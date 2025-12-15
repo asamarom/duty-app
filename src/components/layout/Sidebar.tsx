@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   LayoutDashboard,
   Users,
@@ -10,20 +11,25 @@ import {
   Radio,
 } from 'lucide-react';
 
-const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Personnel', href: '/personnel', icon: Users },
-  { name: 'Equipment', href: '/equipment', icon: Package },
-  { name: 'Reports', href: '/reports', icon: ClipboardList },
-];
-
-const bottomNavigation = [
-  { name: 'Settings', href: '/settings', icon: Settings },
-];
-
 export function Sidebar() {
+  const { t, dir } = useLanguage();
+
+  const navigation = [
+    { name: t('nav.dashboard'), href: '/', icon: LayoutDashboard },
+    { name: t('nav.personnel'), href: '/personnel', icon: Users },
+    { name: t('nav.equipment'), href: '/equipment', icon: Package },
+    { name: t('nav.reports'), href: '/reports', icon: ClipboardList },
+  ];
+
+  const bottomNavigation = [
+    { name: t('nav.settings'), href: '/settings', icon: Settings },
+  ];
+
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-border bg-sidebar">
+    <aside className={cn(
+      "fixed top-0 z-40 h-screen w-64 border-border bg-sidebar",
+      dir === 'rtl' ? 'right-0 border-l' : 'left-0 border-r'
+    )}>
       <div className="flex h-full flex-col">
         {/* Logo */}
         <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-6">
@@ -42,11 +48,11 @@ export function Sidebar() {
         <div className="mx-4 mt-4 rounded-lg border border-success/30 bg-success/10 p-3">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 animate-pulse rounded-full bg-success" />
-            <span className="text-xs font-medium text-success">System Online</span>
+            <span className="text-xs font-medium text-success">{t('nav.systemOnline')}</span>
           </div>
           <div className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground">
             <Radio className="h-3 w-3" />
-            <span>Last sync: 2 min ago</span>
+            <span>{t('settings.lastSync')}: 2 min ago</span>
           </div>
         </div>
 
@@ -54,7 +60,7 @@ export function Sidebar() {
         <nav className="flex-1 space-y-1 px-3 py-4">
           {navigation.map((item) => (
             <NavLink
-              key={item.name}
+              key={item.href}
               to={item.href}
               className={({ isActive }) =>
                 cn(
@@ -75,7 +81,10 @@ export function Sidebar() {
                   />
                   {item.name}
                   {isActive && (
-                    <div className="ml-auto h-1.5 w-1.5 rounded-full bg-sidebar-primary" />
+                    <div className={cn(
+                      "h-1.5 w-1.5 rounded-full bg-sidebar-primary",
+                      dir === 'rtl' ? 'mr-auto' : 'ml-auto'
+                    )} />
                   )}
                 </>
               )}
@@ -87,7 +96,7 @@ export function Sidebar() {
         <div className="border-t border-sidebar-border p-3">
           {bottomNavigation.map((item) => (
             <NavLink
-              key={item.name}
+              key={item.href}
               to={item.href}
               className={({ isActive }) =>
                 cn(
@@ -114,7 +123,7 @@ export function Sidebar() {
               <p className="truncate text-sm font-medium text-sidebar-foreground">
                 CPT Mitchell
               </p>
-              <p className="text-xs text-muted-foreground">Platoon Leader</p>
+              <p className="text-xs text-muted-foreground">{t('nav.platoonSergeant')}</p>
             </div>
           </div>
         </div>

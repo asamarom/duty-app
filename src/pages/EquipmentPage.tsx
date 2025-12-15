@@ -4,7 +4,6 @@ import { EquipmentTable } from '@/components/equipment/EquipmentTable';
 import { mockEquipment } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -14,8 +13,10 @@ import {
 } from '@/components/ui/select';
 import { Search, Plus, Filter, Package, AlertTriangle, CheckCircle } from 'lucide-react';
 import { EquipmentType } from '@/types/pmtb';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function EquipmentPage() {
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<EquipmentType | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -44,20 +45,20 @@ export default function EquipmentPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Equipment Inventory
+                {t('equipment.title')}
               </h1>
               <p className="mt-1 text-sm text-muted-foreground">
-                Track and manage platoon equipment, property, and assignments
+                {t('equipment.subtitle')}
               </p>
             </div>
             <div className="flex gap-3">
               <Button variant="outline">
-                <Package className="mr-2 h-4 w-4" />
-                Run Inventory
+                <Package className="me-2 h-4 w-4" />
+                {t('reports.equipmentAudit')}
               </Button>
               <Button variant="tactical">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Equipment
+                <Plus className="me-2 h-4 w-4" />
+                {t('common.add')} {t('nav.equipment')}
               </Button>
             </div>
           </div>
@@ -69,28 +70,28 @@ export default function EquipmentPage() {
             <Package className="h-8 w-8 text-primary" />
             <div>
               <p className="text-2xl font-bold text-foreground">{mockEquipment.length}</p>
-              <p className="text-xs text-muted-foreground">Total Items</p>
+              <p className="text-xs text-muted-foreground">{t('equipment.totalItems')}</p>
             </div>
           </div>
-          <div className="card-tactical flex items-center gap-3 rounded-lg border-l-4 border-l-success px-4 py-3">
+          <div className="card-tactical flex items-center gap-3 rounded-lg border-s-4 border-s-success px-4 py-3">
             <CheckCircle className="h-8 w-8 text-success" />
             <div>
               <p className="text-2xl font-bold text-foreground">{serviceableCount}</p>
-              <p className="text-xs text-muted-foreground">Serviceable</p>
+              <p className="text-xs text-muted-foreground">{t('status.operational')}</p>
             </div>
           </div>
-          <div className="card-tactical flex items-center gap-3 rounded-lg border-l-4 border-l-destructive px-4 py-3">
+          <div className="card-tactical flex items-center gap-3 rounded-lg border-s-4 border-s-destructive px-4 py-3">
             <AlertTriangle className="h-8 w-8 text-destructive" />
             <div>
               <p className="text-2xl font-bold text-foreground">{unserviceableCount}</p>
-              <p className="text-xs text-muted-foreground">Unserviceable</p>
+              <p className="text-xs text-muted-foreground">{t('equipment.requiresAttention')}</p>
             </div>
           </div>
-          <div className="card-tactical flex items-center gap-3 rounded-lg border-l-4 border-l-warning px-4 py-3">
+          <div className="card-tactical flex items-center gap-3 rounded-lg border-s-4 border-s-warning px-4 py-3">
             <Package className="h-8 w-8 text-warning" />
             <div>
               <p className="text-2xl font-bold text-foreground">{sensitiveCount}</p>
-              <p className="text-xs text-muted-foreground">Sensitive Items</p>
+              <p className="text-xs text-muted-foreground">{t('equipment.sensitiveItems')}</p>
             </div>
           </div>
         </div>
@@ -98,35 +99,35 @@ export default function EquipmentPage() {
         {/* Filters */}
         <div className="mb-6 flex flex-wrap items-center gap-4">
           <div className="relative flex-1 min-w-[250px] max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search by name or serial number..."
+              placeholder={t('equipment.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-card border-border"
+              className="ps-10 bg-card border-border"
             />
           </div>
           <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as EquipmentType | 'all')}>
             <SelectTrigger className="w-[180px] bg-card border-border">
-              <Filter className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Filter by type" />
+              <Filter className="me-2 h-4 w-4" />
+              <SelectValue placeholder={t('equipment.allTypes')} />
             </SelectTrigger>
             <SelectContent>
               {types.map((type) => (
                 <SelectItem key={type} value={type}>
-                  {type === 'all' ? 'All Types' : type.charAt(0).toUpperCase() + type.slice(1)}
+                  {type === 'all' ? t('equipment.allTypes') : type.charAt(0).toUpperCase() + type.slice(1)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[180px] bg-card border-border">
-              <SelectValue placeholder="Filter by status" />
+              <SelectValue placeholder={t('equipment.allStatus')} />
             </SelectTrigger>
             <SelectContent>
               {statuses.map((status) => (
                 <SelectItem key={status} value={status}>
-                  {status === 'all' ? 'All Statuses' : status.charAt(0).toUpperCase() + status.slice(1)}
+                  {status === 'all' ? t('equipment.allStatus') : status.charAt(0).toUpperCase() + status.slice(1)}
                 </SelectItem>
               ))}
             </SelectContent>

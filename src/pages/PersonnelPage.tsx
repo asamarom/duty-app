@@ -13,8 +13,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Search, Plus, Filter, Users, Grid, List } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function PersonnelPage() {
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [teamFilter, setTeamFilter] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -38,15 +40,15 @@ export default function PersonnelPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Personnel Roster
+                {t('personnel.title')}
               </h1>
               <p className="mt-1 text-sm text-muted-foreground">
-                Manage platoon personnel, profiles, and assignments
+                {t('personnel.subtitle')}
               </p>
             </div>
             <Button variant="tactical">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Personnel
+              <Plus className="me-2 h-4 w-4" />
+              {t('common.add')} {t('nav.personnel')}
             </Button>
           </div>
         </header>
@@ -57,15 +59,15 @@ export default function PersonnelPage() {
             <Users className="h-5 w-5 text-primary" />
             <div>
               <p className="text-xl font-bold text-foreground">{mockPersonnel.length}</p>
-              <p className="text-xs text-muted-foreground">Total Personnel</p>
+              <p className="text-xs text-muted-foreground">{t('dashboard.totalPersonnel')}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="success" className="px-3 py-1">
-              {mockPersonnel.filter((p) => p.locationStatus === 'on_duty').length} On Duty
+              {mockPersonnel.filter((p) => p.locationStatus === 'on_duty').length} {t('status.onDuty')}
             </Badge>
             <Badge variant="warning" className="px-3 py-1">
-              {mockPersonnel.filter((p) => p.locationStatus === 'active_mission').length} On Mission
+              {mockPersonnel.filter((p) => p.locationStatus === 'active_mission').length} {t('status.onMission')}
             </Badge>
             <Badge variant="secondary" className="px-3 py-1">
               {mockPersonnel.filter((p) => p.locationStatus === 'leave').length} On Leave
@@ -76,23 +78,23 @@ export default function PersonnelPage() {
         {/* Filters */}
         <div className="mb-6 flex flex-wrap items-center gap-4">
           <div className="relative flex-1 min-w-[250px] max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search by name or service number..."
+              placeholder={t('personnel.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-card border-border"
+              className="ps-10 bg-card border-border"
             />
           </div>
           <Select value={teamFilter} onValueChange={setTeamFilter}>
             <SelectTrigger className="w-[180px] bg-card border-border">
-              <Filter className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Filter by team" />
+              <Filter className="me-2 h-4 w-4" />
+              <SelectValue placeholder={t('personnel.allPositions')} />
             </SelectTrigger>
             <SelectContent>
               {teams.map((team) => (
                 <SelectItem key={team} value={team}>
-                  {team === 'all' ? 'All Teams' : team}
+                  {team === 'all' ? t('personnel.allPositions') : team}
                 </SelectItem>
               ))}
             </SelectContent>

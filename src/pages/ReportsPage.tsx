@@ -12,47 +12,50 @@ import {
   Package,
   TrendingUp,
 } from 'lucide-react';
-
-const reportTypes = [
-  {
-    id: 'daily',
-    title: 'Daily Status Report',
-    description: 'Daily personnel accountability and status updates',
-    icon: Calendar,
-    frequency: 'Daily',
-    lastSubmitted: '2024-01-15 0600',
-    status: 'pending',
-  },
-  {
-    id: 'personnel',
-    title: 'Personnel Strength Report',
-    description: 'Complete roster with qualifications and assignments',
-    icon: Users,
-    frequency: 'Weekly',
-    lastSubmitted: '2024-01-14',
-    status: 'submitted',
-  },
-  {
-    id: 'equipment',
-    title: 'Equipment Status Report',
-    description: 'Full property accountability and serviceability',
-    icon: Package,
-    frequency: 'Weekly',
-    lastSubmitted: '2024-01-14',
-    status: 'submitted',
-  },
-  {
-    id: 'readiness',
-    title: 'Readiness Assessment',
-    description: 'Comprehensive unit readiness evaluation',
-    icon: TrendingUp,
-    frequency: 'Monthly',
-    lastSubmitted: '2024-01-01',
-    status: 'submitted',
-  },
-];
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function ReportsPage() {
+  const { t, dir } = useLanguage();
+
+  const reportTypes = [
+    {
+      id: 'daily',
+      title: t('reports.dailyPersonnel'),
+      description: t('reports.dailyPersonnelDesc'),
+      icon: Calendar,
+      frequency: 'Daily',
+      lastSubmitted: '2024-01-15 0600',
+      status: 'pending',
+    },
+    {
+      id: 'personnel',
+      title: t('reports.weeklyReadiness'),
+      description: t('reports.weeklyReadinessDesc'),
+      icon: Users,
+      frequency: 'Weekly',
+      lastSubmitted: '2024-01-14',
+      status: 'submitted',
+    },
+    {
+      id: 'equipment',
+      title: t('reports.equipmentStatus'),
+      description: t('reports.equipmentStatusDesc'),
+      icon: Package,
+      frequency: 'Weekly',
+      lastSubmitted: '2024-01-14',
+      status: 'submitted',
+    },
+    {
+      id: 'readiness',
+      title: t('reports.trainingRecord'),
+      description: t('reports.trainingRecordDesc'),
+      icon: TrendingUp,
+      frequency: 'Monthly',
+      lastSubmitted: '2024-01-01',
+      status: 'submitted',
+    },
+  ];
+
   return (
     <MainLayout>
       <div className="tactical-grid min-h-screen p-6">
@@ -61,14 +64,14 @@ export default function ReportsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Reports & Documentation
+                {t('reports.title')}
               </h1>
               <p className="mt-1 text-sm text-muted-foreground">
-                Generate, submit, and track platoon reports
+                {t('reports.subtitle')}
               </p>
             </div>
             <Button variant="tactical">
-              <FileText className="mr-2 h-4 w-4" />
+              <FileText className="me-2 h-4 w-4" />
               New Report
             </Button>
           </div>
@@ -81,36 +84,36 @@ export default function ReportsPage() {
               <ClipboardList className="h-6 w-6 text-warning" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">Submit Daily Report</h3>
-              <p className="text-sm text-muted-foreground">Due today at 0800</p>
+              <h3 className="font-semibold text-foreground">{t('reports.submitDaily')}</h3>
+              <p className="text-sm text-muted-foreground">{t('reports.recordStatus')}</p>
             </div>
-            <ChevronRight className="ml-auto h-5 w-5 text-muted-foreground" />
+            <ChevronRight className={`h-5 w-5 text-muted-foreground ${dir === 'rtl' ? 'me-auto rotate-180' : 'ms-auto'}`} />
           </div>
           <div className="card-tactical flex items-center gap-4 rounded-xl p-5 cursor-pointer transition-all hover:border-primary/50">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20">
               <Download className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">Export Roster</h3>
-              <p className="text-sm text-muted-foreground">PDF or Excel format</p>
+              <h3 className="font-semibold text-foreground">{t('reports.generateReadiness')}</h3>
+              <p className="text-sm text-muted-foreground">{t('reports.compileStatus')}</p>
             </div>
-            <ChevronRight className="ml-auto h-5 w-5 text-muted-foreground" />
+            <ChevronRight className={`h-5 w-5 text-muted-foreground ${dir === 'rtl' ? 'me-auto rotate-180' : 'ms-auto'}`} />
           </div>
           <div className="card-tactical flex items-center gap-4 rounded-xl p-5 cursor-pointer transition-all hover:border-primary/50">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-success/20">
               <Package className="h-6 w-6 text-success" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">Property Book</h3>
-              <p className="text-sm text-muted-foreground">Generate hand receipts</p>
+              <h3 className="font-semibold text-foreground">{t('reports.equipmentAudit')}</h3>
+              <p className="text-sm text-muted-foreground">{t('reports.verifyInventory')}</p>
             </div>
-            <ChevronRight className="ml-auto h-5 w-5 text-muted-foreground" />
+            <ChevronRight className={`h-5 w-5 text-muted-foreground ${dir === 'rtl' ? 'me-auto rotate-180' : 'ms-auto'}`} />
           </div>
         </div>
 
         {/* Report Types */}
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Report Templates</h2>
+          <h2 className="text-lg font-semibold text-foreground">{t('reports.reportTemplates')}</h2>
           <p className="text-sm text-muted-foreground">
             Standard reports and documentation
           </p>
@@ -153,8 +156,8 @@ export default function ReportsPage() {
                     </span>
                   </div>
                   <Button variant="ghost" size="sm">
-                    Generate
-                    <ChevronRight className="ml-1 h-4 w-4" />
+                    {t('reports.generate')}
+                    <ChevronRight className={`h-4 w-4 ${dir === 'rtl' ? 'me-1 rotate-180' : 'ms-1'}`} />
                   </Button>
                 </div>
               </CardContent>
