@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { MobileHeader } from '@/components/layout/MobileHeader';
 import { EquipmentTable } from '@/components/equipment/EquipmentTable';
@@ -18,6 +19,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function EquipmentPage() {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<EquipmentType | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -65,7 +67,7 @@ export default function EquipmentPage() {
                 <Package className="me-2 h-4 w-4" />
                 {t('reports.equipmentAudit')}
               </Button>
-              <Button variant="tactical">
+              <Button variant="tactical" onClick={() => navigate('/equipment/add')}>
                 <Plus className="me-2 h-4 w-4" />
                 {t('common.add')} {t('nav.equipment')}
               </Button>
@@ -160,7 +162,12 @@ export default function EquipmentPage() {
 
         {/* Mobile FAB */}
         <div className="lg:hidden fixed bottom-24 end-4 z-40">
-          <Button variant="tactical" size="lg" className="h-14 w-14 rounded-full shadow-lg">
+          <Button 
+            variant="tactical" 
+            size="lg" 
+            className="h-14 w-14 rounded-full shadow-lg"
+            onClick={() => navigate('/equipment/add')}
+          >
             <Plus className="h-6 w-6" />
           </Button>
         </div>
