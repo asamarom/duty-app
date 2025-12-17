@@ -38,26 +38,26 @@ export function StatCard({
   return (
     <div
       className={cn(
-        'card-tactical rounded-xl p-5 transition-all duration-300 hover:border-primary/30',
+        'card-tactical rounded-xl p-3 lg:p-5 transition-all duration-300 active:scale-[0.98] hover:border-primary/30',
         statusColors[status],
         className
       )}
     >
       <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] lg:text-xs font-medium uppercase tracking-wider text-muted-foreground truncate">
             {title}
           </p>
-          <p className="mt-2 text-3xl font-bold tracking-tight text-foreground">
+          <p className="mt-1 lg:mt-2 text-2xl lg:text-3xl font-bold tracking-tight text-foreground">
             {value}
           </p>
           {subtitle && (
-            <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
+            <p className="mt-0.5 lg:mt-1 text-xs lg:text-sm text-muted-foreground truncate">{subtitle}</p>
           )}
           {trend && (
             <div
               className={cn(
-                'mt-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
+                'mt-1 lg:mt-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] lg:text-xs font-medium',
                 trend.positive
                   ? 'bg-success/20 text-success'
                   : 'bg-destructive/20 text-destructive'
@@ -70,11 +70,11 @@ export function StatCard({
         </div>
         <div
           className={cn(
-            'flex h-12 w-12 items-center justify-center rounded-xl',
+            'flex h-9 w-9 lg:h-12 lg:w-12 items-center justify-center rounded-xl shrink-0',
             iconColors[status]
           )}
         >
-          <Icon className="h-6 w-6" />
+          <Icon className="h-4 w-4 lg:h-6 lg:w-6" />
         </div>
       </div>
     </div>
