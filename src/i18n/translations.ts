@@ -59,6 +59,30 @@ export const translations = {
     'equipment.status': 'Status',
     'equipment.unassigned': 'Unassigned',
 
+    // Add Equipment
+    'addEquipment.title': 'Add Item',
+    'addEquipment.subtitle': 'Add new equipment to inventory',
+    'addEquipment.name': 'Item Name',
+    'addEquipment.namePlaceholder': 'Enter item name...',
+    'addEquipment.type': 'Type',
+    'addEquipment.selectType': 'Select type',
+    'addEquipment.hasSerial': 'Has Serial Number',
+    'addEquipment.hasSerialDesc': 'Toggle off for bulk items without serial',
+    'addEquipment.serialNumber': 'Serial Number',
+    'addEquipment.serialPlaceholder': 'Enter serial number...',
+    'addEquipment.quantity': 'Quantity',
+    'addEquipment.assignment': 'Assignment (Optional)',
+    'addEquipment.individual': 'Individual',
+    'addEquipment.squad': 'Squad',
+    'addEquipment.team': 'Team',
+    'addEquipment.platoon': 'Platoon',
+    'addEquipment.selectAssignee': 'Select assignee',
+    'addEquipment.save': 'Save Item',
+    'addEquipment.success': 'Item added successfully',
+    'addEquipment.nameRequired': 'Item name is required',
+    'addEquipment.typeRequired': 'Item type is required',
+    'addEquipment.serialRequired': 'Serial number is required',
+
     // Reports
     'reports.title': 'Reports & Documentation',
     'reports.subtitle': 'Generate and manage platoon reports',
@@ -142,6 +166,7 @@ export const translations = {
     'common.add': 'Add',
     'common.view': 'View',
     'common.loading': 'Loading...',
+    'common.back': 'Back',
   },
   he: {
     // Navigation
@@ -200,6 +225,30 @@ export const translations = {
     'equipment.assignedTo': 'מוקצה ל',
     'equipment.status': 'סטטוס',
     'equipment.unassigned': 'לא מוקצה',
+
+    // Add Equipment
+    'addEquipment.title': 'הוספת פריט',
+    'addEquipment.subtitle': 'הוספת ציוד חדש למלאי',
+    'addEquipment.name': 'שם הפריט',
+    'addEquipment.namePlaceholder': 'הזן שם פריט...',
+    'addEquipment.type': 'סוג',
+    'addEquipment.selectType': 'בחר סוג',
+    'addEquipment.hasSerial': 'יש מספר סידורי',
+    'addEquipment.hasSerialDesc': 'כבה עבור פריטים ללא מספר סידורי',
+    'addEquipment.serialNumber': 'מספר סידורי',
+    'addEquipment.serialPlaceholder': 'הזן מספר סידורי...',
+    'addEquipment.quantity': 'כמות',
+    'addEquipment.assignment': 'הקצאה (אופציונלי)',
+    'addEquipment.individual': 'אישי',
+    'addEquipment.squad': 'כיתה',
+    'addEquipment.team': 'צוות',
+    'addEquipment.platoon': 'מחלקה',
+    'addEquipment.selectAssignee': 'בחר מוקצה',
+    'addEquipment.save': 'שמור פריט',
+    'addEquipment.success': 'הפריט נוסף בהצלחה',
+    'addEquipment.nameRequired': 'שם פריט נדרש',
+    'addEquipment.typeRequired': 'סוג פריט נדרש',
+    'addEquipment.serialRequired': 'מספר סידורי נדרש',
 
     // Reports
     'reports.title': 'דוחות ותיעוד',
@@ -284,6 +333,7 @@ export const translations = {
     'common.add': 'הוספה',
     'common.view': 'צפייה',
     'common.loading': 'טוען...',
+    'common.back': 'חזרה',
   },
 } as const;
 
