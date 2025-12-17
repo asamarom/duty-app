@@ -147,6 +147,11 @@
     animation: slideUp 0.4s ease-out forwards;
   }
 
+  /* Safe area for mobile bottom navigation */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }

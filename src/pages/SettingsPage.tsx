@@ -1,4 +1,5 @@
 import { MainLayout } from '@/components/layout/MainLayout';
+import { MobileHeader } from '@/components/layout/MobileHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,17 +23,26 @@ import {
   Users,
   RefreshCw,
   Globe,
+  ChevronRight,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function SettingsPage() {
-  const { t, language, setLanguage } = useLanguage();
+  const { t, language, setLanguage, dir } = useLanguage();
 
   return (
     <MainLayout>
-      <div className="tactical-grid min-h-screen p-6">
-        {/* Header */}
-        <header className="mb-6">
+      {/* Mobile Header */}
+      <div className="lg:hidden">
+        <MobileHeader 
+          title={t('settings.title')} 
+          subtitle={t('settings.subtitle')}
+        />
+      </div>
+
+      <div className="tactical-grid min-h-screen p-4 lg:p-6">
+        {/* Desktop Header */}
+        <header className="mb-6 hidden lg:block">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
@@ -49,116 +59,95 @@ export default function SettingsPage() {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="space-y-4 lg:grid lg:grid-cols-3 lg:gap-6 lg:space-y-0">
           {/* Main Settings */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Language Settings */}
+          <div className="lg:col-span-2 space-y-4 lg:space-y-6">
+            {/* Language Settings - Mobile First */}
             <Card className="card-tactical border-border/50">
-              <CardHeader>
+              <CardHeader className="p-4 lg:p-6 pb-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20">
-                    <Globe className="h-5 w-5 text-primary" />
+                  <div className="flex h-9 w-9 lg:h-10 lg:w-10 items-center justify-center rounded-lg bg-primary/20">
+                    <Globe className="h-4 w-4 lg:h-5 lg:w-5 text-primary" />
                   </div>
                   <div>
-                    <CardTitle>{t('settings.language')}</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-sm lg:text-base">{t('settings.language')}</CardTitle>
+                    <CardDescription className="text-xs lg:text-sm">
                       {t('settings.selectLanguage')}
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <Label>{t('settings.language')}</Label>
-                  <Select value={language} onValueChange={(value: 'en' | 'he') => setLanguage(value)}>
-                    <SelectTrigger className="w-full bg-secondary border-border">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="en">{t('settings.english')}</SelectItem>
-                      <SelectItem value="he">{t('settings.hebrew')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0">
+                <Select value={language} onValueChange={(value: 'en' | 'he') => setLanguage(value)}>
+                  <SelectTrigger className="w-full bg-secondary border-border h-11">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">{t('settings.english')}</SelectItem>
+                    <SelectItem value="he">{t('settings.hebrew')}</SelectItem>
+                  </SelectContent>
+                </Select>
               </CardContent>
             </Card>
 
             {/* Unit Information */}
             <Card className="card-tactical border-border/50">
-              <CardHeader>
+              <CardHeader className="p-4 lg:p-6 pb-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20">
-                    <Shield className="h-5 w-5 text-primary" />
+                  <div className="flex h-9 w-9 lg:h-10 lg:w-10 items-center justify-center rounded-lg bg-primary/20">
+                    <Shield className="h-4 w-4 lg:h-5 lg:w-5 text-primary" />
                   </div>
                   <div>
-                    <CardTitle>{t('settings.unitInfo')}</CardTitle>
-                    <CardDescription>
-                      Basic unit identification and configuration
+                    <CardTitle className="text-sm lg:text-base">{t('settings.unitInfo')}</CardTitle>
+                    <CardDescription className="text-xs lg:text-sm">
+                      Basic unit identification
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>{t('settings.unitDesignation')}</Label>
-                    <Input
-                      defaultValue="2nd Platoon, Alpha Company"
-                      className="bg-secondary border-border"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t('settings.unitName')}</Label>
-                    <Input
-                      defaultValue="1st Battalion, 501st Infantry Regiment"
-                      className="bg-secondary border-border"
-                    />
-                  </div>
+              <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0 space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-xs lg:text-sm">{t('settings.unitDesignation')}</Label>
+                  <Input
+                    defaultValue="2nd Platoon, Alpha Company"
+                    className="bg-secondary border-border h-11"
+                  />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>{t('settings.homeStation')}</Label>
-                    <Input
-                      defaultValue="Fort Bragg, NC"
-                      className="bg-secondary border-border"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Time Zone</Label>
-                    <Select defaultValue="est">
-                      <SelectTrigger className="bg-secondary border-border">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="est">Eastern Time (EST)</SelectItem>
-                        <SelectItem value="cst">Central Time (CST)</SelectItem>
-                        <SelectItem value="pst">Pacific Time (PST)</SelectItem>
-                        <SelectItem value="utc">UTC</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="space-y-2">
+                  <Label className="text-xs lg:text-sm">{t('settings.unitName')}</Label>
+                  <Input
+                    defaultValue="1st Battalion, 501st Infantry Regiment"
+                    className="bg-secondary border-border h-11"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs lg:text-sm">{t('settings.homeStation')}</Label>
+                  <Input
+                    defaultValue="Fort Bragg, NC"
+                    className="bg-secondary border-border h-11"
+                  />
                 </div>
               </CardContent>
             </Card>
 
             {/* Notifications */}
             <Card className="card-tactical border-border/50">
-              <CardHeader>
+              <CardHeader className="p-4 lg:p-6 pb-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/20">
-                    <Bell className="h-5 w-5 text-warning" />
+                  <div className="flex h-9 w-9 lg:h-10 lg:w-10 items-center justify-center rounded-lg bg-warning/20">
+                    <Bell className="h-4 w-4 lg:h-5 lg:w-5 text-warning" />
                   </div>
                   <div>
-                    <CardTitle>{t('settings.notifications')}</CardTitle>
-                    <CardDescription>Configure alert and notification preferences</CardDescription>
+                    <CardTitle className="text-sm lg:text-base">{t('settings.notifications')}</CardTitle>
+                    <CardDescription className="text-xs lg:text-sm">Configure alerts</CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-foreground">{t('settings.alertsEnabled')}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="font-medium text-foreground text-sm">{t('settings.alertsEnabled')}</p>
+                    <p className="text-xs text-muted-foreground">
                       {t('settings.receiveAlerts')}
                     </p>
                   </div>
@@ -167,8 +156,8 @@ export default function SettingsPage() {
                 <Separator className="bg-border/50" />
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-foreground">{t('settings.dailyDigest')}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="font-medium text-foreground text-sm">{t('settings.dailyDigest')}</p>
+                    <p className="text-xs text-muted-foreground">
                       {t('settings.dailySummary')}
                     </p>
                   </div>
@@ -177,77 +166,73 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
 
-            {/* Access Control */}
+            {/* Access Control - Simplified for Mobile */}
             <Card className="card-tactical border-border/50">
-              <CardHeader>
+              <CardHeader className="p-4 lg:p-6 pb-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/20">
-                    <Users className="h-5 w-5 text-destructive" />
+                  <div className="flex h-9 w-9 lg:h-10 lg:w-10 items-center justify-center rounded-lg bg-destructive/20">
+                    <Users className="h-4 w-4 lg:h-5 lg:w-5 text-destructive" />
                   </div>
                   <div>
-                    <CardTitle>{t('settings.accessControl')}</CardTitle>
-                    <CardDescription>Manage user roles and permissions</CardDescription>
+                    <CardTitle className="text-sm lg:text-base">{t('settings.accessControl')}</CardTitle>
+                    <CardDescription className="text-xs lg:text-sm">User roles</CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
+              <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0">
+                <div className="space-y-2">
                   <div className="flex items-center justify-between rounded-lg border border-border/50 bg-secondary/50 p-3">
-                    <div className="flex items-center gap-3">
-                      <Badge variant="rank">ADMIN</Badge>
-                      <span className="text-sm text-foreground">Platoon Leader / PSG</span>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="rank" className="text-xs">ADMIN</Badge>
+                      <span className="text-xs lg:text-sm text-foreground">PL / PSG</span>
                     </div>
-                    <span className="text-xs text-muted-foreground">{t('settings.fullReadWrite')}</span>
+                    <ChevronRight className={`h-4 w-4 text-muted-foreground ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                   </div>
                   <div className="flex items-center justify-between rounded-lg border border-border/50 bg-secondary/50 p-3">
-                    <div className="flex items-center gap-3">
-                      <Badge variant="tactical">LEADER</Badge>
-                      <span className="text-sm text-foreground">Squad Leaders</span>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="tactical" className="text-xs">LEADER</Badge>
+                      <span className="text-xs lg:text-sm text-foreground">Squad Leaders</span>
                     </div>
-                    <span className="text-xs text-muted-foreground">Squad-level Access</span>
+                    <ChevronRight className={`h-4 w-4 text-muted-foreground ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                   </div>
                   <div className="flex items-center justify-between rounded-lg border border-border/50 bg-secondary/50 p-3">
-                    <div className="flex items-center gap-3">
-                      <Badge variant="secondary">USER</Badge>
-                      <span className="text-sm text-foreground">Soldiers</span>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">USER</Badge>
+                      <span className="text-xs lg:text-sm text-foreground">Soldiers</span>
                     </div>
-                    <span className="text-xs text-muted-foreground">Read-only</span>
+                    <ChevronRight className={`h-4 w-4 text-muted-foreground ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
+          {/* Sidebar - Stacks below on mobile */}
+          <div className="space-y-4 lg:space-y-6">
             {/* Sync Status */}
             <Card className="card-tactical border-border/50">
-              <CardHeader className="pb-3">
+              <CardHeader className="p-4 lg:p-6 pb-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/20">
-                    <Cloud className="h-5 w-5 text-success" />
+                  <div className="flex h-9 w-9 lg:h-10 lg:w-10 items-center justify-center rounded-lg bg-success/20">
+                    <Cloud className="h-4 w-4 lg:h-5 lg:w-5 text-success" />
                   </div>
                   <div>
-                    <CardTitle className="text-base">{t('settings.syncStatus')}</CardTitle>
-                    <CardDescription>Cloud synchronization</CardDescription>
+                    <CardTitle className="text-sm lg:text-base">{t('settings.syncStatus')}</CardTitle>
+                    <CardDescription className="text-xs">Cloud sync</CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Status</span>
-                    <Badge variant="success">Connected</Badge>
+                    <span className="text-xs text-muted-foreground">Status</span>
+                    <Badge variant="success" className="text-xs">Connected</Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">{t('settings.lastSync')}</span>
-                    <span className="text-sm text-foreground">2 min ago</span>
+                    <span className="text-xs text-muted-foreground">{t('settings.lastSync')}</span>
+                    <span className="text-xs text-foreground">2 min ago</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">{t('settings.pendingChanges')}</span>
-                    <span className="text-sm text-foreground">0</span>
-                  </div>
-                  <Button variant="outline" className="w-full mt-2">
+                  <Button variant="outline" className="w-full h-10">
                     <RefreshCw className="me-2 h-4 w-4" />
                     {t('settings.syncNow')}
                   </Button>
@@ -257,39 +242,33 @@ export default function SettingsPage() {
 
             {/* Data Management */}
             <Card className="card-tactical border-border/50">
-              <CardHeader className="pb-3">
+              <CardHeader className="p-4 lg:p-6 pb-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20">
-                    <Database className="h-5 w-5 text-primary" />
+                  <div className="flex h-9 w-9 lg:h-10 lg:w-10 items-center justify-center rounded-lg bg-primary/20">
+                    <Database className="h-4 w-4 lg:h-5 lg:w-5 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-base">{t('settings.dataManagement')}</CardTitle>
-                    <CardDescription>{t('settings.backupDesc')}</CardDescription>
+                    <CardTitle className="text-sm lg:text-base">{t('settings.dataManagement')}</CardTitle>
+                    <CardDescription className="text-xs">{t('settings.backupDesc')}</CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <Button variant="outline" className="w-full justify-start">
+              <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0 space-y-2">
+                <Button variant="outline" className="w-full justify-start h-10 text-sm">
                   {t('settings.exportData')}
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
+                <Button variant="outline" className="w-full justify-start h-10 text-sm">
                   {t('settings.backupRestore')}
-                </Button>
-                <Button variant="outline" className="w-full justify-start text-destructive hover:text-destructive">
-                  Clear Local Cache
                 </Button>
               </CardContent>
             </Card>
 
             {/* Version Info */}
             <Card className="card-tactical border-border/50">
-              <CardContent className="pt-6">
-                <div className="text-center space-y-2">
+              <CardContent className="p-4 lg:pt-6">
+                <div className="text-center space-y-1">
                   <p className="font-mono text-xs text-muted-foreground">PMTB v1.0.0</p>
-                  <p className="text-xs text-muted-foreground">
-                    Platoon Management Tool Box
-                  </p>
-                  <Badge variant="outline" className="mt-2">
+                  <Badge variant="outline" className="text-xs">
                     Build 2024.01.15
                   </Badge>
                 </div>

@@ -1,4 +1,5 @@
 import { MainLayout } from '@/components/layout/MainLayout';
+import { MobileHeader } from '@/components/layout/MobileHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,9 +59,17 @@ export default function ReportsPage() {
 
   return (
     <MainLayout>
-      <div className="tactical-grid min-h-screen p-6">
-        {/* Header */}
-        <header className="mb-6">
+      {/* Mobile Header */}
+      <div className="lg:hidden">
+        <MobileHeader 
+          title={t('reports.title')} 
+          subtitle={t('reports.subtitle')}
+        />
+      </div>
+
+      <div className="tactical-grid min-h-screen p-4 lg:p-6">
+        {/* Desktop Header */}
+        <header className="mb-6 hidden lg:block">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
@@ -77,87 +86,83 @@ export default function ReportsPage() {
           </div>
         </header>
 
-        {/* Quick Actions */}
-        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="card-tactical flex items-center gap-4 rounded-xl p-5 cursor-pointer transition-all hover:border-primary/50">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-warning/20">
-              <ClipboardList className="h-6 w-6 text-warning" />
+        {/* Quick Actions - Mobile Optimized */}
+        <div className="mb-6 lg:mb-8 space-y-3 lg:grid lg:grid-cols-3 lg:gap-4 lg:space-y-0">
+          <div className="card-tactical flex items-center gap-4 rounded-xl p-4 lg:p-5 cursor-pointer transition-all active:scale-[0.98] hover:border-primary/50">
+            <div className="flex h-10 w-10 lg:h-12 lg:w-12 items-center justify-center rounded-xl bg-warning/20">
+              <ClipboardList className="h-5 w-5 lg:h-6 lg:w-6 text-warning" />
             </div>
-            <div>
-              <h3 className="font-semibold text-foreground">{t('reports.submitDaily')}</h3>
-              <p className="text-sm text-muted-foreground">{t('reports.recordStatus')}</p>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-foreground text-sm lg:text-base">{t('reports.submitDaily')}</h3>
+              <p className="text-xs lg:text-sm text-muted-foreground truncate">{t('reports.recordStatus')}</p>
             </div>
-            <ChevronRight className={`h-5 w-5 text-muted-foreground ${dir === 'rtl' ? 'me-auto rotate-180' : 'ms-auto'}`} />
+            <ChevronRight className={`h-5 w-5 text-muted-foreground shrink-0 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
           </div>
-          <div className="card-tactical flex items-center gap-4 rounded-xl p-5 cursor-pointer transition-all hover:border-primary/50">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20">
-              <Download className="h-6 w-6 text-primary" />
+          <div className="card-tactical flex items-center gap-4 rounded-xl p-4 lg:p-5 cursor-pointer transition-all active:scale-[0.98] hover:border-primary/50">
+            <div className="flex h-10 w-10 lg:h-12 lg:w-12 items-center justify-center rounded-xl bg-primary/20">
+              <Download className="h-5 w-5 lg:h-6 lg:w-6 text-primary" />
             </div>
-            <div>
-              <h3 className="font-semibold text-foreground">{t('reports.generateReadiness')}</h3>
-              <p className="text-sm text-muted-foreground">{t('reports.compileStatus')}</p>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-foreground text-sm lg:text-base">{t('reports.generateReadiness')}</h3>
+              <p className="text-xs lg:text-sm text-muted-foreground truncate">{t('reports.compileStatus')}</p>
             </div>
-            <ChevronRight className={`h-5 w-5 text-muted-foreground ${dir === 'rtl' ? 'me-auto rotate-180' : 'ms-auto'}`} />
+            <ChevronRight className={`h-5 w-5 text-muted-foreground shrink-0 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
           </div>
-          <div className="card-tactical flex items-center gap-4 rounded-xl p-5 cursor-pointer transition-all hover:border-primary/50">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-success/20">
-              <Package className="h-6 w-6 text-success" />
+          <div className="card-tactical flex items-center gap-4 rounded-xl p-4 lg:p-5 cursor-pointer transition-all active:scale-[0.98] hover:border-primary/50">
+            <div className="flex h-10 w-10 lg:h-12 lg:w-12 items-center justify-center rounded-xl bg-success/20">
+              <Package className="h-5 w-5 lg:h-6 lg:w-6 text-success" />
             </div>
-            <div>
-              <h3 className="font-semibold text-foreground">{t('reports.equipmentAudit')}</h3>
-              <p className="text-sm text-muted-foreground">{t('reports.verifyInventory')}</p>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-foreground text-sm lg:text-base">{t('reports.equipmentAudit')}</h3>
+              <p className="text-xs lg:text-sm text-muted-foreground truncate">{t('reports.verifyInventory')}</p>
             </div>
-            <ChevronRight className={`h-5 w-5 text-muted-foreground ${dir === 'rtl' ? 'me-auto rotate-180' : 'ms-auto'}`} />
+            <ChevronRight className={`h-5 w-5 text-muted-foreground shrink-0 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
           </div>
         </div>
 
         {/* Report Types */}
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-foreground">{t('reports.reportTemplates')}</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="text-base lg:text-lg font-semibold text-foreground">{t('reports.reportTemplates')}</h2>
+          <p className="text-xs lg:text-sm text-muted-foreground">
             Standard reports and documentation
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 lg:gap-4 lg:grid-cols-2">
           {reportTypes.map((report, index) => (
             <Card
               key={report.id}
-              className="card-tactical border-border/50 transition-all hover:border-primary/30 animate-slide-up cursor-pointer"
+              className="card-tactical border-border/50 transition-all active:scale-[0.99] hover:border-primary/30 animate-slide-up cursor-pointer"
               style={{ animationDelay: `${index * 50}ms` }}
             >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
-                      <report.icon className="h-5 w-5 text-primary" />
+              <CardHeader className="pb-2 lg:pb-3 p-4 lg:p-6">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex h-9 w-9 lg:h-10 lg:w-10 items-center justify-center rounded-lg bg-secondary shrink-0">
+                      <report.icon className="h-4 w-4 lg:h-5 lg:w-5 text-primary" />
                     </div>
-                    <div>
-                      <CardTitle className="text-base">{report.title}</CardTitle>
-                      <CardDescription>{report.description}</CardDescription>
+                    <div className="min-w-0">
+                      <CardTitle className="text-sm lg:text-base truncate">{report.title}</CardTitle>
+                      <CardDescription className="text-xs truncate">{report.description}</CardDescription>
                     </div>
                   </div>
                   <Badge
                     variant={report.status === 'pending' ? 'warning' : 'success'}
-                    className="capitalize"
+                    className="capitalize text-xs shrink-0"
                   >
                     {report.status}
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-4">
-                    <span className="text-muted-foreground">
-                      Frequency: <span className="text-foreground">{report.frequency}</span>
-                    </span>
-                    <span className="text-muted-foreground">
-                      Last: <span className="text-foreground">{report.lastSubmitted}</span>
-                    </span>
+              <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0">
+                <div className="flex items-center justify-between text-xs lg:text-sm">
+                  <div className="flex items-center gap-2 lg:gap-4 text-muted-foreground">
+                    <span>{report.frequency}</span>
+                    <span className="text-foreground">{report.lastSubmitted}</span>
                   </div>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" className="text-xs h-8">
                     {t('reports.generate')}
-                    <ChevronRight className={`h-4 w-4 ${dir === 'rtl' ? 'me-1 rotate-180' : 'ms-1'}`} />
+                    <ChevronRight className={`h-3 w-3 lg:h-4 lg:w-4 ${dir === 'rtl' ? 'me-1 rotate-180' : 'ms-1'}`} />
                   </Button>
                 </div>
               </CardContent>
