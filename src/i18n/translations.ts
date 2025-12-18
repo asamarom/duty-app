@@ -82,6 +82,8 @@ export const translations = {
     'addEquipment.nameRequired': 'Item name is required',
     'addEquipment.typeRequired': 'Item type is required',
     'addEquipment.serialRequired': 'Serial number is required',
+    'addEquipment.newItem': 'New item (press enter to add)',
+    'addEquipment.typeToSearch': 'Start typing to search...',
 
     // Reports
     'reports.title': 'Reports & Documentation',
@@ -249,6 +251,8 @@ export const translations = {
     'addEquipment.nameRequired': 'שם פריט נדרש',
     'addEquipment.typeRequired': 'סוג פריט נדרש',
     'addEquipment.serialRequired': 'מספר סידורי נדרש',
+    'addEquipment.newItem': 'פריט חדש (לחץ Enter להוספה)',
+    'addEquipment.typeToSearch': 'התחל להקליד לחיפוש...',
 
     // Reports
     'reports.title': 'דוחות ותיעוד',
