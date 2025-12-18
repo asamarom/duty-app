@@ -1,4 +1,4 @@
-import { Equipment, EquipmentType } from '@/types/pmtb';
+import { Equipment } from '@/types/pmtb';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import {
@@ -9,20 +9,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Radio, ShieldAlert, Truck, Stethoscope, Package, Crosshair } from 'lucide-react';
 
 interface EquipmentTableProps {
   equipment: Equipment[];
 }
-
-const typeConfig: Record<EquipmentType, { icon: React.ElementType; color: string }> = {
-  weapons: { icon: Crosshair, color: 'text-destructive' },
-  sensitive: { icon: ShieldAlert, color: 'text-warning' },
-  comms: { icon: Radio, color: 'text-tactical-blue' },
-  vehicle: { icon: Truck, color: 'text-primary' },
-  medical: { icon: Stethoscope, color: 'text-success' },
-  ocie: { icon: Package, color: 'text-muted-foreground' },
-};
 
 const statusColors = {
   serviceable: 'status-ready',
@@ -36,9 +26,6 @@ export function EquipmentTable({ equipment }: EquipmentTableProps) {
       <Table>
         <TableHeader>
           <TableRow className="border-border/50 hover:bg-transparent">
-            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Type
-            </TableHead>
             <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Item
             </TableHead>
@@ -61,23 +48,12 @@ export function EquipmentTable({ equipment }: EquipmentTableProps) {
         </TableHeader>
         <TableBody>
           {equipment.map((item, index) => {
-            const TypeIcon = typeConfig[item.type].icon;
             return (
               <TableRow
                 key={item.id}
                 className="border-border/30 transition-colors hover:bg-secondary/50 animate-fade-in"
                 style={{ animationDelay: `${index * 30}ms` }}
               >
-                <TableCell>
-                  <div
-                    className={cn(
-                      'flex h-8 w-8 items-center justify-center rounded-lg bg-secondary',
-                      typeConfig[item.type].color
-                    )}
-                  >
-                    <TypeIcon className="h-4 w-4" />
-                  </div>
-                </TableCell>
                 <TableCell>
                   <div>
                     <p className="font-medium text-foreground">{item.name}</p>

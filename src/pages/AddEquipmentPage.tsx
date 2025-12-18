@@ -29,11 +29,8 @@ import { Switch } from '@/components/ui/switch';
 import { ChevronLeft, Package, Save, Check, ChevronsUpDown } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { mockPersonnel, mockEquipment } from '@/data/mockData';
-import { EquipmentType } from '@/types/pmtb';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-
-const equipmentTypes: EquipmentType[] = ['weapons', 'sensitive', 'comms', 'vehicle', 'medical', 'ocie'];
 
 export default function AddEquipmentPage() {
   const { t, dir } = useLanguage();
@@ -44,7 +41,6 @@ export default function AddEquipmentPage() {
   const [hasSerial, setHasSerial] = useState(true);
   const [serialNumber, setSerialNumber] = useState('');
   const [quantity, setQuantity] = useState('1');
-  const [type, setType] = useState<EquipmentType | ''>('');
   const [assignedTo, setAssignedTo] = useState('');
   const [assignedType, setAssignedType] = useState<'individual' | 'squad' | 'team' | 'platoon'>('individual');
 
@@ -60,10 +56,6 @@ export default function AddEquipmentPage() {
   const handleSubmit = () => {
     if (!name.trim()) {
       toast.error(t('addEquipment.nameRequired'));
-      return;
-    }
-    if (!type) {
-      toast.error(t('addEquipment.typeRequired'));
       return;
     }
     if (hasSerial && !serialNumber.trim()) {
@@ -170,25 +162,6 @@ export default function AddEquipmentPage() {
                 </Command>
               </PopoverContent>
             </Popover>
-          </div>
-
-          {/* Type */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">
-              {t('addEquipment.type')} *
-            </Label>
-            <Select value={type} onValueChange={(v) => setType(v as EquipmentType)}>
-              <SelectTrigger className="h-12 bg-card border-border">
-                <SelectValue placeholder={t('addEquipment.selectType')} />
-              </SelectTrigger>
-              <SelectContent>
-                {equipmentTypes.map((t) => (
-                  <SelectItem key={t} value={t}>
-                    {t.charAt(0).toUpperCase() + t.slice(1)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           {/* Has Serial Toggle */}
