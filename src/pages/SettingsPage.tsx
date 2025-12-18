@@ -105,25 +105,11 @@ export default function SettingsPage() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0 space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-xs lg:text-sm">{t('settings.unitDesignation')}</Label>
-                  <Input
-                    defaultValue="2nd Platoon, Alpha Company"
-                    className="bg-secondary border-border h-11"
-                  />
-                </div>
+              <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0">
                 <div className="space-y-2">
                   <Label className="text-xs lg:text-sm">{t('settings.unitName')}</Label>
                   <Input
-                    defaultValue="1st Battalion, 501st Infantry Regiment"
-                    className="bg-secondary border-border h-11"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs lg:text-sm">{t('settings.homeStation')}</Label>
-                  <Input
-                    defaultValue="Fort Bragg, NC"
+                    defaultValue="2nd Platoon, Alpha Company"
                     className="bg-secondary border-border h-11"
                   />
                 </div>
