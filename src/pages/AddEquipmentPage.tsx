@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { MobileHeader } from '@/components/layout/MobileHeader';
@@ -12,12 +12,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
-import { ChevronLeft, Package, Save } from 'lucide-react';
+import { ChevronLeft, Package, Save, Check, ChevronsUpDown } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { mockPersonnel } from '@/data/mockData';
+import { mockPersonnel, mockEquipment } from '@/data/mockData';
 import { EquipmentType } from '@/types/pmtb';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 const equipmentTypes: EquipmentType[] = ['weapons', 'sensitive', 'comms', 'vehicle', 'medical', 'ocie'];
 
@@ -26,12 +40,19 @@ export default function AddEquipmentPage() {
   const navigate = useNavigate();
   
   const [name, setName] = useState('');
+  const [nameOpen, setNameOpen] = useState(false);
   const [hasSerial, setHasSerial] = useState(true);
   const [serialNumber, setSerialNumber] = useState('');
   const [quantity, setQuantity] = useState('1');
   const [type, setType] = useState<EquipmentType | ''>('');
   const [assignedTo, setAssignedTo] = useState('');
   const [assignedType, setAssignedType] = useState<'individual' | 'squad' | 'team' | 'platoon'>('individual');
+
+  // Get unique equipment names for autocomplete
+  const existingNames = useMemo(() => {
+    const names = [...new Set(mockEquipment.map(e => e.name))];
+    return names.sort();
+  }, []);
 
   const squads = ['1st Squad', '2nd Squad', '3rd Squad', 'HQ'];
   const teams = ['Alpha', 'Bravo', 'Charlie', 'HQ'];
@@ -94,18 +115,61 @@ export default function AddEquipmentPage() {
 
         {/* Form */}
         <div className="space-y-6 max-w-lg">
-          {/* Name */}
           <div className="space-y-2">
             <Label htmlFor="name" className="text-sm font-medium">
               {t('addEquipment.name')} *
             </Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t('addEquipment.namePlaceholder')}
-              className="h-12 bg-card border-border"
-            />
+            <Popover open={nameOpen} onOpenChange={setNameOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={nameOpen}
+                  className="w-full h-12 justify-between bg-card border-border text-start font-normal"
+                >
+                  {name || t('addEquipment.namePlaceholder')}
+                  <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                <Command>
+                  <CommandInput 
+                    placeholder={t('addEquipment.namePlaceholder')}
+                    value={name}
+                    onValueChange={setName}
+                  />
+                  <CommandList>
+                    <CommandEmpty>
+                      <span className="text-muted-foreground text-sm">
+                        {name ? t('addEquipment.newItem') : t('addEquipment.typeToSearch')}
+                      </span>
+                    </CommandEmpty>
+                    <CommandGroup>
+                      {existingNames
+                        .filter(n => n.toLowerCase().includes(name.toLowerCase()))
+                        .map((itemName) => (
+                          <CommandItem
+                            key={itemName}
+                            value={itemName}
+                            onSelect={(value) => {
+                              setName(value);
+                              setNameOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "me-2 h-4 w-4",
+                                name === itemName ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {itemName}
+                          </CommandItem>
+                        ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
 
           {/* Type */}
