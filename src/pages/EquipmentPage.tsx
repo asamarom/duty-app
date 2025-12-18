@@ -14,31 +14,26 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Search, Plus, Package, AlertTriangle, CheckCircle } from 'lucide-react';
-import { EquipmentType } from '@/types/pmtb';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function EquipmentPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState<EquipmentType | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const types: (EquipmentType | 'all')[] = ['all', 'weapons', 'sensitive', 'comms', 'vehicle', 'medical', 'ocie'];
   const statuses = ['all', 'serviceable', 'unserviceable', 'missing'];
 
   const filteredEquipment = mockEquipment.filter((item) => {
     const matchesSearch =
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.serialNumber.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = typeFilter === 'all' || item.type === typeFilter;
     const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
-    return matchesSearch && matchesType && matchesStatus;
+    return matchesSearch && matchesStatus;
   });
 
   const serviceableCount = mockEquipment.filter((e) => e.status === 'serviceable').length;
   const unserviceableCount = mockEquipment.filter((e) => e.status === 'unserviceable').length;
-  const sensitiveCount = mockEquipment.filter((e) => e.type === 'sensitive').length;
 
   return (
     <MainLayout>
@@ -76,7 +71,7 @@ export default function EquipmentPage() {
         </header>
 
         {/* Stats - Mobile Horizontal Scroll */}
-        <div className="mb-4 lg:mb-6 flex gap-3 overflow-x-auto pb-2 lg:grid lg:grid-cols-4 lg:overflow-visible">
+        <div className="mb-4 lg:mb-6 flex gap-3 overflow-x-auto pb-2 lg:grid lg:grid-cols-3 lg:overflow-visible">
           <div className="card-tactical flex items-center gap-3 rounded-lg px-4 py-3 min-w-[140px] lg:min-w-0">
             <Package className="h-6 w-6 lg:h-8 lg:w-8 text-primary" />
             <div>
@@ -98,18 +93,11 @@ export default function EquipmentPage() {
               <p className="text-[10px] lg:text-xs text-muted-foreground whitespace-nowrap">{t('equipment.requiresAttention')}</p>
             </div>
           </div>
-          <div className="card-tactical flex items-center gap-3 rounded-lg border-s-4 border-s-warning px-4 py-3 min-w-[140px] lg:min-w-0">
-            <Package className="h-6 w-6 lg:h-8 lg:w-8 text-warning" />
-            <div>
-              <p className="text-xl lg:text-2xl font-bold text-foreground">{sensitiveCount}</p>
-              <p className="text-[10px] lg:text-xs text-muted-foreground whitespace-nowrap">{t('equipment.sensitiveItems')}</p>
-            </div>
-          </div>
         </div>
 
         {/* Filters - Mobile Optimized */}
-        <div className="mb-4 lg:mb-6 flex flex-col gap-3">
-          <div className="relative">
+        <div className="mb-4 lg:mb-6 flex flex-col gap-3 lg:flex-row">
+          <div className="relative flex-1">
             <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder={t('equipment.searchPlaceholder')}
@@ -118,32 +106,18 @@ export default function EquipmentPage() {
               className="ps-10 bg-card border-border h-11"
             />
           </div>
-          <div className="flex gap-2">
-            <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as EquipmentType | 'all')}>
-              <SelectTrigger className="flex-1 bg-card border-border h-11">
-                <SelectValue placeholder={t('equipment.allTypes')} />
-              </SelectTrigger>
-              <SelectContent>
-                {types.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type === 'all' ? t('equipment.allTypes') : type.charAt(0).toUpperCase() + type.slice(1)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="flex-1 bg-card border-border h-11">
-                <SelectValue placeholder={t('equipment.allStatus')} />
-              </SelectTrigger>
-              <SelectContent>
-                {statuses.map((status) => (
-                  <SelectItem key={status} value={status}>
-                    {status === 'all' ? t('equipment.allStatus') : status.charAt(0).toUpperCase() + status.slice(1)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full lg:w-[180px] bg-card border-border h-11">
+              <SelectValue placeholder={t('equipment.allStatus')} />
+            </SelectTrigger>
+            <SelectContent>
+              {statuses.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {status === 'all' ? t('equipment.allStatus') : status.charAt(0).toUpperCase() + status.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Equipment Table */}

@@ -1,7 +1,7 @@
 export type UserRole = 'admin' | 'leader' | 'user';
 export type DutyPosition = 'Platoon Leader' | 'Platoon Sergeant' | 'Squad Leader' | 'Team Leader' | 'RTO' | 'Medic' | 'Rifleman' | 'Driver' | 'Gunner';
 export type LocationStatus = 'home' | 'on_duty' | 'off_duty' | 'active_mission' | 'leave' | 'tdy';
-export type EquipmentType = 'sensitive' | 'ocie' | 'vehicle' | 'comms' | 'medical' | 'weapons';
+
 export type ReadinessStatus = 'ready' | 'warning' | 'critical';
 
 export interface Personnel {
@@ -29,7 +29,6 @@ export interface Equipment {
   serialNumber: string;
   name: string;
   description: string;
-  type: EquipmentType;
   quantity: number;
   assignedTo?: string;
   assignedType: 'individual' | 'squad' | 'team' | 'platoon';
