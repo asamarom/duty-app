@@ -156,8 +156,6 @@ export const mockEquipment: Equipment[] = [
     quantity: 1,
     assignedTo: '1',
     assignedType: 'individual',
-    status: 'serviceable',
-    lastInventory: '2024-01-15',
   },
   {
     id: '2',
@@ -167,8 +165,6 @@ export const mockEquipment: Equipment[] = [
     quantity: 1,
     assignedTo: '2',
     assignedType: 'individual',
-    status: 'serviceable',
-    lastInventory: '2024-01-15',
   },
   {
     id: '3',
@@ -178,8 +174,6 @@ export const mockEquipment: Equipment[] = [
     quantity: 1,
     assignedTo: '5',
     assignedType: 'individual',
-    status: 'serviceable',
-    lastInventory: '2024-01-14',
   },
   {
     id: '4',
@@ -189,8 +183,6 @@ export const mockEquipment: Equipment[] = [
     quantity: 1,
     assignedTo: '1st Squad',
     assignedType: 'squad',
-    status: 'serviceable',
-    lastInventory: '2024-01-10',
   },
   {
     id: '5',
@@ -200,8 +192,6 @@ export const mockEquipment: Equipment[] = [
     quantity: 1,
     assignedTo: '3',
     assignedType: 'individual',
-    status: 'serviceable',
-    lastInventory: '2024-01-15',
   },
   {
     id: '6',
@@ -211,8 +201,6 @@ export const mockEquipment: Equipment[] = [
     quantity: 1,
     assignedTo: '6',
     assignedType: 'individual',
-    status: 'serviceable',
-    lastInventory: '2024-01-12',
   },
   {
     id: '7',
@@ -222,8 +210,6 @@ export const mockEquipment: Equipment[] = [
     quantity: 32,
     assignedTo: 'Platoon',
     assignedType: 'platoon',
-    status: 'serviceable',
-    lastInventory: '2024-01-08',
   },
   {
     id: '8',
@@ -233,8 +219,6 @@ export const mockEquipment: Equipment[] = [
     quantity: 1,
     assignedTo: 'HQ',
     assignedType: 'team',
-    status: 'unserviceable',
-    lastInventory: '2024-01-05',
   },
 ];
 

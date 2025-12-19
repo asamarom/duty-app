@@ -1,6 +1,5 @@
 import { Equipment } from '@/types/pmtb';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 import {
   Table,
   TableBody,
@@ -13,12 +12,6 @@ import {
 interface EquipmentTableProps {
   equipment: Equipment[];
 }
-
-const statusColors = {
-  serviceable: 'status-ready',
-  unserviceable: 'status-critical',
-  missing: 'status-warning',
-};
 
 export function EquipmentTable({ equipment }: EquipmentTableProps) {
   return (
@@ -37,12 +30,6 @@ export function EquipmentTable({ equipment }: EquipmentTableProps) {
             </TableHead>
             <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Assigned To
-            </TableHead>
-            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Status
-            </TableHead>
-            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Last Inventory
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -75,16 +62,6 @@ export function EquipmentTable({ equipment }: EquipmentTableProps) {
                       {item.assignedType}
                     </Badge>
                   </div>
-                </TableCell>
-                <TableCell>
-                  <Badge className={cn(statusColors[item.status], 'capitalize')}>
-                    {item.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <span className="text-sm text-muted-foreground">
-                    {new Date(item.lastInventory).toLocaleDateString()}
-                  </span>
                 </TableCell>
               </TableRow>
             );

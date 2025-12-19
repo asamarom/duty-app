@@ -6,34 +6,20 @@ import { EquipmentTable } from '@/components/equipment/EquipmentTable';
 import { mockEquipment } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Search, Plus, Package, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Search, Plus, Package } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function EquipmentPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-
-  const statuses = ['all', 'serviceable', 'unserviceable', 'missing'];
 
   const filteredEquipment = mockEquipment.filter((item) => {
     const matchesSearch =
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.serialNumber.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
-
-  const serviceableCount = mockEquipment.filter((e) => e.status === 'serviceable').length;
-  const unserviceableCount = mockEquipment.filter((e) => e.status === 'unserviceable').length;
 
   return (
     <MainLayout>
@@ -70,34 +56,20 @@ export default function EquipmentPage() {
           </div>
         </header>
 
-        {/* Stats - Mobile Horizontal Scroll */}
-        <div className="mb-4 lg:mb-6 flex gap-3 overflow-x-auto pb-2 lg:grid lg:grid-cols-3 lg:overflow-visible">
-          <div className="card-tactical flex items-center gap-3 rounded-lg px-4 py-3 min-w-[140px] lg:min-w-0">
+        {/* Stats */}
+        <div className="mb-4 lg:mb-6">
+          <div className="card-tactical flex items-center gap-3 rounded-lg px-4 py-3 w-fit">
             <Package className="h-6 w-6 lg:h-8 lg:w-8 text-primary" />
             <div>
               <p className="text-xl lg:text-2xl font-bold text-foreground">{mockEquipment.length}</p>
               <p className="text-[10px] lg:text-xs text-muted-foreground whitespace-nowrap">{t('equipment.totalItems')}</p>
             </div>
           </div>
-          <div className="card-tactical flex items-center gap-3 rounded-lg border-s-4 border-s-success px-4 py-3 min-w-[140px] lg:min-w-0">
-            <CheckCircle className="h-6 w-6 lg:h-8 lg:w-8 text-success" />
-            <div>
-              <p className="text-xl lg:text-2xl font-bold text-foreground">{serviceableCount}</p>
-              <p className="text-[10px] lg:text-xs text-muted-foreground whitespace-nowrap">{t('status.operational')}</p>
-            </div>
-          </div>
-          <div className="card-tactical flex items-center gap-3 rounded-lg border-s-4 border-s-destructive px-4 py-3 min-w-[140px] lg:min-w-0">
-            <AlertTriangle className="h-6 w-6 lg:h-8 lg:w-8 text-destructive" />
-            <div>
-              <p className="text-xl lg:text-2xl font-bold text-foreground">{unserviceableCount}</p>
-              <p className="text-[10px] lg:text-xs text-muted-foreground whitespace-nowrap">{t('equipment.requiresAttention')}</p>
-            </div>
-          </div>
         </div>
 
-        {/* Filters - Mobile Optimized */}
-        <div className="mb-4 lg:mb-6 flex flex-col gap-3 lg:flex-row">
-          <div className="relative flex-1">
+        {/* Search Filter */}
+        <div className="mb-4 lg:mb-6">
+          <div className="relative max-w-md">
             <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder={t('equipment.searchPlaceholder')}
@@ -106,18 +78,6 @@ export default function EquipmentPage() {
               className="ps-10 bg-card border-border h-11"
             />
           </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full lg:w-[180px] bg-card border-border h-11">
-              <SelectValue placeholder={t('equipment.allStatus')} />
-            </SelectTrigger>
-            <SelectContent>
-              {statuses.map((status) => (
-                <SelectItem key={status} value={status}>
-                  {status === 'all' ? t('equipment.allStatus') : status.charAt(0).toUpperCase() + status.slice(1)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
 
         {/* Equipment Table */}

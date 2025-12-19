@@ -32,8 +32,6 @@ export interface Equipment {
   quantity: number;
   assignedTo?: string;
   assignedType: 'individual' | 'squad' | 'team' | 'platoon';
-  status: 'serviceable' | 'unserviceable' | 'missing';
-  lastInventory: string;
 }
 
 export interface DailyReport {
