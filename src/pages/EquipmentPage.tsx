@@ -1,18 +1,31 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { MobileHeader } from '@/components/layout/MobileHeader';
 import { EquipmentTable } from '@/components/equipment/EquipmentTable';
 import { mockEquipment } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Search, Plus, Package } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 export default function EquipmentPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [open, setOpen] = useState(false);
 
   const filteredEquipment = mockEquipment.filter((item) => {
     const matchesSearch =
@@ -67,17 +80,51 @@ export default function EquipmentPage() {
           </div>
         </div>
 
-        {/* Search Filter */}
+        {/* Search Filter with Autocomplete */}
         <div className="mb-4 lg:mb-6">
-          <div className="relative max-w-md">
-            <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder={t('equipment.searchPlaceholder')}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="ps-10 bg-card border-border h-11"
-            />
-          </div>
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <div className="relative max-w-md cursor-pointer">
+                <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
+                <input
+                  placeholder={t('equipment.searchPlaceholder')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onClick={() => setOpen(true)}
+                  className="flex h-11 w-full rounded-md border border-border bg-card ps-10 pe-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                />
+              </div>
+            </PopoverTrigger>
+            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 bg-popover border-border" align="start">
+              <Command>
+                <CommandList>
+                  <CommandEmpty>No equipment found.</CommandEmpty>
+                  <CommandGroup>
+                    {mockEquipment
+                      .filter((item) =>
+                        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        item.serialNumber.toLowerCase().includes(searchQuery.toLowerCase())
+                      )
+                      .slice(0, 8)
+                      .map((item) => (
+                        <CommandItem
+                          key={item.id}
+                          value={item.name}
+                          onSelect={(value) => {
+                            setSearchQuery(value);
+                            setOpen(false);
+                          }}
+                        >
+                          <Package className="me-2 h-4 w-4 text-muted-foreground" />
+                          <span>{item.name}</span>
+                          <span className="ms-auto text-xs text-muted-foreground">{item.serialNumber}</span>
+                        </CommandItem>
+                      ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Equipment Table */}
