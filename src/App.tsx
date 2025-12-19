@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import PersonnelPage from "./pages/PersonnelPage";
 import EquipmentPage from "./pages/EquipmentPage";
 import AddEquipmentPage from "./pages/AddEquipmentPage";
+import EquipmentDetailPage from "./pages/EquipmentDetailPage";
 import ReportsPage from "./pages/ReportsPage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/personnel" element={<PersonnelPage />} />
             <Route path="/equipment" element={<EquipmentPage />} />
             <Route path="/equipment/add" element={<AddEquipmentPage />} />
+            <Route path="/equipment/:id" element={<EquipmentDetailPage />} />
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
