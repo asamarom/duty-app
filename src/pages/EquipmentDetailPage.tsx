@@ -14,7 +14,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ArrowRight, Save, Package, User, Users } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { ArrowRight, Save, Package, User, Users, Trash2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 
@@ -58,6 +69,12 @@ export default function EquipmentDetailPage() {
     navigate('/equipment');
   };
 
+  const handleDelete = () => {
+    // In a real app, this would delete from database and remove all assignments
+    toast.success('Equipment and all assignments deleted');
+    navigate('/equipment');
+  };
+
   return (
     <MainLayout>
       <MobileHeader title={equipment.name} />
@@ -83,10 +100,33 @@ export default function EquipmentDetailPage() {
               </p>
             </div>
           </div>
-          <Button onClick={handleSave} className="gap-2">
-            <Save className="h-4 w-4" />
-            <span className="hidden sm:inline">Save Changes</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="icon" className="shrink-0">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Equipment</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete "{equipment.name}"? This will also remove all assignments associated with this item. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <Button onClick={handleSave} className="gap-2">
+              <Save className="h-4 w-4" />
+              <span className="hidden sm:inline">Save Changes</span>
+            </Button>
+          </div>
         </div>
 
         {/* Form */}
