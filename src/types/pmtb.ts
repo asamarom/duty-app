@@ -26,9 +26,9 @@ export interface Personnel {
 
 export interface Equipment {
   id: string;
-  serialNumber: string;
+  serialNumber?: string;
   name: string;
-  description: string;
+  description?: string;
   quantity: number;
   assignedTo?: string;
   assignedType: 'individual' | 'squad' | 'team' | 'platoon';

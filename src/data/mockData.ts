@@ -147,7 +147,7 @@ export const mockPersonnel: Personnel[] = [
   },
 ];
 
-export const mockEquipment: Equipment[] = [
+export let mockEquipment: Equipment[] = [
   {
     id: '1',
     serialNumber: 'W123456',
@@ -221,6 +221,15 @@ export const mockEquipment: Equipment[] = [
     assignedType: 'team',
   },
 ];
+
+export const addEquipment = (equipment: Omit<Equipment, 'id'>) => {
+  const newEquipment: Equipment = {
+    ...equipment,
+    id: String(Date.now()),
+  };
+  mockEquipment = [...mockEquipment, newEquipment];
+  return newEquipment;
+};
 
 export const mockPlatoonStats: PlatoonStats = {
   totalPersonnel: 32,
