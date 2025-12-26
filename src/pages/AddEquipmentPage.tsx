@@ -28,7 +28,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { ChevronLeft, Package, Save, Check, ChevronsUpDown } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { mockPersonnel, mockEquipment } from '@/data/mockData';
+import { mockPersonnel, mockEquipment, addEquipment } from '@/data/mockData';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -63,7 +63,15 @@ export default function AddEquipmentPage() {
       return;
     }
 
-    // Here you would save to database
+    // Add the new equipment to the mock data
+    addEquipment({
+      name: name.trim(),
+      serialNumber: hasSerial ? serialNumber.trim() : undefined,
+      quantity: hasSerial ? 1 : parseInt(quantity) || 1,
+      assignedTo: assignedType === 'platoon' ? 'Platoon' : assignedTo || undefined,
+      assignedType: assignedType,
+    });
+
     toast.success(t('addEquipment.success'));
     navigate('/equipment');
   };
