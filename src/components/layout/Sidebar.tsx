@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/hooks/useAuth';
 import {
   LayoutDashboard,
   Users,
@@ -9,10 +10,13 @@ import {
   Settings,
   Shield,
   Radio,
+  LogOut,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export function Sidebar() {
   const { t, dir } = useLanguage();
+  const { user, signOut } = useAuth();
 
   const navigation = [
     { name: t('nav.dashboard'), href: '/', icon: LayoutDashboard },
@@ -117,14 +121,23 @@ export function Sidebar() {
         <div className="border-t border-sidebar-border p-4">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/20 font-mono text-xs font-bold text-primary">
-              CPT
+              {user?.email?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div className="flex-1 truncate">
               <p className="truncate text-sm font-medium text-sidebar-foreground">
-                CPT Mitchell
+                {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}
               </p>
-              <p className="text-xs text-muted-foreground">{t('nav.platoonSergeant')}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={signOut}
+              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+              title="Sign out"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </div>
