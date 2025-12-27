@@ -126,6 +126,22 @@ export default function AuthPage() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setErrors({});
+    setIsSubmitting(true);
+
+    const { error } = await signInWithGoogle();
+
+    if (error) {
+      setIsSubmitting(false);
+      toast({
+        variant: 'destructive',
+        title: 'Google sign-in failed',
+        description: error.message,
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -222,7 +238,7 @@ export default function AuthPage() {
                     type="button"
                     variant="outline"
                     className="w-full"
-                    onClick={() => signInWithGoogle()}
+                    onClick={() => void handleGoogleSignIn()}
                     disabled={isSubmitting}
                   >
                     <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -340,7 +356,7 @@ export default function AuthPage() {
                     type="button"
                     variant="outline"
                     className="w-full"
-                    onClick={() => signInWithGoogle()}
+                    onClick={() => void handleGoogleSignIn()}
                     disabled={isSubmitting}
                   >
                     <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
