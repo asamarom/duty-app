@@ -14,16 +14,389 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      battalions: {
+        Row: {
+          commander_id: string | null
+          created_at: string
+          designation: string | null
+          id: string
+          name: string
+          status: Database["public"]["Enums"]["unit_status"]
+          updated_at: string
+        }
+        Insert: {
+          commander_id?: string | null
+          created_at?: string
+          designation?: string | null
+          id?: string
+          name: string
+          status?: Database["public"]["Enums"]["unit_status"]
+          updated_at?: string
+        }
+        Update: {
+          commander_id?: string | null
+          created_at?: string
+          designation?: string | null
+          id?: string
+          name?: string
+          status?: Database["public"]["Enums"]["unit_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "battalions_commander_id_fkey"
+            columns: ["commander_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      equipment: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          quantity: number
+          serial_number: string | null
+          status: Database["public"]["Enums"]["equipment_status"]
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          quantity?: number
+          serial_number?: string | null
+          status?: Database["public"]["Enums"]["equipment_status"]
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          quantity?: number
+          serial_number?: string | null
+          status?: Database["public"]["Enums"]["equipment_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      equipment_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          created_at: string
+          equipment_id: string
+          id: string
+          notes: string | null
+          personnel_id: string | null
+          platoon_id: string | null
+          returned_at: string | null
+          squad_id: string | null
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          created_at?: string
+          equipment_id: string
+          id?: string
+          notes?: string | null
+          personnel_id?: string | null
+          platoon_id?: string | null
+          returned_at?: string | null
+          squad_id?: string | null
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          created_at?: string
+          equipment_id?: string
+          id?: string
+          notes?: string | null
+          personnel_id?: string | null
+          platoon_id?: string | null
+          returned_at?: string | null
+          squad_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_assignments_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_assignments_personnel_id_fkey"
+            columns: ["personnel_id"]
+            isOneToOne: false
+            referencedRelation: "personnel"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_assignments_platoon_id_fkey"
+            columns: ["platoon_id"]
+            isOneToOne: false
+            referencedRelation: "platoons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_assignments_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      personnel: {
+        Row: {
+          created_at: string
+          driver_licenses: string[] | null
+          duty_position: string | null
+          email: string | null
+          first_name: string
+          id: string
+          last_name: string
+          local_address: string | null
+          location_status: Database["public"]["Enums"]["location_status"]
+          phone: string | null
+          profile_image: string | null
+          rank: string
+          readiness_status: Database["public"]["Enums"]["readiness_status"]
+          service_number: string
+          skills: string[] | null
+          squad_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          driver_licenses?: string[] | null
+          duty_position?: string | null
+          email?: string | null
+          first_name: string
+          id?: string
+          last_name: string
+          local_address?: string | null
+          location_status?: Database["public"]["Enums"]["location_status"]
+          phone?: string | null
+          profile_image?: string | null
+          rank: string
+          readiness_status?: Database["public"]["Enums"]["readiness_status"]
+          service_number: string
+          skills?: string[] | null
+          squad_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          driver_licenses?: string[] | null
+          duty_position?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          local_address?: string | null
+          location_status?: Database["public"]["Enums"]["location_status"]
+          phone?: string | null
+          profile_image?: string | null
+          rank?: string
+          readiness_status?: Database["public"]["Enums"]["readiness_status"]
+          service_number?: string
+          skills?: string[] | null
+          squad_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personnel_squad_id_fkey"
+            columns: ["squad_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platoons: {
+        Row: {
+          battalion_id: string
+          created_at: string
+          designation: string | null
+          id: string
+          leader_id: string | null
+          name: string
+          status: Database["public"]["Enums"]["unit_status"]
+          updated_at: string
+        }
+        Insert: {
+          battalion_id: string
+          created_at?: string
+          designation?: string | null
+          id?: string
+          leader_id?: string | null
+          name: string
+          status?: Database["public"]["Enums"]["unit_status"]
+          updated_at?: string
+        }
+        Update: {
+          battalion_id?: string
+          created_at?: string
+          designation?: string | null
+          id?: string
+          leader_id?: string | null
+          name?: string
+          status?: Database["public"]["Enums"]["unit_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platoons_battalion_id_fkey"
+            columns: ["battalion_id"]
+            isOneToOne: false
+            referencedRelation: "battalions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "platoons_leader_id_fkey"
+            columns: ["leader_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      squads: {
+        Row: {
+          created_at: string
+          designation: string | null
+          id: string
+          leader_id: string | null
+          name: string
+          platoon_id: string
+          status: Database["public"]["Enums"]["unit_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          designation?: string | null
+          id?: string
+          leader_id?: string | null
+          name: string
+          platoon_id: string
+          status?: Database["public"]["Enums"]["unit_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          designation?: string | null
+          id?: string
+          leader_id?: string | null
+          name?: string
+          platoon_id?: string
+          status?: Database["public"]["Enums"]["unit_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "squads_leader_id_fkey"
+            columns: ["leader_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "squads_platoon_id_fkey"
+            columns: ["platoon_id"]
+            isOneToOne: false
+            referencedRelation: "platoons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "leader" | "user"
+      equipment_status:
+        | "serviceable"
+        | "unserviceable"
+        | "in_maintenance"
+        | "missing"
+      location_status:
+        | "home"
+        | "on_duty"
+        | "off_duty"
+        | "active_mission"
+        | "leave"
+        | "tdy"
+      readiness_status: "ready" | "warning" | "critical"
+      unit_status: "active" | "inactive" | "deployed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +523,24 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "leader", "user"],
+      equipment_status: [
+        "serviceable",
+        "unserviceable",
+        "in_maintenance",
+        "missing",
+      ],
+      location_status: [
+        "home",
+        "on_duty",
+        "off_duty",
+        "active_mission",
+        "leave",
+        "tdy",
+      ],
+      readiness_status: ["ready", "warning", "critical"],
+      unit_status: ["active", "inactive", "deployed"],
+    },
   },
 } as const
