@@ -194,8 +194,8 @@ export default function EquipmentDetailPage() {
       return getPlatoonsForBattalion(selectedBattalionId);
     }
     
-    // When going up from squad/individual to platoon, only show the current platoon
-    if ((currentLevel === 'squad' || currentLevel === 'individual') && currentAssignmentInfo.platoonId) {
+    // When at platoon level going down, or going up from squad/individual - only show current platoon
+    if ((currentLevel === 'platoon' || currentLevel === 'squad' || currentLevel === 'individual') && currentAssignmentInfo.platoonId) {
       return platoons.filter(p => p.id === currentAssignmentInfo.platoonId);
     }
     
@@ -214,8 +214,8 @@ export default function EquipmentDetailPage() {
       return getSquadsForPlatoon(selectedPlatoonId);
     }
     
-    // When going up from individual to squad, only show the current squad
-    if (currentLevel === 'individual' && currentAssignmentInfo.squadId) {
+    // When at squad level going down to individual, or going up from individual - only show current squad
+    if ((currentLevel === 'squad' || currentLevel === 'individual') && currentAssignmentInfo.squadId) {
       return squads.filter(s => s.id === currentAssignmentInfo.squadId);
     }
     
