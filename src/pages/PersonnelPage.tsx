@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { MobileHeader } from '@/components/layout/MobileHeader';
 import { PersonnelCard } from '@/components/personnel/PersonnelCard';
@@ -59,6 +60,7 @@ function mapPersonnelRowToUI(row: any): Personnel {
 }
 
 export default function PersonnelPage() {
+  const navigate = useNavigate();
   const { t } = useLanguage();
   const { toast } = useToast();
 
@@ -219,7 +221,7 @@ export default function PersonnelPage() {
                   className="animate-slide-up"
                   style={{ animationDelay: `${index * 30}ms` }}
                 >
-                  <PersonnelCard person={person} />
+                  <PersonnelCard person={person} onClick={() => navigate(`/personnel/${person.id}`)} />
                 </div>
               ))}
             </div>
