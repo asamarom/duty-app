@@ -13,6 +13,7 @@ export interface Personnel {
   dutyPosition: DutyPosition;
   team: string;
   squad: string;
+  squadId?: string;
   role: UserRole;
   phone: string;
   email: string;
