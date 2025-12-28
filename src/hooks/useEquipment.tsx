@@ -5,8 +5,12 @@ import type { Equipment } from '@/types/pmtb';
 
 export type EquipmentRow = Tables<'equipment'>;
 
+interface EquipmentWithAssignment extends Equipment {
+  assigneeName?: string;
+}
+
 interface UseEquipmentReturn {
-  equipment: Equipment[];
+  equipment: EquipmentWithAssignment[];
   loading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
@@ -15,35 +19,68 @@ interface UseEquipmentReturn {
   updateEquipment: (id: string, updates: Partial<Equipment>) => Promise<void>;
 }
 
-// Map database row to UI Equipment type
-function mapEquipmentRowToUI(row: EquipmentRow): Equipment {
-  return {
-    id: row.id,
-    serialNumber: row.serial_number || undefined,
-    name: row.name,
-    description: row.description || undefined,
-    quantity: row.quantity,
-    assignedTo: undefined, // Equipment assignments are in a separate table
-    assignedType: 'individual', // Default for now
-  };
-}
-
 export function useEquipment(): UseEquipmentReturn {
-  const [equipment, setEquipment] = useState<Equipment[]>([]);
+  const [equipment, setEquipment] = useState<EquipmentWithAssignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchEquipment = useCallback(async () => {
     try {
       setLoading(true);
-      const { data, error: fetchError } = await supabase
+      
+      // Fetch equipment with assignments
+      const { data: equipmentData, error: fetchError } = await supabase
         .from('equipment')
-        .select('*')
+        .select(`
+          *,
+          equipment_assignments(
+            personnel_id,
+            platoon_id,
+            squad_id,
+            returned_at,
+            personnel(first_name, last_name),
+            platoons(name),
+            squads(name)
+          )
+        `)
         .order('name');
 
       if (fetchError) throw fetchError;
 
-      const mappedEquipment = (data || []).map(mapEquipmentRowToUI);
+      const mappedEquipment: EquipmentWithAssignment[] = (equipmentData || []).map((row) => {
+        // Find active assignment (not returned)
+        const activeAssignment = row.equipment_assignments?.find(
+          (a: { returned_at: string | null }) => !a.returned_at
+        );
+
+        let assigneeName: string | undefined;
+        let assignedType: 'individual' | 'squad' | 'platoon' = 'individual';
+
+        if (activeAssignment) {
+          if (activeAssignment.personnel) {
+            assigneeName = `${activeAssignment.personnel.first_name} ${activeAssignment.personnel.last_name}`;
+            assignedType = 'individual';
+          } else if (activeAssignment.squads) {
+            assigneeName = activeAssignment.squads.name;
+            assignedType = 'squad';
+          } else if (activeAssignment.platoons) {
+            assigneeName = activeAssignment.platoons.name;
+            assignedType = 'platoon';
+          }
+        }
+
+        return {
+          id: row.id,
+          serialNumber: row.serial_number || undefined,
+          name: row.name,
+          description: row.description || undefined,
+          quantity: row.quantity,
+          assignedTo: assigneeName,
+          assignedType,
+          assigneeName,
+        };
+      });
+      
       setEquipment(mappedEquipment);
     } catch (err) {
       setError(err as Error);
