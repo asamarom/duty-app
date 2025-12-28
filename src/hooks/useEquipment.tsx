@@ -7,6 +7,14 @@ export type EquipmentRow = Tables<'equipment'>;
 
 interface EquipmentWithAssignment extends Equipment {
   assigneeName?: string;
+  currentAssignmentId?: string;
+  currentPersonnelId?: string;
+}
+
+interface AssignmentData {
+  personnelId?: string;
+  platoonId?: string;
+  squadId?: string;
 }
 
 interface UseEquipmentReturn {
@@ -17,6 +25,8 @@ interface UseEquipmentReturn {
   addEquipment: (item: Omit<Equipment, 'id'>) => Promise<void>;
   deleteEquipment: (id: string) => Promise<void>;
   updateEquipment: (id: string, updates: Partial<Equipment>) => Promise<void>;
+  assignEquipment: (equipmentId: string, assignment: AssignmentData) => Promise<void>;
+  unassignEquipment: (equipmentId: string) => Promise<void>;
 }
 
 export function useEquipment(): UseEquipmentReturn {
@@ -34,6 +44,7 @@ export function useEquipment(): UseEquipmentReturn {
         .select(`
           *,
           equipment_assignments(
+            id,
             personnel_id,
             platoon_id,
             squad_id,
@@ -78,6 +89,8 @@ export function useEquipment(): UseEquipmentReturn {
           assignedTo: assigneeName,
           assignedType,
           assigneeName,
+          currentAssignmentId: activeAssignment?.id,
+          currentPersonnelId: activeAssignment?.personnel_id,
         };
       });
       
@@ -128,6 +141,39 @@ export function useEquipment(): UseEquipmentReturn {
     await fetchEquipment();
   }, [fetchEquipment]);
 
+  const assignEquipment = useCallback(async (equipmentId: string, assignment: AssignmentData) => {
+    // First, mark any existing assignment as returned
+    await supabase
+      .from('equipment_assignments')
+      .update({ returned_at: new Date().toISOString() })
+      .eq('equipment_id', equipmentId)
+      .is('returned_at', null);
+
+    // Create new assignment
+    const { error: assignError } = await supabase
+      .from('equipment_assignments')
+      .insert({
+        equipment_id: equipmentId,
+        personnel_id: assignment.personnelId || null,
+        platoon_id: assignment.platoonId || null,
+        squad_id: assignment.squadId || null,
+      });
+
+    if (assignError) throw assignError;
+    await fetchEquipment();
+  }, [fetchEquipment]);
+
+  const unassignEquipment = useCallback(async (equipmentId: string) => {
+    const { error: unassignError } = await supabase
+      .from('equipment_assignments')
+      .update({ returned_at: new Date().toISOString() })
+      .eq('equipment_id', equipmentId)
+      .is('returned_at', null);
+
+    if (unassignError) throw unassignError;
+    await fetchEquipment();
+  }, [fetchEquipment]);
+
   useEffect(() => {
     fetchEquipment();
   }, [fetchEquipment]);
@@ -140,5 +186,7 @@ export function useEquipment(): UseEquipmentReturn {
     addEquipment,
     deleteEquipment,
     updateEquipment,
+    assignEquipment,
+    unassignEquipment,
   };
 }
