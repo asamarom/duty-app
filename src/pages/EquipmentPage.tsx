@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { MobileHeader } from '@/components/layout/MobileHeader';
 import { EquipmentTable } from '@/components/equipment/EquipmentTable';
-import { useEquipment } from '@/hooks/useEquipment';
+import { BulkAssignDialog } from '@/components/equipment/BulkAssignDialog';
+import { useEquipment, EquipmentWithAssignment } from '@/hooks/useEquipment';
 import { Button } from '@/components/ui/button';
-import { Search, Plus, Package, Loader2 } from 'lucide-react';
+import { Search, Plus, Package, Loader2, CheckSquare, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { toast } from 'sonner';
 import {
   Command,
   CommandEmpty,
@@ -23,9 +25,12 @@ import {
 export default function EquipmentPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { equipment, loading } = useEquipment();
+  const { equipment, loading, assignEquipment, refetch } = useEquipment();
   const [searchQuery, setSearchQuery] = useState('');
   const [open, setOpen] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkAssignOpen, setBulkAssignOpen] = useState(false);
 
   const filteredEquipment = equipment.filter((item) => {
     const matchesSearch =
@@ -33,6 +38,32 @@ export default function EquipmentPage() {
       (item.serialNumber || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch;
   });
+
+  const selectedItems = useMemo(() => {
+    return equipment.filter(item => selectedIds.has(item.id)) as EquipmentWithAssignment[];
+  }, [equipment, selectedIds]);
+
+  const handleToggleSelectMode = () => {
+    setSelectMode(!selectMode);
+    if (selectMode) {
+      setSelectedIds(new Set());
+    }
+  };
+
+  const handleBulkAssign = async (assignment: { personnelId?: string; platoonId?: string; squadId?: string; battalionId?: string }) => {
+    try {
+      // Assign each selected item
+      for (const itemId of selectedIds) {
+        await assignEquipment(itemId, assignment);
+      }
+      toast.success(`Successfully assigned ${selectedIds.size} item${selectedIds.size > 1 ? 's' : ''}`);
+      setSelectedIds(new Set());
+      setSelectMode(false);
+      await refetch();
+    } catch (error) {
+      toast.error('Failed to assign some items');
+    }
+  };
 
   if (loading) {
     return (
@@ -67,6 +98,13 @@ export default function EquipmentPage() {
               </p>
             </div>
             <div className="flex gap-3">
+              <Button 
+                variant={selectMode ? 'default' : 'outline'} 
+                onClick={handleToggleSelectMode}
+              >
+                <CheckSquare className="me-2 h-4 w-4" />
+                {selectMode ? 'Cancel Selection' : 'Select Items'}
+              </Button>
               <Button variant="outline">
                 <Package className="me-2 h-4 w-4" />
                 {t('reports.equipmentAudit')}
@@ -78,6 +116,30 @@ export default function EquipmentPage() {
             </div>
           </div>
         </header>
+
+        {/* Bulk Action Bar */}
+        {selectMode && selectedIds.size > 0 && (
+          <div className="mb-4 p-4 card-tactical rounded-lg flex items-center justify-between gap-4 animate-fade-in">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium">
+                {selectedIds.size} item{selectedIds.size > 1 ? 's' : ''} selected
+              </span>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setSelectedIds(new Set())}
+              >
+                <X className="h-4 w-4 me-1" />
+                Clear
+              </Button>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={() => setBulkAssignOpen(true)}>
+                Assign Selected
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Stats */}
         <div className="mb-4 lg:mb-6">
@@ -137,9 +199,27 @@ export default function EquipmentPage() {
           </Popover>
         </div>
 
+        {/* Mobile Select Mode Toggle */}
+        <div className="mb-4 lg:hidden">
+          <Button 
+            variant={selectMode ? 'default' : 'outline'} 
+            size="sm"
+            onClick={handleToggleSelectMode}
+            className="w-full"
+          >
+            <CheckSquare className="me-2 h-4 w-4" />
+            {selectMode ? 'Cancel Selection' : 'Select Items'}
+          </Button>
+        </div>
+
         {/* Equipment Table */}
         <div className="overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0">
-          <EquipmentTable equipment={filteredEquipment} />
+          <EquipmentTable 
+            equipment={filteredEquipment} 
+            selectable={selectMode}
+            selectedIds={selectedIds}
+            onSelectionChange={setSelectedIds}
+          />
         </div>
 
         {filteredEquipment.length === 0 && (
@@ -151,18 +231,37 @@ export default function EquipmentPage() {
           </div>
         )}
 
-        {/* Mobile FAB */}
+        {/* Mobile FAB - show Assign button when items selected, otherwise Add */}
         <div className="lg:hidden fixed bottom-24 end-4 z-40">
-          <Button 
-            variant="tactical" 
-            size="lg" 
-            className="h-14 w-14 rounded-full shadow-lg"
-            onClick={() => navigate('/equipment/add')}
-          >
-            <Plus className="h-6 w-6" />
-          </Button>
+          {selectMode && selectedIds.size > 0 ? (
+            <Button 
+              variant="tactical" 
+              size="lg" 
+              className="h-14 px-6 rounded-full shadow-lg"
+              onClick={() => setBulkAssignOpen(true)}
+            >
+              Assign ({selectedIds.size})
+            </Button>
+          ) : (
+            <Button 
+              variant="tactical" 
+              size="lg" 
+              className="h-14 w-14 rounded-full shadow-lg"
+              onClick={() => navigate('/equipment/add')}
+            >
+              <Plus className="h-6 w-6" />
+            </Button>
+          )}
         </div>
       </div>
+
+      {/* Bulk Assign Dialog */}
+      <BulkAssignDialog
+        open={bulkAssignOpen}
+        onOpenChange={setBulkAssignOpen}
+        selectedItems={selectedItems}
+        onAssign={handleBulkAssign}
+      />
     </MainLayout>
   );
 }

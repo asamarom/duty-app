@@ -7,7 +7,7 @@ export type EquipmentRow = Tables<'equipment'>;
 
 export type AssignmentLevel = 'battalion' | 'platoon' | 'squad' | 'individual' | 'unassigned';
 
-interface EquipmentWithAssignment extends Equipment {
+export interface EquipmentWithAssignment extends Equipment {
   assigneeName?: string;
   currentAssignmentId?: string;
   currentPersonnelId?: string;
