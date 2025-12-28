@@ -416,14 +416,14 @@ export default function PersonnelDetailPage() {
                   <Label>Squad</Label>
                   {isEditing ? (
                     <Select
-                      value={formData.squad_id || ''}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, squad_id: value || null }))}
+                      value={formData.squad_id || 'unassigned'}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, squad_id: value === 'unassigned' ? null : value }))}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select squad" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Unassigned</SelectItem>
+                        <SelectItem value="unassigned">Unassigned</SelectItem>
                         {squads.map((squad) => (
                           <SelectItem key={squad.id} value={squad.id}>
                             {squad.name}
