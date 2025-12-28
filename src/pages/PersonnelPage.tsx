@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { MobileHeader } from '@/components/layout/MobileHeader';
 import { PersonnelCard } from '@/components/personnel/PersonnelCard';
-import { mockPersonnel } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -13,24 +12,109 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Plus, Users } from 'lucide-react';
+import { Search, Plus, Users, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import type { DutyPosition, Personnel } from '@/types/pmtb';
+
+const dutyPositions: DutyPosition[] = [
+  'Platoon Leader',
+  'Platoon Sergeant',
+  'Squad Leader',
+  'Team Leader',
+  'RTO',
+  'Medic',
+  'Rifleman',
+  'Driver',
+  'Gunner',
+];
+
+function toDutyPosition(value: string | null): DutyPosition {
+  return dutyPositions.includes(value as DutyPosition) ? (value as DutyPosition) : 'Rifleman';
+}
+
+function mapPersonnelRowToUI(row: any): Personnel {
+  const squadName = row?.squads?.name ?? 'Unassigned';
+
+  return {
+    id: row.id,
+    serviceNumber: row.service_number,
+    rank: row.rank,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    dutyPosition: toDutyPosition(row.duty_position ?? null),
+    team: squadName,
+    squad: squadName,
+    role: 'user',
+    phone: row.phone ?? '',
+    email: row.email ?? '',
+    localAddress: row.local_address ?? '',
+    locationStatus: row.location_status ?? 'home',
+    skills: row.skills ?? [],
+    driverLicenses: row.driver_licenses ?? [],
+    profileImage: row.profile_image ?? undefined,
+    readinessStatus: row.readiness_status ?? 'ready',
+  };
+}
 
 export default function PersonnelPage() {
   const { t } = useLanguage();
+  const { toast } = useToast();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [teamFilter, setTeamFilter] = useState('all');
+  const [personnel, setPersonnel] = useState<Personnel[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const teams = ['all', ...new Set(mockPersonnel.map((p) => p.team))];
+  useEffect(() => {
+    let active = true;
 
-  const filteredPersonnel = mockPersonnel.filter((person) => {
-    const matchesSearch =
-      person.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      person.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      person.serviceNumber.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTeam = teamFilter === 'all' || person.team === teamFilter;
-    return matchesSearch && matchesTeam;
-  });
+    const fetchPersonnel = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('personnel')
+          .select(
+            'id, service_number, rank, first_name, last_name, duty_position, phone, email, local_address, location_status, readiness_status, skills, driver_licenses, profile_image, squads(name)'
+          )
+          .order('last_name', { ascending: true });
+
+        if (error) throw error;
+        if (!active) return;
+
+        setPersonnel((data ?? []).map(mapPersonnelRowToUI));
+      } catch {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Failed to load personnel list.',
+        });
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    fetchPersonnel();
+    return () => {
+      active = false;
+    };
+  }, [toast]);
+
+  const teams = useMemo(() => {
+    return ['all', ...new Set(personnel.map((p) => p.team).filter(Boolean))];
+  }, [personnel]);
+
+  const filteredPersonnel = useMemo(() => {
+    return personnel.filter((person) => {
+      const matchesSearch =
+        person.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        person.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        person.serviceNumber.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesTeam = teamFilter === 'all' || person.team === teamFilter;
+      return matchesSearch && matchesTeam;
+    });
+  }, [personnel, searchQuery, teamFilter]);
 
   return (
     <MainLayout>
@@ -38,7 +122,7 @@ export default function PersonnelPage() {
       <div className="lg:hidden">
         <MobileHeader 
           title={t('personnel.title')} 
-          subtitle={`${mockPersonnel.length} ${t('nav.personnel')}`}
+          subtitle={loading ? t('common.loading') : `${personnel.length} ${t('nav.personnel')}`}
         />
       </div>
 
@@ -61,95 +145,104 @@ export default function PersonnelPage() {
           </div>
         </header>
 
-        {/* Mobile Stats */}
-        <div className="lg:hidden mb-4 flex items-center gap-2 overflow-x-auto pb-2">
-          <Badge variant="success" className="px-3 py-1.5 whitespace-nowrap">
-            {mockPersonnel.filter((p) => p.locationStatus === 'on_duty').length} {t('status.onDuty')}
-          </Badge>
-          <Badge variant="warning" className="px-3 py-1.5 whitespace-nowrap">
-            {mockPersonnel.filter((p) => p.locationStatus === 'active_mission').length} {t('status.onMission')}
-          </Badge>
-          <Badge variant="secondary" className="px-3 py-1.5 whitespace-nowrap">
-            {mockPersonnel.filter((p) => p.locationStatus === 'leave').length} Leave
-          </Badge>
-        </div>
-
-        {/* Desktop Stats Bar */}
-        <div className="mb-6 hidden lg:flex items-center gap-4">
-          <div className="card-tactical flex items-center gap-3 rounded-lg px-4 py-3">
-            <Users className="h-5 w-5 text-primary" />
-            <div>
-              <p className="text-xl font-bold text-foreground">{mockPersonnel.length}</p>
-              <p className="text-xs text-muted-foreground">{t('dashboard.totalPersonnel')}</p>
+        {loading ? (
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <>
+            {/* Mobile Stats */}
+            <div className="lg:hidden mb-4 flex items-center gap-2 overflow-x-auto pb-2">
+              <Badge variant="success" className="px-3 py-1.5 whitespace-nowrap">
+                {personnel.filter((p) => p.locationStatus === 'on_duty').length} {t('status.onDuty')}
+              </Badge>
+              <Badge variant="warning" className="px-3 py-1.5 whitespace-nowrap">
+                {personnel.filter((p) => p.locationStatus === 'active_mission').length} {t('status.onMission')}
+              </Badge>
+              <Badge variant="secondary" className="px-3 py-1.5 whitespace-nowrap">
+                {personnel.filter((p) => p.locationStatus === 'leave').length} Leave
+              </Badge>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="success" className="px-3 py-1">
-              {mockPersonnel.filter((p) => p.locationStatus === 'on_duty').length} {t('status.onDuty')}
-            </Badge>
-            <Badge variant="warning" className="px-3 py-1">
-              {mockPersonnel.filter((p) => p.locationStatus === 'active_mission').length} {t('status.onMission')}
-            </Badge>
-            <Badge variant="secondary" className="px-3 py-1">
-              {mockPersonnel.filter((p) => p.locationStatus === 'leave').length} On Leave
-            </Badge>
-          </div>
-        </div>
 
-        {/* Filters - Mobile Optimized */}
-        <div className="mb-4 lg:mb-6 flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder={t('personnel.searchPlaceholder')}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="ps-10 bg-card border-border h-11"
-            />
-          </div>
-          <Select value={teamFilter} onValueChange={setTeamFilter}>
-            <SelectTrigger className="w-full sm:w-[160px] bg-card border-border h-11">
-              <SelectValue placeholder={t('personnel.allPositions')} />
-            </SelectTrigger>
-            <SelectContent>
-              {teams.map((team) => (
-                <SelectItem key={team} value={team}>
-                  {team === 'all' ? t('personnel.allPositions') : team}
-                </SelectItem>
+            {/* Desktop Stats Bar */}
+            <div className="mb-6 hidden lg:flex items-center gap-4">
+              <div className="card-tactical flex items-center gap-3 rounded-lg px-4 py-3">
+                <Users className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="text-xl font-bold text-foreground">{personnel.length}</p>
+                  <p className="text-xs text-muted-foreground">{t('dashboard.totalPersonnel')}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="success" className="px-3 py-1">
+                  {personnel.filter((p) => p.locationStatus === 'on_duty').length} {t('status.onDuty')}
+                </Badge>
+                <Badge variant="warning" className="px-3 py-1">
+                  {personnel.filter((p) => p.locationStatus === 'active_mission').length} {t('status.onMission')}
+                </Badge>
+                <Badge variant="secondary" className="px-3 py-1">
+                  {personnel.filter((p) => p.locationStatus === 'leave').length} On Leave
+                </Badge>
+              </div>
+            </div>
+
+            {/* Filters - Mobile Optimized */}
+            <div className="mb-4 lg:mb-6 flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder={t('personnel.searchPlaceholder')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="ps-10 bg-card border-border h-11"
+                />
+              </div>
+              <Select value={teamFilter} onValueChange={setTeamFilter}>
+                <SelectTrigger className="w-full sm:w-[160px] bg-card border-border h-11">
+                  <SelectValue placeholder={t('personnel.allPositions')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {teams.map((team) => (
+                    <SelectItem key={team} value={team}>
+                      {team === 'all' ? t('personnel.allPositions') : team}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Personnel Grid - Mobile Single Column */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {filteredPersonnel.map((person, index) => (
+                <div
+                  key={person.id}
+                  className="animate-slide-up"
+                  style={{ animationDelay: `${index * 30}ms` }}
+                >
+                  <PersonnelCard person={person} />
+                </div>
               ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Personnel Grid - Mobile Single Column */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {filteredPersonnel.map((person, index) => (
-            <div
-              key={person.id}
-              className="animate-slide-up"
-              style={{ animationDelay: `${index * 30}ms` }}
-            >
-              <PersonnelCard person={person} />
             </div>
-          ))}
-        </div>
 
-        {filteredPersonnel.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12">
-            <Users className="h-12 w-12 text-muted-foreground/50" />
-            <p className="mt-4 text-lg font-medium text-muted-foreground">
-              No personnel found
-            </p>
-          </div>
+            {filteredPersonnel.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-12">
+                <Users className="h-12 w-12 text-muted-foreground/50" />
+                <p className="mt-4 text-lg font-medium text-muted-foreground">
+                  No personnel found
+                </p>
+              </div>
+            )}
+
+            {/* Mobile FAB */}
+            <div className="lg:hidden fixed bottom-24 end-4 z-40">
+              <Button variant="tactical" size="lg" className="h-14 w-14 rounded-full shadow-lg">
+                <Plus className="h-6 w-6" />
+              </Button>
+            </div>
+          </>
         )}
-
-        {/* Mobile FAB */}
-        <div className="lg:hidden fixed bottom-24 end-4 z-40">
-          <Button variant="tactical" size="lg" className="h-14 w-14 rounded-full shadow-lg">
-            <Plus className="h-6 w-6" />
-          </Button>
-        </div>
       </div>
     </MainLayout>
   );
 }
+
