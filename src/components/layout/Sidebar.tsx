@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 import {
   LayoutDashboard,
   Users,
@@ -11,12 +12,14 @@ import {
   Shield,
   Radio,
   LogOut,
+  UserCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function Sidebar() {
   const { t, dir } = useLanguage();
   const { user, signOut } = useAuth();
+  const { isAdmin, isLeader } = useUserRole();
 
   const navigation = [
     { name: t('nav.dashboard'), href: '/', icon: LayoutDashboard },
@@ -24,6 +27,11 @@ export function Sidebar() {
     { name: t('nav.equipment'), href: '/equipment', icon: Package },
     { name: t('nav.reports'), href: '/reports', icon: ClipboardList },
   ];
+
+  // Add approvals link for admins and leaders
+  if (isAdmin || isLeader) {
+    navigation.push({ name: 'Approvals', href: '/approvals', icon: UserCheck });
+  }
 
   const bottomNavigation = [
     { name: t('nav.settings'), href: '/settings', icon: Settings },
