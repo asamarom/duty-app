@@ -23,6 +23,7 @@ function mapPersonnelRowToUI(row: PersonnelRow & { squads?: { name: string } | n
     dutyPosition: (row.duty_position || 'Rifleman') as Personnel['dutyPosition'],
     team: row.squads?.name || 'Unassigned',
     squad: row.squads?.name || 'Unassigned',
+    squadId: row.squad_id || undefined,
     role: 'user',
     phone: row.phone || '',
     email: row.email || '',

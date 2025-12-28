@@ -128,17 +128,132 @@ export default function EquipmentDetailPage() {
 
   const loading = personnelLoading || equipmentLoading || unitsLoading;
 
-  // Get available platoons based on selected battalion
-  const availablePlatoons = useMemo(() => {
-    if (!selectedBattalionId) return [];
-    return getPlatoonsForBattalion(selectedBattalionId);
-  }, [selectedBattalionId, getPlatoonsForBattalion]);
+  // Get the current assignment's hierarchy info
+  const currentAssignmentInfo = useMemo(() => {
+    if (!item) return { battalionId: null, platoonId: null, squadId: null };
+    
+    // Get the current battalion, platoon, squad from the item's assignment
+    let battalionId = item.currentBattalionId || null;
+    let platoonId = item.currentPlatoonId || null;
+    let squadId = item.currentSquadId || null;
+    
+    // If assigned to individual, find their squad
+    if (item.currentPersonnelId) {
+      const person = personnel.find(p => p.id === item.currentPersonnelId);
+      if (person?.squadId) {
+        squadId = person.squadId;
+        const squad = squads.find(s => s.id === squadId);
+        if (squad) {
+          platoonId = squad.platoon_id;
+          const platoon = platoons.find(p => p.id === platoonId);
+          if (platoon) {
+            battalionId = platoon.battalion_id;
+          }
+        }
+      }
+    }
+    
+    // If assigned to squad, find its platoon and battalion
+    if (squadId && !platoonId) {
+      const squad = squads.find(s => s.id === squadId);
+      if (squad) {
+        platoonId = squad.platoon_id;
+        const platoon = platoons.find(p => p.id === platoonId);
+        if (platoon) {
+          battalionId = platoon.battalion_id;
+        }
+      }
+    }
+    
+    // If assigned to platoon, find its battalion
+    if (platoonId && !battalionId) {
+      const platoon = platoons.find(p => p.id === platoonId);
+      if (platoon) {
+        battalionId = platoon.battalion_id;
+      }
+    }
+    
+    return { battalionId, platoonId, squadId };
+  }, [item, personnel, squads, platoons]);
 
-  // Get available squads based on selected platoon
+  // Get available battalions - only the current hierarchy's battalion when not unassigned
+  const availableBattalions = useMemo(() => {
+    if (currentLevel === 'unassigned') return battalions;
+    // When going up to battalion, only show the current hierarchy's battalion
+    if (currentAssignmentInfo.battalionId) {
+      return battalions.filter(b => b.id === currentAssignmentInfo.battalionId);
+    }
+    return battalions;
+  }, [battalions, currentLevel, currentAssignmentInfo.battalionId]);
+
+  // Get available platoons - filtered by hierarchy
+  const availablePlatoons = useMemo(() => {
+    if (currentLevel === 'unassigned') {
+      // When unassigned, show platoons based on selected battalion
+      if (!selectedBattalionId) return [];
+      return getPlatoonsForBattalion(selectedBattalionId);
+    }
+    
+    // When going up from squad/individual to platoon, only show the current platoon
+    if ((currentLevel === 'squad' || currentLevel === 'individual') && currentAssignmentInfo.platoonId) {
+      return platoons.filter(p => p.id === currentAssignmentInfo.platoonId);
+    }
+    
+    // When going down from battalion to platoon, show platoons in that battalion
+    if (currentLevel === 'battalion' && currentAssignmentInfo.battalionId) {
+      return getPlatoonsForBattalion(currentAssignmentInfo.battalionId);
+    }
+    
+    return getPlatoonsForBattalion(selectedBattalionId);
+  }, [currentLevel, currentAssignmentInfo, selectedBattalionId, getPlatoonsForBattalion, platoons]);
+
+  // Get available squads - filtered by hierarchy
   const availableSquads = useMemo(() => {
-    if (!selectedPlatoonId) return [];
+    if (currentLevel === 'unassigned') {
+      if (!selectedPlatoonId) return [];
+      return getSquadsForPlatoon(selectedPlatoonId);
+    }
+    
+    // When going up from individual to squad, only show the current squad
+    if (currentLevel === 'individual' && currentAssignmentInfo.squadId) {
+      return squads.filter(s => s.id === currentAssignmentInfo.squadId);
+    }
+    
+    // When going down from platoon to squad, show squads in that platoon
+    if (currentLevel === 'platoon' && currentAssignmentInfo.platoonId) {
+      return getSquadsForPlatoon(currentAssignmentInfo.platoonId);
+    }
+    
     return getSquadsForPlatoon(selectedPlatoonId);
-  }, [selectedPlatoonId, getSquadsForPlatoon]);
+  }, [currentLevel, currentAssignmentInfo, selectedPlatoonId, getSquadsForPlatoon, squads]);
+
+  // Get available personnel - filtered by hierarchy
+  const availablePersonnel = useMemo(() => {
+    if (currentLevel === 'unassigned') {
+      // Filter by selected squad if available
+      if (selectedSquadId) {
+        return personnel.filter(p => p.squadId === selectedSquadId);
+      }
+      return personnel;
+    }
+    
+    // When individual is current level, only show individuals in the same squad
+    if (currentLevel === 'individual' && currentAssignmentInfo.squadId) {
+      return personnel.filter(p => p.squadId === currentAssignmentInfo.squadId);
+    }
+    
+    // When going down from squad to individual, show individuals in that squad
+    if (currentLevel === 'squad' && currentAssignmentInfo.squadId) {
+      return personnel.filter(p => p.squadId === currentAssignmentInfo.squadId);
+    }
+    
+    // Filter by selected squad
+    if (selectedSquadId) {
+      return personnel.filter(p => p.squadId === selectedSquadId);
+    }
+    
+    return personnel;
+  }, [currentLevel, currentAssignmentInfo, selectedSquadId, personnel]);
 
   // Reset child selections when parent changes
   const handleBattalionChange = (value: string) => {
@@ -424,7 +539,7 @@ export default function EquipmentDetailPage() {
                         <SelectValue placeholder="Select Battalion" />
                       </SelectTrigger>
                       <SelectContent>
-                        {battalions.map((b) => (
+                        {availableBattalions.map((b) => (
                           <SelectItem key={b.id} value={b.id}>
                             <div className="flex items-center gap-2">
                               <Building2 className="h-4 w-4" />
@@ -446,7 +561,7 @@ export default function EquipmentDetailPage() {
                         <SelectValue placeholder="Select Platoon" />
                       </SelectTrigger>
                       <SelectContent>
-                        {(currentLevel === 'battalion' ? availablePlatoons : platoons).map((p) => (
+                        {availablePlatoons.map((p) => (
                           <SelectItem key={p.id} value={p.id}>
                             <div className="flex items-center gap-2">
                               <Users className="h-4 w-4" />
@@ -491,7 +606,7 @@ export default function EquipmentDetailPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="unassigned">Unassigned</SelectItem>
-                        {personnel.map((p) => (
+                        {availablePersonnel.map((p) => (
                           <SelectItem key={p.id} value={p.id}>
                             <div className="flex items-center gap-2">
                               <User className="h-4 w-4" />
