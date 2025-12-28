@@ -8,6 +8,9 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
+import SignupRequestPage from "./pages/SignupRequestPage";
+import PendingApprovalPage from "./pages/PendingApprovalPage";
+import AdminApprovalsPage from "./pages/AdminApprovalsPage";
 import PersonnelPage from "./pages/PersonnelPage";
 import EquipmentPage from "./pages/EquipmentPage";
 import AddEquipmentPage from "./pages/AddEquipmentPage";
@@ -28,7 +31,18 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/auth" element={<AuthPage />} />
+              <Route path="/signup-request" element={
+                <ProtectedRoute requireApproval={false}>
+                  <SignupRequestPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/pending-approval" element={
+                <ProtectedRoute requireApproval={false}>
+                  <PendingApprovalPage />
+                </ProtectedRoute>
+              } />
               <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+              <Route path="/approvals" element={<ProtectedRoute><AdminApprovalsPage /></ProtectedRoute>} />
               <Route path="/personnel" element={<ProtectedRoute><PersonnelPage /></ProtectedRoute>} />
               <Route path="/equipment" element={<ProtectedRoute><EquipmentPage /></ProtectedRoute>} />
               <Route path="/equipment/add" element={<ProtectedRoute><AddEquipmentPage /></ProtectedRoute>} />
