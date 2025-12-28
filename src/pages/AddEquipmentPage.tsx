@@ -26,15 +26,18 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
-import { ChevronLeft, Package, Save, Check, ChevronsUpDown } from 'lucide-react';
+import { ChevronLeft, Package, Save, Check, ChevronsUpDown, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { mockPersonnel, mockEquipment, addEquipment } from '@/data/mockData';
+import { usePersonnel } from '@/hooks/usePersonnel';
+import { useEquipment } from '@/hooks/useEquipment';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 export default function AddEquipmentPage() {
   const { t, dir } = useLanguage();
   const navigate = useNavigate();
+  const { personnel, loading: personnelLoading } = usePersonnel();
+  const { equipment, loading: equipmentLoading, addEquipment } = useEquipment();
   
   const [name, setName] = useState('');
   const [nameOpen, setNameOpen] = useState(false);
@@ -43,17 +46,20 @@ export default function AddEquipmentPage() {
   const [quantity, setQuantity] = useState('1');
   const [assignedTo, setAssignedTo] = useState('');
   const [assignedType, setAssignedType] = useState<'individual' | 'squad' | 'team' | 'platoon'>('individual');
+  const [saving, setSaving] = useState(false);
+
+  const loading = personnelLoading || equipmentLoading;
 
   // Get unique equipment names for autocomplete
   const existingNames = useMemo(() => {
-    const names = [...new Set(mockEquipment.map(e => e.name))];
+    const names = [...new Set(equipment.map(e => e.name))];
     return names.sort();
-  }, []);
+  }, [equipment]);
 
   const squads = ['1st Squad', '2nd Squad', '3rd Squad', 'HQ'];
   const teams = ['Alpha', 'Bravo', 'Charlie', 'HQ'];
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!name.trim()) {
       toast.error(t('addEquipment.nameRequired'));
       return;
@@ -63,18 +69,34 @@ export default function AddEquipmentPage() {
       return;
     }
 
-    // Add the new equipment to the mock data
-    addEquipment({
-      name: name.trim(),
-      serialNumber: hasSerial ? serialNumber.trim() : undefined,
-      quantity: hasSerial ? 1 : parseInt(quantity) || 1,
-      assignedTo: assignedType === 'platoon' ? 'Platoon' : assignedTo || undefined,
-      assignedType: assignedType,
-    });
+    try {
+      setSaving(true);
+      await addEquipment({
+        name: name.trim(),
+        serialNumber: hasSerial ? serialNumber.trim() : undefined,
+        quantity: hasSerial ? 1 : parseInt(quantity) || 1,
+        assignedTo: assignedType === 'platoon' ? 'Platoon' : assignedTo || undefined,
+        assignedType: assignedType,
+      });
 
-    toast.success(t('addEquipment.success'));
-    navigate('/equipment');
+      toast.success(t('addEquipment.success'));
+      navigate('/equipment');
+    } catch (error) {
+      toast.error('Failed to add equipment');
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
@@ -250,7 +272,7 @@ export default function AddEquipmentPage() {
                   <SelectValue placeholder={t('addEquipment.selectAssignee')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {assignedType === 'individual' && mockPersonnel.map((p) => (
+                  {assignedType === 'individual' && personnel.map((p) => (
                     <SelectItem key={p.id} value={p.id}>
                       {p.rank} {p.lastName}, {p.firstName}
                     </SelectItem>
@@ -271,9 +293,14 @@ export default function AddEquipmentPage() {
             variant="tactical" 
             size="lg"
             onClick={handleSubmit}
+            disabled={saving}
             className="w-full h-14 text-base"
           >
-            <Save className="me-2 h-5 w-5" />
+            {saving ? (
+              <Loader2 className="me-2 h-5 w-5 animate-spin" />
+            ) : (
+              <Save className="me-2 h-5 w-5" />
+            )}
             {t('addEquipment.save')}
           </Button>
         </div>

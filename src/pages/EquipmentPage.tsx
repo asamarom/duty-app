@@ -1,17 +1,16 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { MobileHeader } from '@/components/layout/MobileHeader';
 import { EquipmentTable } from '@/components/equipment/EquipmentTable';
-import { mockEquipment } from '@/data/mockData';
+import { useEquipment } from '@/hooks/useEquipment';
 import { Button } from '@/components/ui/button';
-import { Search, Plus, Package } from 'lucide-react';
+import { Search, Plus, Package, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Command,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
@@ -24,15 +23,26 @@ import {
 export default function EquipmentPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { equipment, loading } = useEquipment();
   const [searchQuery, setSearchQuery] = useState('');
   const [open, setOpen] = useState(false);
 
-  const filteredEquipment = mockEquipment.filter((item) => {
+  const filteredEquipment = equipment.filter((item) => {
     const matchesSearch =
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.serialNumber.toLowerCase().includes(searchQuery.toLowerCase());
+      (item.serialNumber || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch;
   });
+
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
@@ -40,7 +50,7 @@ export default function EquipmentPage() {
       <div className="lg:hidden">
         <MobileHeader 
           title={t('equipment.title')} 
-          subtitle={`${mockEquipment.length} ${t('equipment.totalItems')}`}
+          subtitle={`${equipment.length} ${t('equipment.totalItems')}`}
         />
       </div>
 
@@ -74,7 +84,7 @@ export default function EquipmentPage() {
           <div className="card-tactical flex items-center gap-3 rounded-lg px-4 py-3 w-fit">
             <Package className="h-6 w-6 lg:h-8 lg:w-8 text-primary" />
             <div>
-              <p className="text-xl lg:text-2xl font-bold text-foreground">{mockEquipment.length}</p>
+              <p className="text-xl lg:text-2xl font-bold text-foreground">{equipment.length}</p>
               <p className="text-[10px] lg:text-xs text-muted-foreground whitespace-nowrap">{t('equipment.totalItems')}</p>
             </div>
           </div>
@@ -100,10 +110,10 @@ export default function EquipmentPage() {
                 <CommandList>
                   <CommandEmpty>No equipment found.</CommandEmpty>
                   <CommandGroup>
-                    {mockEquipment
+                    {equipment
                       .filter((item) =>
                         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        item.serialNumber.toLowerCase().includes(searchQuery.toLowerCase())
+                        (item.serialNumber || '').toLowerCase().includes(searchQuery.toLowerCase())
                       )
                       .slice(0, 8)
                       .map((item) => (
