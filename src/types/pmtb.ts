@@ -31,7 +31,7 @@ export interface Equipment {
   description?: string;
   quantity: number;
   assignedTo?: string;
-  assignedType: 'individual' | 'squad' | 'team' | 'platoon';
+  assignedType?: 'individual' | 'squad' | 'team' | 'platoon' | 'battalion';
 }
 
 export interface DailyReport {

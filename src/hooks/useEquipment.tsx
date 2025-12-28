@@ -45,7 +45,7 @@ export function useEquipment(): UseEquipmentReturn {
     try {
       setLoading(true);
       
-      // Fetch equipment with assignments including battalion
+      // Fetch equipment with assignments
       const { data: equipmentData, error: fetchError } = await supabase
         .from('equipment')
         .select(`
@@ -55,17 +55,35 @@ export function useEquipment(): UseEquipmentReturn {
             personnel_id,
             platoon_id,
             squad_id,
-            battalion_id,
             returned_at,
             personnel(first_name, last_name),
             platoons(name),
-            squads(name),
-            battalions(name)
+            squads(name)
           )
         `)
         .order('name');
 
       if (fetchError) throw fetchError;
+
+      // Fetch battalion assignments separately (since types aren't regenerated yet)
+      const { data: battalionAssignments } = await supabase
+        .from('equipment_assignments')
+        .select('id, equipment_id, battalion_id, battalions(name)')
+        .not('battalion_id', 'is', null)
+        .is('returned_at', null);
+
+      // Create a map of equipment_id to battalion assignment
+      const battalionMap = new Map<string, { battalion_id: string; battalionName: string }>();
+      if (battalionAssignments) {
+        for (const ba of battalionAssignments as any[]) {
+          if (ba.battalion_id && ba.battalions) {
+            battalionMap.set(ba.equipment_id, {
+              battalion_id: ba.battalion_id,
+              battalionName: ba.battalions.name,
+            });
+          }
+        }
+      }
 
       const mappedEquipment: EquipmentWithAssignment[] = (equipmentData || []).map((row) => {
         // Find active assignment (not returned)
@@ -74,10 +92,18 @@ export function useEquipment(): UseEquipmentReturn {
         );
 
         let assigneeName: string | undefined;
-        let assignedType: 'individual' | 'squad' | 'platoon' = 'individual';
+        let assignedType: 'individual' | 'squad' | 'platoon' | 'battalion' = 'individual';
         let assignmentLevel: AssignmentLevel = 'unassigned';
+        let currentBattalionId: string | undefined;
 
-        if (activeAssignment) {
+        // Check for battalion assignment first
+        const battalionAssignment = battalionMap.get(row.id);
+        if (battalionAssignment) {
+          assigneeName = battalionAssignment.battalionName;
+          assignedType = 'battalion';
+          assignmentLevel = 'battalion';
+          currentBattalionId = battalionAssignment.battalion_id;
+        } else if (activeAssignment) {
           if (activeAssignment.personnel) {
             assigneeName = `${activeAssignment.personnel.first_name} ${activeAssignment.personnel.last_name}`;
             assignedType = 'individual';
@@ -90,10 +116,6 @@ export function useEquipment(): UseEquipmentReturn {
             assigneeName = activeAssignment.platoons.name;
             assignedType = 'platoon';
             assignmentLevel = 'platoon';
-          } else if (activeAssignment.battalions) {
-            assigneeName = activeAssignment.battalions.name;
-            assignedType = 'platoon'; // For display purposes
-            assignmentLevel = 'battalion';
           }
         }
 
@@ -108,7 +130,7 @@ export function useEquipment(): UseEquipmentReturn {
           assigneeName,
           currentAssignmentId: activeAssignment?.id,
           currentPersonnelId: activeAssignment?.personnel_id,
-          currentBattalionId: activeAssignment?.battalion_id,
+          currentBattalionId,
           currentPlatoonId: activeAssignment?.platoon_id,
           currentSquadId: activeAssignment?.squad_id,
           assignmentLevel,
@@ -147,7 +169,7 @@ export function useEquipment(): UseEquipmentReturn {
           platoon_id: assignment.platoonId || null,
           squad_id: assignment.squadId || null,
           battalion_id: assignment.battalionId || null,
-        });
+        } as any);
 
       if (assignError) throw assignError;
     }
@@ -197,7 +219,7 @@ export function useEquipment(): UseEquipmentReturn {
         platoon_id: assignment.platoonId || null,
         squad_id: assignment.squadId || null,
         battalion_id: assignment.battalionId || null,
-      });
+      } as any);
 
     if (assignError) throw assignError;
     await fetchEquipment();
