@@ -26,29 +26,39 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
-import { ChevronLeft, Package, Save, Check, ChevronsUpDown, Loader2 } from 'lucide-react';
+import { ChevronLeft, Package, Save, Check, ChevronsUpDown, Loader2, Building2, Users, User } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePersonnel } from '@/hooks/usePersonnel';
 import { useEquipment } from '@/hooks/useEquipment';
+import { useUnits } from '@/hooks/useUnits';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+
+type AssignmentType = 'battalion' | 'platoon' | 'squad' | 'individual';
 
 export default function AddEquipmentPage() {
   const { t, dir } = useLanguage();
   const navigate = useNavigate();
   const { personnel, loading: personnelLoading } = usePersonnel();
   const { equipment, loading: equipmentLoading, addEquipment } = useEquipment();
+  const { battalions, platoons, squads, loading: unitsLoading, getPlatoonsForBattalion, getSquadsForPlatoon } = useUnits();
   
   const [name, setName] = useState('');
   const [nameOpen, setNameOpen] = useState(false);
   const [hasSerial, setHasSerial] = useState(true);
   const [serialNumber, setSerialNumber] = useState('');
   const [quantity, setQuantity] = useState('1');
-  const [assignedTo, setAssignedTo] = useState('');
-  const [assignedType, setAssignedType] = useState<'individual' | 'squad' | 'team' | 'platoon'>('individual');
+  const [assignedType, setAssignedType] = useState<AssignmentType>('battalion');
+  
+  // Hierarchical selection state
+  const [selectedBattalionId, setSelectedBattalionId] = useState('');
+  const [selectedPlatoonId, setSelectedPlatoonId] = useState('');
+  const [selectedSquadId, setSelectedSquadId] = useState('');
+  const [selectedPersonnelId, setSelectedPersonnelId] = useState('');
+  
   const [saving, setSaving] = useState(false);
 
-  const loading = personnelLoading || equipmentLoading;
+  const loading = personnelLoading || equipmentLoading || unitsLoading;
 
   // Get unique equipment names for autocomplete
   const existingNames = useMemo(() => {
@@ -56,8 +66,56 @@ export default function AddEquipmentPage() {
     return names.sort();
   }, [equipment]);
 
-  const squads = ['1st Squad', '2nd Squad', '3rd Squad', 'HQ'];
-  const teams = ['Alpha', 'Bravo', 'Charlie', 'HQ'];
+  // Get available platoons based on selected battalion
+  const availablePlatoons = useMemo(() => {
+    if (!selectedBattalionId) return [];
+    return getPlatoonsForBattalion(selectedBattalionId);
+  }, [selectedBattalionId, getPlatoonsForBattalion]);
+
+  // Get available squads based on selected platoon
+  const availableSquads = useMemo(() => {
+    if (!selectedPlatoonId) return [];
+    return getSquadsForPlatoon(selectedPlatoonId);
+  }, [selectedPlatoonId, getSquadsForPlatoon]);
+
+  // Get available personnel (could filter by squad if needed)
+  const availablePersonnel = useMemo(() => {
+    return personnel;
+  }, [personnel]);
+
+  // Reset child selections when parent changes
+  const handleBattalionChange = (value: string) => {
+    setSelectedBattalionId(value);
+    setSelectedPlatoonId('');
+    setSelectedSquadId('');
+    setSelectedPersonnelId('');
+  };
+
+  const handlePlatoonChange = (value: string) => {
+    setSelectedPlatoonId(value);
+    setSelectedSquadId('');
+    setSelectedPersonnelId('');
+  };
+
+  const handleSquadChange = (value: string) => {
+    setSelectedSquadId(value);
+    setSelectedPersonnelId('');
+  };
+
+  const handleTypeChange = (type: AssignmentType) => {
+    setAssignedType(type);
+    // Reset selections when type changes
+    if (type === 'battalion') {
+      setSelectedPlatoonId('');
+      setSelectedSquadId('');
+      setSelectedPersonnelId('');
+    } else if (type === 'platoon') {
+      setSelectedSquadId('');
+      setSelectedPersonnelId('');
+    } else if (type === 'squad') {
+      setSelectedPersonnelId('');
+    }
+  };
 
   const handleSubmit = async () => {
     if (!name.trim()) {
@@ -69,15 +127,26 @@ export default function AddEquipmentPage() {
       return;
     }
 
+    // Build assignment based on type
+    let assignment: { personnelId?: string; platoonId?: string; squadId?: string; battalionId?: string } = {};
+    
+    if (assignedType === 'battalion' && selectedBattalionId) {
+      assignment.battalionId = selectedBattalionId;
+    } else if (assignedType === 'platoon' && selectedPlatoonId) {
+      assignment.platoonId = selectedPlatoonId;
+    } else if (assignedType === 'squad' && selectedSquadId) {
+      assignment.squadId = selectedSquadId;
+    } else if (assignedType === 'individual' && selectedPersonnelId) {
+      assignment.personnelId = selectedPersonnelId;
+    }
+
     try {
       setSaving(true);
       await addEquipment({
         name: name.trim(),
         serialNumber: hasSerial ? serialNumber.trim() : undefined,
         quantity: hasSerial ? 1 : parseInt(quantity) || 1,
-        assignedTo: assignedType === 'platoon' ? 'Platoon' : assignedTo || undefined,
-        assignedType: assignedType,
-      });
+      }, assignment);
 
       toast.success(t('addEquipment.success'));
       navigate('/equipment');
@@ -248,44 +317,112 @@ export default function AddEquipmentPage() {
             
             {/* Assignment Type */}
             <div className="grid grid-cols-2 gap-2">
-              {(['individual', 'squad', 'team', 'platoon'] as const).map((aType) => (
+              {(['battalion', 'platoon', 'squad', 'individual'] as const).map((aType) => (
                 <Button
                   key={aType}
                   type="button"
                   variant={assignedType === aType ? 'tactical' : 'outline'}
                   size="sm"
-                  onClick={() => {
-                    setAssignedType(aType);
-                    setAssignedTo('');
-                  }}
-                  className="h-10"
+                  onClick={() => handleTypeChange(aType)}
+                  className="h-10 gap-2"
                 >
-                  {t(`addEquipment.${aType}`)}
+                  {aType === 'battalion' && <Building2 className="h-4 w-4" />}
+                  {aType === 'platoon' && <Users className="h-4 w-4" />}
+                  {aType === 'squad' && <Users className="h-4 w-4" />}
+                  {aType === 'individual' && <User className="h-4 w-4" />}
+                  {aType.charAt(0).toUpperCase() + aType.slice(1)}
                 </Button>
               ))}
             </div>
 
-            {/* Assignment Target */}
-            {assignedType !== 'platoon' && (
-              <Select value={assignedTo} onValueChange={setAssignedTo}>
-                <SelectTrigger className="h-12 bg-secondary border-border">
-                  <SelectValue placeholder={t('addEquipment.selectAssignee')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {assignedType === 'individual' && personnel.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.rank} {p.lastName}, {p.firstName}
-                    </SelectItem>
-                  ))}
-                  {assignedType === 'squad' && squads.map((s) => (
-                    <SelectItem key={s} value={s}>{s}</SelectItem>
-                  ))}
-                  {assignedType === 'team' && teams.map((t) => (
-                    <SelectItem key={t} value={t}>{t}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+            {/* Hierarchical Selection */}
+            <div className="space-y-3">
+              {/* Battalion Selection - always show for all types */}
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Battalion</Label>
+                <Select value={selectedBattalionId} onValueChange={handleBattalionChange}>
+                  <SelectTrigger className="h-12 bg-secondary border-border">
+                    <SelectValue placeholder="Select Battalion" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {battalions.map((b) => (
+                      <SelectItem key={b.id} value={b.id}>
+                        <div className="flex items-center gap-2">
+                          <Building2 className="h-4 w-4" />
+                          {b.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Platoon Selection - show for platoon, squad, individual */}
+              {assignedType !== 'battalion' && selectedBattalionId && (
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Platoon</Label>
+                  <Select value={selectedPlatoonId} onValueChange={handlePlatoonChange}>
+                    <SelectTrigger className="h-12 bg-secondary border-border">
+                      <SelectValue placeholder="Select Platoon" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availablePlatoons.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4" />
+                            {p.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Squad Selection - show for squad, individual */}
+              {(assignedType === 'squad' || assignedType === 'individual') && selectedPlatoonId && (
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Squad</Label>
+                  <Select value={selectedSquadId} onValueChange={handleSquadChange}>
+                    <SelectTrigger className="h-12 bg-secondary border-border">
+                      <SelectValue placeholder="Select Squad" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableSquads.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4" />
+                            {s.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Individual Selection */}
+              {assignedType === 'individual' && (
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Person</Label>
+                  <Select value={selectedPersonnelId} onValueChange={setSelectedPersonnelId}>
+                    <SelectTrigger className="h-12 bg-secondary border-border">
+                      <SelectValue placeholder="Select Person" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availablePersonnel.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4" />
+                            {p.rank} {p.lastName}, {p.firstName}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Submit Button */}
