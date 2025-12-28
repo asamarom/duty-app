@@ -255,7 +255,24 @@ export default function EquipmentDetailPage() {
     return personnel;
   }, [currentLevel, currentAssignmentInfo, selectedSquadId, personnel]);
 
-  // Reset child selections when parent changes
+  // Auto-select when there's only one option
+  useEffect(() => {
+    if (availableBattalions.length === 1 && !selectedBattalionId) {
+      setSelectedBattalionId(availableBattalions[0].id);
+    }
+  }, [availableBattalions, selectedBattalionId]);
+
+  useEffect(() => {
+    if (availablePlatoons.length === 1 && !selectedPlatoonId) {
+      setSelectedPlatoonId(availablePlatoons[0].id);
+    }
+  }, [availablePlatoons, selectedPlatoonId]);
+
+  useEffect(() => {
+    if (availableSquads.length === 1 && !selectedSquadId) {
+      setSelectedSquadId(availableSquads[0].id);
+    }
+  }, [availableSquads, selectedSquadId]);
   const handleBattalionChange = (value: string) => {
     setSelectedBattalionId(value);
     setSelectedPlatoonId('');
@@ -534,21 +551,28 @@ export default function EquipmentDetailPage() {
                 {(assignedType === 'battalion' || currentLevel === 'unassigned') && allowedTypes.includes('battalion') && (
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Battalion</Label>
-                    <Select value={selectedBattalionId} onValueChange={handleBattalionChange}>
-                      <SelectTrigger className="bg-background">
-                        <SelectValue placeholder="Select Battalion" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableBattalions.map((b) => (
-                          <SelectItem key={b.id} value={b.id}>
-                            <div className="flex items-center gap-2">
-                              <Building2 className="h-4 w-4" />
-                              {b.name}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {availableBattalions.length === 1 ? (
+                      <div className="flex items-center gap-2 h-10 px-3 rounded-md border border-input bg-muted/50">
+                        <Building2 className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{availableBattalions[0].name}</span>
+                      </div>
+                    ) : (
+                      <Select value={selectedBattalionId} onValueChange={handleBattalionChange}>
+                        <SelectTrigger className="bg-background">
+                          <SelectValue placeholder="Select Battalion" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableBattalions.map((b) => (
+                            <SelectItem key={b.id} value={b.id}>
+                              <div className="flex items-center gap-2">
+                                <Building2 className="h-4 w-4" />
+                                {b.name}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
                 )}
 
@@ -556,21 +580,28 @@ export default function EquipmentDetailPage() {
                 {(assignedType === 'platoon' || assignedType === 'squad' || assignedType === 'individual') && (
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Platoon</Label>
-                    <Select value={selectedPlatoonId} onValueChange={handlePlatoonChange}>
-                      <SelectTrigger className="bg-background">
-                        <SelectValue placeholder="Select Platoon" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availablePlatoons.map((p) => (
-                          <SelectItem key={p.id} value={p.id}>
-                            <div className="flex items-center gap-2">
-                              <Users className="h-4 w-4" />
-                              {p.name}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {availablePlatoons.length === 1 ? (
+                      <div className="flex items-center gap-2 h-10 px-3 rounded-md border border-input bg-muted/50">
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{availablePlatoons[0].name}</span>
+                      </div>
+                    ) : (
+                      <Select value={selectedPlatoonId} onValueChange={handlePlatoonChange}>
+                        <SelectTrigger className="bg-background">
+                          <SelectValue placeholder="Select Platoon" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availablePlatoons.map((p) => (
+                            <SelectItem key={p.id} value={p.id}>
+                              <div className="flex items-center gap-2">
+                                <Users className="h-4 w-4" />
+                                {p.name}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
                 )}
 
@@ -578,21 +609,28 @@ export default function EquipmentDetailPage() {
                 {(assignedType === 'squad' || assignedType === 'individual') && selectedPlatoonId && (
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Squad</Label>
-                    <Select value={selectedSquadId} onValueChange={handleSquadChange}>
-                      <SelectTrigger className="bg-background">
-                        <SelectValue placeholder="Select Squad" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableSquads.map((s) => (
-                          <SelectItem key={s.id} value={s.id}>
-                            <div className="flex items-center gap-2">
-                              <Users className="h-4 w-4" />
-                              {s.name}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {availableSquads.length === 1 ? (
+                      <div className="flex items-center gap-2 h-10 px-3 rounded-md border border-input bg-muted/50">
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{availableSquads[0].name}</span>
+                      </div>
+                    ) : (
+                      <Select value={selectedSquadId} onValueChange={handleSquadChange}>
+                        <SelectTrigger className="bg-background">
+                          <SelectValue placeholder="Select Squad" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableSquads.map((s) => (
+                            <SelectItem key={s.id} value={s.id}>
+                              <div className="flex items-center gap-2">
+                                <Users className="h-4 w-4" />
+                                {s.name}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
                 )}
 
