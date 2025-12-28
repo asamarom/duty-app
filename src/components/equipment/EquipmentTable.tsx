@@ -31,12 +31,13 @@ export function EquipmentTable({ equipment }: EquipmentTableProps) {
                 x{item.quantity}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground truncate">{item.assignedTo}</span>
-              <Badge variant="secondary" className="text-[10px] uppercase shrink-0">
-                {item.assignedType}
-              </Badge>
-            </div>
+            {item.assignedTo && (
+              <div className="flex items-center gap-2 text-sm">
+                <Badge variant="outline" className="text-xs font-medium">
+                  {item.assignedTo}
+                </Badge>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -82,12 +83,13 @@ export function EquipmentTable({ equipment }: EquipmentTableProps) {
                 <span className="font-mono text-sm">{item.quantity}</span>
               </td>
               <td className="p-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-foreground">{item.assignedTo}</span>
-                  <Badge variant="secondary" className="text-[10px] uppercase">
-                    {item.assignedType}
+                {item.assignedTo ? (
+                  <Badge variant="outline" className="text-xs font-medium">
+                    {item.assignedTo}
                   </Badge>
-                </div>
+                ) : (
+                  <span className="text-sm text-muted-foreground">Unassigned</span>
+                )}
               </td>
             </tr>
           ))}
