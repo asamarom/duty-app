@@ -35,7 +35,7 @@ export default function EquipmentDetailPage() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { personnel, loading: personnelLoading } = usePersonnel();
-  const { equipment, loading: equipmentLoading, updateEquipment, deleteEquipment } = useEquipment();
+  const { equipment, loading: equipmentLoading, updateEquipment, deleteEquipment, assignEquipment, unassignEquipment } = useEquipment();
   
   const item = equipment.find((e) => e.id === id);
   
@@ -44,7 +44,7 @@ export default function EquipmentDetailPage() {
     serialNumber: '',
     description: '',
     quantity: 1,
-    assignedTo: '',
+    assignedToId: '', // Store the personnel ID
     assignedType: 'individual' as 'individual' | 'squad' | 'team' | 'platoon',
   });
 
@@ -56,7 +56,7 @@ export default function EquipmentDetailPage() {
         serialNumber: item.serialNumber || '',
         description: item.description || '',
         quantity: item.quantity || 1,
-        assignedTo: item.assignedTo || '',
+        assignedToId: (item as any).currentPersonnelId || '',
         assignedType: item.assignedType || 'individual',
       });
     }
@@ -96,12 +96,21 @@ export default function EquipmentDetailPage() {
 
   const handleSave = async () => {
     try {
+      // Update equipment details
       await updateEquipment(id!, {
         name: formData.name,
         serialNumber: formData.serialNumber || undefined,
         description: formData.description || undefined,
         quantity: formData.quantity,
       });
+
+      // Handle assignment
+      if (formData.assignedToId) {
+        await assignEquipment(id!, { personnelId: formData.assignedToId });
+      } else {
+        await unassignEquipment(id!);
+      }
+
       toast.success('Equipment updated successfully');
       navigate('/equipment');
     } catch (error) {
@@ -280,15 +289,16 @@ export default function EquipmentDetailPage() {
                 </Label>
                 {formData.assignedType === 'individual' ? (
                   <Select
-                    value={formData.assignedTo}
-                    onValueChange={(value) => setFormData({ ...formData, assignedTo: value })}
+                    value={formData.assignedToId}
+                    onValueChange={(value) => setFormData({ ...formData, assignedToId: value })}
                   >
                     <SelectTrigger className="bg-background">
                       <SelectValue placeholder="Select person" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="">Unassigned</SelectItem>
                       {personnel.map((person) => (
-                        <SelectItem key={person.id} value={`${person.firstName} ${person.lastName}`}>
+                        <SelectItem key={person.id} value={person.id}>
                           {person.firstName} {person.lastName} - {person.rank}
                         </SelectItem>
                       ))}
@@ -297,8 +307,8 @@ export default function EquipmentDetailPage() {
                 ) : (
                   <Input
                     id="assignedTo"
-                    value={formData.assignedTo}
-                    onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
+                    value={formData.assignedToId}
+                    onChange={(e) => setFormData({ ...formData, assignedToId: e.target.value })}
                     placeholder={`Enter ${formData.assignedType} name`}
                     className="bg-background"
                   />
