@@ -144,6 +144,7 @@ export type Database = {
         Row: {
           assigned_at: string
           assigned_by: string | null
+          battalion_id: string | null
           created_at: string
           equipment_id: string
           id: string
@@ -156,6 +157,7 @@ export type Database = {
         Insert: {
           assigned_at?: string
           assigned_by?: string | null
+          battalion_id?: string | null
           created_at?: string
           equipment_id: string
           id?: string
@@ -168,6 +170,7 @@ export type Database = {
         Update: {
           assigned_at?: string
           assigned_by?: string | null
+          battalion_id?: string | null
           created_at?: string
           equipment_id?: string
           id?: string
@@ -178,6 +181,13 @@ export type Database = {
           squad_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "equipment_assignments_battalion_id_fkey"
+            columns: ["battalion_id"]
+            isOneToOne: false
+            referencedRelation: "battalions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "equipment_assignments_equipment_id_fkey"
             columns: ["equipment_id"]
