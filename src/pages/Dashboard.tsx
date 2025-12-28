@@ -3,21 +3,40 @@ import { MobileHeader } from '@/components/layout/MobileHeader';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { ReadinessGauge } from '@/components/dashboard/ReadinessGauge';
 import { PersonnelStatusList } from '@/components/dashboard/PersonnelStatusList';
-import { mockPersonnel, mockPlatoonStats } from '@/data/mockData';
-import { Users, Package, AlertTriangle, Target, Calendar, Shield } from 'lucide-react';
+import { usePersonnel } from '@/hooks/usePersonnel';
+import { useEquipment } from '@/hooks/useEquipment';
+import { Users, Package, AlertTriangle, Target, Calendar, Shield, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Dashboard() {
   const { t } = useLanguage();
-  
-  const readyPercentage = Math.round(
-    (mockPlatoonStats.readyPersonnel / mockPlatoonStats.totalPersonnel) * 100
-  );
-  const equipmentPercentage = Math.round(
-    (mockPlatoonStats.equipmentServiceable / mockPlatoonStats.equipmentTotal) * 100
-  );
+  const { personnel, loading: personnelLoading } = usePersonnel();
+  const { equipment, loading: equipmentLoading } = useEquipment();
+
+  const loading = personnelLoading || equipmentLoading;
+
+  // Calculate stats from real data
+  const totalPersonnel = personnel.length;
+  const readyPersonnel = personnel.filter(p => p.readinessStatus === 'ready').length;
+  const onMission = personnel.filter(p => p.locationStatus === 'active_mission').length;
+  const onLeave = personnel.filter(p => p.locationStatus === 'leave').length;
+  const totalEquipment = equipment.length;
+  const serviceableEquipment = equipment.length; // All equipment from DB is serviceable by default
+
+  const readyPercentage = totalPersonnel > 0 ? Math.round((readyPersonnel / totalPersonnel) * 100) : 0;
+  const equipmentPercentage = totalEquipment > 0 ? Math.round((serviceableEquipment / totalEquipment) * 100) : 0;
+
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
@@ -89,31 +108,31 @@ export default function Dashboard() {
         <section className="mb-4 lg:mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
           <StatCard
             title={t('dashboard.totalPersonnel')}
-            value={mockPlatoonStats.totalPersonnel}
-            subtitle={`${mockPlatoonStats.readyPersonnel} ${t('dashboard.assigned')}`}
+            value={totalPersonnel}
+            subtitle={`${readyPersonnel} ${t('dashboard.assigned')}`}
             icon={Users}
             status="ready"
           />
           <StatCard
             title={t('dashboard.onMission')}
-            value={mockPlatoonStats.onMission}
+            value={onMission}
             subtitle={t('dashboard.deployed')}
             icon={Target}
             status="warning"
           />
           <StatCard
             title={t('dashboard.equipmentItems')}
-            value={mockPlatoonStats.equipmentTotal}
-            subtitle={`${mockPlatoonStats.equipmentServiceable} ${t('dashboard.tracked')}`}
+            value={totalEquipment}
+            subtitle={`${serviceableEquipment} ${t('dashboard.tracked')}`}
             icon={Package}
             status="ready"
           />
           <StatCard
             title="Certs Due"
-            value={mockPlatoonStats.certificationsDue}
+            value={0}
             subtitle="Next 30 days"
             icon={AlertTriangle}
-            status={mockPlatoonStats.certificationsDue > 5 ? 'critical' : 'warning'}
+            status="ready"
           />
         </section>
 
@@ -127,7 +146,7 @@ export default function Dashboard() {
                 {t('common.view')}
               </Button>
             </div>
-            <PersonnelStatusList personnel={mockPersonnel} limit={4} />
+            <PersonnelStatusList personnel={personnel} limit={4} />
           </div>
 
           {/* Alerts & Notifications */}

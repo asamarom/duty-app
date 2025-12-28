@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { MobileHeader } from '@/components/layout/MobileHeader';
-import { mockEquipment, mockPersonnel } from '@/data/mockData';
+import { usePersonnel } from '@/hooks/usePersonnel';
+import { useEquipment } from '@/hooks/useEquipment';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,7 +26,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { ArrowRight, Save, Package, User, Users, Trash2 } from 'lucide-react';
+import { ArrowRight, Save, Package, User, Users, Trash2, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 
@@ -33,19 +34,48 @@ export default function EquipmentDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { personnel, loading: personnelLoading } = usePersonnel();
+  const { equipment, loading: equipmentLoading, updateEquipment, deleteEquipment } = useEquipment();
   
-  const equipment = mockEquipment.find((item) => item.id === id);
+  const item = equipment.find((e) => e.id === id);
   
   const [formData, setFormData] = useState({
-    name: equipment?.name || '',
-    serialNumber: equipment?.serialNumber || '',
-    description: equipment?.description || '',
-    quantity: equipment?.quantity || 1,
-    assignedTo: equipment?.assignedTo || '',
-    assignedType: equipment?.assignedType || 'individual' as 'individual' | 'squad' | 'team' | 'platoon',
+    name: '',
+    serialNumber: '',
+    description: '',
+    quantity: 1,
+    assignedTo: '',
+    assignedType: 'individual' as 'individual' | 'squad' | 'team' | 'platoon',
   });
 
-  if (!equipment) {
+  // Initialize form data when equipment is loaded
+  useEffect(() => {
+    if (item) {
+      setFormData({
+        name: item.name || '',
+        serialNumber: item.serialNumber || '',
+        description: item.description || '',
+        quantity: item.quantity || 1,
+        assignedTo: item.assignedTo || '',
+        assignedType: item.assignedType || 'individual',
+      });
+    }
+  }, [item]);
+
+  const loading = personnelLoading || equipmentLoading;
+
+  if (loading) {
+    return (
+      <MainLayout>
+        <MobileHeader title="Loading..." />
+        <div className="flex-1 p-4 lg:p-6 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (!item) {
     return (
       <MainLayout>
         <MobileHeader title="Equipment Not Found" />
@@ -64,20 +94,34 @@ export default function EquipmentDetailPage() {
     );
   }
 
-  const handleSave = () => {
-    toast.success('Equipment updated successfully');
-    navigate('/equipment');
+  const handleSave = async () => {
+    try {
+      await updateEquipment(id!, {
+        name: formData.name,
+        serialNumber: formData.serialNumber || undefined,
+        description: formData.description || undefined,
+        quantity: formData.quantity,
+      });
+      toast.success('Equipment updated successfully');
+      navigate('/equipment');
+    } catch (error) {
+      toast.error('Failed to update equipment');
+    }
   };
 
-  const handleDelete = () => {
-    // In a real app, this would delete from database and remove all assignments
-    toast.success('Equipment and all assignments deleted');
-    navigate('/equipment');
+  const handleDelete = async () => {
+    try {
+      await deleteEquipment(id!);
+      toast.success('Equipment deleted');
+      navigate('/equipment');
+    } catch (error) {
+      toast.error('Failed to delete equipment');
+    }
   };
 
   return (
     <MainLayout>
-      <MobileHeader title={equipment.name} />
+      <MobileHeader title={item.name} />
       
       <div className="flex-1 p-4 lg:p-6 overflow-auto">
         {/* Header */}
@@ -93,10 +137,10 @@ export default function EquipmentDetailPage() {
             </Button>
             <div>
               <h1 className="text-xl lg:text-2xl font-bold text-foreground">
-                {equipment.name}
+                {item.name}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {equipment.serialNumber}
+                {item.serialNumber}
               </p>
             </div>
           </div>
@@ -111,7 +155,7 @@ export default function EquipmentDetailPage() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete Equipment</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to delete "{equipment.name}"? This will also remove all assignments associated with this item. This action cannot be undone.
+                    Are you sure you want to delete "{item.name}"? This will also remove all assignments associated with this item. This action cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -243,7 +287,7 @@ export default function EquipmentDetailPage() {
                       <SelectValue placeholder="Select person" />
                     </SelectTrigger>
                     <SelectContent>
-                      {mockPersonnel.map((person) => (
+                      {personnel.map((person) => (
                         <SelectItem key={person.id} value={`${person.firstName} ${person.lastName}`}>
                           {person.firstName} {person.lastName} - {person.rank}
                         </SelectItem>
