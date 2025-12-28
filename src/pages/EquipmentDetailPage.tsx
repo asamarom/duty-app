@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { MobileHeader } from '@/components/layout/MobileHeader';
 import { usePersonnel } from '@/hooks/usePersonnel';
-import { useEquipment } from '@/hooks/useEquipment';
+import { useEquipment, AssignmentLevel } from '@/hooks/useEquipment';
+import { useUnits } from '@/hooks/useUnits';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,9 +27,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { ArrowRight, Save, Package, User, Users, Trash2, Loader2 } from 'lucide-react';
+import { ArrowRight, Save, Package, User, Users, Trash2, Loader2, Building2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
+
+type AssignmentType = 'battalion' | 'platoon' | 'squad' | 'individual';
 
 export default function EquipmentDetailPage() {
   const { id } = useParams();
@@ -36,6 +39,7 @@ export default function EquipmentDetailPage() {
   const { t } = useLanguage();
   const { personnel, loading: personnelLoading } = usePersonnel();
   const { equipment, loading: equipmentLoading, updateEquipment, deleteEquipment, assignEquipment, unassignEquipment } = useEquipment();
+  const { battalions, platoons, squads, loading: unitsLoading, getPlatoonsForBattalion, getSquadsForPlatoon } = useUnits();
   
   const item = equipment.find((e) => e.id === id);
   
@@ -44,9 +48,38 @@ export default function EquipmentDetailPage() {
     serialNumber: '',
     description: '',
     quantity: 1,
-    assignedToId: '', // Store the personnel ID
-    assignedType: 'individual' as 'individual' | 'squad' | 'team' | 'platoon',
   });
+
+  const [assignedType, setAssignedType] = useState<AssignmentType>('battalion');
+  const [selectedBattalionId, setSelectedBattalionId] = useState('');
+  const [selectedPlatoonId, setSelectedPlatoonId] = useState('');
+  const [selectedSquadId, setSelectedSquadId] = useState('');
+  const [selectedPersonnelId, setSelectedPersonnelId] = useState('');
+
+  // Get the current assignment level to determine allowed reassignments
+  const currentLevel: AssignmentLevel = item?.assignmentLevel || 'unassigned';
+
+  // Determine which assignment types are allowed based on current level
+  const allowedTypes = useMemo((): AssignmentType[] => {
+    switch (currentLevel) {
+      case 'battalion':
+        // Can reassign to platoon or individual within platoon
+        return ['platoon', 'individual'];
+      case 'platoon':
+        // Can reassign to squad or individual within squad
+        return ['squad', 'individual'];
+      case 'squad':
+        // Can only reassign to individual
+        return ['individual'];
+      case 'individual':
+        // Already at lowest level, can only reassign to another individual
+        return ['individual'];
+      case 'unassigned':
+      default:
+        // Can assign to any level
+        return ['battalion', 'platoon', 'squad', 'individual'];
+    }
+  }, [currentLevel]);
 
   // Initialize form data when equipment is loaded
   useEffect(() => {
@@ -56,13 +89,89 @@ export default function EquipmentDetailPage() {
         serialNumber: item.serialNumber || '',
         description: item.description || '',
         quantity: item.quantity || 1,
-        assignedToId: (item as any).currentPersonnelId || '',
-        assignedType: item.assignedType || 'individual',
       });
-    }
-  }, [item]);
 
-  const loading = personnelLoading || equipmentLoading;
+      // Set current assignment state
+      if (item.currentBattalionId) {
+        setSelectedBattalionId(item.currentBattalionId);
+        setAssignedType('battalion');
+      }
+      if (item.currentPlatoonId) {
+        setSelectedPlatoonId(item.currentPlatoonId);
+        // Find the battalion for this platoon
+        const platoon = platoons.find(p => p.id === item.currentPlatoonId);
+        if (platoon) {
+          setSelectedBattalionId(platoon.battalion_id);
+        }
+        setAssignedType('platoon');
+      }
+      if (item.currentSquadId) {
+        setSelectedSquadId(item.currentSquadId);
+        // Find the platoon and battalion for this squad
+        const squad = squads.find(s => s.id === item.currentSquadId);
+        if (squad) {
+          setSelectedPlatoonId(squad.platoon_id);
+          const platoon = platoons.find(p => p.id === squad.platoon_id);
+          if (platoon) {
+            setSelectedBattalionId(platoon.battalion_id);
+          }
+        }
+        setAssignedType('squad');
+      }
+      if (item.currentPersonnelId) {
+        setSelectedPersonnelId(item.currentPersonnelId);
+        setAssignedType('individual');
+      }
+    }
+  }, [item, platoons, squads]);
+
+  const loading = personnelLoading || equipmentLoading || unitsLoading;
+
+  // Get available platoons based on selected battalion
+  const availablePlatoons = useMemo(() => {
+    if (!selectedBattalionId) return [];
+    return getPlatoonsForBattalion(selectedBattalionId);
+  }, [selectedBattalionId, getPlatoonsForBattalion]);
+
+  // Get available squads based on selected platoon
+  const availableSquads = useMemo(() => {
+    if (!selectedPlatoonId) return [];
+    return getSquadsForPlatoon(selectedPlatoonId);
+  }, [selectedPlatoonId, getSquadsForPlatoon]);
+
+  // Reset child selections when parent changes
+  const handleBattalionChange = (value: string) => {
+    setSelectedBattalionId(value);
+    setSelectedPlatoonId('');
+    setSelectedSquadId('');
+    setSelectedPersonnelId('');
+  };
+
+  const handlePlatoonChange = (value: string) => {
+    setSelectedPlatoonId(value);
+    setSelectedSquadId('');
+    setSelectedPersonnelId('');
+  };
+
+  const handleSquadChange = (value: string) => {
+    setSelectedSquadId(value);
+    setSelectedPersonnelId('');
+  };
+
+  const handleTypeChange = (type: AssignmentType) => {
+    setAssignedType(type);
+    // Reset selections when type changes
+    if (type === 'battalion') {
+      setSelectedPlatoonId('');
+      setSelectedSquadId('');
+      setSelectedPersonnelId('');
+    } else if (type === 'platoon') {
+      setSelectedSquadId('');
+      setSelectedPersonnelId('');
+    } else if (type === 'squad') {
+      setSelectedPersonnelId('');
+    }
+  };
 
   if (loading) {
     return (
@@ -104,9 +213,26 @@ export default function EquipmentDetailPage() {
         quantity: formData.quantity,
       });
 
-      // Handle assignment
-      if (formData.assignedToId) {
-        await assignEquipment(id!, { personnelId: formData.assignedToId });
+      // Build assignment based on type
+      let hasAssignment = false;
+      let assignment: { personnelId?: string; platoonId?: string; squadId?: string; battalionId?: string } = {};
+      
+      if (assignedType === 'battalion' && selectedBattalionId) {
+        assignment.battalionId = selectedBattalionId;
+        hasAssignment = true;
+      } else if (assignedType === 'platoon' && selectedPlatoonId) {
+        assignment.platoonId = selectedPlatoonId;
+        hasAssignment = true;
+      } else if (assignedType === 'squad' && selectedSquadId) {
+        assignment.squadId = selectedSquadId;
+        hasAssignment = true;
+      } else if (assignedType === 'individual' && selectedPersonnelId) {
+        assignment.personnelId = selectedPersonnelId;
+        hasAssignment = true;
+      }
+
+      if (hasAssignment) {
+        await assignEquipment(id!, assignment);
       } else {
         await unassignEquipment(id!);
       }
@@ -243,75 +369,138 @@ export default function EquipmentDetailPage() {
               <User className="h-5 w-5 text-primary" />
               Assignment
             </h2>
+
+            {/* Current Assignment Info */}
+            {currentLevel !== 'unassigned' && (
+              <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                <span className="text-muted-foreground">Currently assigned to: </span>
+                <span className="font-medium">{item.assigneeName}</span>
+                <span className="text-muted-foreground"> ({currentLevel})</span>
+              </div>
+            )}
             
-            <div className="grid gap-4">
+            <div className="space-y-4">
+              {/* Assignment Type */}
               <div className="space-y-2">
-                <Label htmlFor="assignedType">Assignment Type</Label>
-                <Select
-                  value={formData.assignedType}
-                  onValueChange={(value) => setFormData({ ...formData, assignedType: value as 'individual' | 'squad' | 'team' | 'platoon' })}
-                >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="individual">
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        Individual
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="team">
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4" />
-                        Team
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="squad">
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4" />
-                        Squad
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="platoon">
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4" />
-                        Platoon
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label>Assignment Type</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['battalion', 'platoon', 'squad', 'individual'] as const).map((aType) => {
+                    const isAllowed = allowedTypes.includes(aType);
+                    return (
+                      <Button
+                        key={aType}
+                        type="button"
+                        variant={assignedType === aType ? 'tactical' : 'outline'}
+                        size="sm"
+                        onClick={() => isAllowed && handleTypeChange(aType)}
+                        disabled={!isAllowed}
+                        className="h-10 gap-2"
+                      >
+                        {aType === 'battalion' && <Building2 className="h-4 w-4" />}
+                        {aType === 'platoon' && <Users className="h-4 w-4" />}
+                        {aType === 'squad' && <Users className="h-4 w-4" />}
+                        {aType === 'individual' && <User className="h-4 w-4" />}
+                        {aType.charAt(0).toUpperCase() + aType.slice(1)}
+                      </Button>
+                    );
+                  })}
+                </div>
+                {currentLevel !== 'unassigned' && (
+                  <p className="text-xs text-muted-foreground">
+                    Items can only be reassigned down the hierarchy (e.g., battalion → platoon → squad → individual)
+                  </p>
+                )}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="assignedTo">
-                  {formData.assignedType === 'individual' ? 'Assigned To (Person)' : `Assigned To (${formData.assignedType})`}
-                </Label>
-                {formData.assignedType === 'individual' ? (
-                  <Select
-                    value={formData.assignedToId || "unassigned"}
-                    onValueChange={(value) => setFormData({ ...formData, assignedToId: value === "unassigned" ? "" : value })}
-                  >
-                    <SelectTrigger className="bg-background">
-                      <SelectValue placeholder="Select person" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="unassigned">Unassigned</SelectItem>
-                      {personnel.map((person) => (
-                        <SelectItem key={person.id} value={person.id}>
-                          {person.firstName} {person.lastName} - {person.rank}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Input
-                    id="assignedTo"
-                    value={formData.assignedToId}
-                    onChange={(e) => setFormData({ ...formData, assignedToId: e.target.value })}
-                    placeholder={`Enter ${formData.assignedType} name`}
-                    className="bg-background"
-                  />
+              {/* Hierarchical Selection */}
+              <div className="space-y-3">
+                {/* Battalion Selection - show for battalion type or when unassigned */}
+                {(assignedType === 'battalion' || currentLevel === 'unassigned') && allowedTypes.includes('battalion') && (
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Battalion</Label>
+                    <Select value={selectedBattalionId} onValueChange={handleBattalionChange}>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue placeholder="Select Battalion" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {battalions.map((b) => (
+                          <SelectItem key={b.id} value={b.id}>
+                            <div className="flex items-center gap-2">
+                              <Building2 className="h-4 w-4" />
+                              {b.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* Platoon Selection - for platoon assignment or drilling down */}
+                {(assignedType === 'platoon' || assignedType === 'squad' || assignedType === 'individual') && (
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Platoon</Label>
+                    <Select value={selectedPlatoonId} onValueChange={handlePlatoonChange}>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue placeholder="Select Platoon" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(currentLevel === 'battalion' ? availablePlatoons : platoons).map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            <div className="flex items-center gap-2">
+                              <Users className="h-4 w-4" />
+                              {p.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* Squad Selection - for squad or individual assignment */}
+                {(assignedType === 'squad' || assignedType === 'individual') && selectedPlatoonId && (
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Squad</Label>
+                    <Select value={selectedSquadId} onValueChange={handleSquadChange}>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue placeholder="Select Squad" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableSquads.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>
+                            <div className="flex items-center gap-2">
+                              <Users className="h-4 w-4" />
+                              {s.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* Individual Selection */}
+                {assignedType === 'individual' && (
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Person</Label>
+                    <Select value={selectedPersonnelId} onValueChange={setSelectedPersonnelId}>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue placeholder="Select Person" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="unassigned">Unassigned</SelectItem>
+                        {personnel.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4" />
+                              {p.rank} {p.lastName}, {p.firstName}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 )}
               </div>
             </div>
