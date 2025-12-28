@@ -60,20 +60,21 @@ export default function EquipmentDetailPage() {
   const currentLevel: AssignmentLevel = item?.assignmentLevel || 'unassigned';
 
   // Determine which assignment types are allowed based on current level
+  // Allow one step up OR down the hierarchy
   const allowedTypes = useMemo((): AssignmentType[] => {
     switch (currentLevel) {
       case 'battalion':
-        // Can reassign to platoon or individual within platoon
-        return ['platoon', 'individual'];
+        // Can reassign to platoon (one step down)
+        return ['platoon'];
       case 'platoon':
-        // Can reassign to squad or individual within squad
-        return ['squad', 'individual'];
+        // Can go up to battalion or down to squad
+        return ['battalion', 'squad'];
       case 'squad':
-        // Can only reassign to individual
-        return ['individual'];
+        // Can go up to platoon or down to individual
+        return ['platoon', 'individual'];
       case 'individual':
-        // Already at lowest level, can only reassign to another individual
-        return ['individual'];
+        // Can go up to squad or reassign to another individual
+        return ['squad', 'individual'];
       case 'unassigned':
       default:
         // Can assign to any level
