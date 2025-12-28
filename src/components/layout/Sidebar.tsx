@@ -13,6 +13,7 @@ import {
   Radio,
   LogOut,
   UserCheck,
+  Building2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -25,6 +26,7 @@ export function Sidebar() {
     { name: t('nav.dashboard'), href: '/', icon: LayoutDashboard },
     { name: t('nav.personnel'), href: '/personnel', icon: Users },
     { name: t('nav.equipment'), href: '/equipment', icon: Package },
+    { name: 'Units', href: '/units', icon: Building2 },
     { name: t('nav.reports'), href: '/reports', icon: ClipboardList },
   ];
 

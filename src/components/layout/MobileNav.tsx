@@ -6,7 +6,7 @@ import {
   Users,
   Package,
   ClipboardList,
-  Settings,
+  Building2,
 } from 'lucide-react';
 
 export function MobileNav() {
@@ -16,8 +16,8 @@ export function MobileNav() {
     { name: t('nav.dashboard'), href: '/', icon: LayoutDashboard },
     { name: t('nav.personnel'), href: '/personnel', icon: Users },
     { name: t('nav.equipment'), href: '/equipment', icon: Package },
+    { name: 'Units', href: '/units', icon: Building2 },
     { name: t('nav.reports'), href: '/reports', icon: ClipboardList },
-    { name: t('nav.settings'), href: '/settings', icon: Settings },
   ];
 
   return (
