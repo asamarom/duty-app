@@ -108,9 +108,49 @@ export default function AdminApprovalsPage() {
         throw roleError;
       }
 
+      // Create personnel record linked to the user
+      const nameParts = request.full_name.split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      
+      // Determine which squad to assign based on the request
+      let squadId: string | null = null;
+      if (request.requested_squad_id) {
+        squadId = request.requested_squad_id;
+      } else if (request.requested_platoon_id) {
+        // Find the first squad in the platoon
+        const platoonSquad = squads.find(s => s.platoon_id === request.requested_platoon_id);
+        squadId = platoonSquad?.id || null;
+      } else if (request.requested_battalion_id) {
+        // Find the first squad in the battalion (through platoons)
+        const battalionPlatoon = platoons.find(p => p.battalion_id === request.requested_battalion_id);
+        if (battalionPlatoon) {
+          const platoonSquad = squads.find(s => s.platoon_id === battalionPlatoon.id);
+          squadId = platoonSquad?.id || null;
+        }
+      }
+
+      const { error: personnelError } = await supabase
+        .from('personnel')
+        .insert({
+          user_id: request.user_id,
+          first_name: firstName,
+          last_name: lastName,
+          email: request.email,
+          phone: request.phone,
+          service_number: request.service_number,
+          squad_id: squadId,
+          rank: 'Private', // Default rank, can be updated later
+        });
+
+      if (personnelError && !personnelError.message.includes('duplicate')) {
+        console.error('Failed to create personnel record:', personnelError);
+        // Don't throw - approval still succeeded, just personnel creation failed
+      }
+
       toast({
         title: 'Request approved',
-        description: `${request.full_name} has been approved.`,
+        description: `${request.full_name} has been approved and added to personnel.`,
       });
 
       fetchRequests();
