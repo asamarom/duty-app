@@ -14,58 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      admin_unit_assignments: {
-        Row: {
-          battalion_id: string | null
-          created_at: string
-          id: string
-          platoon_id: string | null
-          squad_id: string | null
-          unit_type: string
-          user_id: string
-        }
-        Insert: {
-          battalion_id?: string | null
-          created_at?: string
-          id?: string
-          platoon_id?: string | null
-          squad_id?: string | null
-          unit_type: string
-          user_id: string
-        }
-        Update: {
-          battalion_id?: string | null
-          created_at?: string
-          id?: string
-          platoon_id?: string | null
-          squad_id?: string | null
-          unit_type?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "admin_unit_assignments_battalion_id_fkey"
-            columns: ["battalion_id"]
-            isOneToOne: false
-            referencedRelation: "battalions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "admin_unit_assignments_platoon_id_fkey"
-            columns: ["platoon_id"]
-            isOneToOne: false
-            referencedRelation: "platoons"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "admin_unit_assignments_squad_id_fkey"
-            columns: ["squad_id"]
-            isOneToOne: false
-            referencedRelation: "squads"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       battalions: {
         Row: {
           commander_id: string | null
@@ -351,85 +299,6 @@ export type Database = {
         }
         Relationships: []
       }
-      signup_requests: {
-        Row: {
-          created_at: string
-          decline_reason: string | null
-          email: string
-          full_name: string
-          id: string
-          phone: string | null
-          requested_battalion_id: string | null
-          requested_platoon_id: string | null
-          requested_squad_id: string | null
-          requested_unit_type: string
-          reviewed_at: string | null
-          reviewed_by: string | null
-          service_number: string
-          status: Database["public"]["Enums"]["signup_request_status"]
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          decline_reason?: string | null
-          email: string
-          full_name: string
-          id?: string
-          phone?: string | null
-          requested_battalion_id?: string | null
-          requested_platoon_id?: string | null
-          requested_squad_id?: string | null
-          requested_unit_type: string
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          service_number: string
-          status?: Database["public"]["Enums"]["signup_request_status"]
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          decline_reason?: string | null
-          email?: string
-          full_name?: string
-          id?: string
-          phone?: string | null
-          requested_battalion_id?: string | null
-          requested_platoon_id?: string | null
-          requested_squad_id?: string | null
-          requested_unit_type?: string
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          service_number?: string
-          status?: Database["public"]["Enums"]["signup_request_status"]
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "signup_requests_requested_battalion_id_fkey"
-            columns: ["requested_battalion_id"]
-            isOneToOne: false
-            referencedRelation: "battalions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "signup_requests_requested_platoon_id_fkey"
-            columns: ["requested_platoon_id"]
-            isOneToOne: false
-            referencedRelation: "platoons"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "signup_requests_requested_squad_id_fkey"
-            columns: ["requested_squad_id"]
-            isOneToOne: false
-            referencedRelation: "squads"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       squads: {
         Row: {
           created_at: string
@@ -504,16 +373,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      can_admin_manage_unit: {
-        Args: {
-          _admin_user_id: string
-          _battalion_id: string
-          _platoon_id: string
-          _squad_id: string
-          _unit_type: string
-        }
-        Returns: boolean
-      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -537,7 +396,6 @@ export type Database = {
         | "leave"
         | "tdy"
       readiness_status: "ready" | "warning" | "critical"
-      signup_request_status: "pending" | "approved" | "declined"
       unit_status: "active" | "inactive" | "deployed"
     }
     CompositeTypes: {
@@ -682,7 +540,6 @@ export const Constants = {
         "tdy",
       ],
       readiness_status: ["ready", "warning", "critical"],
-      signup_request_status: ["pending", "approved", "declined"],
       unit_status: ["active", "inactive", "deployed"],
     },
   },

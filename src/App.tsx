@@ -8,8 +8,6 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
-import PendingApprovalPage from "./pages/PendingApprovalPage";
-import SignupApprovalsPage from "./pages/SignupApprovalsPage";
 import PersonnelPage from "./pages/PersonnelPage";
 import EquipmentPage from "./pages/EquipmentPage";
 import AddEquipmentPage from "./pages/AddEquipmentPage";
@@ -30,9 +28,7 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/auth" element={<AuthPage />} />
-              <Route path="/pending-approval" element={<PendingApprovalPage />} />
               <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-              <Route path="/signup-approvals" element={<ProtectedRoute><SignupApprovalsPage /></ProtectedRoute>} />
               <Route path="/personnel" element={<ProtectedRoute><PersonnelPage /></ProtectedRoute>} />
               <Route path="/equipment" element={<ProtectedRoute><EquipmentPage /></ProtectedRoute>} />
               <Route path="/equipment/add" element={<ProtectedRoute><AddEquipmentPage /></ProtectedRoute>} />
