@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 import {
   LayoutDashboard,
   Users,
@@ -11,18 +12,22 @@ import {
   Shield,
   Radio,
   LogOut,
+  UserCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function Sidebar() {
   const { t, dir } = useLanguage();
   const { user, signOut } = useAuth();
+  const { isAdmin, isLeader } = useUserRole();
 
   const navigation = [
     { name: t('nav.dashboard'), href: '/', icon: LayoutDashboard },
     { name: t('nav.personnel'), href: '/personnel', icon: Users },
     { name: t('nav.equipment'), href: '/equipment', icon: Package },
     { name: t('nav.reports'), href: '/reports', icon: ClipboardList },
+    // Only show to admins and leaders
+    ...(isAdmin || isLeader ? [{ name: 'Signup Approvals', href: '/signup-approvals', icon: UserCheck }] : []),
   ];
 
   const bottomNavigation = [
