@@ -289,14 +289,14 @@ export default function EquipmentDetailPage() {
                 </Label>
                 {formData.assignedType === 'individual' ? (
                   <Select
-                    value={formData.assignedToId}
-                    onValueChange={(value) => setFormData({ ...formData, assignedToId: value })}
+                    value={formData.assignedToId || "unassigned"}
+                    onValueChange={(value) => setFormData({ ...formData, assignedToId: value === "unassigned" ? "" : value })}
                   >
                     <SelectTrigger className="bg-background">
                       <SelectValue placeholder="Select person" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Unassigned</SelectItem>
+                      <SelectItem value="unassigned">Unassigned</SelectItem>
                       {personnel.map((person) => (
                         <SelectItem key={person.id} value={person.id}>
                           {person.firstName} {person.lastName} - {person.rank}
