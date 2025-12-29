@@ -155,14 +155,8 @@ export default function PersonnelPage() {
           <>
             {/* Mobile Stats */}
             <div className="lg:hidden mb-4 flex items-center gap-2 overflow-x-auto pb-2">
-              <Badge variant="success" className="px-3 py-1.5 whitespace-nowrap">
-                {personnel.filter((p) => p.locationStatus === 'on_duty').length} {t('status.onDuty')}
-              </Badge>
-              <Badge variant="warning" className="px-3 py-1.5 whitespace-nowrap">
-                {personnel.filter((p) => p.locationStatus === 'active_mission').length} {t('status.onMission')}
-              </Badge>
               <Badge variant="secondary" className="px-3 py-1.5 whitespace-nowrap">
-                {personnel.filter((p) => p.locationStatus === 'leave').length} Leave
+                {personnel.length} Total
               </Badge>
             </div>
 
@@ -174,17 +168,6 @@ export default function PersonnelPage() {
                   <p className="text-xl font-bold text-foreground">{personnel.length}</p>
                   <p className="text-xs text-muted-foreground">{t('dashboard.totalPersonnel')}</p>
                 </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="success" className="px-3 py-1">
-                  {personnel.filter((p) => p.locationStatus === 'on_duty').length} {t('status.onDuty')}
-                </Badge>
-                <Badge variant="warning" className="px-3 py-1">
-                  {personnel.filter((p) => p.locationStatus === 'active_mission').length} {t('status.onMission')}
-                </Badge>
-                <Badge variant="secondary" className="px-3 py-1">
-                  {personnel.filter((p) => p.locationStatus === 'leave').length} On Leave
-                </Badge>
               </div>
             </div>
 
