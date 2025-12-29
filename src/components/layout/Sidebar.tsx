@@ -27,14 +27,14 @@ export function Sidebar() {
     { name: t('nav.dashboard'), href: '/', icon: LayoutDashboard },
     { name: t('nav.personnel'), href: '/personnel', icon: Users },
     { name: t('nav.equipment'), href: '/equipment', icon: Package },
-    { name: 'Units', href: '/units', icon: Building2 },
+    { name: t('nav.units'), href: '/units', icon: Building2 },
     { name: t('nav.reports'), href: '/reports', icon: ClipboardList },
   ];
 
   // Add approvals link for admins and leaders
   if (isAdmin || isLeader) {
-    navigation.push({ name: 'Approvals', href: '/approvals', icon: UserCheck });
-    navigation.push({ name: 'Transfers', href: '/assignment-requests', icon: ArrowLeftRight });
+    navigation.push({ name: t('nav.approvals'), href: '/approvals', icon: UserCheck });
+    navigation.push({ name: t('nav.transfers'), href: '/assignment-requests', icon: ArrowLeftRight });
   }
 
   const bottomNavigation = [

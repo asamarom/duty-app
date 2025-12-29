@@ -27,12 +27,12 @@ export function MobileNav() {
     { name: t('nav.dashboard'), href: '/', icon: LayoutDashboard },
     { name: t('nav.personnel'), href: '/personnel', icon: Users },
     { name: t('nav.equipment'), href: '/equipment', icon: Package },
-    { name: 'Transfers', href: '/assignment-requests', icon: ArrowLeftRight, adminOnly: true },
+    { name: t('nav.transfers'), href: '/assignment-requests', icon: ArrowLeftRight, adminOnly: true },
   ];
 
   const moreItems = [
-    { name: 'Units', href: '/units' },
-    { name: 'Approvals', href: '/approvals', adminOnly: true },
+    { name: t('nav.units'), href: '/units' },
+    { name: t('nav.approvals'), href: '/approvals', adminOnly: true },
     { name: t('nav.reports'), href: '/reports' },
     { name: t('nav.settings'), href: '/settings' },
   ];
@@ -96,7 +96,7 @@ export function MobileNav() {
                 'text-[10px] font-medium',
                 isMoreActive && 'text-primary'
               )}>
-                More
+                {t('nav.more')}
               </span>
             </button>
           </DropdownMenuTrigger>

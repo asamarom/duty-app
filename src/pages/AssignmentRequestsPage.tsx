@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { useAssignmentRequests, AssignmentRequest } from '@/hooks/useAssignmentRequests';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,6 +39,7 @@ import { format } from 'date-fns';
 export default function AssignmentRequestsPage() {
   const { requests, loading, approveRequest, rejectRequest, getApprovalsForRequest } = useAssignmentRequests();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [selectedRequest, setSelectedRequest] = useState<AssignmentRequest | null>(null);
   const [actionType, setActionType] = useState<'approve' | 'reject' | 'history' | null>(null);
   const [notes, setNotes] = useState('');
@@ -53,16 +55,16 @@ export default function AssignmentRequestsPage() {
     try {
       if (actionType === 'approve') {
         await approveRequest(selectedRequest.id, notes);
-        toast({ title: 'Request approved', description: 'The equipment has been reassigned.' });
+        toast({ title: t('transfers.requestApproved'), description: t('transfers.equipmentReassigned') });
       } else if (actionType === 'reject') {
         await rejectRequest(selectedRequest.id, notes);
-        toast({ title: 'Request rejected', description: 'The assignment request was rejected.' });
+        toast({ title: t('transfers.requestRejected'), description: t('transfers.requestWasRejected') });
       }
       setSelectedRequest(null);
       setActionType(null);
       setNotes('');
     } catch (error) {
-      toast({ title: 'Error', description: 'Failed to process request.', variant: 'destructive' });
+      toast({ title: t('common.error'), description: 'Failed to process request.', variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }
@@ -71,11 +73,11 @@ export default function AssignmentRequestsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="outline" className="text-warning border-warning"><Clock className="h-3 w-3 mr-1" /> Pending</Badge>;
+        return <Badge variant="outline" className="text-warning border-warning"><Clock className="h-3 w-3 mr-1" /> {t('status.pending')}</Badge>;
       case 'approved':
-        return <Badge className="bg-success text-success-foreground"><Check className="h-3 w-3 mr-1" /> Approved</Badge>;
+        return <Badge className="bg-success text-success-foreground"><Check className="h-3 w-3 mr-1" /> {t('status.approved')}</Badge>;
       case 'rejected':
-        return <Badge variant="destructive"><X className="h-3 w-3 mr-1" /> Rejected</Badge>;
+        return <Badge variant="destructive"><X className="h-3 w-3 mr-1" /> {t('status.rejected')}</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -112,7 +114,7 @@ export default function AssignmentRequestsPage() {
           {format(new Date(request.requested_at), 'MMM d, yyyy HH:mm')}
         </TableCell>
         <TableCell className="text-muted-foreground text-sm">
-          {request.requested_by_name || 'Unknown'}
+          {request.requested_by_name || t('transfers.unknown')}
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-2">
@@ -172,46 +174,46 @@ export default function AssignmentRequestsPage() {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 p-4 lg:p-6">
         <div>
-          <h1 className="text-2xl font-bold">Assignment Requests</h1>
-          <p className="text-muted-foreground">Manage equipment transfer requests between units</p>
+          <h1 className="text-2xl font-bold">{t('transfers.title')}</h1>
+          <p className="text-muted-foreground">{t('transfers.subtitle')}</p>
         </div>
 
         <Tabs defaultValue="pending" className="space-y-4">
           <TabsList>
             <TabsTrigger value="pending" className="gap-2">
               <Clock className="h-4 w-4" />
-              Pending ({pendingRequests.length})
+              {t('transfers.pending')} ({pendingRequests.length})
             </TabsTrigger>
             <TabsTrigger value="processed" className="gap-2">
               <History className="h-4 w-4" />
-              History ({processedRequests.length})
+              {t('transfers.history')} ({processedRequests.length})
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="pending">
             <Card>
               <CardHeader>
-                <CardTitle>Pending Requests</CardTitle>
+                <CardTitle>{t('transfers.pendingRequests')}</CardTitle>
               </CardHeader>
               <CardContent>
                 {pendingRequests.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    No pending assignment requests
+                    {t('transfers.noPending')}
                   </div>
                 ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Equipment</TableHead>
-                        <TableHead>From</TableHead>
+                        <TableHead>{t('transfers.equipment')}</TableHead>
+                        <TableHead>{t('transfers.from')}</TableHead>
                         <TableHead></TableHead>
-                        <TableHead>To</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Requested</TableHead>
-                        <TableHead>By</TableHead>
-                        <TableHead>Actions</TableHead>
+                        <TableHead>{t('transfers.to')}</TableHead>
+                        <TableHead>{t('equipment.status')}</TableHead>
+                        <TableHead>{t('transfers.requested')}</TableHead>
+                        <TableHead>{t('transfers.by')}</TableHead>
+                        <TableHead>{t('transfers.actions')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -228,25 +230,25 @@ export default function AssignmentRequestsPage() {
           <TabsContent value="processed">
             <Card>
               <CardHeader>
-                <CardTitle>Request History</CardTitle>
+                <CardTitle>{t('transfers.requestHistory')}</CardTitle>
               </CardHeader>
               <CardContent>
                 {processedRequests.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    No processed requests yet
+                    {t('transfers.noProcessed')}
                   </div>
                 ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Equipment</TableHead>
-                        <TableHead>From</TableHead>
+                        <TableHead>{t('transfers.equipment')}</TableHead>
+                        <TableHead>{t('transfers.from')}</TableHead>
                         <TableHead></TableHead>
-                        <TableHead>To</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Requested</TableHead>
-                        <TableHead>By</TableHead>
-                        <TableHead>Actions</TableHead>
+                        <TableHead>{t('transfers.to')}</TableHead>
+                        <TableHead>{t('equipment.status')}</TableHead>
+                        <TableHead>{t('transfers.requested')}</TableHead>
+                        <TableHead>{t('transfers.by')}</TableHead>
+                        <TableHead>{t('transfers.actions')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -270,13 +272,13 @@ export default function AssignmentRequestsPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {actionType === 'approve' ? 'Approve' : 'Reject'} Assignment Request
+                {actionType === 'approve' ? t('transfers.approveRequest') : t('transfers.rejectRequest')}
               </DialogTitle>
               <DialogDescription>
                 {selectedRequest && (
                   <>
-                    Transfer <strong>{selectedRequest.equipment_name}</strong> from{' '}
-                    <strong>{selectedRequest.from_unit_name}</strong> to{' '}
+                    {t('transfers.transfer')} <strong>{selectedRequest.equipment_name}</strong> {t('transfers.fromUnit')}{' '}
+                    <strong>{selectedRequest.from_unit_name}</strong> {t('transfers.toUnit')}{' '}
                     <strong>{selectedRequest.to_unit_name}</strong>
                   </>
                 )}
@@ -284,10 +286,10 @@ export default function AssignmentRequestsPage() {
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="notes">Notes (optional)</Label>
+                <Label htmlFor="notes">{t('transfers.notesOptional')}</Label>
                 <Textarea
                   id="notes"
-                  placeholder="Add any notes about this decision..."
+                  placeholder={t('transfers.addNotes')}
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
                 />
@@ -299,7 +301,7 @@ export default function AssignmentRequestsPage() {
                 setActionType(null);
                 setNotes('');
               }}>
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 variant={actionType === 'approve' ? 'default' : 'destructive'}
@@ -307,7 +309,7 @@ export default function AssignmentRequestsPage() {
                 disabled={submitting}
               >
                 {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                {actionType === 'approve' ? 'Approve' : 'Reject'}
+                {actionType === 'approve' ? t('transfers.approve') : t('transfers.reject')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -320,7 +322,7 @@ export default function AssignmentRequestsPage() {
         }}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Approval History</DialogTitle>
+              <DialogTitle>{t('transfers.approvalHistory')}</DialogTitle>
               <DialogDescription>
                 {selectedRequest?.equipment_name}
               </DialogDescription>
@@ -330,14 +332,14 @@ export default function AssignmentRequestsPage() {
                 <div key={approval.id} className="border rounded-lg p-3">
                   <div className="flex items-center justify-between">
                     <Badge variant={approval.action === 'approved' ? 'default' : 'destructive'}>
-                      {approval.action}
+                      {approval.action === 'approved' ? t('status.approved') : t('status.rejected')}
                     </Badge>
                     <span className="text-sm text-muted-foreground">
                       {format(new Date(approval.action_at), 'MMM d, yyyy HH:mm')}
                     </span>
                   </div>
                   <p className="text-sm mt-2">
-                    By: {approval.action_by_name || 'Unknown'}
+                    {t('transfers.by')}: {approval.action_by_name || t('transfers.unknown')}
                   </p>
                   {approval.notes && (
                     <p className="text-sm text-muted-foreground mt-1">{approval.notes}</p>
