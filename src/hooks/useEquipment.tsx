@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
 import type { Equipment } from '@/types/pmtb';
+import { useAuth } from '@/hooks/useAuth';
 
 export type EquipmentRow = Tables<'equipment'>;
 
@@ -34,12 +35,15 @@ interface UseEquipmentReturn {
   updateEquipment: (id: string, updates: Partial<Equipment>) => Promise<void>;
   assignEquipment: (equipmentId: string, assignment: AssignmentData) => Promise<void>;
   unassignEquipment: (equipmentId: string) => Promise<void>;
+  requestAssignment: (equipmentId: string, assignment: AssignmentData, notes?: string) => Promise<void>;
+  isWithinSameUnit: (currentLevel: AssignmentLevel, targetLevel: AssignmentLevel, equipmentItem: EquipmentWithAssignment, assignment: AssignmentData) => boolean;
 }
 
 export function useEquipment(): UseEquipmentReturn {
   const [equipment, setEquipment] = useState<EquipmentWithAssignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const { user } = useAuth();
 
   const fetchEquipment = useCallback(async () => {
     try {
@@ -236,6 +240,75 @@ export function useEquipment(): UseEquipmentReturn {
     await fetchEquipment();
   }, [fetchEquipment]);
 
+  // Helper function to determine if assignment is within same unit (to member)
+  const isWithinSameUnit = useCallback((
+    currentLevel: AssignmentLevel,
+    targetLevel: AssignmentLevel,
+    equipmentItem: EquipmentWithAssignment,
+    assignment: AssignmentData
+  ): boolean => {
+    // Assigning to individual within current unit is direct
+    if (targetLevel === 'individual' && assignment.personnelId) {
+      // If current is battalion, assigning to someone in that battalion is direct
+      // If current is platoon, assigning to someone in that platoon is direct
+      // If current is squad, assigning to someone in that squad is direct
+      return true; // For now, consider individual assignment from any level as direct
+    }
+    
+    // If target and current are same type/id, it's within same unit
+    if (currentLevel === 'battalion' && targetLevel === 'battalion' && 
+        equipmentItem.currentBattalionId === assignment.battalionId) {
+      return true;
+    }
+    if (currentLevel === 'platoon' && targetLevel === 'platoon' && 
+        equipmentItem.currentPlatoonId === assignment.platoonId) {
+      return true;
+    }
+    if (currentLevel === 'squad' && targetLevel === 'squad' && 
+        equipmentItem.currentSquadId === assignment.squadId) {
+      return true;
+    }
+    
+    return false;
+  }, []);
+
+  // Create an assignment request for cross-unit transfers
+  const requestAssignment = useCallback(async (
+    equipmentId: string, 
+    assignment: AssignmentData,
+    notes?: string
+  ) => {
+    const equipmentItem = equipment.find(e => e.id === equipmentId);
+    if (!equipmentItem) throw new Error('Equipment not found');
+
+    const fromUnitType = equipmentItem.assignmentLevel || 'unassigned';
+    const toUnitType = assignment.personnelId ? 'individual' 
+      : assignment.squadId ? 'squad'
+      : assignment.platoonId ? 'platoon'
+      : assignment.battalionId ? 'battalion'
+      : 'unassigned';
+
+    const { error: insertError } = await supabase
+      .from('assignment_requests')
+      .insert({
+        equipment_id: equipmentId,
+        from_unit_type: fromUnitType,
+        from_battalion_id: equipmentItem.currentBattalionId || null,
+        from_platoon_id: equipmentItem.currentPlatoonId || null,
+        from_squad_id: equipmentItem.currentSquadId || null,
+        from_personnel_id: equipmentItem.currentPersonnelId || null,
+        to_unit_type: toUnitType,
+        to_battalion_id: assignment.battalionId || null,
+        to_platoon_id: assignment.platoonId || null,
+        to_squad_id: assignment.squadId || null,
+        to_personnel_id: assignment.personnelId || null,
+        requested_by: user?.id || null,
+        notes: notes || null,
+      });
+
+    if (insertError) throw insertError;
+  }, [equipment, user?.id]);
+
   useEffect(() => {
     fetchEquipment();
   }, [fetchEquipment]);
@@ -250,5 +323,7 @@ export function useEquipment(): UseEquipmentReturn {
     updateEquipment,
     assignEquipment,
     unassignEquipment,
+    requestAssignment,
+    isWithinSameUnit,
   };
 }
