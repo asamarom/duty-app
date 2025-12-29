@@ -36,57 +36,7 @@ import { cn } from '@/lib/utils';
 
 import { UnitTreeSelector } from '@/components/personnel/UnitTreeSelector';
 import { AutocompleteTagInput } from '@/components/personnel/AutocompleteTagInput';
-
-// Suggestions for autocomplete
-const dutyPositionSuggestions = [
-  'Platoon Leader',
-  'Platoon Sergeant',
-  'Squad Leader',
-  'Team Leader',
-  'RTO',
-  'Medic',
-  'Rifleman',
-  'Driver',
-  'Gunner',
-  'Sniper',
-  'Machine Gunner',
-  'Grenadier',
-  'Forward Observer',
-  'Combat Engineer',
-];
-
-const skillSuggestions = [
-  'First Aid',
-  'Advanced Medical',
-  'Navigation',
-  'Communications',
-  'Explosives',
-  'Sniper',
-  'Heavy Weapons',
-  'Languages',
-  'Intelligence',
-  'Reconnaissance',
-  'Parachuting',
-  'SCUBA',
-  'Mountain Warfare',
-  'Urban Combat',
-  'Vehicle Maintenance',
-];
-
-const licenseSuggestions = [
-  'B',
-  'B+E',
-  'C',
-  'C+E',
-  'D',
-  'D+E',
-  'Military Light',
-  'Military Heavy',
-  'APC',
-  'Tank',
-  'Motorcycle',
-  'Forklift',
-];
+import { usePersonnelSuggestions } from '@/hooks/usePersonnelSuggestions';
 
 
 export default function PersonnelDetailPage() {
@@ -94,6 +44,7 @@ export default function PersonnelDetailPage() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { toast } = useToast();
+  const { dutyPositions: dutyPositionSuggestions, skills: skillSuggestions, driverLicenses: licenseSuggestions } = usePersonnelSuggestions();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
