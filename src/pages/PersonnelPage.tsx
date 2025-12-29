@@ -19,21 +19,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { DutyPosition, Personnel } from '@/types/pmtb';
 
-const dutyPositions: DutyPosition[] = [
-  'Platoon Leader',
-  'Platoon Sergeant',
-  'Squad Leader',
-  'Team Leader',
-  'RTO',
-  'Medic',
-  'Rifleman',
-  'Driver',
-  'Gunner',
-];
-
-function toDutyPosition(value: string | null): DutyPosition {
-  return dutyPositions.includes(value as DutyPosition) ? (value as DutyPosition) : 'Rifleman';
-}
 
 function mapPersonnelRowToUI(row: any): Personnel {
   const squadName = row?.squads?.name ?? 'Unassigned';
@@ -44,7 +29,7 @@ function mapPersonnelRowToUI(row: any): Personnel {
     rank: row.rank,
     firstName: row.first_name,
     lastName: row.last_name,
-    dutyPosition: toDutyPosition(row.duty_position ?? null),
+    dutyPosition: (row.duty_position ?? 'Unassigned') as Personnel['dutyPosition'],
     team: squadName,
     squad: squadName,
     role: 'user',
