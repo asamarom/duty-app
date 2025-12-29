@@ -25,7 +25,6 @@ import {
   Award,
   Car,
   User,
-  Shield,
   Edit,
   X,
   Briefcase
@@ -34,7 +33,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import type { LocationStatus, ReadinessStatus } from '@/types/pmtb';
+
 import { UnitTreeSelector } from '@/components/personnel/UnitTreeSelector';
 import { AutocompleteTagInput } from '@/components/personnel/AutocompleteTagInput';
 
@@ -89,20 +88,6 @@ const licenseSuggestions = [
   'Forklift',
 ];
 
-const locationStatuses: { value: LocationStatus; label: string }[] = [
-  { value: 'on_duty', label: 'On Duty' },
-  { value: 'off_duty', label: 'Off Duty' },
-  { value: 'home', label: 'Home' },
-  { value: 'active_mission', label: 'Active Mission' },
-  { value: 'leave', label: 'Leave' },
-  { value: 'tdy', label: 'TDY' },
-];
-
-const readinessStatuses: { value: ReadinessStatus; label: string; className: string }[] = [
-  { value: 'ready', label: 'Ready', className: 'bg-success/20 text-success border-success/30' },
-  { value: 'warning', label: 'Warning', className: 'bg-warning/20 text-warning border-warning/30' },
-  { value: 'critical', label: 'Critical', className: 'bg-destructive/20 text-destructive border-destructive/30' },
-];
 
 export default function PersonnelDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -127,8 +112,6 @@ export default function PersonnelDetailPage() {
     phone: '',
     email: '',
     local_address: '',
-    location_status: 'home' as LocationStatus,
-    readiness_status: 'ready' as ReadinessStatus,
     skills: [] as string[],
     driver_licenses: [] as string[],
     profile_image: '' as string | null,
@@ -168,8 +151,6 @@ export default function PersonnelDetailPage() {
           phone: person.phone || '',
           email: person.email || '',
           local_address: person.local_address || '',
-          location_status: person.location_status as LocationStatus,
-          readiness_status: person.readiness_status as ReadinessStatus,
           skills: person.skills || [],
           driver_licenses: person.driver_licenses || [],
           profile_image: person.profile_image,
@@ -215,8 +196,6 @@ export default function PersonnelDetailPage() {
           phone: formData.phone || null,
           email: formData.email || null,
           local_address: formData.local_address || null,
-          location_status: formData.location_status,
-          readiness_status: formData.readiness_status,
           skills: formData.skills,
           driver_licenses: formData.driver_licenses,
           profile_image: formData.profile_image || null,
@@ -246,7 +225,7 @@ export default function PersonnelDetailPage() {
     return formData.duty_positions.length > 0 ? formData.duty_positions[0] : null;
   };
 
-  const currentReadiness = readinessStatuses.find(s => s.value === formData.readiness_status);
+  
 
   if (loading) {
     return (
@@ -489,68 +468,8 @@ export default function PersonnelDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Status & Skills Card */}
+          {/* Skills & Licenses */}
           <div className="space-y-6">
-            {/* Status Card */}
-            <Card className="card-tactical">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-primary" />
-                  Status
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Location Status</Label>
-                  {isEditing ? (
-                    <Select
-                      value={formData.location_status}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, location_status: value as LocationStatus }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {locationStatuses.map((status) => (
-                          <SelectItem key={status.value} value={status.value}>
-                            {status.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Badge className="mt-1">
-                      {locationStatuses.find(s => s.value === formData.location_status)?.label}
-                    </Badge>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label>Readiness Status</Label>
-                  {isEditing ? (
-                    <Select
-                      value={formData.readiness_status}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, readiness_status: value as ReadinessStatus }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {readinessStatuses.map((status) => (
-                          <SelectItem key={status.value} value={status.value}>
-                            {status.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Badge className={cn('mt-1 border', currentReadiness?.className)}>
-                      {currentReadiness?.label}
-                    </Badge>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Skills Card */}
             <Card className="card-tactical">
               <CardHeader>
