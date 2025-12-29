@@ -27,16 +27,19 @@ import {
   User,
   Shield,
   Edit,
-  X
+  X,
+  Briefcase
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import type { DutyPosition, LocationStatus, ReadinessStatus } from '@/types/pmtb';
+import type { LocationStatus, ReadinessStatus } from '@/types/pmtb';
 import { UnitTreeSelector } from '@/components/personnel/UnitTreeSelector';
+import { AutocompleteTagInput } from '@/components/personnel/AutocompleteTagInput';
 
-const dutyPositions: DutyPosition[] = [
+// Suggestions for autocomplete
+const dutyPositionSuggestions = [
   'Platoon Leader',
   'Platoon Sergeant',
   'Squad Leader',
@@ -46,6 +49,44 @@ const dutyPositions: DutyPosition[] = [
   'Rifleman',
   'Driver',
   'Gunner',
+  'Sniper',
+  'Machine Gunner',
+  'Grenadier',
+  'Forward Observer',
+  'Combat Engineer',
+];
+
+const skillSuggestions = [
+  'First Aid',
+  'Advanced Medical',
+  'Navigation',
+  'Communications',
+  'Explosives',
+  'Sniper',
+  'Heavy Weapons',
+  'Languages',
+  'Intelligence',
+  'Reconnaissance',
+  'Parachuting',
+  'SCUBA',
+  'Mountain Warfare',
+  'Urban Combat',
+  'Vehicle Maintenance',
+];
+
+const licenseSuggestions = [
+  'B',
+  'B+E',
+  'C',
+  'C+E',
+  'D',
+  'D+E',
+  'Military Light',
+  'Military Heavy',
+  'APC',
+  'Tank',
+  'Motorcycle',
+  'Forklift',
 ];
 
 const locationStatuses: { value: LocationStatus; label: string }[] = [
@@ -63,11 +104,6 @@ const readinessStatuses: { value: ReadinessStatus; label: string; className: str
   { value: 'critical', label: 'Critical', className: 'bg-destructive/20 text-destructive border-destructive/30' },
 ];
 
-interface Squad {
-  id: string;
-  name: string;
-}
-
 export default function PersonnelDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -84,7 +120,7 @@ export default function PersonnelDetailPage() {
     rank: '',
     first_name: '',
     last_name: '',
-    duty_position: '' as string,
+    duty_positions: [] as string[],
     battalion_id: null as string | null,
     platoon_id: null as string | null,
     squad_id: null as string | null,
@@ -97,9 +133,6 @@ export default function PersonnelDetailPage() {
     driver_licenses: [] as string[],
     profile_image: '' as string | null,
   });
-
-  const [skillInput, setSkillInput] = useState('');
-  const [licenseInput, setLicenseInput] = useState('');
 
   useEffect(() => {
     if (!id) return;
@@ -116,12 +149,19 @@ export default function PersonnelDetailPage() {
 
         if (error) throw error;
 
+        // Parse duty_position - could be stored as string or already an array
+        const dutyPositions = person.duty_position 
+          ? (Array.isArray(person.duty_position) 
+              ? person.duty_position 
+              : [person.duty_position])
+          : [];
+
         setFormData({
           service_number: person.service_number,
           rank: person.rank,
           first_name: person.first_name,
           last_name: person.last_name,
-          duty_position: person.duty_position || '',
+          duty_positions: dutyPositions,
           battalion_id: (person as any).battalion_id || null,
           platoon_id: (person as any).platoon_id || null,
           squad_id: person.squad_id || null,
@@ -156,6 +196,11 @@ export default function PersonnelDetailPage() {
     try {
       setSaving(true);
 
+      // Store duty_positions as first item for backward compatibility
+      const primaryDutyPosition = formData.duty_positions.length > 0 
+        ? formData.duty_positions[0] 
+        : null;
+
       const { error } = await supabase
         .from('personnel')
         .update({
@@ -163,7 +208,7 @@ export default function PersonnelDetailPage() {
           rank: formData.rank,
           first_name: formData.first_name,
           last_name: formData.last_name,
-          duty_position: formData.duty_position || null,
+          duty_position: primaryDutyPosition,
           battalion_id: formData.battalion_id || null,
           platoon_id: formData.platoon_id || null,
           squad_id: formData.squad_id || null,
@@ -197,38 +242,8 @@ export default function PersonnelDetailPage() {
     }
   };
 
-  const addSkill = () => {
-    if (skillInput.trim() && !formData.skills.includes(skillInput.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        skills: [...prev.skills, skillInput.trim()],
-      }));
-      setSkillInput('');
-    }
-  };
-
-  const removeSkill = (skill: string) => {
-    setFormData(prev => ({
-      ...prev,
-      skills: prev.skills.filter(s => s !== skill),
-    }));
-  };
-
-  const addLicense = () => {
-    if (licenseInput.trim() && !formData.driver_licenses.includes(licenseInput.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        driver_licenses: [...prev.driver_licenses, licenseInput.trim()],
-      }));
-      setLicenseInput('');
-    }
-  };
-
-  const removeLicense = (license: string) => {
-    setFormData(prev => ({
-      ...prev,
-      driver_licenses: prev.driver_licenses.filter(l => l !== license),
-    }));
+  const getPrimaryDutyPosition = () => {
+    return formData.duty_positions.length > 0 ? formData.duty_positions[0] : null;
   };
 
   const currentReadiness = readinessStatuses.find(s => s.value === formData.readiness_status);
@@ -267,7 +282,7 @@ export default function PersonnelDetailPage() {
                   {formData.rank} {formData.first_name} {formData.last_name}
                 </h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {formData.duty_position || 'No position assigned'} • {formData.service_number}
+                  {getPrimaryDutyPosition() || 'No position assigned'} • {formData.service_number}
                 </p>
               </div>
             </div>
@@ -381,30 +396,22 @@ export default function PersonnelDetailPage() {
               </div>
 
               {/* Position & Assignment */}
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4">
                 <div className="space-y-2">
-                  <Label>Duty Position</Label>
-                  {isEditing ? (
-                    <Select
-                      value={formData.duty_position}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, duty_position: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select position" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {dutyPositions.map((pos) => (
-                          <SelectItem key={pos} value={pos}>
-                            {pos}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <p className="text-foreground">{formData.duty_position || 'Not assigned'}</p>
-                  )}
+                  <Label className="flex items-center gap-2">
+                    <Briefcase className="h-4 w-4 text-primary" />
+                    Duty Positions
+                  </Label>
+                  <AutocompleteTagInput
+                    values={formData.duty_positions}
+                    onChange={(values) => setFormData(prev => ({ ...prev, duty_positions: values }))}
+                    suggestions={dutyPositionSuggestions}
+                    placeholder="Add position"
+                    disabled={!isEditing}
+                    badgeVariant="outline"
+                  />
                 </div>
-                <div className="space-y-2 sm:col-span-2">
+                <div className="space-y-2">
                   <Label>Unit Assignment</Label>
                   <UnitTreeSelector
                     value={{
@@ -553,38 +560,14 @@ export default function PersonnelDetailPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {formData.skills.map((skill) => (
-                    <Badge key={skill} variant="tactical" className="gap-1">
-                      {skill}
-                      {isEditing && (
-                        <button
-                          onClick={() => removeSkill(skill)}
-                          className="ml-1 hover:text-destructive"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      )}
-                    </Badge>
-                  ))}
-                  {formData.skills.length === 0 && !isEditing && (
-                    <p className="text-sm text-muted-foreground">No skills listed</p>
-                  )}
-                </div>
-                {isEditing && (
-                  <div className="mt-3 flex gap-2">
-                    <Input
-                      value={skillInput}
-                      onChange={(e) => setSkillInput(e.target.value)}
-                      placeholder="Add skill"
-                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
-                      className="flex-1"
-                    />
-                    <Button type="button" variant="outline" size="sm" onClick={addSkill}>
-                      Add
-                    </Button>
-                  </div>
-                )}
+                <AutocompleteTagInput
+                  values={formData.skills}
+                  onChange={(values) => setFormData(prev => ({ ...prev, skills: values }))}
+                  suggestions={skillSuggestions}
+                  placeholder="Add skill"
+                  disabled={!isEditing}
+                  badgeVariant="tactical"
+                />
               </CardContent>
             </Card>
 
@@ -597,38 +580,14 @@ export default function PersonnelDetailPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {formData.driver_licenses.map((license) => (
-                    <Badge key={license} variant="secondary" className="gap-1">
-                      {license}
-                      {isEditing && (
-                        <button
-                          onClick={() => removeLicense(license)}
-                          className="ml-1 hover:text-destructive"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      )}
-                    </Badge>
-                  ))}
-                  {formData.driver_licenses.length === 0 && !isEditing && (
-                    <p className="text-sm text-muted-foreground">No licenses listed</p>
-                  )}
-                </div>
-                {isEditing && (
-                  <div className="mt-3 flex gap-2">
-                    <Input
-                      value={licenseInput}
-                      onChange={(e) => setLicenseInput(e.target.value)}
-                      placeholder="Add license"
-                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addLicense())}
-                      className="flex-1"
-                    />
-                    <Button type="button" variant="outline" size="sm" onClick={addLicense}>
-                      Add
-                    </Button>
-                  </div>
-                )}
+                <AutocompleteTagInput
+                  values={formData.driver_licenses}
+                  onChange={(values) => setFormData(prev => ({ ...prev, driver_licenses: values }))}
+                  suggestions={licenseSuggestions}
+                  placeholder="Add license"
+                  disabled={!isEditing}
+                  badgeVariant="secondary"
+                />
               </CardContent>
             </Card>
           </div>
