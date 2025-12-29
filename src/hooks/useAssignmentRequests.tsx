@@ -261,6 +261,15 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
   }, [user?.id, fetchRequests]);
 
   const rejectRequest = useCallback(async (requestId: string, notes?: string) => {
+    // Get the request details first to know the original unit
+    const { data: request, error: fetchError } = await supabase
+      .from('assignment_requests')
+      .select('*')
+      .eq('id', requestId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
     const { error: updateError } = await supabase
       .from('assignment_requests')
       .update({ status: 'rejected' })
@@ -278,6 +287,29 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
       });
 
     if (approvalError) throw approvalError;
+
+    // Reassign the equipment back to the original unit
+    // Close any current pending assignment
+    await supabase
+      .from('equipment_assignments')
+      .update({ returned_at: new Date().toISOString() })
+      .eq('equipment_id', request.equipment_id)
+      .is('returned_at', null);
+
+    // Create assignment back to the original unit
+    const { error: assignError } = await supabase
+      .from('equipment_assignments')
+      .insert({
+        equipment_id: request.equipment_id,
+        personnel_id: request.from_personnel_id || null,
+        platoon_id: request.from_platoon_id || null,
+        squad_id: request.from_squad_id || null,
+        battalion_id: request.from_battalion_id || null,
+        assigned_by: user?.id || null,
+        notes: 'Reassigned after transfer rejection',
+      });
+
+    if (assignError) throw assignError;
     await fetchRequests();
   }, [user?.id, fetchRequests]);
 
