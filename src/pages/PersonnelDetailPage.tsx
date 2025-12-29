@@ -34,9 +34,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import type { DutyPosition, LocationStatus, ReadinessStatus } from '@/types/pmtb';
-import type { Tables } from '@/integrations/supabase/types';
-
-type PersonnelRow = Tables<'personnel'>;
+import { UnitTreeSelector } from '@/components/personnel/UnitTreeSelector';
 
 const dutyPositions: DutyPosition[] = [
   'Platoon Leader',
@@ -79,7 +77,6 @@ export default function PersonnelDetailPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [squads, setSquads] = useState<Squad[]>([]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -88,7 +85,9 @@ export default function PersonnelDetailPage() {
     first_name: '',
     last_name: '',
     duty_position: '' as string,
-    squad_id: '' as string | null,
+    battalion_id: null as string | null,
+    platoon_id: null as string | null,
+    squad_id: null as string | null,
     phone: '',
     email: '',
     local_address: '',
@@ -109,24 +108,13 @@ export default function PersonnelDetailPage() {
       try {
         setLoading(true);
 
-        // Fetch personnel and squads in parallel
-        const [personnelRes, squadsRes] = await Promise.all([
-          supabase
-            .from('personnel')
-            .select('*')
-            .eq('id', id)
-            .single(),
-          supabase
-            .from('squads')
-            .select('id, name')
-            .order('name'),
-        ]);
+        const { data: person, error } = await supabase
+          .from('personnel')
+          .select('*')
+          .eq('id', id)
+          .single();
 
-        if (personnelRes.error) throw personnelRes.error;
-        if (squadsRes.error) throw squadsRes.error;
-
-        const person = personnelRes.data as PersonnelRow;
-        setSquads(squadsRes.data || []);
+        if (error) throw error;
 
         setFormData({
           service_number: person.service_number,
@@ -134,7 +122,9 @@ export default function PersonnelDetailPage() {
           first_name: person.first_name,
           last_name: person.last_name,
           duty_position: person.duty_position || '',
-          squad_id: person.squad_id,
+          battalion_id: (person as any).battalion_id || null,
+          platoon_id: (person as any).platoon_id || null,
+          squad_id: person.squad_id || null,
           phone: person.phone || '',
           email: person.email || '',
           local_address: person.local_address || '',
@@ -174,6 +164,8 @@ export default function PersonnelDetailPage() {
           first_name: formData.first_name,
           last_name: formData.last_name,
           duty_position: formData.duty_position || null,
+          battalion_id: formData.battalion_id || null,
+          platoon_id: formData.platoon_id || null,
           squad_id: formData.squad_id || null,
           phone: formData.phone || null,
           email: formData.email || null,
@@ -183,7 +175,7 @@ export default function PersonnelDetailPage() {
           skills: formData.skills,
           driver_licenses: formData.driver_licenses,
           profile_image: formData.profile_image || null,
-        })
+        } as any)
         .eq('id', id);
 
       if (error) throw error;
@@ -412,30 +404,22 @@ export default function PersonnelDetailPage() {
                     <p className="text-foreground">{formData.duty_position || 'Not assigned'}</p>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label>Squad</Label>
-                  {isEditing ? (
-                    <Select
-                      value={formData.squad_id || 'unassigned'}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, squad_id: value === 'unassigned' ? null : value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select squad" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="unassigned">Unassigned</SelectItem>
-                        {squads.map((squad) => (
-                          <SelectItem key={squad.id} value={squad.id}>
-                            {squad.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <p className="text-foreground">
-                      {squads.find(s => s.id === formData.squad_id)?.name || 'Unassigned'}
-                    </p>
-                  )}
+                <div className="space-y-2 sm:col-span-2">
+                  <Label>Unit Assignment</Label>
+                  <UnitTreeSelector
+                    value={{
+                      battalion_id: formData.battalion_id,
+                      platoon_id: formData.platoon_id,
+                      squad_id: formData.squad_id,
+                    }}
+                    onChange={(assignment) => setFormData(prev => ({
+                      ...prev,
+                      battalion_id: assignment.battalion_id,
+                      platoon_id: assignment.platoon_id,
+                      squad_id: assignment.squad_id,
+                    }))}
+                    disabled={!isEditing}
+                  />
                 </div>
               </div>
 

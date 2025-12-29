@@ -220,6 +220,7 @@ export type Database = {
       }
       personnel: {
         Row: {
+          battalion_id: string | null
           created_at: string
           driver_licenses: string[] | null
           duty_position: string | null
@@ -230,6 +231,7 @@ export type Database = {
           local_address: string | null
           location_status: Database["public"]["Enums"]["location_status"]
           phone: string | null
+          platoon_id: string | null
           profile_image: string | null
           rank: string
           readiness_status: Database["public"]["Enums"]["readiness_status"]
@@ -240,6 +242,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          battalion_id?: string | null
           created_at?: string
           driver_licenses?: string[] | null
           duty_position?: string | null
@@ -250,6 +253,7 @@ export type Database = {
           local_address?: string | null
           location_status?: Database["public"]["Enums"]["location_status"]
           phone?: string | null
+          platoon_id?: string | null
           profile_image?: string | null
           rank: string
           readiness_status?: Database["public"]["Enums"]["readiness_status"]
@@ -260,6 +264,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          battalion_id?: string | null
           created_at?: string
           driver_licenses?: string[] | null
           duty_position?: string | null
@@ -270,6 +275,7 @@ export type Database = {
           local_address?: string | null
           location_status?: Database["public"]["Enums"]["location_status"]
           phone?: string | null
+          platoon_id?: string | null
           profile_image?: string | null
           rank?: string
           readiness_status?: Database["public"]["Enums"]["readiness_status"]
@@ -280,6 +286,20 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "personnel_battalion_id_fkey"
+            columns: ["battalion_id"]
+            isOneToOne: false
+            referencedRelation: "battalions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "personnel_platoon_id_fkey"
+            columns: ["platoon_id"]
+            isOneToOne: false
+            referencedRelation: "platoons"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "personnel_squad_id_fkey"
             columns: ["squad_id"]
