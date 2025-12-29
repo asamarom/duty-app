@@ -66,6 +66,171 @@ export type Database = {
           },
         ]
       }
+      assignment_approvals: {
+        Row: {
+          action: string
+          action_at: string
+          action_by: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          request_id: string
+        }
+        Insert: {
+          action: string
+          action_at?: string
+          action_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          request_id: string
+        }
+        Update: {
+          action?: string
+          action_at?: string
+          action_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_approvals_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "assignment_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assignment_requests: {
+        Row: {
+          created_at: string
+          equipment_id: string
+          from_battalion_id: string | null
+          from_personnel_id: string | null
+          from_platoon_id: string | null
+          from_squad_id: string | null
+          from_unit_type: string
+          id: string
+          notes: string | null
+          requested_at: string
+          requested_by: string | null
+          status: Database["public"]["Enums"]["assignment_request_status"]
+          to_battalion_id: string | null
+          to_personnel_id: string | null
+          to_platoon_id: string | null
+          to_squad_id: string | null
+          to_unit_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          equipment_id: string
+          from_battalion_id?: string | null
+          from_personnel_id?: string | null
+          from_platoon_id?: string | null
+          from_squad_id?: string | null
+          from_unit_type: string
+          id?: string
+          notes?: string | null
+          requested_at?: string
+          requested_by?: string | null
+          status?: Database["public"]["Enums"]["assignment_request_status"]
+          to_battalion_id?: string | null
+          to_personnel_id?: string | null
+          to_platoon_id?: string | null
+          to_squad_id?: string | null
+          to_unit_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          equipment_id?: string
+          from_battalion_id?: string | null
+          from_personnel_id?: string | null
+          from_platoon_id?: string | null
+          from_squad_id?: string | null
+          from_unit_type?: string
+          id?: string
+          notes?: string | null
+          requested_at?: string
+          requested_by?: string | null
+          status?: Database["public"]["Enums"]["assignment_request_status"]
+          to_battalion_id?: string | null
+          to_personnel_id?: string | null
+          to_platoon_id?: string | null
+          to_squad_id?: string | null
+          to_unit_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_requests_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_requests_from_battalion_id_fkey"
+            columns: ["from_battalion_id"]
+            isOneToOne: false
+            referencedRelation: "battalions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_requests_from_personnel_id_fkey"
+            columns: ["from_personnel_id"]
+            isOneToOne: false
+            referencedRelation: "personnel"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_requests_from_platoon_id_fkey"
+            columns: ["from_platoon_id"]
+            isOneToOne: false
+            referencedRelation: "platoons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_requests_from_squad_id_fkey"
+            columns: ["from_squad_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_requests_to_battalion_id_fkey"
+            columns: ["to_battalion_id"]
+            isOneToOne: false
+            referencedRelation: "battalions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_requests_to_personnel_id_fkey"
+            columns: ["to_personnel_id"]
+            isOneToOne: false
+            referencedRelation: "personnel"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_requests_to_platoon_id_fkey"
+            columns: ["to_platoon_id"]
+            isOneToOne: false
+            referencedRelation: "platoons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_requests_to_squad_id_fkey"
+            columns: ["to_squad_id"]
+            isOneToOne: false
+            referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       battalions: {
         Row: {
           commander_id: string | null
@@ -554,6 +719,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "leader" | "user"
+      assignment_request_status: "pending" | "approved" | "rejected"
       equipment_status:
         | "serviceable"
         | "unserviceable"
@@ -697,6 +863,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "leader", "user"],
+      assignment_request_status: ["pending", "approved", "rejected"],
       equipment_status: [
         "serviceable",
         "unserviceable",

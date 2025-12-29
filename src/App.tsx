@@ -11,6 +11,7 @@ import AuthPage from "./pages/AuthPage";
 import SignupRequestPage from "./pages/SignupRequestPage";
 import PendingApprovalPage from "./pages/PendingApprovalPage";
 import AdminApprovalsPage from "./pages/AdminApprovalsPage";
+import AssignmentRequestsPage from "./pages/AssignmentRequestsPage";
 import PersonnelPage from "./pages/PersonnelPage";
 import PersonnelDetailPage from "./pages/PersonnelDetailPage";
 import EquipmentPage from "./pages/EquipmentPage";
@@ -45,6 +46,7 @@ const App = () => (
               } />
               <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/approvals" element={<ProtectedRoute><AdminApprovalsPage /></ProtectedRoute>} />
+              <Route path="/assignment-requests" element={<ProtectedRoute><AssignmentRequestsPage /></ProtectedRoute>} />
               <Route path="/personnel" element={<ProtectedRoute><PersonnelPage /></ProtectedRoute>} />
               <Route path="/personnel/:id" element={<ProtectedRoute><PersonnelDetailPage /></ProtectedRoute>} />
               <Route path="/equipment" element={<ProtectedRoute><EquipmentPage /></ProtectedRoute>} />

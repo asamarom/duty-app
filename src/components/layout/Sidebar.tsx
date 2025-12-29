@@ -14,6 +14,7 @@ import {
   LogOut,
   UserCheck,
   Building2,
+  ArrowLeftRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -33,6 +34,7 @@ export function Sidebar() {
   // Add approvals link for admins and leaders
   if (isAdmin || isLeader) {
     navigation.push({ name: 'Approvals', href: '/approvals', icon: UserCheck });
+    navigation.push({ name: 'Transfers', href: '/assignment-requests', icon: ArrowLeftRight });
   }
 
   const bottomNavigation = [

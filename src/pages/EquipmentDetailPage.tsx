@@ -38,7 +38,7 @@ export default function EquipmentDetailPage() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { personnel, loading: personnelLoading } = usePersonnel();
-  const { equipment, loading: equipmentLoading, updateEquipment, deleteEquipment, assignEquipment, unassignEquipment } = useEquipment();
+  const { equipment, loading: equipmentLoading, updateEquipment, deleteEquipment, assignEquipment, unassignEquipment, requestAssignment, isWithinSameUnit } = useEquipment();
   const { battalions, platoons, squads, loading: unitsLoading, getPlatoonsForBattalion, getSquadsForPlatoon } = useUnits();
   
   const item = equipment.find((e) => e.id === id);
@@ -365,12 +365,30 @@ export default function EquipmentDetailPage() {
       }
 
       if (hasAssignment) {
-        await assignEquipment(id!, assignment);
+        // Determine target level
+        const targetLevel: AssignmentLevel = assignment.personnelId ? 'individual' 
+          : assignment.squadId ? 'squad'
+          : assignment.platoonId ? 'platoon'
+          : assignment.battalionId ? 'battalion'
+          : 'unassigned';
+        
+        // Check if this is an assignment within the same unit
+        const isDirect = targetLevel === 'individual' || 
+          isWithinSameUnit(currentLevel, targetLevel, item!, assignment) ||
+          currentLevel === 'unassigned';
+        
+        if (isDirect) {
+          await assignEquipment(id!, assignment);
+          toast.success('Equipment updated successfully');
+        } else {
+          await requestAssignment(id!, assignment);
+          toast.success('Equipment details updated. Transfer request created pending approval.');
+        }
       } else {
         await unassignEquipment(id!);
+        toast.success('Equipment updated successfully');
       }
 
-      toast.success('Equipment updated successfully');
       navigate('/equipment');
     } catch (error) {
       toast.error('Failed to update equipment');

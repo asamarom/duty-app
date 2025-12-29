@@ -4,7 +4,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { MobileHeader } from '@/components/layout/MobileHeader';
 import { EquipmentTable } from '@/components/equipment/EquipmentTable';
 import { BulkAssignDialog } from '@/components/equipment/BulkAssignDialog';
-import { useEquipment, EquipmentWithAssignment } from '@/hooks/useEquipment';
+import { useEquipment, EquipmentWithAssignment, AssignmentLevel } from '@/hooks/useEquipment';
 import { Button } from '@/components/ui/button';
 import { Search, Plus, Package, Loader2, CheckSquare, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -25,7 +25,7 @@ import {
 export default function EquipmentPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { equipment, loading, assignEquipment, refetch } = useEquipment();
+  const { equipment, loading, assignEquipment, requestAssignment, isWithinSameUnit, refetch } = useEquipment();
   const [searchQuery, setSearchQuery] = useState('');
   const [open, setOpen] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
@@ -52,16 +52,51 @@ export default function EquipmentPage() {
 
   const handleBulkAssign = async (assignment: { personnelId?: string; platoonId?: string; squadId?: string; battalionId?: string }) => {
     try {
-      // Assign each selected item
+      let directCount = 0;
+      let requestCount = 0;
+      
+      // Determine target level
+      const targetLevel: AssignmentLevel = assignment.personnelId ? 'individual' 
+        : assignment.squadId ? 'squad'
+        : assignment.platoonId ? 'platoon'
+        : assignment.battalionId ? 'battalion'
+        : 'unassigned';
+      
+      // Process each selected item
       for (const itemId of selectedIds) {
-        await assignEquipment(itemId, assignment);
+        const item = equipment.find(e => e.id === itemId);
+        if (!item) continue;
+        
+        const currentLevel = item.assignmentLevel || 'unassigned';
+        
+        // Check if this is an assignment to a member within the same unit
+        // Assigning to individual from unit level is always direct (within same unit)
+        const isDirect = targetLevel === 'individual' || 
+          isWithinSameUnit(currentLevel, targetLevel, item, assignment) ||
+          currentLevel === 'unassigned';
+        
+        if (isDirect) {
+          await assignEquipment(itemId, assignment);
+          directCount++;
+        } else {
+          await requestAssignment(itemId, assignment);
+          requestCount++;
+        }
       }
-      toast.success(`Successfully assigned ${selectedIds.size} item${selectedIds.size > 1 ? 's' : ''}`);
+      
+      if (directCount > 0 && requestCount > 0) {
+        toast.success(`Assigned ${directCount} item${directCount > 1 ? 's' : ''} directly. Created ${requestCount} transfer request${requestCount > 1 ? 's' : ''} pending approval.`);
+      } else if (directCount > 0) {
+        toast.success(`Successfully assigned ${directCount} item${directCount > 1 ? 's' : ''}`);
+      } else if (requestCount > 0) {
+        toast.success(`Created ${requestCount} transfer request${requestCount > 1 ? 's' : ''} pending approval.`);
+      }
+      
       setSelectedIds(new Set());
       setSelectMode(false);
       await refetch();
     } catch (error) {
-      toast.error('Failed to assign some items');
+      toast.error('Failed to process some items');
     }
   };
 
