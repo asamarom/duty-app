@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
+import { usePendingRequestsCount } from '@/hooks/usePendingRequestsCount';
 import {
   LayoutDashboard,
   Users,
@@ -18,12 +19,20 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+interface NavItem {
+  name: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  showBadge?: boolean;
+}
+
 export function Sidebar() {
   const { t, dir } = useLanguage();
   const { user, signOut } = useAuth();
   const { isAdmin, isLeader } = useUserRole();
+  const pendingCount = usePendingRequestsCount();
 
-  const navigation = [
+  const navigation: NavItem[] = [
     { name: t('nav.dashboard'), href: '/', icon: LayoutDashboard },
     { name: t('nav.personnel'), href: '/personnel', icon: Users },
     { name: t('nav.equipment'), href: '/equipment', icon: Package },
@@ -34,7 +43,7 @@ export function Sidebar() {
   // Add approvals link for admins and leaders
   if (isAdmin || isLeader) {
     navigation.push({ name: t('nav.approvals'), href: '/approvals', icon: UserCheck });
-    navigation.push({ name: t('nav.transfers'), href: '/assignment-requests', icon: ArrowLeftRight });
+    navigation.push({ name: t('nav.transfers'), href: '/assignment-requests', icon: ArrowLeftRight, showBadge: true });
   }
 
   const bottomNavigation = [
@@ -89,12 +98,19 @@ export function Sidebar() {
             >
               {({ isActive }) => (
                 <>
-                  <item.icon
-                    className={cn(
-                      'h-5 w-5 transition-colors',
-                      isActive ? 'text-sidebar-primary' : 'text-muted-foreground'
+                  <div className="relative">
+                    <item.icon
+                      className={cn(
+                        'h-5 w-5 transition-colors',
+                        isActive ? 'text-sidebar-primary' : 'text-muted-foreground'
+                      )}
+                    />
+                    {item.showBadge && pendingCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+                        {pendingCount > 99 ? '99+' : pendingCount}
+                      </span>
                     )}
-                  />
+                  </div>
                   {item.name}
                   {isActive && (
                     <div className={cn(

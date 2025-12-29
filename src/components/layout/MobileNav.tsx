@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { usePendingRequestsCount } from '@/hooks/usePendingRequestsCount';
 import {
   LayoutDashboard,
   Users,
@@ -20,6 +21,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 export function MobileNav() {
   const { t } = useLanguage();
   const { isAdmin, isLeader } = useUserRole();
+  const pendingCount = usePendingRequestsCount();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -27,7 +29,7 @@ export function MobileNav() {
     { name: t('nav.dashboard'), href: '/', icon: LayoutDashboard },
     { name: t('nav.personnel'), href: '/personnel', icon: Users },
     { name: t('nav.equipment'), href: '/equipment', icon: Package },
-    { name: t('nav.transfers'), href: '/assignment-requests', icon: ArrowLeftRight, adminOnly: true },
+    { name: t('nav.transfers'), href: '/assignment-requests', icon: ArrowLeftRight, adminOnly: true, showBadge: true },
   ];
 
   const moreItems = [
@@ -51,7 +53,7 @@ export function MobileNav() {
             to={item.href}
             className={({ isActive }) =>
               cn(
-                'flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all min-w-[60px]',
+                'flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all min-w-[60px] relative',
                 isActive
                   ? 'text-primary'
                   : 'text-muted-foreground'
@@ -61,10 +63,15 @@ export function MobileNav() {
             {({ isActive }) => (
               <>
                 <div className={cn(
-                  'p-2 rounded-xl transition-all',
+                  'p-2 rounded-xl transition-all relative',
                   isActive && 'bg-primary/20'
                 )}>
                   <item.icon className={cn('h-5 w-5', isActive && 'text-primary')} />
+                  {item.showBadge && pendingCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+                      {pendingCount > 99 ? '99+' : pendingCount}
+                    </span>
+                  )}
                 </div>
                 <span className={cn(
                   'text-[10px] font-medium',
@@ -76,7 +83,6 @@ export function MobileNav() {
             )}
           </NavLink>
         ))}
-
         {/* More Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
