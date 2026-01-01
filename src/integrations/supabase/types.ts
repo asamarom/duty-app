@@ -96,6 +96,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "assignment_approvals_action_by_fkey"
+            columns: ["action_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "assignment_approvals_request_id_fkey"
             columns: ["request_id"]
             isOneToOne: false
@@ -199,6 +206,13 @@ export type Database = {
             columns: ["from_squad_id"]
             isOneToOne: false
             referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
