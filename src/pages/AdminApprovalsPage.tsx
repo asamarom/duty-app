@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useUnits } from '@/hooks/useUnits';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,7 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, CheckCircle, XCircle, Clock, UserPlus, Building2, Users, UserCheck } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, Clock, UserPlus } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
 type SignupRequest = Tables<'signup_requests'>;
@@ -24,6 +25,7 @@ export default function AdminApprovalsPage() {
   const { isAdmin, isLeader, loading: rolesLoading } = useUserRole();
   const { battalions, platoons, squads, loading: unitsLoading } = useUnits();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const [requests, setRequests] = useState<SignupRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,8 +52,8 @@ export default function AdminApprovalsPage() {
     } catch (err) {
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to load signup requests.',
+        title: t('common.error'),
+        description: t('approvals.errorLoading'),
       });
     } finally {
       setLoading(false);
@@ -67,17 +69,17 @@ export default function AdminApprovalsPage() {
   const getUnitName = (request: SignupRequest) => {
     if (request.requested_squad_id) {
       const squad = squads.find((s) => s.id === request.requested_squad_id);
-      return squad?.name || 'Unknown Squad';
+      return squad?.name || t('units.unknownSquad');
     }
     if (request.requested_platoon_id) {
       const platoon = platoons.find((p) => p.id === request.requested_platoon_id);
-      return platoon?.name || 'Unknown Platoon';
+      return platoon?.name || t('units.unknownPlatoon');
     }
     if (request.requested_battalion_id) {
       const battalion = battalions.find((b) => b.id === request.requested_battalion_id);
-      return battalion?.name || 'Unknown Battalion';
+      return battalion?.name || t('units.unknownBattalion');
     }
-    return 'No unit';
+    return t('units.noUnit');
   };
 
   const handleApprove = async (request: SignupRequest) => {
@@ -149,16 +151,16 @@ export default function AdminApprovalsPage() {
       }
 
       toast({
-        title: 'Request approved',
-        description: `${request.full_name} has been approved and added to personnel.`,
+        title: t('approvals.approved'),
+        description: `${request.full_name} ${t('approvals.approvedDesc')}`,
       });
 
       fetchRequests();
     } catch (err) {
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to approve request.',
+        title: t('common.error'),
+        description: t('approvals.errorApproving'),
       });
     } finally {
       setProcessingId(null);
@@ -183,8 +185,8 @@ export default function AdminApprovalsPage() {
       if (error) throw error;
 
       toast({
-        title: 'Request declined',
-        description: `${selectedRequest.full_name}'s request has been declined.`,
+        title: t('approvals.declined'),
+        description: `${selectedRequest.full_name} ${t('approvals.declinedDesc')}`,
       });
 
       setDeclineDialogOpen(false);
@@ -194,8 +196,8 @@ export default function AdminApprovalsPage() {
     } catch (err) {
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to decline request.',
+        title: t('common.error'),
+        description: t('approvals.errorDeclining'),
       });
     } finally {
       setProcessingId(null);
@@ -225,7 +227,7 @@ export default function AdminApprovalsPage() {
     return (
       <MainLayout>
         <div className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">You do not have permission to view this page.</p>
+          <p className="text-muted-foreground">{t('approvals.noPermission')}</p>
         </div>
       </MainLayout>
     );
@@ -236,28 +238,27 @@ export default function AdminApprovalsPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Signup Approvals</h1>
-            <p className="text-muted-foreground">Manage user signup requests</p>
+            <h1 className="text-2xl font-bold">{t('approvals.title')}</h1>
+            <p className="text-muted-foreground">{t('approvals.subtitle')}</p>
           </div>
           
           <Dialog open={addUserDialogOpen} onOpenChange={setAddUserDialogOpen}>
             <DialogTrigger asChild>
               <Button>
                 <UserPlus className="mr-2 h-4 w-4" />
-                Add User Manually
+                {t('approvals.addUser')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add User Manually</DialogTitle>
+                <DialogTitle>{t('approvals.addUserTitle')}</DialogTitle>
                 <DialogDescription>
-                  Note: The user must first sign in with Google to create their account.
-                  You can then assign them a role here using their email.
+                  {t('approvals.addUserDesc')}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label>User Email</Label>
+                  <Label>{t('approvals.userEmail')}</Label>
                   <Input
                     value={newUserEmail}
                     onChange={(e) => setNewUserEmail(e.target.value)}
@@ -265,33 +266,33 @@ export default function AdminApprovalsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Role</Label>
+                  <Label>{t('approvals.role')}</Label>
                   <Select value={newUserRole} onValueChange={(v) => setNewUserRole(v as 'user' | 'leader' | 'admin')}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="user">User</SelectItem>
-                      <SelectItem value="leader">Leader</SelectItem>
-                      {isAdmin && <SelectItem value="admin">Admin</SelectItem>}
+                      <SelectItem value="user">{t('approvals.user')}</SelectItem>
+                      <SelectItem value="leader">{t('approvals.leader')}</SelectItem>
+                      {isAdmin && <SelectItem value="admin">{t('approvals.admin')}</SelectItem>}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setAddUserDialogOpen(false)}>
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
                 <Button onClick={async () => {
                   // This would require an edge function to look up user by email
                   // For now, show a message
                   toast({
-                    title: 'Feature coming soon',
-                    description: 'Manual user addition will be available in a future update.',
+                    title: t('approvals.featureComingSoon'),
+                    description: t('approvals.featureComingSoonDesc'),
                   });
                   setAddUserDialogOpen(false);
                 }}>
-                  Add User
+                  {t('approvals.addUserBtn')}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -302,7 +303,7 @@ export default function AdminApprovalsPage() {
           <TabsList>
             <TabsTrigger value="pending" className="gap-2">
               <Clock className="h-4 w-4" />
-              Pending
+              {t('status.pending')}
               {pendingRequests.length > 0 && (
                 <Badge variant="secondary" className="ml-1">
                   {pendingRequests.length}
@@ -311,7 +312,7 @@ export default function AdminApprovalsPage() {
             </TabsTrigger>
             <TabsTrigger value="processed" className="gap-2">
               <CheckCircle className="h-4 w-4" />
-              Processed
+              {t('approvals.processed')}
             </TabsTrigger>
           </TabsList>
 
@@ -324,7 +325,7 @@ export default function AdminApprovalsPage() {
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <Clock className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No pending requests</p>
+                  <p className="text-muted-foreground">{t('approvals.noPending')}</p>
                 </CardContent>
               </Card>
             ) : (
@@ -339,26 +340,26 @@ export default function AdminApprovalsPage() {
                         </div>
                         <Badge variant="outline" className="gap-1">
                           <Clock className="h-3 w-3" />
-                          Pending
+                          {t('status.pending')}
                         </Badge>
                       </div>
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                         <div>
-                          <p className="text-xs text-muted-foreground">Service #</p>
+                          <p className="text-xs text-muted-foreground">{t('approvals.serviceNumber')}</p>
                           <p className="font-medium">{request.service_number}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground">Phone</p>
+                          <p className="text-xs text-muted-foreground">{t('approvals.phone')}</p>
                           <p className="font-medium">{request.phone || 'N/A'}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground">Unit Type</p>
+                          <p className="text-xs text-muted-foreground">{t('approvals.unitType')}</p>
                           <p className="font-medium capitalize">{request.requested_unit_type}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground">Unit</p>
+                          <p className="text-xs text-muted-foreground">{t('approvals.unit')}</p>
                           <p className="font-medium">{getUnitName(request)}</p>
                         </div>
                       </div>
@@ -373,7 +374,7 @@ export default function AdminApprovalsPage() {
                           ) : (
                             <CheckCircle className="mr-2 h-4 w-4" />
                           )}
-                          Approve
+                          {t('approvals.approve')}
                         </Button>
                         <Button
                           variant="destructive"
@@ -382,7 +383,7 @@ export default function AdminApprovalsPage() {
                           disabled={processingId === request.id}
                         >
                           <XCircle className="mr-2 h-4 w-4" />
-                          Decline
+                          {t('approvals.decline')}
                         </Button>
                       </div>
                     </CardContent>
@@ -401,7 +402,7 @@ export default function AdminApprovalsPage() {
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <CheckCircle className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No processed requests</p>
+                  <p className="text-muted-foreground">{t('approvals.noProcessed')}</p>
                 </CardContent>
               </Card>
             ) : (
@@ -423,29 +424,29 @@ export default function AdminApprovalsPage() {
                           ) : (
                             <XCircle className="h-3 w-3" />
                           )}
-                          {request.status === 'approved' ? 'Approved' : 'Declined'}
+                          {request.status === 'approved' ? t('status.approved') : t('status.declined')}
                         </Badge>
                       </div>
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
-                          <p className="text-xs text-muted-foreground">Service #</p>
+                          <p className="text-xs text-muted-foreground">{t('approvals.serviceNumber')}</p>
                           <p className="font-medium">{request.service_number}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground">Unit</p>
+                          <p className="text-xs text-muted-foreground">{t('approvals.unit')}</p>
                           <p className="font-medium">{getUnitName(request)}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground">Reviewed</p>
+                          <p className="text-xs text-muted-foreground">{t('approvals.reviewed')}</p>
                           <p className="font-medium">
                             {request.reviewed_at && new Date(request.reviewed_at).toLocaleDateString()}
                           </p>
                         </div>
                         {request.decline_reason && (
                           <div className="col-span-2">
-                            <p className="text-xs text-muted-foreground">Decline Reason</p>
+                            <p className="text-xs text-muted-foreground">{t('approvals.declineReason')}</p>
                             <p className="font-medium text-destructive">{request.decline_reason}</p>
                           </div>
                         )}
@@ -462,24 +463,23 @@ export default function AdminApprovalsPage() {
         <Dialog open={declineDialogOpen} onOpenChange={setDeclineDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Decline Request</DialogTitle>
+              <DialogTitle>{t('approvals.declineRequest')}</DialogTitle>
               <DialogDescription>
-                Are you sure you want to decline {selectedRequest?.full_name}'s request?
-                You can optionally provide a reason.
+                {t('approvals.declineDesc')} {selectedRequest?.full_name}
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <Label>Reason (Optional)</Label>
+              <Label>{t('approvals.reasonOptional')}</Label>
               <Textarea
                 value={declineReason}
                 onChange={(e) => setDeclineReason(e.target.value)}
-                placeholder="Enter a reason for declining..."
+                placeholder={t('approvals.reasonPlaceholder')}
                 className="mt-2"
               />
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDeclineDialogOpen(false)}>
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 variant="destructive"
@@ -491,7 +491,7 @@ export default function AdminApprovalsPage() {
                 ) : (
                   <XCircle className="mr-2 h-4 w-4" />
                 )}
-                Decline
+                {t('approvals.decline')}
               </Button>
             </DialogFooter>
           </DialogContent>
