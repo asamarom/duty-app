@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAdminMode } from '@/contexts/AdminModeContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { usePendingRequestsCount } from '@/hooks/usePendingRequestsCount';
@@ -16,8 +17,12 @@ import {
   UserCheck,
   Building2,
   ArrowLeftRight,
+  ShieldCheck,
+  User,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface NavItem {
   name: string;
@@ -29,8 +34,14 @@ interface NavItem {
 export function Sidebar() {
   const { t, dir } = useLanguage();
   const { user, signOut } = useAuth();
-  const { isAdmin, isLeader } = useUserRole();
+  const { isAdmin, isLeader, isActualAdmin } = useUserRole();
+  const { isAdminMode, toggleAdminMode } = useAdminMode();
   const pendingCount = usePendingRequestsCount();
+
+  // Determine effective admin/leader status based on admin mode
+  const effectiveIsAdmin = isActualAdmin && isAdminMode;
+  const effectiveIsLeader = isLeader && (!isActualAdmin || isAdminMode);
+  const hasAdminAccess = effectiveIsAdmin || effectiveIsLeader;
 
   const navigation: NavItem[] = [
     { name: t('nav.dashboard'), href: '/', icon: LayoutDashboard },
@@ -40,8 +51,8 @@ export function Sidebar() {
     { name: t('nav.reports'), href: '/reports', icon: ClipboardList },
   ];
 
-  // Add approvals link for admins and leaders
-  if (isAdmin || isLeader) {
+  // Add approvals link for admins and leaders (respecting admin mode)
+  if (hasAdminAccess) {
     navigation.push({ name: t('nav.approvals'), href: '/approvals', icon: UserCheck });
     navigation.push({ name: t('nav.transfers'), href: '/assignment-requests', icon: ArrowLeftRight, showBadge: true });
   }
@@ -80,6 +91,52 @@ export function Sidebar() {
             <span>{t('settings.lastSync')}: 2 min ago</span>
           </div>
         </div>
+
+        {/* Admin Mode Toggle - Only for admins */}
+        {isAdmin && (
+          <div className="mx-4 mt-3">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div 
+                  className={cn(
+                    "rounded-lg border p-3 transition-all cursor-pointer",
+                    isAdminMode 
+                      ? "border-primary/50 bg-primary/10" 
+                      : "border-muted bg-muted/30"
+                  )}
+                  onClick={toggleAdminMode}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      {isAdminMode ? (
+                        <ShieldCheck className="h-4 w-4 text-primary" />
+                      ) : (
+                        <User className="h-4 w-4 text-muted-foreground" />
+                      )}
+                      <span className={cn(
+                        "text-xs font-medium",
+                        isAdminMode ? "text-primary" : "text-muted-foreground"
+                      )}>
+                        {isAdminMode ? t('adminMode.adminView') : t('adminMode.userView')}
+                      </span>
+                    </div>
+                    <Switch
+                      checked={isAdminMode}
+                      onCheckedChange={toggleAdminMode}
+                      className="scale-75"
+                    />
+                  </div>
+                  <p className="mt-1 text-[10px] text-muted-foreground">
+                    {isAdminMode ? t('adminMode.enabled') : t('adminMode.disabled')}
+                  </p>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side={dir === 'rtl' ? 'left' : 'right'}>
+                <p>{t('adminMode.description')}</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        )}
 
         {/* Navigation */}
         <nav className="flex-1 space-y-1 px-3 py-4">

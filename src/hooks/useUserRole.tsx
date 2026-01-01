@@ -8,8 +8,10 @@ export type AppRole = 'admin' | 'leader' | 'user';
 
 interface UseUserRoleReturn {
   roles: AppRole[];
+  actualRoles: AppRole[]; // The actual roles from DB, unaffected by admin mode
   isAdmin: boolean;
   isLeader: boolean;
+  isActualAdmin: boolean; // True if user is actually an admin (regardless of mode)
   loading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
@@ -17,14 +19,14 @@ interface UseUserRoleReturn {
 
 export function useUserRole(): UseUserRoleReturn {
   const { user } = useAuth();
-  const [roles, setRoles] = useState<AppRole[]>([]);
+  const [actualRoles, setActualRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchRoles = async () => {
     if (!user) {
       setLoading(false);
-      setRoles([]);
+      setActualRoles([]);
       return;
     }
 
@@ -38,7 +40,7 @@ export function useUserRole(): UseUserRoleReturn {
       if (fetchError) throw fetchError;
 
       const userRoles = data?.map((r) => r.role as AppRole) || [];
-      setRoles(userRoles);
+      setActualRoles(userRoles);
     } catch (err) {
       setError(err as Error);
     } finally {
@@ -50,10 +52,14 @@ export function useUserRole(): UseUserRoleReturn {
     fetchRoles();
   }, [user?.id]);
 
+  const isActualAdmin = actualRoles.includes('admin');
+
   return {
-    roles,
-    isAdmin: roles.includes('admin'),
-    isLeader: roles.includes('leader'),
+    roles: actualRoles,
+    actualRoles,
+    isAdmin: isActualAdmin,
+    isLeader: actualRoles.includes('leader'),
+    isActualAdmin,
     loading,
     error,
     refetch: fetchRoles,
