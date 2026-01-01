@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useAdminMode } from '@/contexts/AdminModeContext';
 import { usePendingRequestsCount } from '@/hooks/usePendingRequestsCount';
 import {
   LayoutDashboard,
@@ -9,21 +10,31 @@ import {
   Package,
   ArrowLeftRight,
   MoreHorizontal,
+  ShieldCheck,
+  User,
 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Switch } from '@/components/ui/switch';
 
 export function MobileNav() {
   const { t } = useLanguage();
-  const { isAdmin, isLeader } = useUserRole();
+  const { isAdmin, isLeader, isActualAdmin } = useUserRole();
+  const { isAdminMode, toggleAdminMode } = useAdminMode();
   const pendingCount = usePendingRequestsCount();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Determine effective admin/leader status based on admin mode
+  const effectiveIsAdmin = isActualAdmin && isAdminMode;
+  const effectiveIsLeader = isLeader && (!isActualAdmin || isAdminMode);
+  const hasAdminAccess = effectiveIsAdmin || effectiveIsLeader;
 
   const mainNavigation = [
     { name: t('nav.dashboard'), href: '/', icon: LayoutDashboard },
@@ -39,8 +50,8 @@ export function MobileNav() {
     { name: t('nav.settings'), href: '/settings' },
   ];
 
-  const filteredMainNav = mainNavigation.filter(item => !item.adminOnly || isAdmin || isLeader);
-  const filteredMoreItems = moreItems.filter(item => !item.adminOnly || isAdmin || isLeader);
+  const filteredMainNav = mainNavigation.filter(item => !item.adminOnly || hasAdminAccess);
+  const filteredMoreItems = moreItems.filter(item => !item.adminOnly || hasAdminAccess);
 
   const isMoreActive = filteredMoreItems.some(item => location.pathname === item.href);
 
@@ -107,6 +118,31 @@ export function MobileNav() {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="mb-2">
+            {isActualAdmin && (
+              <>
+                <DropdownMenuItem
+                  className="flex items-center justify-between gap-3"
+                  onSelect={(e) => e.preventDefault()}
+                >
+                  <div className="flex items-center gap-2">
+                    {isAdminMode ? (
+                      <ShieldCheck className="h-4 w-4 text-primary" />
+                    ) : (
+                      <User className="h-4 w-4 text-muted-foreground" />
+                    )}
+                    <span className={isAdminMode ? 'text-primary' : ''}>
+                      {isAdminMode ? t('adminMode.adminView') : t('adminMode.userView')}
+                    </span>
+                  </div>
+                  <Switch
+                    checked={isAdminMode}
+                    onCheckedChange={toggleAdminMode}
+                    className="scale-75"
+                  />
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
             {filteredMoreItems.map((item) => (
               <DropdownMenuItem
                 key={item.href}

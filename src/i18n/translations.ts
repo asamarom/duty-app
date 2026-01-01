@@ -283,6 +283,14 @@ export const translations = {
     'common.confirm': 'Confirm',
     'common.close': 'Close',
     'common.na': 'N/A',
+
+    // Admin Mode
+    'adminMode.title': 'Admin Mode',
+    'adminMode.description': 'Switch between admin view and user view',
+    'adminMode.adminView': 'Admin View',
+    'adminMode.userView': 'User View',
+    'adminMode.enabled': 'Full access enabled',
+    'adminMode.disabled': 'Viewing as assigned user',
   },
   he: {
     // Navigation
@@ -565,6 +573,14 @@ export const translations = {
     'common.confirm': 'אישור',
     'common.close': 'סגור',
     'common.na': 'לא זמין',
+
+    // Admin Mode
+    'adminMode.title': 'מצב מנהל',
+    'adminMode.description': 'החלף בין תצוגת מנהל לתצוגת משתמש',
+    'adminMode.adminView': 'תצוגת מנהל',
+    'adminMode.userView': 'תצוגת משתמש',
+    'adminMode.enabled': 'גישה מלאה מופעלת',
+    'adminMode.disabled': 'צפייה כמשתמש מוקצה',
   },
 } as const;
 

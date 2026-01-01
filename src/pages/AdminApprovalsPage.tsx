@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useAdminMode } from '@/contexts/AdminModeContext';
 import { useUnits } from '@/hooks/useUnits';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -22,10 +23,16 @@ type SignupRequest = Tables<'signup_requests'>;
 
 export default function AdminApprovalsPage() {
   const { user } = useAuth();
-  const { isAdmin, isLeader, loading: rolesLoading } = useUserRole();
+  const { isAdmin, isLeader, isActualAdmin, loading: rolesLoading } = useUserRole();
+  const { isAdminMode } = useAdminMode();
   const { battalions, platoons, squads, loading: unitsLoading } = useUnits();
   const { toast } = useToast();
   const { t } = useLanguage();
+
+  // Determine effective admin/leader status based on admin mode
+  const effectiveIsAdmin = isActualAdmin && isAdminMode;
+  const effectiveIsLeader = isLeader && (!isActualAdmin || isAdminMode);
+  const hasAdminAccess = effectiveIsAdmin || effectiveIsLeader;
 
   const [requests, setRequests] = useState<SignupRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,10 +68,10 @@ export default function AdminApprovalsPage() {
   };
 
   useEffect(() => {
-    if (isAdmin || isLeader) {
+    if (hasAdminAccess) {
       fetchRequests();
     }
-  }, [isAdmin, isLeader]);
+  }, [hasAdminAccess]);
 
   const getUnitName = (request: SignupRequest) => {
     if (request.requested_squad_id) {
@@ -223,7 +230,7 @@ export default function AdminApprovalsPage() {
     );
   }
 
-  if (!isAdmin && !isLeader) {
+  if (!hasAdminAccess) {
     return (
       <MainLayout>
         <div className="flex items-center justify-center h-64">
@@ -274,7 +281,7 @@ export default function AdminApprovalsPage() {
                     <SelectContent>
                       <SelectItem value="user">{t('approvals.user')}</SelectItem>
                       <SelectItem value="leader">{t('approvals.leader')}</SelectItem>
-                      {isAdmin && <SelectItem value="admin">{t('approvals.admin')}</SelectItem>}
+                      {effectiveIsAdmin && <SelectItem value="admin">{t('approvals.admin')}</SelectItem>}
                     </SelectContent>
                   </Select>
                 </div>
