@@ -2,13 +2,16 @@ import { Personnel } from '@/types/pmtb';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Phone, Mail, Award, Car, ChevronRight } from 'lucide-react';
+import { RoleBadges } from './RoleBadge';
+import type { AppRole } from '@/hooks/useUserRole';
 
 interface PersonnelCardProps {
   person: Personnel;
   onClick?: () => void;
+  roles?: AppRole[];
 }
 
-export function PersonnelCard({ person, onClick }: PersonnelCardProps) {
+export function PersonnelCard({ person, onClick, roles = [] }: PersonnelCardProps) {
   return (
     <div
       className={cn(
@@ -24,9 +27,12 @@ export function PersonnelCard({ person, onClick }: PersonnelCardProps) {
             {person.rank}
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-foreground">
-              {person.lastName}, {person.firstName}
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-foreground">
+                {person.lastName}, {person.firstName}
+              </h3>
+              <RoleBadges roles={roles} size="sm" />
+            </div>
             <p className="text-sm font-medium text-primary">{person.dutyPosition}</p>
             <div className="mt-1 flex items-center gap-2">
               <Badge variant="rank">{person.team}</Badge>
