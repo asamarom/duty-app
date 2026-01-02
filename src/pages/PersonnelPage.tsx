@@ -18,9 +18,13 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { DutyPosition, Personnel } from '@/types/pmtb';
+import type { AppRole } from '@/hooks/useUserRole';
 
+interface PersonnelWithRoles extends Personnel {
+  userRoles: AppRole[];
+}
 
-function mapPersonnelRowToUI(row: any): Personnel {
+function mapPersonnelRowToUI(row: any): PersonnelWithRoles {
   const squadName = row?.squads?.name ?? 'Unassigned';
 
   return {
@@ -41,6 +45,7 @@ function mapPersonnelRowToUI(row: any): Personnel {
     driverLicenses: row.driver_licenses ?? [],
     profileImage: row.profile_image ?? undefined,
     readinessStatus: row.readiness_status ?? 'ready',
+    userRoles: [],
   };
 }
 
@@ -51,7 +56,7 @@ export default function PersonnelPage() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [teamFilter, setTeamFilter] = useState('all');
-  const [personnel, setPersonnel] = useState<Personnel[]>([]);
+  const [personnel, setPersonnel] = useState<PersonnelWithRoles[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -63,14 +68,43 @@ export default function PersonnelPage() {
         const { data, error } = await supabase
           .from('personnel')
           .select(
-            'id, service_number, rank, first_name, last_name, duty_position, phone, email, local_address, location_status, readiness_status, skills, driver_licenses, profile_image, squads(name)'
+            'id, service_number, rank, first_name, last_name, duty_position, phone, email, local_address, location_status, readiness_status, skills, driver_licenses, profile_image, user_id, squads(name)'
           )
           .order('last_name', { ascending: true });
 
         if (error) throw error;
         if (!active) return;
 
-        setPersonnel((data ?? []).map(mapPersonnelRowToUI));
+        const mappedPersonnel = (data ?? []).map(mapPersonnelRowToUI);
+        
+        // Get user_ids that are not null
+        const userIds = data?.filter(p => p.user_id).map(p => p.user_id) || [];
+        
+        // Fetch roles for these users
+        if (userIds.length > 0) {
+          const { data: rolesData } = await supabase
+            .from('user_roles')
+            .select('user_id, role')
+            .in('user_id', userIds);
+          
+          // Build user_id to roles map
+          const userRolesMap = new Map<string, AppRole[]>();
+          rolesData?.forEach(r => {
+            const existing = userRolesMap.get(r.user_id) || [];
+            existing.push(r.role as AppRole);
+            userRolesMap.set(r.user_id, existing);
+          });
+          
+          // Attach roles to personnel
+          mappedPersonnel.forEach((p, index) => {
+            const userId = data?.[index]?.user_id;
+            if (userId) {
+              p.userRoles = userRolesMap.get(userId) || [];
+            }
+          });
+        }
+
+        setPersonnel(mappedPersonnel);
       } catch {
         toast({
           variant: 'destructive',
@@ -189,7 +223,7 @@ export default function PersonnelPage() {
                   className="animate-slide-up"
                   style={{ animationDelay: `${index * 30}ms` }}
                 >
-                  <PersonnelCard person={person} onClick={() => navigate(`/personnel/${person.id}`)} />
+                  <PersonnelCard person={person} roles={person.userRoles} onClick={() => navigate(`/personnel/${person.id}`)} />
                 </div>
               ))}
             </div>

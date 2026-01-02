@@ -723,6 +723,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      can_assign_leader_role: {
+        Args: { _assigner_user_id: string; _target_personnel_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

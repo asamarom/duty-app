@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { MobileHeader } from '@/components/layout/MobileHeader';
@@ -37,6 +37,10 @@ import { cn } from '@/lib/utils';
 import { UnitTreeSelector } from '@/components/personnel/UnitTreeSelector';
 import { AutocompleteTagInput } from '@/components/personnel/AutocompleteTagInput';
 import { usePersonnelSuggestions } from '@/hooks/usePersonnelSuggestions';
+import { RoleManagement } from '@/components/personnel/RoleManagement';
+import { RoleBadges } from '@/components/personnel/RoleBadge';
+import { useCanManageRole } from '@/hooks/useCanManageRole';
+import type { AppRole } from '@/hooks/useUserRole';
 
 
 export default function PersonnelDetailPage() {
@@ -49,6 +53,9 @@ export default function PersonnelDetailPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [roles, setRoles] = useState<AppRole[]>([]);
+  const { canManage: canManageRoles, loading: canManageLoading } = useCanManageRole(id);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -68,6 +75,24 @@ export default function PersonnelDetailPage() {
     profile_image: '' as string | null,
   });
 
+  const fetchRoles = useCallback(async (personnelUserId: string | null) => {
+    if (!personnelUserId) {
+      setRoles([]);
+      return;
+    }
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', personnelUserId);
+      
+      if (error) throw error;
+      setRoles(data?.map(r => r.role as AppRole) || []);
+    } catch (err) {
+      console.error('Error fetching roles:', err);
+    }
+  }, []);
+
   useEffect(() => {
     if (!id) return;
 
@@ -82,6 +107,12 @@ export default function PersonnelDetailPage() {
           .single();
 
         if (error) throw error;
+
+        // Store user_id for role management
+        setUserId(person.user_id || null);
+        
+        // Fetch roles for this personnel
+        await fetchRoles(person.user_id || null);
 
         // Parse duty_position - could be stored as string or already an array
         const dutyPositions = person.duty_position 
@@ -120,7 +151,7 @@ export default function PersonnelDetailPage() {
     };
 
     fetchData();
-  }, [id, navigate, toast]);
+  }, [id, navigate, toast, fetchRoles]);
 
   const handleSave = async () => {
     if (!id) return;
@@ -208,9 +239,12 @@ export default function PersonnelDetailPage() {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
-                <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                  {formData.rank} {formData.first_name} {formData.last_name}
-                </h1>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                    {formData.rank} {formData.first_name} {formData.last_name}
+                  </h1>
+                  <RoleBadges roles={roles} />
+                </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {getPrimaryDutyPosition() || 'No position assigned'} • {formData.service_number}
                 </p>
@@ -460,6 +494,17 @@ export default function PersonnelDetailPage() {
                 />
               </CardContent>
             </Card>
+
+            {/* Role Management - only show if user has role or can manage */}
+            {(roles.some(r => r !== 'user') || canManageRoles) && (
+              <RoleManagement
+                personnelId={id!}
+                userId={userId}
+                currentRoles={roles}
+                onRolesChanged={() => fetchRoles(userId)}
+                canManage={canManageRoles}
+              />
+            )}
           </div>
         </div>
       </div>
