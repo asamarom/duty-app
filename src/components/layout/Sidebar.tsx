@@ -39,8 +39,9 @@ export function Sidebar() {
   const pendingCount = usePendingRequestsCount();
 
   // Determine effective admin/leader status based on admin mode
+  // Admin mode only affects admin privileges; leader privileges remain.
   const effectiveIsAdmin = isActualAdmin && isAdminMode;
-  const effectiveIsLeader = isLeader && (!isActualAdmin || isAdminMode);
+  const effectiveIsLeader = isLeader;
   const hasAdminAccess = effectiveIsAdmin || effectiveIsLeader;
 
   const navigation: NavItem[] = [
