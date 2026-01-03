@@ -17,6 +17,9 @@ interface RoleManagementProps {
   currentRoles: AppRole[];
   onRolesChanged: () => void;
   canManage: boolean;
+  battalionId?: string | null;
+  platoonId?: string | null;
+  squadId?: string | null;
 }
 
 export function RoleManagement({ 
@@ -24,7 +27,10 @@ export function RoleManagement({
   userId, 
   currentRoles, 
   onRolesChanged,
-  canManage 
+  canManage,
+  battalionId,
+  platoonId,
+  squadId,
 }: RoleManagementProps) {
   const { toast } = useToast();
   const { isAdmin: viewerIsAdmin } = useUserRole();
@@ -56,17 +62,49 @@ export function RoleManagement({
 
         if (error) throw error;
 
+        // Also remove unit assignment
+        await supabase
+          .from('admin_unit_assignments')
+          .delete()
+          .eq('user_id', userId);
+
         toast({
           title: 'Role removed',
           description: 'Leader role has been removed.',
         });
       } else {
+        // Determine unit type and create unit assignment
+        let unitType = 'battalion';
+        if (squadId) {
+          unitType = 'squad';
+        } else if (platoonId) {
+          unitType = 'platoon';
+        } else if (battalionId) {
+          unitType = 'battalion';
+        }
+
         // Add leader role
         const { error } = await supabase
           .from('user_roles')
           .insert({ user_id: userId, role: 'leader' });
 
         if (error) throw error;
+
+        // Create unit assignment for the leader
+        const { error: unitError } = await supabase
+          .from('admin_unit_assignments')
+          .insert({
+            user_id: userId,
+            unit_type: unitType,
+            battalion_id: battalionId || null,
+            platoon_id: platoonId || null,
+            squad_id: squadId || null,
+          });
+
+        if (unitError) {
+          console.error('Error creating unit assignment:', unitError);
+          // Don't fail the whole operation if unit assignment fails
+        }
 
         toast({
           title: 'Role assigned',
