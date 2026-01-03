@@ -11,10 +11,11 @@ export function useEffectiveRole() {
   const { isAdminMode } = useAdminMode();
 
   // If user is an actual admin but admin mode is off, treat them as a regular user
+  // (i.e. remove admin-only privileges from the UI).
   const effectiveIsAdmin = isActualAdmin && isAdminMode;
-  
-  // Leaders keep their leader status unless they're also admins with admin mode off
-  const effectiveIsLeader = isLeader && (!isActualAdmin || isAdminMode);
+
+  // Leader privileges remain regardless of admin mode.
+  const effectiveIsLeader = isLeader;
 
   return {
     // Effective roles (respects admin mode)
