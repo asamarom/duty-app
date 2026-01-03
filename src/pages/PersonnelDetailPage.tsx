@@ -503,6 +503,9 @@ export default function PersonnelDetailPage() {
                 currentRoles={roles}
                 onRolesChanged={() => fetchRoles(userId)}
                 canManage={canManageRoles}
+                battalionId={formData.battalion_id}
+                platoonId={formData.platoon_id}
+                squadId={formData.squad_id}
               />
             )}
           </div>
