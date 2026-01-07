@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { MobileHeader } from '@/components/layout/MobileHeader';
@@ -26,7 +26,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
-import { ChevronLeft, Package, Save, Check, ChevronsUpDown, Loader2, Building2, Users, User } from 'lucide-react';
+import { ChevronLeft, Package, Save, Check, ChevronsUpDown, Loader2, Building2, Users, User, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePersonnel } from '@/hooks/usePersonnel';
 import { useEquipment } from '@/hooks/useEquipment';
@@ -34,14 +34,14 @@ import { useUnits } from '@/hooks/useUnits';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-type AssignmentType = 'battalion' | 'platoon' | 'squad' | 'individual';
+type AssignmentType = 'battalion' | 'company' | 'platoon' | 'individual';
 
 export default function AddEquipmentPage() {
   const { t, dir } = useLanguage();
   const navigate = useNavigate();
   const { personnel, loading: personnelLoading } = usePersonnel();
   const { equipment, loading: equipmentLoading, addEquipment } = useEquipment();
-  const { battalions, platoons, squads, loading: unitsLoading, getPlatoonsForBattalion, getSquadsForPlatoon } = useUnits();
+  const { battalions, companies, platoons, loading: unitsLoading, getCompaniesForBattalion, getPlatoonsForCompany } = useUnits();
   
   const [name, setName] = useState('');
   const [nameOpen, setNameOpen] = useState(false);
@@ -52,13 +52,20 @@ export default function AddEquipmentPage() {
   
   // Hierarchical selection state
   const [selectedBattalionId, setSelectedBattalionId] = useState('');
+  const [selectedCompanyId, setSelectedCompanyId] = useState('');
   const [selectedPlatoonId, setSelectedPlatoonId] = useState('');
-  const [selectedSquadId, setSelectedSquadId] = useState('');
   const [selectedPersonnelId, setSelectedPersonnelId] = useState('');
   
   const [saving, setSaving] = useState(false);
 
   const loading = personnelLoading || equipmentLoading || unitsLoading;
+
+  // Serialized items must be assigned to individuals
+  useEffect(() => {
+    if (hasSerial && assignedType !== 'individual') {
+      setAssignedType('individual');
+    }
+  }, [hasSerial, assignedType]);
 
   // Get unique equipment names for autocomplete
   const existingNames = useMemo(() => {
@@ -66,53 +73,62 @@ export default function AddEquipmentPage() {
     return names.sort();
   }, [equipment]);
 
-  // Get available platoons based on selected battalion
-  const availablePlatoons = useMemo(() => {
+  // Get available companies based on selected battalion
+  const availableCompanies = useMemo(() => {
     if (!selectedBattalionId) return [];
-    return getPlatoonsForBattalion(selectedBattalionId);
-  }, [selectedBattalionId, getPlatoonsForBattalion]);
+    return getCompaniesForBattalion(selectedBattalionId);
+  }, [selectedBattalionId, getCompaniesForBattalion]);
 
-  // Get available squads based on selected platoon
-  const availableSquads = useMemo(() => {
-    if (!selectedPlatoonId) return [];
-    return getSquadsForPlatoon(selectedPlatoonId);
-  }, [selectedPlatoonId, getSquadsForPlatoon]);
+  // Get available platoons based on selected company
+  const availablePlatoons = useMemo(() => {
+    if (!selectedCompanyId) return [];
+    return getPlatoonsForCompany(selectedCompanyId);
+  }, [selectedCompanyId, getPlatoonsForCompany]);
 
-  // Get available personnel (could filter by squad if needed)
+  // Get available personnel (could filter by platoon if needed)
   const availablePersonnel = useMemo(() => {
+    if (selectedPlatoonId) {
+      return personnel.filter(p => p.platoonId === selectedPlatoonId);
+    }
     return personnel;
-  }, [personnel]);
+  }, [personnel, selectedPlatoonId]);
 
   // Reset child selections when parent changes
   const handleBattalionChange = (value: string) => {
     setSelectedBattalionId(value);
+    setSelectedCompanyId('');
     setSelectedPlatoonId('');
-    setSelectedSquadId('');
+    setSelectedPersonnelId('');
+  };
+
+  const handleCompanyChange = (value: string) => {
+    setSelectedCompanyId(value);
+    setSelectedPlatoonId('');
     setSelectedPersonnelId('');
   };
 
   const handlePlatoonChange = (value: string) => {
     setSelectedPlatoonId(value);
-    setSelectedSquadId('');
-    setSelectedPersonnelId('');
-  };
-
-  const handleSquadChange = (value: string) => {
-    setSelectedSquadId(value);
     setSelectedPersonnelId('');
   };
 
   const handleTypeChange = (type: AssignmentType) => {
+    // Don't allow changing away from individual if serialized
+    if (hasSerial && type !== 'individual') {
+      toast.error('Serialized equipment must be assigned to an individual');
+      return;
+    }
+    
     setAssignedType(type);
     // Reset selections when type changes
     if (type === 'battalion') {
+      setSelectedCompanyId('');
       setSelectedPlatoonId('');
-      setSelectedSquadId('');
+      setSelectedPersonnelId('');
+    } else if (type === 'company') {
+      setSelectedPlatoonId('');
       setSelectedPersonnelId('');
     } else if (type === 'platoon') {
-      setSelectedSquadId('');
-      setSelectedPersonnelId('');
-    } else if (type === 'squad') {
       setSelectedPersonnelId('');
     }
   };
@@ -126,16 +142,22 @@ export default function AddEquipmentPage() {
       toast.error(t('addEquipment.serialRequired'));
       return;
     }
+    
+    // Serialized items must have an individual assigned
+    if (hasSerial && !selectedPersonnelId) {
+      toast.error('Serialized equipment must be assigned to an individual');
+      return;
+    }
 
     // Build assignment based on type
-    let assignment: { personnelId?: string; platoonId?: string; squadId?: string; battalionId?: string } = {};
+    let assignment: { personnelId?: string; platoonId?: string; companyId?: string; battalionId?: string } = {};
     
     if (assignedType === 'battalion' && selectedBattalionId) {
       assignment.battalionId = selectedBattalionId;
+    } else if (assignedType === 'company' && selectedCompanyId) {
+      assignment.companyId = selectedCompanyId;
     } else if (assignedType === 'platoon' && selectedPlatoonId) {
       assignment.platoonId = selectedPlatoonId;
-    } else if (assignedType === 'squad' && selectedSquadId) {
-      assignment.squadId = selectedSquadId;
     } else if (assignedType === 'individual' && selectedPersonnelId) {
       assignment.personnelId = selectedPersonnelId;
     }
@@ -279,6 +301,14 @@ export default function AddEquipmentPage() {
             />
           </div>
 
+          {/* Serialized item notice */}
+          {hasSerial && (
+            <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+              <span>Serialized equipment must be assigned to an individual for accountability.</span>
+            </div>
+          )}
+
           {/* Serial Number or Quantity */}
           {hasSerial ? (
             <div className="space-y-2">
@@ -317,22 +347,26 @@ export default function AddEquipmentPage() {
             
             {/* Assignment Type */}
             <div className="grid grid-cols-2 gap-2">
-              {(['battalion', 'platoon', 'squad', 'individual'] as const).map((aType) => (
-                <Button
-                  key={aType}
-                  type="button"
-                  variant={assignedType === aType ? 'tactical' : 'outline'}
-                  size="sm"
-                  onClick={() => handleTypeChange(aType)}
-                  className="h-10 gap-2"
-                >
-                  {aType === 'battalion' && <Building2 className="h-4 w-4" />}
-                  {aType === 'platoon' && <Users className="h-4 w-4" />}
-                  {aType === 'squad' && <Users className="h-4 w-4" />}
-                  {aType === 'individual' && <User className="h-4 w-4" />}
-                  {aType.charAt(0).toUpperCase() + aType.slice(1)}
-                </Button>
-              ))}
+              {(['battalion', 'company', 'platoon', 'individual'] as const).map((aType) => {
+                const isDisabled = hasSerial && aType !== 'individual';
+                return (
+                  <Button
+                    key={aType}
+                    type="button"
+                    variant={assignedType === aType ? 'tactical' : 'outline'}
+                    size="sm"
+                    onClick={() => handleTypeChange(aType)}
+                    disabled={isDisabled}
+                    className="h-10 gap-2"
+                  >
+                    {aType === 'battalion' && <Building2 className="h-4 w-4" />}
+                    {aType === 'company' && <Users className="h-4 w-4" />}
+                    {aType === 'platoon' && <Users className="h-4 w-4" />}
+                    {aType === 'individual' && <User className="h-4 w-4" />}
+                    {aType.charAt(0).toUpperCase() + aType.slice(1)}
+                  </Button>
+                );
+              })}
             </div>
 
             {/* Hierarchical Selection */}
@@ -357,8 +391,30 @@ export default function AddEquipmentPage() {
                 </Select>
               </div>
 
-              {/* Platoon Selection - show for platoon, squad, individual */}
+              {/* Company Selection - show for company, platoon, individual */}
               {assignedType !== 'battalion' && selectedBattalionId && (
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Company</Label>
+                  <Select value={selectedCompanyId} onValueChange={handleCompanyChange}>
+                    <SelectTrigger className="h-12 bg-secondary border-border">
+                      <SelectValue placeholder="Select Company" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableCompanies.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4" />
+                            {c.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Platoon Selection - show for platoon, individual */}
+              {(assignedType === 'platoon' || assignedType === 'individual') && selectedCompanyId && (
                 <div className="space-y-2">
                   <Label className="text-xs text-muted-foreground">Platoon</Label>
                   <Select value={selectedPlatoonId} onValueChange={handlePlatoonChange}>
@@ -379,32 +435,10 @@ export default function AddEquipmentPage() {
                 </div>
               )}
 
-              {/* Squad Selection - show for squad, individual */}
-              {(assignedType === 'squad' || assignedType === 'individual') && selectedPlatoonId && (
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Squad</Label>
-                  <Select value={selectedSquadId} onValueChange={handleSquadChange}>
-                    <SelectTrigger className="h-12 bg-secondary border-border">
-                      <SelectValue placeholder="Select Squad" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableSquads.map((s) => (
-                        <SelectItem key={s.id} value={s.id}>
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4" />
-                            {s.name}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
               {/* Individual Selection */}
               {assignedType === 'individual' && (
                 <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Person</Label>
+                  <Label className="text-xs text-muted-foreground">Person {hasSerial && '*'}</Label>
                   <Select value={selectedPersonnelId} onValueChange={setSelectedPersonnelId}>
                     <SelectTrigger className="h-12 bg-secondary border-border">
                       <SelectValue placeholder="Select Person" />

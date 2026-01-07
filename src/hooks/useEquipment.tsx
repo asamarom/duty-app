@@ -6,22 +6,23 @@ import { useAuth } from '@/hooks/useAuth';
 
 export type EquipmentRow = Tables<'equipment'>;
 
-export type AssignmentLevel = 'battalion' | 'platoon' | 'squad' | 'individual' | 'unassigned';
+export type AssignmentLevel = 'battalion' | 'company' | 'platoon' | 'individual' | 'unassigned';
 
 export interface EquipmentWithAssignment extends Equipment {
   assigneeName?: string;
   currentAssignmentId?: string;
   currentPersonnelId?: string;
   currentBattalionId?: string;
+  currentCompanyId?: string;
   currentPlatoonId?: string;
-  currentSquadId?: string;
   assignmentLevel: AssignmentLevel;
+  hasPendingTransfer?: boolean;
 }
 
 interface AssignmentData {
   personnelId?: string;
   platoonId?: string;
-  squadId?: string;
+  companyId?: string;
   battalionId?: string;
 }
 
@@ -58,68 +59,60 @@ export function useEquipment(): UseEquipmentReturn {
             id,
             personnel_id,
             platoon_id,
-            squad_id,
+            company_id,
+            battalion_id,
             returned_at,
             personnel(first_name, last_name),
             platoons(name),
-            squads(name)
+            companies(name),
+            battalions(name)
           )
         `)
         .order('name');
 
       if (fetchError) throw fetchError;
 
-      // Fetch battalion assignments separately (since types aren't regenerated yet)
-      const { data: battalionAssignments } = await supabase
-        .from('equipment_assignments')
-        .select('id, equipment_id, battalion_id, battalions(name)')
-        .not('battalion_id', 'is', null)
-        .is('returned_at', null);
+      // Fetch pending transfer requests to mark equipment
+      const { data: pendingRequests } = await supabase
+        .from('assignment_requests')
+        .select('equipment_id')
+        .eq('status', 'pending');
 
-      // Create a map of equipment_id to battalion assignment
-      const battalionMap = new Map<string, { battalion_id: string; battalionName: string }>();
-      if (battalionAssignments) {
-        for (const ba of battalionAssignments as any[]) {
-          if (ba.battalion_id && ba.battalions) {
-            battalionMap.set(ba.equipment_id, {
-              battalion_id: ba.battalion_id,
-              battalionName: ba.battalions.name,
-            });
-          }
-        }
-      }
+      const pendingEquipmentIds = new Set((pendingRequests || []).map(r => r.equipment_id));
 
-      const mappedEquipment: EquipmentWithAssignment[] = (equipmentData || []).map((row) => {
+      const mappedEquipment: EquipmentWithAssignment[] = (equipmentData || []).map((row: any) => {
         // Find active assignment (not returned)
         const activeAssignment = row.equipment_assignments?.find(
           (a: { returned_at: string | null }) => !a.returned_at
         );
 
         let assigneeName: string | undefined;
-        let assignedType: 'individual' | 'squad' | 'platoon' | 'battalion' = 'individual';
+        let assignedType: 'individual' | 'company' | 'platoon' | 'battalion' = 'individual';
         let assignmentLevel: AssignmentLevel = 'unassigned';
         let currentBattalionId: string | undefined;
+        let currentCompanyId: string | undefined;
+        let currentPlatoonId: string | undefined;
 
-        // Check for battalion assignment first
-        const battalionAssignment = battalionMap.get(row.id);
-        if (battalionAssignment) {
-          assigneeName = battalionAssignment.battalionName;
-          assignedType = 'battalion';
-          assignmentLevel = 'battalion';
-          currentBattalionId = battalionAssignment.battalion_id;
-        } else if (activeAssignment) {
+        if (activeAssignment) {
           if (activeAssignment.personnel) {
             assigneeName = `${activeAssignment.personnel.first_name} ${activeAssignment.personnel.last_name}`;
             assignedType = 'individual';
             assignmentLevel = 'individual';
-          } else if (activeAssignment.squads) {
-            assigneeName = activeAssignment.squads.name;
-            assignedType = 'squad';
-            assignmentLevel = 'squad';
           } else if (activeAssignment.platoons) {
             assigneeName = activeAssignment.platoons.name;
             assignedType = 'platoon';
             assignmentLevel = 'platoon';
+            currentPlatoonId = activeAssignment.platoon_id;
+          } else if (activeAssignment.companies) {
+            assigneeName = activeAssignment.companies.name;
+            assignedType = 'company';
+            assignmentLevel = 'company';
+            currentCompanyId = activeAssignment.company_id;
+          } else if (activeAssignment.battalions) {
+            assigneeName = activeAssignment.battalions.name;
+            assignedType = 'battalion';
+            assignmentLevel = 'battalion';
+            currentBattalionId = activeAssignment.battalion_id;
           }
         }
 
@@ -134,10 +127,11 @@ export function useEquipment(): UseEquipmentReturn {
           assigneeName,
           currentAssignmentId: activeAssignment?.id,
           currentPersonnelId: activeAssignment?.personnel_id,
-          currentBattalionId,
-          currentPlatoonId: activeAssignment?.platoon_id,
-          currentSquadId: activeAssignment?.squad_id,
+          currentBattalionId: currentBattalionId || activeAssignment?.battalion_id,
+          currentCompanyId: currentCompanyId || activeAssignment?.company_id,
+          currentPlatoonId: currentPlatoonId || activeAssignment?.platoon_id,
           assignmentLevel,
+          hasPendingTransfer: pendingEquipmentIds.has(row.id),
         };
       });
       
@@ -164,16 +158,16 @@ export function useEquipment(): UseEquipmentReturn {
     if (insertError) throw insertError;
 
     // Create assignment if provided
-    if (assignment && inserted && (assignment.personnelId || assignment.platoonId || assignment.squadId || assignment.battalionId)) {
+    if (assignment && inserted && (assignment.personnelId || assignment.platoonId || assignment.companyId || assignment.battalionId)) {
       const { error: assignError } = await supabase
         .from('equipment_assignments')
         .insert({
           equipment_id: inserted.id,
           personnel_id: assignment.personnelId || null,
           platoon_id: assignment.platoonId || null,
-          squad_id: assignment.squadId || null,
+          company_id: assignment.companyId || null,
           battalion_id: assignment.battalionId || null,
-        } as any);
+        });
 
       if (assignError) throw assignError;
     }
@@ -221,9 +215,9 @@ export function useEquipment(): UseEquipmentReturn {
         equipment_id: equipmentId,
         personnel_id: assignment.personnelId || null,
         platoon_id: assignment.platoonId || null,
-        squad_id: assignment.squadId || null,
+        company_id: assignment.companyId || null,
         battalion_id: assignment.battalionId || null,
-      } as any);
+      });
 
     if (assignError) throw assignError;
     await fetchEquipment();
@@ -249,9 +243,6 @@ export function useEquipment(): UseEquipmentReturn {
   ): boolean => {
     // Assigning to individual within current unit is direct
     if (targetLevel === 'individual' && assignment.personnelId) {
-      // If current is battalion, assigning to someone in that battalion is direct
-      // If current is platoon, assigning to someone in that platoon is direct
-      // If current is squad, assigning to someone in that squad is direct
       return true; // For now, consider individual assignment from any level as direct
     }
     
@@ -260,12 +251,12 @@ export function useEquipment(): UseEquipmentReturn {
         equipmentItem.currentBattalionId === assignment.battalionId) {
       return true;
     }
-    if (currentLevel === 'platoon' && targetLevel === 'platoon' && 
-        equipmentItem.currentPlatoonId === assignment.platoonId) {
+    if (currentLevel === 'company' && targetLevel === 'company' && 
+        equipmentItem.currentCompanyId === assignment.companyId) {
       return true;
     }
-    if (currentLevel === 'squad' && targetLevel === 'squad' && 
-        equipmentItem.currentSquadId === assignment.squadId) {
+    if (currentLevel === 'platoon' && targetLevel === 'platoon' && 
+        equipmentItem.currentPlatoonId === assignment.platoonId) {
       return true;
     }
     
@@ -283,8 +274,8 @@ export function useEquipment(): UseEquipmentReturn {
 
     const fromUnitType = equipmentItem.assignmentLevel || 'unassigned';
     const toUnitType = assignment.personnelId ? 'individual' 
-      : assignment.squadId ? 'squad'
       : assignment.platoonId ? 'platoon'
+      : assignment.companyId ? 'company'
       : assignment.battalionId ? 'battalion'
       : 'unassigned';
 
@@ -294,13 +285,13 @@ export function useEquipment(): UseEquipmentReturn {
         equipment_id: equipmentId,
         from_unit_type: fromUnitType,
         from_battalion_id: equipmentItem.currentBattalionId || null,
+        from_company_id: equipmentItem.currentCompanyId || null,
         from_platoon_id: equipmentItem.currentPlatoonId || null,
-        from_squad_id: equipmentItem.currentSquadId || null,
         from_personnel_id: equipmentItem.currentPersonnelId || null,
         to_unit_type: toUnitType,
         to_battalion_id: assignment.battalionId || null,
+        to_company_id: assignment.companyId || null,
         to_platoon_id: assignment.platoonId || null,
-        to_squad_id: assignment.squadId || null,
         to_personnel_id: assignment.personnelId || null,
         requested_by: user?.id || null,
         notes: notes || null,

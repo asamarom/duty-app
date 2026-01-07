@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -27,11 +28,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { ArrowRight, Save, Package, User, Users, Trash2, Loader2, Building2 } from 'lucide-react';
+import { ArrowRight, Save, Package, User, Users, Trash2, Loader2, Building2, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 
-type AssignmentType = 'battalion' | 'platoon' | 'squad' | 'individual';
+type AssignmentType = 'battalion' | 'company' | 'platoon' | 'individual';
 
 export default function EquipmentDetailPage() {
   const { id } = useParams();
@@ -39,7 +40,7 @@ export default function EquipmentDetailPage() {
   const { t } = useLanguage();
   const { personnel, loading: personnelLoading } = usePersonnel();
   const { equipment, loading: equipmentLoading, updateEquipment, deleteEquipment, assignEquipment, unassignEquipment, requestAssignment, isWithinSameUnit } = useEquipment();
-  const { battalions, platoons, squads, loading: unitsLoading, getPlatoonsForBattalion, getSquadsForPlatoon } = useUnits();
+  const { battalions, companies, platoons, loading: unitsLoading, getCompaniesForBattalion, getPlatoonsForCompany } = useUnits();
   
   const item = equipment.find((e) => e.id === id);
   
@@ -52,35 +53,42 @@ export default function EquipmentDetailPage() {
 
   const [assignedType, setAssignedType] = useState<AssignmentType>('battalion');
   const [selectedBattalionId, setSelectedBattalionId] = useState('');
+  const [selectedCompanyId, setSelectedCompanyId] = useState('');
   const [selectedPlatoonId, setSelectedPlatoonId] = useState('');
-  const [selectedSquadId, setSelectedSquadId] = useState('');
   const [selectedPersonnelId, setSelectedPersonnelId] = useState('');
 
   // Get the current assignment level to determine allowed reassignments
   const currentLevel: AssignmentLevel = item?.assignmentLevel || 'unassigned';
 
-  // Determine which assignment types are allowed based on current level
-  // Allow one step up OR down the hierarchy
+  // Serialized items can ONLY be assigned to individuals
+  const isSerializedItem = !!item?.serialNumber;
+
+  // Determine which assignment types are allowed based on current level and serialization
   const allowedTypes = useMemo((): AssignmentType[] => {
+    // Serialized items must go to individuals
+    if (isSerializedItem) {
+      return ['individual'];
+    }
+    
     switch (currentLevel) {
       case 'battalion':
-        // Can reassign to platoon (one step down)
-        return ['platoon'];
+        // Can reassign to company (one step down)
+        return ['company'];
+      case 'company':
+        // Can go up to battalion or down to platoon
+        return ['battalion', 'platoon'];
       case 'platoon':
-        // Can go up to battalion or down to squad
-        return ['battalion', 'squad'];
-      case 'squad':
-        // Can go up to platoon or down to individual
-        return ['platoon', 'individual'];
+        // Can go up to company or down to individual
+        return ['company', 'individual'];
       case 'individual':
-        // Can go up to squad or reassign to another individual
-        return ['squad', 'individual'];
+        // Can go up to platoon or reassign to another individual
+        return ['platoon', 'individual'];
       case 'unassigned':
       default:
         // Can assign to any level
-        return ['battalion', 'platoon', 'squad', 'individual'];
+        return ['battalion', 'company', 'platoon', 'individual'];
     }
-  }, [currentLevel]);
+  }, [currentLevel, isSerializedItem]);
 
   // Initialize form data when equipment is loaded
   useEffect(() => {
@@ -93,167 +101,163 @@ export default function EquipmentDetailPage() {
       });
 
       // Set current assignment state
-      if (item.currentBattalionId) {
+      if (item.currentBattalionId && item.assignmentLevel === 'battalion') {
         setSelectedBattalionId(item.currentBattalionId);
         setAssignedType('battalion');
       }
-      if (item.currentPlatoonId) {
-        setSelectedPlatoonId(item.currentPlatoonId);
-        // Find the battalion for this platoon
-        const platoon = platoons.find(p => p.id === item.currentPlatoonId);
-        if (platoon) {
-          setSelectedBattalionId(platoon.battalion_id);
+      if (item.currentCompanyId && item.assignmentLevel === 'company') {
+        setSelectedCompanyId(item.currentCompanyId);
+        // Find the battalion for this company
+        const company = companies.find(c => c.id === item.currentCompanyId);
+        if (company) {
+          setSelectedBattalionId(company.battalion_id);
         }
-        setAssignedType('platoon');
+        setAssignedType('company');
       }
-      if (item.currentSquadId) {
-        setSelectedSquadId(item.currentSquadId);
-        // Find the platoon and battalion for this squad
-        const squad = squads.find(s => s.id === item.currentSquadId);
-        if (squad) {
-          setSelectedPlatoonId(squad.platoon_id);
-          const platoon = platoons.find(p => p.id === squad.platoon_id);
-          if (platoon) {
-            setSelectedBattalionId(platoon.battalion_id);
+      if (item.currentPlatoonId && item.assignmentLevel === 'platoon') {
+        setSelectedPlatoonId(item.currentPlatoonId);
+        // Find the company and battalion for this platoon
+        const platoon = platoons.find(p => p.id === item.currentPlatoonId);
+        if (platoon?.company_id) {
+          setSelectedCompanyId(platoon.company_id);
+          const company = companies.find(c => c.id === platoon.company_id);
+          if (company) {
+            setSelectedBattalionId(company.battalion_id);
           }
         }
-        setAssignedType('squad');
+        setAssignedType('platoon');
       }
       if (item.currentPersonnelId) {
         setSelectedPersonnelId(item.currentPersonnelId);
         setAssignedType('individual');
       }
     }
-  }, [item, platoons, squads]);
+  }, [item, companies, platoons]);
 
   const loading = personnelLoading || equipmentLoading || unitsLoading;
 
   // Get the current assignment's hierarchy info
   const currentAssignmentInfo = useMemo(() => {
-    if (!item) return { battalionId: null, platoonId: null, squadId: null };
+    if (!item) return { battalionId: null, companyId: null, platoonId: null };
     
-    // Get the current battalion, platoon, squad from the item's assignment
     let battalionId = item.currentBattalionId || null;
+    let companyId = item.currentCompanyId || null;
     let platoonId = item.currentPlatoonId || null;
-    let squadId = item.currentSquadId || null;
     
-    // If assigned to individual, find their squad
+    // If assigned to individual, find their platoon
     if (item.currentPersonnelId) {
       const person = personnel.find(p => p.id === item.currentPersonnelId);
-      if (person?.squadId) {
-        squadId = person.squadId;
-        const squad = squads.find(s => s.id === squadId);
-        if (squad) {
-          platoonId = squad.platoon_id;
-          const platoon = platoons.find(p => p.id === platoonId);
-          if (platoon) {
-            battalionId = platoon.battalion_id;
+      if (person?.platoonId) {
+        platoonId = person.platoonId;
+        const platoon = platoons.find(p => p.id === platoonId);
+        if (platoon?.company_id) {
+          companyId = platoon.company_id;
+          const company = companies.find(c => c.id === companyId);
+          if (company) {
+            battalionId = company.battalion_id;
           }
         }
       }
     }
     
-    // If assigned to squad, find its platoon and battalion
-    if (squadId && !platoonId) {
-      const squad = squads.find(s => s.id === squadId);
-      if (squad) {
-        platoonId = squad.platoon_id;
-        const platoon = platoons.find(p => p.id === platoonId);
-        if (platoon) {
-          battalionId = platoon.battalion_id;
+    // If assigned to platoon, find its company and battalion
+    if (platoonId && !companyId) {
+      const platoon = platoons.find(p => p.id === platoonId);
+      if (platoon?.company_id) {
+        companyId = platoon.company_id;
+        const company = companies.find(c => c.id === companyId);
+        if (company) {
+          battalionId = company.battalion_id;
         }
       }
     }
     
-    // If assigned to platoon, find its battalion
-    if (platoonId && !battalionId) {
-      const platoon = platoons.find(p => p.id === platoonId);
-      if (platoon) {
-        battalionId = platoon.battalion_id;
+    // If assigned to company, find its battalion
+    if (companyId && !battalionId) {
+      const company = companies.find(c => c.id === companyId);
+      if (company) {
+        battalionId = company.battalion_id;
       }
     }
     
-    return { battalionId, platoonId, squadId };
-  }, [item, personnel, squads, platoons]);
+    return { battalionId, companyId, platoonId };
+  }, [item, personnel, companies, platoons]);
 
   // Get available battalions - only the current hierarchy's battalion when not unassigned
   const availableBattalions = useMemo(() => {
     if (currentLevel === 'unassigned') return battalions;
-    // When going up to battalion, only show the current hierarchy's battalion
     if (currentAssignmentInfo.battalionId) {
       return battalions.filter(b => b.id === currentAssignmentInfo.battalionId);
     }
     return battalions;
   }, [battalions, currentLevel, currentAssignmentInfo.battalionId]);
 
+  // Get available companies - filtered by hierarchy
+  const availableCompanies = useMemo(() => {
+    if (currentLevel === 'unassigned') {
+      if (!selectedBattalionId) return [];
+      return getCompaniesForBattalion(selectedBattalionId);
+    }
+    
+    // When at company level or below, only show current company hierarchy
+    if ((currentLevel === 'company' || currentLevel === 'platoon' || currentLevel === 'individual') && currentAssignmentInfo.companyId) {
+      return companies.filter(c => c.id === currentAssignmentInfo.companyId);
+    }
+    
+    // When going down from battalion to company, show companies in that battalion
+    if (currentLevel === 'battalion' && currentAssignmentInfo.battalionId) {
+      return getCompaniesForBattalion(currentAssignmentInfo.battalionId);
+    }
+    
+    return getCompaniesForBattalion(selectedBattalionId);
+  }, [currentLevel, currentAssignmentInfo, selectedBattalionId, getCompaniesForBattalion, companies]);
+
   // Get available platoons - filtered by hierarchy
   const availablePlatoons = useMemo(() => {
     if (currentLevel === 'unassigned') {
-      // When unassigned, show platoons based on selected battalion
-      if (!selectedBattalionId) return [];
-      return getPlatoonsForBattalion(selectedBattalionId);
+      if (!selectedCompanyId) return [];
+      return getPlatoonsForCompany(selectedCompanyId);
     }
     
-    // When at platoon level going down, or going up from squad/individual - only show current platoon
-    if ((currentLevel === 'platoon' || currentLevel === 'squad' || currentLevel === 'individual') && currentAssignmentInfo.platoonId) {
+    // When at platoon level or individual, only show current platoon
+    if ((currentLevel === 'platoon' || currentLevel === 'individual') && currentAssignmentInfo.platoonId) {
       return platoons.filter(p => p.id === currentAssignmentInfo.platoonId);
     }
     
-    // When going down from battalion to platoon, show platoons in that battalion
-    if (currentLevel === 'battalion' && currentAssignmentInfo.battalionId) {
-      return getPlatoonsForBattalion(currentAssignmentInfo.battalionId);
+    // When going down from company to platoon, show platoons in that company
+    if (currentLevel === 'company' && currentAssignmentInfo.companyId) {
+      return getPlatoonsForCompany(currentAssignmentInfo.companyId);
     }
     
-    return getPlatoonsForBattalion(selectedBattalionId);
-  }, [currentLevel, currentAssignmentInfo, selectedBattalionId, getPlatoonsForBattalion, platoons]);
-
-  // Get available squads - filtered by hierarchy
-  const availableSquads = useMemo(() => {
-    if (currentLevel === 'unassigned') {
-      if (!selectedPlatoonId) return [];
-      return getSquadsForPlatoon(selectedPlatoonId);
-    }
-    
-    // When at squad level going down to individual, or going up from individual - only show current squad
-    if ((currentLevel === 'squad' || currentLevel === 'individual') && currentAssignmentInfo.squadId) {
-      return squads.filter(s => s.id === currentAssignmentInfo.squadId);
-    }
-    
-    // When going down from platoon to squad, show squads in that platoon
-    if (currentLevel === 'platoon' && currentAssignmentInfo.platoonId) {
-      return getSquadsForPlatoon(currentAssignmentInfo.platoonId);
-    }
-    
-    return getSquadsForPlatoon(selectedPlatoonId);
-  }, [currentLevel, currentAssignmentInfo, selectedPlatoonId, getSquadsForPlatoon, squads]);
+    return getPlatoonsForCompany(selectedCompanyId);
+  }, [currentLevel, currentAssignmentInfo, selectedCompanyId, getPlatoonsForCompany, platoons]);
 
   // Get available personnel - filtered by hierarchy
   const availablePersonnel = useMemo(() => {
     if (currentLevel === 'unassigned') {
-      // Filter by selected squad if available
-      if (selectedSquadId) {
-        return personnel.filter(p => p.squadId === selectedSquadId);
+      if (selectedPlatoonId) {
+        return personnel.filter(p => p.platoonId === selectedPlatoonId);
       }
       return personnel;
     }
     
-    // When individual is current level, only show individuals in the same squad
-    if (currentLevel === 'individual' && currentAssignmentInfo.squadId) {
-      return personnel.filter(p => p.squadId === currentAssignmentInfo.squadId);
+    // When individual is current level, only show individuals in the same platoon
+    if (currentLevel === 'individual' && currentAssignmentInfo.platoonId) {
+      return personnel.filter(p => p.platoonId === currentAssignmentInfo.platoonId);
     }
     
-    // When going down from squad to individual, show individuals in that squad
-    if (currentLevel === 'squad' && currentAssignmentInfo.squadId) {
-      return personnel.filter(p => p.squadId === currentAssignmentInfo.squadId);
+    // When going down from platoon to individual, show individuals in that platoon
+    if (currentLevel === 'platoon' && currentAssignmentInfo.platoonId) {
+      return personnel.filter(p => p.platoonId === currentAssignmentInfo.platoonId);
     }
     
-    // Filter by selected squad
-    if (selectedSquadId) {
-      return personnel.filter(p => p.squadId === selectedSquadId);
+    // Filter by selected platoon
+    if (selectedPlatoonId) {
+      return personnel.filter(p => p.platoonId === selectedPlatoonId);
     }
     
     return personnel;
-  }, [currentLevel, currentAssignmentInfo, selectedSquadId, personnel]);
+  }, [currentLevel, currentAssignmentInfo, selectedPlatoonId, personnel]);
 
   // Auto-select when there's only one option
   useEffect(() => {
@@ -263,31 +267,32 @@ export default function EquipmentDetailPage() {
   }, [availableBattalions, selectedBattalionId]);
 
   useEffect(() => {
+    if (availableCompanies.length === 1 && !selectedCompanyId) {
+      setSelectedCompanyId(availableCompanies[0].id);
+    }
+  }, [availableCompanies, selectedCompanyId]);
+
+  useEffect(() => {
     if (availablePlatoons.length === 1 && !selectedPlatoonId) {
       setSelectedPlatoonId(availablePlatoons[0].id);
     }
   }, [availablePlatoons, selectedPlatoonId]);
 
-  useEffect(() => {
-    if (availableSquads.length === 1 && !selectedSquadId) {
-      setSelectedSquadId(availableSquads[0].id);
-    }
-  }, [availableSquads, selectedSquadId]);
   const handleBattalionChange = (value: string) => {
     setSelectedBattalionId(value);
+    setSelectedCompanyId('');
     setSelectedPlatoonId('');
-    setSelectedSquadId('');
+    setSelectedPersonnelId('');
+  };
+
+  const handleCompanyChange = (value: string) => {
+    setSelectedCompanyId(value);
+    setSelectedPlatoonId('');
     setSelectedPersonnelId('');
   };
 
   const handlePlatoonChange = (value: string) => {
     setSelectedPlatoonId(value);
-    setSelectedSquadId('');
-    setSelectedPersonnelId('');
-  };
-
-  const handleSquadChange = (value: string) => {
-    setSelectedSquadId(value);
     setSelectedPersonnelId('');
   };
 
@@ -295,13 +300,13 @@ export default function EquipmentDetailPage() {
     setAssignedType(type);
     // Reset selections when type changes
     if (type === 'battalion') {
+      setSelectedCompanyId('');
       setSelectedPlatoonId('');
-      setSelectedSquadId('');
+      setSelectedPersonnelId('');
+    } else if (type === 'company') {
+      setSelectedPlatoonId('');
       setSelectedPersonnelId('');
     } else if (type === 'platoon') {
-      setSelectedSquadId('');
-      setSelectedPersonnelId('');
-    } else if (type === 'squad') {
       setSelectedPersonnelId('');
     }
   };
@@ -348,16 +353,16 @@ export default function EquipmentDetailPage() {
 
       // Build assignment based on type
       let hasAssignment = false;
-      let assignment: { personnelId?: string; platoonId?: string; squadId?: string; battalionId?: string } = {};
+      let assignment: { personnelId?: string; platoonId?: string; companyId?: string; battalionId?: string } = {};
       
       if (assignedType === 'battalion' && selectedBattalionId) {
         assignment.battalionId = selectedBattalionId;
         hasAssignment = true;
+      } else if (assignedType === 'company' && selectedCompanyId) {
+        assignment.companyId = selectedCompanyId;
+        hasAssignment = true;
       } else if (assignedType === 'platoon' && selectedPlatoonId) {
         assignment.platoonId = selectedPlatoonId;
-        hasAssignment = true;
-      } else if (assignedType === 'squad' && selectedSquadId) {
-        assignment.squadId = selectedSquadId;
         hasAssignment = true;
       } else if (assignedType === 'individual' && selectedPersonnelId) {
         assignment.personnelId = selectedPersonnelId;
@@ -367,8 +372,8 @@ export default function EquipmentDetailPage() {
       if (hasAssignment) {
         // Determine target level
         const targetLevel: AssignmentLevel = assignment.personnelId ? 'individual' 
-          : assignment.squadId ? 'squad'
           : assignment.platoonId ? 'platoon'
+          : assignment.companyId ? 'company'
           : assignment.battalionId ? 'battalion'
           : 'unassigned';
         
@@ -422,9 +427,17 @@ export default function EquipmentDetailPage() {
               <ArrowRight className="h-5 w-5 rotate-180" />
             </Button>
             <div>
-              <h1 className="text-xl lg:text-2xl font-bold text-foreground">
-                {item.name}
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl lg:text-2xl font-bold text-foreground">
+                  {item.name}
+                </h1>
+                {item.hasPendingTransfer && (
+                  <Badge variant="outline" className="text-warning border-warning">
+                    <AlertTriangle className="h-3 w-3 mr-1" />
+                    Transfer Pending
+                  </Badge>
+                )}
+              </div>
               <p className="text-sm text-muted-foreground">
                 {item.serialNumber}
               </p>
@@ -529,13 +542,21 @@ export default function EquipmentDetailPage() {
                 <span className="text-muted-foreground"> ({currentLevel})</span>
               </div>
             )}
+
+            {/* Serialized item warning */}
+            {isSerializedItem && (
+              <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+                <span>Serialized equipment must be assigned to an individual for accountability.</span>
+              </div>
+            )}
             
             <div className="space-y-4">
               {/* Assignment Type */}
               <div className="space-y-2">
                 <Label>Assignment Type</Label>
                 <div className="grid grid-cols-2 gap-2">
-                  {(['battalion', 'platoon', 'squad', 'individual'] as const).map((aType) => {
+                  {(['battalion', 'company', 'platoon', 'individual'] as const).map((aType) => {
                     const isAllowed = allowedTypes.includes(aType);
                     return (
                       <Button
@@ -548,24 +569,24 @@ export default function EquipmentDetailPage() {
                         className="h-10 gap-2"
                       >
                         {aType === 'battalion' && <Building2 className="h-4 w-4" />}
+                        {aType === 'company' && <Users className="h-4 w-4" />}
                         {aType === 'platoon' && <Users className="h-4 w-4" />}
-                        {aType === 'squad' && <Users className="h-4 w-4" />}
                         {aType === 'individual' && <User className="h-4 w-4" />}
                         {aType.charAt(0).toUpperCase() + aType.slice(1)}
                       </Button>
                     );
                   })}
                 </div>
-                {currentLevel !== 'unassigned' && (
+                {currentLevel !== 'unassigned' && !isSerializedItem && (
                   <p className="text-xs text-muted-foreground">
-                    Items can only be reassigned down the hierarchy (e.g., battalion → platoon → squad → individual)
+                    Items can only be reassigned one level up or down the hierarchy (e.g., battalion → company → platoon → individual)
                   </p>
                 )}
               </div>
 
               {/* Hierarchical Selection */}
               <div className="space-y-3">
-                {/* Battalion Selection - show for battalion type or when unassigned */}
+                {/* Battalion Selection */}
                 {(assignedType === 'battalion' || currentLevel === 'unassigned') && allowedTypes.includes('battalion') && (
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Battalion</Label>
@@ -594,8 +615,37 @@ export default function EquipmentDetailPage() {
                   </div>
                 )}
 
-                {/* Platoon Selection - for platoon assignment or drilling down */}
-                {(assignedType === 'platoon' || assignedType === 'squad' || assignedType === 'individual') && (
+                {/* Company Selection */}
+                {(assignedType === 'company' || assignedType === 'platoon' || assignedType === 'individual') && (
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Company</Label>
+                    {availableCompanies.length === 1 ? (
+                      <div className="flex items-center gap-2 h-10 px-3 rounded-md border border-input bg-muted/50">
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{availableCompanies[0].name}</span>
+                      </div>
+                    ) : (
+                      <Select value={selectedCompanyId} onValueChange={handleCompanyChange}>
+                        <SelectTrigger className="bg-background">
+                          <SelectValue placeholder="Select Company" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableCompanies.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              <div className="flex items-center gap-2">
+                                <Users className="h-4 w-4" />
+                                {c.name}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                )}
+
+                {/* Platoon Selection */}
+                {(assignedType === 'platoon' || assignedType === 'individual') && selectedCompanyId && (
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Platoon</Label>
                     {availablePlatoons.length === 1 ? (
@@ -614,35 +664,6 @@ export default function EquipmentDetailPage() {
                               <div className="flex items-center gap-2">
                                 <Users className="h-4 w-4" />
                                 {p.name}
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-                )}
-
-                {/* Squad Selection - for squad or individual assignment */}
-                {(assignedType === 'squad' || assignedType === 'individual') && selectedPlatoonId && (
-                  <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Squad</Label>
-                    {availableSquads.length === 1 ? (
-                      <div className="flex items-center gap-2 h-10 px-3 rounded-md border border-input bg-muted/50">
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{availableSquads[0].name}</span>
-                      </div>
-                    ) : (
-                      <Select value={selectedSquadId} onValueChange={handleSquadChange}>
-                        <SelectTrigger className="bg-background">
-                          <SelectValue placeholder="Select Squad" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {availableSquads.map((s) => (
-                            <SelectItem key={s.id} value={s.id}>
-                              <div className="flex items-center gap-2">
-                                <Users className="h-4 w-4" />
-                                {s.name}
                               </div>
                             </SelectItem>
                           ))}
