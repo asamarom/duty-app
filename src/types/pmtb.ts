@@ -11,8 +11,9 @@ export interface Personnel {
   firstName: string;
   lastName: string;
   dutyPosition: DutyPosition;
-  team: string;
-  squad: string;
+  battalionId?: string;
+  companyId?: string;
+  platoonId?: string;
   squadId?: string;
   role: UserRole;
   phone: string;
@@ -23,6 +24,7 @@ export interface Personnel {
   driverLicenses: string[];
   profileImage?: string;
   readinessStatus: ReadinessStatus;
+  transferApproved?: boolean;
 }
 
 export interface Equipment {
@@ -32,7 +34,7 @@ export interface Equipment {
   description?: string;
   quantity: number;
   assignedTo?: string;
-  assignedType?: 'individual' | 'squad' | 'team' | 'platoon' | 'battalion';
+  assignedType?: 'individual' | 'company' | 'platoon' | 'battalion';
 }
 
 export interface DailyReport {

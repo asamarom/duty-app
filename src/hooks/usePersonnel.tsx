@@ -13,7 +13,7 @@ interface UsePersonnelReturn {
 }
 
 // Map database row to UI Personnel type
-function mapPersonnelRowToUI(row: PersonnelRow & { squads?: { name: string } | null }): Personnel {
+function mapPersonnelRowToUI(row: PersonnelRow): Personnel {
   return {
     id: row.id,
     serviceNumber: row.service_number,
@@ -21,8 +21,9 @@ function mapPersonnelRowToUI(row: PersonnelRow & { squads?: { name: string } | n
     firstName: row.first_name,
     lastName: row.last_name,
     dutyPosition: (row.duty_position || 'Unassigned') as Personnel['dutyPosition'],
-    team: row.squads?.name || 'Unassigned',
-    squad: row.squads?.name || 'Unassigned',
+    battalionId: row.battalion_id || undefined,
+    companyId: row.company_id || undefined,
+    platoonId: row.platoon_id || undefined,
     squadId: row.squad_id || undefined,
     role: 'user',
     phone: row.phone || '',
@@ -33,6 +34,7 @@ function mapPersonnelRowToUI(row: PersonnelRow & { squads?: { name: string } | n
     driverLicenses: row.driver_licenses || [],
     profileImage: row.profile_image || undefined,
     readinessStatus: row.readiness_status,
+    transferApproved: row.transfer_approved,
   };
 }
 
@@ -46,7 +48,7 @@ export function usePersonnel(): UsePersonnelReturn {
       setLoading(true);
       const { data, error: fetchError } = await supabase
         .from('personnel')
-        .select('*, squads(name)')
+        .select('*')
         .order('last_name');
 
       if (fetchError) throw fetchError;

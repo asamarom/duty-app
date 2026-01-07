@@ -50,15 +50,15 @@ export default function EquipmentPage() {
     }
   };
 
-  const handleBulkAssign = async (assignment: { personnelId?: string; platoonId?: string; squadId?: string; battalionId?: string }) => {
+  const handleBulkAssign = async (assignment: { personnelId?: string; platoonId?: string; companyId?: string; battalionId?: string }) => {
     try {
       let directCount = 0;
       let requestCount = 0;
       
       // Determine target level
       const targetLevel: AssignmentLevel = assignment.personnelId ? 'individual' 
-        : assignment.squadId ? 'squad'
         : assignment.platoonId ? 'platoon'
+        : assignment.companyId ? 'company'
         : assignment.battalionId ? 'battalion'
         : 'unassigned';
       
