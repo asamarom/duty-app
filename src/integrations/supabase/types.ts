@@ -666,6 +666,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          battalion_id: string | null
           created_at: string
           full_name: string | null
           id: string
@@ -673,6 +674,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          battalion_id?: string | null
           created_at?: string
           full_name?: string | null
           id: string
@@ -680,12 +682,21 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          battalion_id?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_battalion_id_fkey"
+            columns: ["battalion_id"]
+            isOneToOne: false
+            referencedRelation: "battalions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       signup_requests: {
         Row: {
