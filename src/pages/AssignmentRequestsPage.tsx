@@ -33,15 +33,26 @@ import {
   Package,
   History,
   Loader2,
+  Inbox,
+  UserCheck,
 } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function AssignmentRequestsPage() {
-  const { requests, loading, approveRequest, rejectRequest, getApprovalsForRequest } = useAssignmentRequests();
+  const { 
+    requests, 
+    incomingTransfers, 
+    loading, 
+    approveRequest, 
+    rejectRequest, 
+    recipientApprove, 
+    recipientReject,
+    getApprovalsForRequest 
+  } = useAssignmentRequests();
   const { toast } = useToast();
   const { t } = useLanguage();
   const [selectedRequest, setSelectedRequest] = useState<AssignmentRequest | null>(null);
-  const [actionType, setActionType] = useState<'approve' | 'reject' | 'history' | null>(null);
+  const [actionType, setActionType] = useState<'approve' | 'reject' | 'recipient_approve' | 'recipient_reject' | 'history' | null>(null);
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -53,12 +64,23 @@ export default function AssignmentRequestsPage() {
 
     setSubmitting(true);
     try {
-      if (actionType === 'approve') {
-        await approveRequest(selectedRequest.id, notes);
-        toast({ title: t('transfers.requestApproved'), description: t('transfers.equipmentReassigned') });
-      } else if (actionType === 'reject') {
-        await rejectRequest(selectedRequest.id, notes);
-        toast({ title: t('transfers.requestRejected'), description: t('transfers.requestWasRejected') });
+      switch (actionType) {
+        case 'approve':
+          await approveRequest(selectedRequest.id, notes);
+          toast({ title: t('transfers.requestApproved'), description: t('transfers.equipmentReassigned') });
+          break;
+        case 'reject':
+          await rejectRequest(selectedRequest.id, notes);
+          toast({ title: t('transfers.requestRejected'), description: t('transfers.requestWasRejected') });
+          break;
+        case 'recipient_approve':
+          await recipientApprove(selectedRequest.id, notes);
+          toast({ title: 'Transfer Accepted', description: 'You have accepted the incoming transfer.' });
+          break;
+        case 'recipient_reject':
+          await recipientReject(selectedRequest.id, notes);
+          toast({ title: 'Transfer Rejected', description: 'You have rejected the incoming transfer.' });
+          break;
       }
       setSelectedRequest(null);
       setActionType(null);
@@ -70,20 +92,23 @@ export default function AssignmentRequestsPage() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Badge variant="outline" className="text-warning border-warning"><Clock className="h-3 w-3 mr-1" /> {t('status.pending')}</Badge>;
-      case 'approved':
-        return <Badge className="bg-success text-success-foreground"><Check className="h-3 w-3 mr-1" /> {t('status.approved')}</Badge>;
-      case 'rejected':
-        return <Badge variant="destructive"><X className="h-3 w-3 mr-1" /> {t('status.rejected')}</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
+  const getStatusBadge = (request: AssignmentRequest) => {
+    if (request.status === 'pending') {
+      if (request.recipient_approved) {
+        return <Badge className="bg-success/20 text-success border-success"><UserCheck className="h-3 w-3 mr-1" /> Recipient Approved</Badge>;
+      }
+      return <Badge variant="outline" className="text-warning border-warning"><Clock className="h-3 w-3 mr-1" /> {t('status.pending')}</Badge>;
     }
+    if (request.status === 'approved') {
+      return <Badge className="bg-success text-success-foreground"><Check className="h-3 w-3 mr-1" /> {t('status.approved')}</Badge>;
+    }
+    if (request.status === 'rejected') {
+      return <Badge variant="destructive"><X className="h-3 w-3 mr-1" /> {t('status.rejected')}</Badge>;
+    }
+    return <Badge variant="secondary">{request.status}</Badge>;
   };
 
-  const RequestRow = ({ request, showActions }: { request: AssignmentRequest; showActions: boolean }) => {
+  const RequestRow = ({ request, showActions, isIncoming = false }: { request: AssignmentRequest; showActions: boolean; isIncoming?: boolean }) => {
     const approvalHistory = getApprovalsForRequest(request.id);
     
     return (
@@ -109,7 +134,7 @@ export default function AssignmentRequestsPage() {
             <span>{request.to_unit_name}</span>
           </div>
         </TableCell>
-        <TableCell>{getStatusBadge(request.status)}</TableCell>
+        <TableCell>{getStatusBadge(request)}</TableCell>
         <TableCell className="text-muted-foreground text-sm">
           {format(new Date(request.requested_at), 'MMM d, yyyy HH:mm')}
         </TableCell>
@@ -118,7 +143,33 @@ export default function AssignmentRequestsPage() {
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-2">
-            {showActions && (
+            {isIncoming && (
+              <>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-success border-success hover:bg-success/10"
+                  onClick={() => {
+                    setSelectedRequest(request);
+                    setActionType('recipient_approve');
+                  }}
+                >
+                  <Check className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-destructive border-destructive hover:bg-destructive/10"
+                  onClick={() => {
+                    setSelectedRequest(request);
+                    setActionType('recipient_reject');
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </>
+            )}
+            {showActions && !isIncoming && (
               <>
                 <Button
                   size="sm"
@@ -180,8 +231,12 @@ export default function AssignmentRequestsPage() {
           <p className="text-muted-foreground">{t('transfers.subtitle')}</p>
         </div>
 
-        <Tabs defaultValue="pending" className="space-y-4">
+        <Tabs defaultValue="incoming" className="space-y-4">
           <TabsList>
+            <TabsTrigger value="incoming" className="gap-2">
+              <Inbox className="h-4 w-4" />
+              Incoming ({incomingTransfers.length})
+            </TabsTrigger>
             <TabsTrigger value="pending" className="gap-2">
               <Clock className="h-4 w-4" />
               {t('transfers.pending')} ({pendingRequests.length})
@@ -191,6 +246,44 @@ export default function AssignmentRequestsPage() {
               {t('transfers.history')} ({processedRequests.length})
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="incoming">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Inbox className="h-5 w-5" />
+                  Incoming Transfers
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {incomingTransfers.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No incoming transfers awaiting your approval.
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>{t('transfers.equipment')}</TableHead>
+                        <TableHead>{t('transfers.from')}</TableHead>
+                        <TableHead></TableHead>
+                        <TableHead>{t('transfers.to')}</TableHead>
+                        <TableHead>{t('equipment.status')}</TableHead>
+                        <TableHead>{t('transfers.requested')}</TableHead>
+                        <TableHead>{t('transfers.by')}</TableHead>
+                        <TableHead>{t('transfers.actions')}</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {incomingTransfers.map(request => (
+                        <RequestRow key={request.id} request={request} showActions={false} isIncoming={true} />
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="pending">
             <Card>
@@ -263,8 +356,8 @@ export default function AssignmentRequestsPage() {
           </TabsContent>
         </Tabs>
 
-        {/* Approve/Reject Dialog */}
-        <Dialog open={actionType === 'approve' || actionType === 'reject'} onOpenChange={() => {
+        {/* Approve/Reject/Recipient Action Dialog */}
+        <Dialog open={!!actionType && actionType !== 'history'} onOpenChange={() => {
           setSelectedRequest(null);
           setActionType(null);
           setNotes('');
@@ -272,7 +365,10 @@ export default function AssignmentRequestsPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {actionType === 'approve' ? t('transfers.approveRequest') : t('transfers.rejectRequest')}
+                {actionType === 'approve' && t('transfers.approveRequest')}
+                {actionType === 'reject' && t('transfers.rejectRequest')}
+                {actionType === 'recipient_approve' && 'Accept Incoming Transfer'}
+                {actionType === 'recipient_reject' && 'Reject Incoming Transfer'}
               </DialogTitle>
               <DialogDescription>
                 {selectedRequest && (
@@ -304,12 +400,12 @@ export default function AssignmentRequestsPage() {
                 {t('common.cancel')}
               </Button>
               <Button
-                variant={actionType === 'approve' ? 'default' : 'destructive'}
+                variant={(actionType === 'approve' || actionType === 'recipient_approve') ? 'default' : 'destructive'}
                 onClick={handleAction}
                 disabled={submitting}
               >
                 {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                {actionType === 'approve' ? t('transfers.approve') : t('transfers.reject')}
+                {(actionType === 'approve' || actionType === 'recipient_approve') ? t('transfers.approve') : t('transfers.reject')}
               </Button>
             </DialogFooter>
           </DialogContent>
