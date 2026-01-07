@@ -35,6 +35,21 @@ export interface Equipment {
   quantity: number;
   assignedTo?: string;
   assignedType?: 'individual' | 'company' | 'platoon' | 'battalion';
+  createdBy?: string;
+}
+
+export interface TransferHistoryRecord {
+  id: string;
+  equipmentId: string;
+  quantity: number;
+  fromUnitType: string;
+  fromName?: string;
+  toUnitType: string;
+  toName?: string;
+  transferredBy?: string;
+  transferredByName?: string;
+  transferredAt: string;
+  notes?: string;
 }
 
 export interface DailyReport {
