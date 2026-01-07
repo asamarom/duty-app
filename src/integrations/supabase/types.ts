@@ -381,6 +381,7 @@ export type Database = {
         Row: {
           category: string | null
           created_at: string
+          created_by: string | null
           description: string | null
           id: string
           name: string
@@ -392,6 +393,7 @@ export type Database = {
         Insert: {
           category?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
           name: string
@@ -403,6 +405,7 @@ export type Database = {
         Update: {
           category?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
           name?: string
@@ -425,6 +428,7 @@ export type Database = {
           notes: string | null
           personnel_id: string | null
           platoon_id: string | null
+          quantity: number
           returned_at: string | null
           squad_id: string | null
         }
@@ -439,6 +443,7 @@ export type Database = {
           notes?: string | null
           personnel_id?: string | null
           platoon_id?: string | null
+          quantity?: number
           returned_at?: string | null
           squad_id?: string | null
         }
@@ -453,6 +458,7 @@ export type Database = {
           notes?: string | null
           personnel_id?: string | null
           platoon_id?: string | null
+          quantity?: number
           returned_at?: string | null
           squad_id?: string | null
         }
@@ -497,6 +503,130 @@ export type Database = {
             columns: ["squad_id"]
             isOneToOne: false
             referencedRelation: "squads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      equipment_transfer_history: {
+        Row: {
+          created_at: string
+          equipment_id: string
+          from_battalion_id: string | null
+          from_company_id: string | null
+          from_personnel_id: string | null
+          from_platoon_id: string | null
+          from_unit_type: string
+          id: string
+          notes: string | null
+          quantity: number
+          to_battalion_id: string | null
+          to_company_id: string | null
+          to_personnel_id: string | null
+          to_platoon_id: string | null
+          to_unit_type: string
+          transferred_at: string
+          transferred_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          equipment_id: string
+          from_battalion_id?: string | null
+          from_company_id?: string | null
+          from_personnel_id?: string | null
+          from_platoon_id?: string | null
+          from_unit_type: string
+          id?: string
+          notes?: string | null
+          quantity?: number
+          to_battalion_id?: string | null
+          to_company_id?: string | null
+          to_personnel_id?: string | null
+          to_platoon_id?: string | null
+          to_unit_type: string
+          transferred_at?: string
+          transferred_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          equipment_id?: string
+          from_battalion_id?: string | null
+          from_company_id?: string | null
+          from_personnel_id?: string | null
+          from_platoon_id?: string | null
+          from_unit_type?: string
+          id?: string
+          notes?: string | null
+          quantity?: number
+          to_battalion_id?: string | null
+          to_company_id?: string | null
+          to_personnel_id?: string | null
+          to_platoon_id?: string | null
+          to_unit_type?: string
+          transferred_at?: string
+          transferred_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_transfer_history_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_transfer_history_from_battalion_id_fkey"
+            columns: ["from_battalion_id"]
+            isOneToOne: false
+            referencedRelation: "battalions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_transfer_history_from_company_id_fkey"
+            columns: ["from_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_transfer_history_from_personnel_id_fkey"
+            columns: ["from_personnel_id"]
+            isOneToOne: false
+            referencedRelation: "personnel"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_transfer_history_from_platoon_id_fkey"
+            columns: ["from_platoon_id"]
+            isOneToOne: false
+            referencedRelation: "platoons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_transfer_history_to_battalion_id_fkey"
+            columns: ["to_battalion_id"]
+            isOneToOne: false
+            referencedRelation: "battalions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_transfer_history_to_company_id_fkey"
+            columns: ["to_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_transfer_history_to_personnel_id_fkey"
+            columns: ["to_personnel_id"]
+            isOneToOne: false
+            referencedRelation: "personnel"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_transfer_history_to_platoon_id_fkey"
+            columns: ["to_platoon_id"]
+            isOneToOne: false
+            referencedRelation: "platoons"
             referencedColumns: ["id"]
           },
         ]

@@ -17,6 +17,7 @@ export interface EquipmentWithAssignment extends Equipment {
   currentPlatoonId?: string;
   assignmentLevel: AssignmentLevel;
   hasPendingTransfer?: boolean;
+  currentQuantity?: number; // The quantity at current assignment
 }
 
 interface AssignmentData {
@@ -33,11 +34,20 @@ interface UseEquipmentReturn {
   refetch: () => Promise<void>;
   addEquipment: (item: Omit<Equipment, 'id'>, assignment?: AssignmentData) => Promise<void>;
   deleteEquipment: (id: string) => Promise<void>;
-  updateEquipment: (id: string, updates: Partial<Equipment>) => Promise<void>;
-  assignEquipment: (equipmentId: string, assignment: AssignmentData) => Promise<void>;
+  assignEquipment: (equipmentId: string, assignment: AssignmentData, quantity?: number) => Promise<void>;
   unassignEquipment: (equipmentId: string) => Promise<void>;
-  requestAssignment: (equipmentId: string, assignment: AssignmentData, notes?: string) => Promise<void>;
+  requestAssignment: (equipmentId: string, assignment: AssignmentData, notes?: string, quantity?: number) => Promise<void>;
   isWithinSameUnit: (currentLevel: AssignmentLevel, targetLevel: AssignmentLevel, equipmentItem: EquipmentWithAssignment, assignment: AssignmentData) => boolean;
+  canDeleteEquipment: (equipmentItem: EquipmentWithAssignment, currentUserPersonnelId?: string) => boolean;
+  recordTransferHistory: (
+    equipmentId: string,
+    quantity: number,
+    fromUnitType: string,
+    fromIds: { battalionId?: string; companyId?: string; platoonId?: string; personnelId?: string },
+    toUnitType: string,
+    toIds: { battalionId?: string; companyId?: string; platoonId?: string; personnelId?: string },
+    notes?: string
+  ) => Promise<void>;
 }
 
 export function useEquipment(): UseEquipmentReturn {
@@ -50,7 +60,7 @@ export function useEquipment(): UseEquipmentReturn {
     try {
       setLoading(true);
       
-      // Fetch equipment with assignments
+      // Fetch equipment with assignments including quantity
       const { data: equipmentData, error: fetchError } = await supabase
         .from('equipment')
         .select(`
@@ -62,6 +72,7 @@ export function useEquipment(): UseEquipmentReturn {
             company_id,
             battalion_id,
             returned_at,
+            quantity,
             personnel(first_name, last_name),
             platoons(name),
             companies(name),
@@ -132,6 +143,8 @@ export function useEquipment(): UseEquipmentReturn {
           currentPlatoonId: currentPlatoonId || activeAssignment?.platoon_id,
           assignmentLevel,
           hasPendingTransfer: pendingEquipmentIds.has(row.id),
+          currentQuantity: activeAssignment?.quantity || row.quantity,
+          createdBy: row.created_by,
         };
       });
       
@@ -143,7 +156,89 @@ export function useEquipment(): UseEquipmentReturn {
     }
   }, []);
 
+  // Record transfer in history table
+  const recordTransferHistory = useCallback(async (
+    equipmentId: string,
+    quantity: number,
+    fromUnitType: string,
+    fromIds: { battalionId?: string; companyId?: string; platoonId?: string; personnelId?: string },
+    toUnitType: string,
+    toIds: { battalionId?: string; companyId?: string; platoonId?: string; personnelId?: string },
+    notes?: string
+  ) => {
+    await supabase.from('equipment_transfer_history').insert({
+      equipment_id: equipmentId,
+      quantity,
+      from_unit_type: fromUnitType,
+      from_battalion_id: fromIds.battalionId || null,
+      from_company_id: fromIds.companyId || null,
+      from_platoon_id: fromIds.platoonId || null,
+      from_personnel_id: fromIds.personnelId || null,
+      to_unit_type: toUnitType,
+      to_battalion_id: toIds.battalionId || null,
+      to_company_id: toIds.companyId || null,
+      to_platoon_id: toIds.platoonId || null,
+      to_personnel_id: toIds.personnelId || null,
+      transferred_by: user?.id || null,
+      notes: notes || null,
+    });
+  }, [user?.id]);
+
   const addEquipment = useCallback(async (item: Omit<Equipment, 'id'>, assignment?: AssignmentData) => {
+    // For bulk items (no serial), check if equipment with same name exists at same assignment
+    if (!item.serialNumber && assignment) {
+      // Build assignment key for matching
+      const assignmentKey = assignment.personnelId 
+        ? `personnel:${assignment.personnelId}`
+        : assignment.platoonId
+        ? `platoon:${assignment.platoonId}`
+        : assignment.companyId
+        ? `company:${assignment.companyId}`
+        : assignment.battalionId
+        ? `battalion:${assignment.battalionId}`
+        : null;
+      
+      if (assignmentKey) {
+        // Find existing equipment with same name at same location
+        const existingItem = equipment.find(e => {
+          if (e.serialNumber) return false; // Skip serialized items
+          if (e.name.toLowerCase() !== item.name.toLowerCase()) return false;
+          
+          const existingKey = e.currentPersonnelId
+            ? `personnel:${e.currentPersonnelId}`
+            : e.currentPlatoonId
+            ? `platoon:${e.currentPlatoonId}`
+            : e.currentCompanyId
+            ? `company:${e.currentCompanyId}`
+            : e.currentBattalionId
+            ? `battalion:${e.currentBattalionId}`
+            : null;
+          
+          return existingKey === assignmentKey;
+        });
+        
+        if (existingItem && existingItem.currentAssignmentId) {
+          // Add to existing assignment's quantity
+          const newQuantity = (existingItem.currentQuantity || existingItem.quantity) + (item.quantity || 1);
+          
+          await supabase
+            .from('equipment_assignments')
+            .update({ quantity: newQuantity })
+            .eq('id', existingItem.currentAssignmentId);
+          
+          // Update the equipment's total quantity as well
+          await supabase
+            .from('equipment')
+            .update({ quantity: existingItem.quantity + (item.quantity || 1) })
+            .eq('id', existingItem.id);
+          
+          await fetchEquipment();
+          return;
+        }
+      }
+    }
+
+    // Create new equipment record
     const { data: inserted, error: insertError } = await supabase
       .from('equipment')
       .insert({
@@ -151,6 +246,7 @@ export function useEquipment(): UseEquipmentReturn {
         serial_number: item.serialNumber || null,
         description: item.description || null,
         quantity: item.quantity,
+        created_by: user?.id || null,
       })
       .select()
       .single();
@@ -167,13 +263,14 @@ export function useEquipment(): UseEquipmentReturn {
           platoon_id: assignment.platoonId || null,
           company_id: assignment.companyId || null,
           battalion_id: assignment.battalionId || null,
+          quantity: item.quantity || 1,
         });
 
       if (assignError) throw assignError;
     }
 
     await fetchEquipment();
-  }, [fetchEquipment]);
+  }, [fetchEquipment, equipment, user?.id]);
 
   const deleteEquipment = useCallback(async (id: string) => {
     const { error: deleteError } = await supabase
@@ -185,43 +282,100 @@ export function useEquipment(): UseEquipmentReturn {
     await fetchEquipment();
   }, [fetchEquipment]);
 
-  const updateEquipment = useCallback(async (id: string, updates: Partial<Equipment>) => {
-    const { error: updateError } = await supabase
-      .from('equipment')
-      .update({
-        name: updates.name,
-        serial_number: updates.serialNumber || null,
-        description: updates.description || null,
-        quantity: updates.quantity,
-      })
-      .eq('id', id);
+  // Check if user can delete equipment (creator only, when assigned back to them)
+  const canDeleteEquipment = useCallback((equipmentItem: EquipmentWithAssignment, currentUserPersonnelId?: string): boolean => {
+    // Must be assigned to the current user's personnel record
+    if (!currentUserPersonnelId || equipmentItem.currentPersonnelId !== currentUserPersonnelId) {
+      return false;
+    }
+    // Equipment must have been created by current user
+    if (equipmentItem.createdBy !== user?.id) {
+      return false;
+    }
+    return true;
+  }, [user?.id]);
 
-    if (updateError) throw updateError;
+  const assignEquipment = useCallback(async (equipmentId: string, assignment: AssignmentData, quantity?: number) => {
+    const equipmentItem = equipment.find(e => e.id === equipmentId);
+    if (!equipmentItem) throw new Error('Equipment not found');
+    
+    const transferQty = quantity || equipmentItem.currentQuantity || equipmentItem.quantity;
+    const currentQty = equipmentItem.currentQuantity || equipmentItem.quantity;
+    const isPartialTransfer = transferQty < currentQty;
+    
+    // Record transfer history
+    const fromUnitType = equipmentItem.assignmentLevel || 'unassigned';
+    const toUnitType = assignment.personnelId ? 'individual' 
+      : assignment.platoonId ? 'platoon'
+      : assignment.companyId ? 'company'
+      : assignment.battalionId ? 'battalion'
+      : 'unassigned';
+    
+    await recordTransferHistory(
+      equipmentId,
+      transferQty,
+      fromUnitType,
+      {
+        battalionId: equipmentItem.currentBattalionId,
+        companyId: equipmentItem.currentCompanyId,
+        platoonId: equipmentItem.currentPlatoonId,
+        personnelId: equipmentItem.currentPersonnelId,
+      },
+      toUnitType,
+      {
+        battalionId: assignment.battalionId,
+        companyId: assignment.companyId,
+        platoonId: assignment.platoonId,
+        personnelId: assignment.personnelId,
+      }
+    );
+
+    if (isPartialTransfer) {
+      // Partial transfer: update source quantity, create new assignment
+      if (equipmentItem.currentAssignmentId) {
+        await supabase
+          .from('equipment_assignments')
+          .update({ quantity: currentQty - transferQty })
+          .eq('id', equipmentItem.currentAssignmentId);
+      }
+      
+      // Create new assignment with transferred quantity
+      const { error: assignError } = await supabase
+        .from('equipment_assignments')
+        .insert({
+          equipment_id: equipmentId,
+          personnel_id: assignment.personnelId || null,
+          platoon_id: assignment.platoonId || null,
+          company_id: assignment.companyId || null,
+          battalion_id: assignment.battalionId || null,
+          quantity: transferQty,
+        });
+
+      if (assignError) throw assignError;
+    } else {
+      // Full transfer: mark source as returned, create new assignment
+      await supabase
+        .from('equipment_assignments')
+        .update({ returned_at: new Date().toISOString() })
+        .eq('equipment_id', equipmentId)
+        .is('returned_at', null);
+
+      const { error: assignError } = await supabase
+        .from('equipment_assignments')
+        .insert({
+          equipment_id: equipmentId,
+          personnel_id: assignment.personnelId || null,
+          platoon_id: assignment.platoonId || null,
+          company_id: assignment.companyId || null,
+          battalion_id: assignment.battalionId || null,
+          quantity: transferQty,
+        });
+
+      if (assignError) throw assignError;
+    }
+    
     await fetchEquipment();
-  }, [fetchEquipment]);
-
-  const assignEquipment = useCallback(async (equipmentId: string, assignment: AssignmentData) => {
-    // First, mark any existing assignment as returned
-    await supabase
-      .from('equipment_assignments')
-      .update({ returned_at: new Date().toISOString() })
-      .eq('equipment_id', equipmentId)
-      .is('returned_at', null);
-
-    // Create new assignment
-    const { error: assignError } = await supabase
-      .from('equipment_assignments')
-      .insert({
-        equipment_id: equipmentId,
-        personnel_id: assignment.personnelId || null,
-        platoon_id: assignment.platoonId || null,
-        company_id: assignment.companyId || null,
-        battalion_id: assignment.battalionId || null,
-      });
-
-    if (assignError) throw assignError;
-    await fetchEquipment();
-  }, [fetchEquipment]);
+  }, [fetchEquipment, equipment, recordTransferHistory]);
 
   const unassignEquipment = useCallback(async (equipmentId: string) => {
     const { error: unassignError } = await supabase
@@ -267,7 +421,8 @@ export function useEquipment(): UseEquipmentReturn {
   const requestAssignment = useCallback(async (
     equipmentId: string, 
     assignment: AssignmentData,
-    notes?: string
+    notes?: string,
+    quantity?: number
   ) => {
     const equipmentItem = equipment.find(e => e.id === equipmentId);
     if (!equipmentItem) throw new Error('Equipment not found');
@@ -294,7 +449,7 @@ export function useEquipment(): UseEquipmentReturn {
         to_platoon_id: assignment.platoonId || null,
         to_personnel_id: assignment.personnelId || null,
         requested_by: user?.id || null,
-        notes: notes || null,
+        notes: notes ? `${notes}${quantity ? ` (Quantity: ${quantity})` : ''}` : (quantity ? `Quantity: ${quantity}` : null),
       });
 
     if (insertError) throw insertError;
@@ -311,10 +466,11 @@ export function useEquipment(): UseEquipmentReturn {
     refetch: fetchEquipment,
     addEquipment,
     deleteEquipment,
-    updateEquipment,
     assignEquipment,
     unassignEquipment,
     requestAssignment,
     isWithinSameUnit,
+    canDeleteEquipment,
+    recordTransferHistory,
   };
 }
