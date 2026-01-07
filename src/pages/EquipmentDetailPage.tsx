@@ -5,6 +5,7 @@ import { MobileHeader } from '@/components/layout/MobileHeader';
 import { usePersonnel } from '@/hooks/usePersonnel';
 import { useEquipment, AssignmentLevel } from '@/hooks/useEquipment';
 import { useUnits } from '@/hooks/useUnits';
+import { useUserBattalion } from '@/hooks/useUserBattalion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -41,6 +42,7 @@ export default function EquipmentDetailPage() {
   const { personnel, loading: personnelLoading } = usePersonnel();
   const { equipment, loading: equipmentLoading, updateEquipment, deleteEquipment, assignEquipment, unassignEquipment, requestAssignment, isWithinSameUnit } = useEquipment();
   const { battalions, companies, platoons, loading: unitsLoading, getCompaniesForBattalion, getPlatoonsForCompany } = useUnits();
+  const { battalionId: userBattalionId, loading: battalionLoading } = useUserBattalion();
   
   const item = equipment.find((e) => e.id === id);
   
@@ -134,7 +136,14 @@ export default function EquipmentDetailPage() {
     }
   }, [item, companies, platoons]);
 
-  const loading = personnelLoading || equipmentLoading || unitsLoading;
+  const loading = personnelLoading || equipmentLoading || unitsLoading || battalionLoading;
+
+  // Auto-set battalion from user's profile when unassigned
+  useEffect(() => {
+    if (userBattalionId && !selectedBattalionId && currentLevel === 'unassigned') {
+      setSelectedBattalionId(userBattalionId);
+    }
+  }, [userBattalionId, selectedBattalionId, currentLevel]);
 
   // Get the current assignment's hierarchy info
   const currentAssignmentInfo = useMemo(() => {
@@ -183,14 +192,16 @@ export default function EquipmentDetailPage() {
     return { battalionId, companyId, platoonId };
   }, [item, personnel, companies, platoons]);
 
-  // Get available battalions - only the current hierarchy's battalion when not unassigned
+  // Get available battalions - use user's battalion, or current hierarchy's battalion
   const availableBattalions = useMemo(() => {
-    if (currentLevel === 'unassigned') return battalions;
+    if (currentLevel === 'unassigned' && userBattalionId) {
+      return battalions.filter(b => b.id === userBattalionId);
+    }
     if (currentAssignmentInfo.battalionId) {
       return battalions.filter(b => b.id === currentAssignmentInfo.battalionId);
     }
     return battalions;
-  }, [battalions, currentLevel, currentAssignmentInfo.battalionId]);
+  }, [battalions, currentLevel, currentAssignmentInfo.battalionId, userBattalionId]);
 
   // Get available companies - filtered by hierarchy
   const availableCompanies = useMemo(() => {
@@ -586,32 +597,20 @@ export default function EquipmentDetailPage() {
 
               {/* Hierarchical Selection */}
               <div className="space-y-3">
-                {/* Battalion Selection */}
-                {(assignedType === 'battalion' || currentLevel === 'unassigned') && allowedTypes.includes('battalion') && (
+                {/* Battalion - shown as read-only since it comes from user profile */}
+                {selectedBattalionId && (assignedType === 'battalion' || currentLevel === 'unassigned') && allowedTypes.includes('battalion') && (
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Battalion</Label>
-                    {availableBattalions.length === 1 ? (
-                      <div className="flex items-center gap-2 h-10 px-3 rounded-md border border-input bg-muted/50">
-                        <Building2 className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{availableBattalions[0].name}</span>
-                      </div>
-                    ) : (
-                      <Select value={selectedBattalionId} onValueChange={handleBattalionChange}>
-                        <SelectTrigger className="bg-background">
-                          <SelectValue placeholder="Select Battalion" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {availableBattalions.map((b) => (
-                            <SelectItem key={b.id} value={b.id}>
-                              <div className="flex items-center gap-2">
-                                <Building2 className="h-4 w-4" />
-                                {b.name}
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
+                    <div className="flex items-center gap-2 h-10 px-3 rounded-md border border-input bg-muted/50">
+                      <Building2 className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">{battalions.find(b => b.id === selectedBattalionId)?.name || 'Unknown'}</span>
+                    </div>
+                  </div>
+                )}
+                {!selectedBattalionId && currentLevel === 'unassigned' && !battalionLoading && (
+                  <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+                    <span>No battalion assigned to your profile. Contact an admin to set your battalion.</span>
                   </div>
                 )}
 

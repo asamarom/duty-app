@@ -5,6 +5,7 @@ import { MobileHeader } from '@/components/layout/MobileHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useUserBattalion } from '@/hooks/useUserBattalion';
 import {
   Select,
   SelectContent,
@@ -42,6 +43,7 @@ export default function AddEquipmentPage() {
   const { personnel, loading: personnelLoading } = usePersonnel();
   const { equipment, loading: equipmentLoading, addEquipment } = useEquipment();
   const { battalions, companies, platoons, loading: unitsLoading, getCompaniesForBattalion, getPlatoonsForCompany } = useUnits();
+  const { battalionId: userBattalionId, loading: battalionLoading } = useUserBattalion();
   
   const [name, setName] = useState('');
   const [nameOpen, setNameOpen] = useState(false);
@@ -50,7 +52,7 @@ export default function AddEquipmentPage() {
   const [quantity, setQuantity] = useState('1');
   const [assignedType, setAssignedType] = useState<AssignmentType>('battalion');
   
-  // Hierarchical selection state
+  // Hierarchical selection state - pre-set from user's battalion
   const [selectedBattalionId, setSelectedBattalionId] = useState('');
   const [selectedCompanyId, setSelectedCompanyId] = useState('');
   const [selectedPlatoonId, setSelectedPlatoonId] = useState('');
@@ -58,7 +60,14 @@ export default function AddEquipmentPage() {
   
   const [saving, setSaving] = useState(false);
 
-  const loading = personnelLoading || equipmentLoading || unitsLoading;
+  const loading = personnelLoading || equipmentLoading || unitsLoading || battalionLoading;
+
+  // Auto-set battalion from user's profile
+  useEffect(() => {
+    if (userBattalionId && !selectedBattalionId) {
+      setSelectedBattalionId(userBattalionId);
+    }
+  }, [userBattalionId, selectedBattalionId]);
 
   // Serialized items must be assigned to individuals
   useEffect(() => {
@@ -371,25 +380,22 @@ export default function AddEquipmentPage() {
 
             {/* Hierarchical Selection */}
             <div className="space-y-3">
-              {/* Battalion Selection - always show for all types */}
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Battalion</Label>
-                <Select value={selectedBattalionId} onValueChange={handleBattalionChange}>
-                  <SelectTrigger className="h-12 bg-secondary border-border">
-                    <SelectValue placeholder="Select Battalion" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {battalions.map((b) => (
-                      <SelectItem key={b.id} value={b.id}>
-                        <div className="flex items-center gap-2">
-                          <Building2 className="h-4 w-4" />
-                          {b.name}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Battalion - auto-set from user profile, shown as read-only */}
+              {selectedBattalionId && (
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Battalion</Label>
+                  <div className="flex items-center gap-2 h-12 px-3 rounded-md border border-input bg-muted/50">
+                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{battalions.find(b => b.id === selectedBattalionId)?.name || 'Unknown'}</span>
+                  </div>
+                </div>
+              )}
+              {!selectedBattalionId && !battalionLoading && (
+                <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm flex items-start gap-2">
+                  <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+                  <span>No battalion assigned to your profile. Contact an admin to set your battalion.</span>
+                </div>
+              )}
 
               {/* Company Selection - show for company, platoon, individual */}
               {assignedType !== 'battalion' && selectedBattalionId && (
