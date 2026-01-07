@@ -24,21 +24,14 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import {
   Building2,
-  Users2,
-  UserSquare2,
+  Briefcase,
+  Users,
   Plus,
   Edit,
   Trash2,
@@ -49,9 +42,9 @@ import {
 import { useUnitsManagement } from '@/hooks/useUnitsManagement';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Battalion, Platoon, Squad } from '@/hooks/useUnits';
+import { Battalion, Company, Platoon } from '@/hooks/useUnits';
 
-type UnitType = 'battalion' | 'platoon' | 'squad';
+type UnitType = 'battalion' | 'company' | 'platoon';
 
 interface UnitFormData {
   name: string;
@@ -64,32 +57,32 @@ export default function UnitsPage() {
   const { isAdmin, isLeader } = useUserRole();
   const {
     battalions,
+    companies,
     platoons,
-    squads,
     loading,
-    getPlatoonsForBattalion,
-    getSquadsForPlatoon,
+    getCompaniesForBattalion,
+    getPlatoonsForCompany,
     createBattalion,
     updateBattalion,
     deleteBattalion,
+    createCompany,
+    updateCompany,
+    deleteCompany,
     createPlatoon,
     updatePlatoon,
     deletePlatoon,
-    createSquad,
-    updateSquad,
-    deleteSquad,
     refetch,
   } = useUnitsManagement();
 
   const [expandedBattalions, setExpandedBattalions] = useState<Set<string>>(new Set());
-  const [expandedPlatoons, setExpandedPlatoons] = useState<Set<string>>(new Set());
+  const [expandedCompanies, setExpandedCompanies] = useState<Set<string>>(new Set());
 
   // Dialog states
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
   const [currentUnitType, setCurrentUnitType] = useState<UnitType>('battalion');
-  const [currentUnit, setCurrentUnit] = useState<Battalion | Platoon | Squad | null>(null);
+  const [currentUnit, setCurrentUnit] = useState<Battalion | Company | Platoon | null>(null);
   const [formData, setFormData] = useState<UnitFormData>({ name: '', designation: '', parentId: '' });
   const [saving, setSaving] = useState(false);
 
@@ -104,8 +97,8 @@ export default function UnitsPage() {
     });
   };
 
-  const togglePlatoon = (id: string) => {
-    setExpandedPlatoons((prev) => {
+  const toggleCompany = (id: string) => {
+    setExpandedCompanies((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -121,7 +114,7 @@ export default function UnitsPage() {
     setIsDialogOpen(true);
   };
 
-  const openEditDialog = (type: UnitType, unit: Battalion | Platoon | Squad) => {
+  const openEditDialog = (type: UnitType, unit: Battalion | Company | Platoon) => {
     setDialogMode('edit');
     setCurrentUnitType(type);
     setCurrentUnit(unit);
@@ -132,7 +125,7 @@ export default function UnitsPage() {
     setIsDialogOpen(true);
   };
 
-  const openDeleteDialog = (type: UnitType, unit: Battalion | Platoon | Squad) => {
+  const openDeleteDialog = (type: UnitType, unit: Battalion | Company | Platoon) => {
     setCurrentUnitType(type);
     setCurrentUnit(unit);
     setIsDeleteDialogOpen(true);
@@ -146,16 +139,16 @@ export default function UnitsPage() {
       if (dialogMode === 'create') {
         if (currentUnitType === 'battalion') {
           await createBattalion({ name: formData.name, designation: formData.designation || undefined });
-        } else if (currentUnitType === 'platoon' && formData.parentId) {
-          await createPlatoon({
+        } else if (currentUnitType === 'company' && formData.parentId) {
+          await createCompany({
             name: formData.name,
             battalion_id: formData.parentId,
             designation: formData.designation || undefined,
           });
-        } else if (currentUnitType === 'squad' && formData.parentId) {
-          await createSquad({
+        } else if (currentUnitType === 'platoon' && formData.parentId) {
+          await createPlatoon({
             name: formData.name,
-            platoon_id: formData.parentId,
+            company_id: formData.parentId,
             designation: formData.designation || undefined,
           });
         }
@@ -163,10 +156,10 @@ export default function UnitsPage() {
         const updateData = { name: formData.name, designation: formData.designation || undefined };
         if (currentUnitType === 'battalion') {
           await updateBattalion(currentUnit.id, updateData);
+        } else if (currentUnitType === 'company') {
+          await updateCompany(currentUnit.id, updateData);
         } else if (currentUnitType === 'platoon') {
           await updatePlatoon(currentUnit.id, updateData);
-        } else if (currentUnitType === 'squad') {
-          await updateSquad(currentUnit.id, updateData);
         }
       }
       setIsDialogOpen(false);
@@ -182,10 +175,10 @@ export default function UnitsPage() {
     try {
       if (currentUnitType === 'battalion') {
         await deleteBattalion(currentUnit.id);
+      } else if (currentUnitType === 'company') {
+        await deleteCompany(currentUnit.id);
       } else if (currentUnitType === 'platoon') {
         await deletePlatoon(currentUnit.id);
-      } else if (currentUnitType === 'squad') {
-        await deleteSquad(currentUnit.id);
       }
       setIsDeleteDialogOpen(false);
     } finally {
@@ -197,10 +190,10 @@ export default function UnitsPage() {
     switch (type) {
       case 'battalion':
         return Building2;
+      case 'company':
+        return Briefcase;
       case 'platoon':
-        return Users2;
-      case 'squad':
-        return UserSquare2;
+        return Users;
     }
   };
 
@@ -240,7 +233,7 @@ export default function UnitsPage() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">Unit Management</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Manage battalions, platoons, and squads
+              Manage battalions, companies, and platoons
             </p>
           </div>
           {canManage && (
@@ -281,7 +274,7 @@ export default function UnitsPage() {
             </Card>
           ) : (
             battalions.map((battalion) => {
-              const battalionPlatoons = getPlatoonsForBattalion(battalion.id);
+              const battalionCompanies = getCompaniesForBattalion(battalion.id);
               const isExpanded = expandedBattalions.has(battalion.id);
               const BattalionIcon = getUnitIcon('battalion');
 
@@ -303,7 +296,7 @@ export default function UnitsPage() {
                           <Badge variant={getStatusColor(battalion.status) as any} className="mx-2">
                             {battalion.status}
                           </Badge>
-                          {battalionPlatoons.length > 0 && (
+                          {battalionCompanies.length > 0 && (
                             isExpanded ? (
                               <ChevronDown className="h-4 w-4 text-muted-foreground" />
                             ) : (
@@ -318,9 +311,9 @@ export default function UnitsPage() {
                               size="icon"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                openCreateDialog('platoon', battalion.id);
+                                openCreateDialog('company', battalion.id);
                               }}
-                              title="Add Platoon"
+                              title="Add Company"
                             >
                               <Plus className="h-4 w-4" />
                             </Button>
@@ -352,38 +345,38 @@ export default function UnitsPage() {
 
                     <CollapsibleContent>
                       <CardContent className="pt-0 pb-4 px-4">
-                        {battalionPlatoons.length === 0 ? (
-                          <p className="text-sm text-muted-foreground ps-12">No platoons in this battalion</p>
+                        {battalionCompanies.length === 0 ? (
+                          <p className="text-sm text-muted-foreground ps-12">No companies in this battalion</p>
                         ) : (
                           <div className="space-y-3 ps-6 border-s border-border ms-5">
-                            {battalionPlatoons.map((platoon) => {
-                              const platoonSquads = getSquadsForPlatoon(platoon.id);
-                              const isPlatoonExpanded = expandedPlatoons.has(platoon.id);
-                              const PlatoonIcon = getUnitIcon('platoon');
+                            {battalionCompanies.map((company) => {
+                              const companyPlatoons = getPlatoonsForCompany(company.id);
+                              const isCompanyExpanded = expandedCompanies.has(company.id);
+                              const CompanyIcon = getUnitIcon('company');
 
                               return (
                                 <Collapsible
-                                  key={platoon.id}
-                                  open={isPlatoonExpanded}
-                                  onOpenChange={() => togglePlatoon(platoon.id)}
+                                  key={company.id}
+                                  open={isCompanyExpanded}
+                                  onOpenChange={() => toggleCompany(company.id)}
                                 >
                                   <div className="rounded-lg border border-border bg-secondary/30 p-3">
                                     <div className="flex items-center justify-between">
                                       <CollapsibleTrigger className="flex items-center gap-3 flex-1 hover:opacity-80">
                                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/20">
-                                          <PlatoonIcon className="h-4 w-4 text-accent-foreground" />
+                                          <CompanyIcon className="h-4 w-4 text-accent-foreground" />
                                         </div>
                                         <div className={`text-${dir === 'rtl' ? 'right' : 'left'}`}>
-                                          <p className="text-sm font-medium">{platoon.name}</p>
-                                          {platoon.designation && (
-                                            <p className="text-xs text-muted-foreground">{platoon.designation}</p>
+                                          <p className="text-sm font-medium">{company.name}</p>
+                                          {company.designation && (
+                                            <p className="text-xs text-muted-foreground">{company.designation}</p>
                                           )}
                                         </div>
-                                        <Badge variant={getStatusColor(platoon.status) as any} className="text-xs mx-2">
-                                          {platoon.status}
+                                        <Badge variant={getStatusColor(company.status) as any} className="text-xs mx-2">
+                                          {company.status}
                                         </Badge>
-                                        {platoonSquads.length > 0 && (
-                                          isPlatoonExpanded ? (
+                                        {companyPlatoons.length > 0 && (
+                                          isCompanyExpanded ? (
                                             <ChevronDown className="h-3 w-3 text-muted-foreground" />
                                           ) : (
                                             <ChevronRight className={`h-3 w-3 text-muted-foreground ${dir === 'rtl' ? 'rotate-180' : ''}`} />
@@ -398,9 +391,9 @@ export default function UnitsPage() {
                                             className="h-7 w-7"
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              openCreateDialog('squad', platoon.id);
+                                              openCreateDialog('platoon', company.id);
                                             }}
-                                            title="Add Squad"
+                                            title="Add Platoon"
                                           >
                                             <Plus className="h-3 w-3" />
                                           </Button>
@@ -410,7 +403,7 @@ export default function UnitsPage() {
                                             className="h-7 w-7"
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              openEditDialog('platoon', platoon);
+                                              openEditDialog('company', company);
                                             }}
                                           >
                                             <Edit className="h-3 w-3" />
@@ -421,7 +414,7 @@ export default function UnitsPage() {
                                             className="h-7 w-7 text-destructive hover:text-destructive"
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              openDeleteDialog('platoon', platoon);
+                                              openDeleteDialog('company', company);
                                             }}
                                           >
                                             <Trash2 className="h-3 w-3" />
@@ -431,32 +424,31 @@ export default function UnitsPage() {
                                     </div>
 
                                     <CollapsibleContent>
-                                      {platoonSquads.length > 0 && (
+                                      {companyPlatoons.length > 0 && (
                                         <div className="mt-3 space-y-2 ps-6 border-s border-border ms-4">
-                                          {platoonSquads.map((squad) => {
-                                            const SquadIcon = getUnitIcon('squad');
+                                          {companyPlatoons.map((platoon) => {
+                                            const PlatoonIcon = getUnitIcon('platoon');
+
                                             return (
                                               <div
-                                                key={squad.id}
-                                                className="flex items-center justify-between rounded-lg border border-border bg-background/50 p-2"
+                                                key={platoon.id}
+                                                className="flex items-center justify-between rounded-md border border-border bg-background/50 p-2"
                                               >
                                                 <div className="flex items-center gap-2">
-                                                  <div className="flex h-6 w-6 items-center justify-center rounded bg-muted">
-                                                    <SquadIcon className="h-3 w-3 text-muted-foreground" />
-                                                  </div>
+                                                  <PlatoonIcon className="h-4 w-4 text-muted-foreground" />
                                                   <div>
-                                                    <p className="text-xs font-medium">{squad.name}</p>
-                                                    {squad.designation && (
-                                                      <p className="text-[10px] text-muted-foreground">
-                                                        {squad.designation}
+                                                    <p className="text-sm font-medium">{platoon.name}</p>
+                                                    {platoon.designation && (
+                                                      <p className="text-xs text-muted-foreground">
+                                                        {platoon.designation}
                                                       </p>
                                                     )}
                                                   </div>
                                                   <Badge
-                                                    variant={getStatusColor(squad.status) as any}
-                                                    className="text-[10px] px-1.5 py-0"
+                                                    variant={getStatusColor(platoon.status) as any}
+                                                    className="text-xs ms-2"
                                                   >
-                                                    {squad.status}
+                                                    {platoon.status}
                                                   </Badge>
                                                 </div>
                                                 {canManage && (
@@ -465,7 +457,7 @@ export default function UnitsPage() {
                                                       variant="ghost"
                                                       size="icon"
                                                       className="h-6 w-6"
-                                                      onClick={() => openEditDialog('squad', squad)}
+                                                      onClick={() => openEditDialog('platoon', platoon)}
                                                     >
                                                       <Edit className="h-3 w-3" />
                                                     </Button>
@@ -473,7 +465,7 @@ export default function UnitsPage() {
                                                       variant="ghost"
                                                       size="icon"
                                                       className="h-6 w-6 text-destructive hover:text-destructive"
-                                                      onClick={() => openDeleteDialog('squad', squad)}
+                                                      onClick={() => openDeleteDialog('platoon', platoon)}
                                                     >
                                                       <Trash2 className="h-3 w-3" />
                                                     </Button>
@@ -506,7 +498,8 @@ export default function UnitsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {dialogMode === 'create' ? `Create ${currentUnitType}` : `Edit ${currentUnitType}`}
+              {dialogMode === 'create' ? 'Create' : 'Edit'}{' '}
+              {currentUnitType.charAt(0).toUpperCase() + currentUnitType.slice(1)}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -515,7 +508,7 @@ export default function UnitsPage() {
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                 placeholder={`Enter ${currentUnitType} name`}
               />
             </div>
@@ -524,13 +517,13 @@ export default function UnitsPage() {
               <Input
                 id="designation"
                 value={formData.designation}
-                onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
-                placeholder="e.g., 1st, Alpha, etc."
+                onChange={(e) => setFormData((prev) => ({ ...prev, designation: e.target.value }))}
+                placeholder="e.g., Alpha, Bravo, 1st"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={saving}>
               Cancel
             </Button>
             <Button onClick={handleSave} disabled={saving || !formData.name.trim()}>
@@ -548,14 +541,23 @@ export default function UnitsPage() {
             <AlertDialogTitle>Delete {currentUnitType}?</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete "{currentUnit?.name}"? This action cannot be undone.
-              {currentUnitType === 'battalion' && ' All platoons and squads within will also be deleted.'}
-              {currentUnitType === 'platoon' && ' All squads within will also be deleted.'}
+              {currentUnitType === 'battalion' && (
+                <span className="block mt-2 text-destructive">
+                  Warning: This will also delete all companies and platoons within this battalion.
+                </span>
+              )}
+              {currentUnitType === 'company' && (
+                <span className="block mt-2 text-destructive">
+                  Warning: This will also delete all platoons within this company.
+                </span>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={saving}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
+              disabled={saving}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {saving && <Loader2 className="me-2 h-4 w-4 animate-spin" />}

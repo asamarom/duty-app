@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
-import { ChevronRight, ChevronDown, Building2, Users, UserSquare2, X } from 'lucide-react';
+import { ChevronRight, ChevronDown, Building2, Users, Briefcase, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useUnits, Battalion, Platoon, Squad } from '@/hooks/useUnits';
+import { useUnits, Battalion, Company, Platoon } from '@/hooks/useUnits';
 
 interface UnitAssignment {
   battalion_id: string | null;
+  company_id: string | null;
   platoon_id: string | null;
-  squad_id: string | null;
+  // Legacy support
+  squad_id?: string | null;
 }
 
 interface UnitTreeSelectorProps {
@@ -17,28 +19,28 @@ interface UnitTreeSelectorProps {
 }
 
 export function UnitTreeSelector({ value, onChange, disabled }: UnitTreeSelectorProps) {
-  const { battalions, platoons, squads, loading } = useUnits();
+  const { battalions, companies, platoons, loading } = useUnits();
   const [expandedBattalions, setExpandedBattalions] = useState<Set<string>>(new Set());
-  const [expandedPlatoons, setExpandedPlatoons] = useState<Set<string>>(new Set());
+  const [expandedCompanies, setExpandedCompanies] = useState<Set<string>>(new Set());
 
   // Auto-expand to show current selection
   useEffect(() => {
-    if (value.squad_id) {
-      const squad = squads.find(s => s.id === value.squad_id);
-      if (squad) {
-        const platoon = platoons.find(p => p.id === squad.platoon_id);
-        if (platoon) {
-          setExpandedBattalions(prev => new Set(prev).add(platoon.battalion_id));
-          setExpandedPlatoons(prev => new Set(prev).add(squad.platoon_id));
+    if (value.platoon_id) {
+      const platoon = platoons.find(p => p.id === value.platoon_id);
+      if (platoon && platoon.company_id) {
+        const company = companies.find(c => c.id === platoon.company_id);
+        if (company) {
+          setExpandedBattalions(prev => new Set(prev).add(company.battalion_id));
+          setExpandedCompanies(prev => new Set(prev).add(platoon.company_id!));
         }
       }
-    } else if (value.platoon_id) {
-      const platoon = platoons.find(p => p.id === value.platoon_id);
-      if (platoon) {
-        setExpandedBattalions(prev => new Set(prev).add(platoon.battalion_id));
+    } else if (value.company_id) {
+      const company = companies.find(c => c.id === value.company_id);
+      if (company) {
+        setExpandedBattalions(prev => new Set(prev).add(company.battalion_id));
       }
     }
-  }, [value, squads, platoons]);
+  }, [value, companies, platoons]);
 
   const toggleBattalion = (id: string) => {
     setExpandedBattalions(prev => {
@@ -52,8 +54,8 @@ export function UnitTreeSelector({ value, onChange, disabled }: UnitTreeSelector
     });
   };
 
-  const togglePlatoon = (id: string) => {
-    setExpandedPlatoons(prev => {
+  const toggleCompany = (id: string) => {
+    setExpandedCompanies(prev => {
       const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
@@ -67,57 +69,61 @@ export function UnitTreeSelector({ value, onChange, disabled }: UnitTreeSelector
   const selectBattalion = (battalion: Battalion) => {
     onChange({
       battalion_id: battalion.id,
+      company_id: null,
+      platoon_id: null,
+      squad_id: null,
+    });
+  };
+
+  const selectCompany = (company: Company) => {
+    onChange({
+      battalion_id: company.battalion_id,
+      company_id: company.id,
       platoon_id: null,
       squad_id: null,
     });
   };
 
   const selectPlatoon = (platoon: Platoon) => {
+    const company = companies.find(c => c.id === platoon.company_id);
     onChange({
-      battalion_id: platoon.battalion_id,
+      battalion_id: company?.battalion_id || null,
+      company_id: platoon.company_id,
       platoon_id: platoon.id,
       squad_id: null,
-    });
-  };
-
-  const selectSquad = (squad: Squad) => {
-    const platoon = platoons.find(p => p.id === squad.platoon_id);
-    onChange({
-      battalion_id: platoon?.battalion_id || null,
-      platoon_id: squad.platoon_id,
-      squad_id: squad.id,
     });
   };
 
   const clearSelection = () => {
     onChange({
       battalion_id: null,
+      company_id: null,
       platoon_id: null,
       squad_id: null,
     });
   };
 
-  const isSelected = (type: 'battalion' | 'platoon' | 'squad', id: string) => {
+  const isSelected = (type: 'battalion' | 'company' | 'platoon', id: string) => {
     if (type === 'battalion') {
-      return value.battalion_id === id && !value.platoon_id && !value.squad_id;
+      return value.battalion_id === id && !value.company_id && !value.platoon_id;
     }
-    if (type === 'platoon') {
-      return value.platoon_id === id && !value.squad_id;
+    if (type === 'company') {
+      return value.company_id === id && !value.platoon_id;
     }
-    return value.squad_id === id;
+    return value.platoon_id === id;
   };
 
   const getSelectedLabel = (): string => {
-    if (value.squad_id) {
-      const squad = squads.find(s => s.id === value.squad_id);
-      const platoon = platoons.find(p => p.id === value.platoon_id);
-      const battalion = battalions.find(b => b.id === value.battalion_id);
-      return `${battalion?.name} → ${platoon?.name} → ${squad?.name}`;
-    }
     if (value.platoon_id) {
       const platoon = platoons.find(p => p.id === value.platoon_id);
+      const company = companies.find(c => c.id === value.company_id);
       const battalion = battalions.find(b => b.id === value.battalion_id);
-      return `${battalion?.name} → ${platoon?.name}`;
+      return `${battalion?.name} → ${company?.name} → ${platoon?.name}`;
+    }
+    if (value.company_id) {
+      const company = companies.find(c => c.id === value.company_id);
+      const battalion = battalions.find(b => b.id === value.battalion_id);
+      return `${battalion?.name} → ${company?.name}`;
     }
     if (value.battalion_id) {
       const battalion = battalions.find(b => b.id === value.battalion_id);
@@ -139,7 +145,7 @@ export function UnitTreeSelector({ value, onChange, disabled }: UnitTreeSelector
       {/* Current Selection Display */}
       <div className="flex items-center justify-between gap-2 p-2 bg-muted/50 rounded-md border border-border">
         <span className="text-sm font-medium truncate">{getSelectedLabel()}</span>
-        {(value.battalion_id || value.platoon_id || value.squad_id) && !disabled && (
+        {(value.battalion_id || value.company_id || value.platoon_id) && !disabled && (
           <Button
             type="button"
             variant="ghost"
@@ -160,7 +166,7 @@ export function UnitTreeSelector({ value, onChange, disabled }: UnitTreeSelector
           ) : (
             <div className="p-2 space-y-1">
               {battalions.map((battalion) => {
-                const battalionPlatoons = platoons.filter(p => p.battalion_id === battalion.id);
+                const battalionCompanies = companies.filter(c => c.battalion_id === battalion.id);
                 const isExpanded = expandedBattalions.has(battalion.id);
                 const isBattalionSelected = isSelected('battalion', battalion.id);
 
@@ -173,7 +179,7 @@ export function UnitTreeSelector({ value, onChange, disabled }: UnitTreeSelector
                         className="p-1 hover:bg-muted rounded"
                         onClick={() => toggleBattalion(battalion.id)}
                       >
-                        {battalionPlatoons.length > 0 ? (
+                        {battalionCompanies.length > 0 ? (
                           isExpanded ? (
                             <ChevronDown className="h-4 w-4 text-muted-foreground" />
                           ) : (
@@ -196,25 +202,25 @@ export function UnitTreeSelector({ value, onChange, disabled }: UnitTreeSelector
                       </button>
                     </div>
 
-                    {/* Platoons */}
+                    {/* Companies */}
                     {isExpanded && (
                       <div className="ml-5 space-y-1">
-                        {battalionPlatoons.map((platoon) => {
-                          const platoonSquads = squads.filter(s => s.platoon_id === platoon.id);
-                          const isPlatoonExpanded = expandedPlatoons.has(platoon.id);
-                          const isPlatoonSelected = isSelected('platoon', platoon.id);
+                        {battalionCompanies.map((company) => {
+                          const companyPlatoons = platoons.filter(p => p.company_id === company.id);
+                          const isCompanyExpanded = expandedCompanies.has(company.id);
+                          const isCompanySelected = isSelected('company', company.id);
 
                           return (
-                            <div key={platoon.id} className="space-y-1">
-                              {/* Platoon Row */}
+                            <div key={company.id} className="space-y-1">
+                              {/* Company Row */}
                               <div className="flex items-center">
                                 <button
                                   type="button"
                                   className="p-1 hover:bg-muted rounded"
-                                  onClick={() => togglePlatoon(platoon.id)}
+                                  onClick={() => toggleCompany(company.id)}
                                 >
-                                  {platoonSquads.length > 0 ? (
-                                    isPlatoonExpanded ? (
+                                  {companyPlatoons.length > 0 ? (
+                                    isCompanyExpanded ? (
                                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                                     ) : (
                                       <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -227,33 +233,33 @@ export function UnitTreeSelector({ value, onChange, disabled }: UnitTreeSelector
                                   type="button"
                                   className={cn(
                                     "flex-1 flex items-center gap-2 px-2 py-1.5 rounded text-sm text-left hover:bg-muted transition-colors",
-                                    isPlatoonSelected && "bg-primary/20 text-primary font-medium"
+                                    isCompanySelected && "bg-primary/20 text-primary font-medium"
                                   )}
-                                  onClick={() => selectPlatoon(platoon)}
+                                  onClick={() => selectCompany(company)}
                                 >
-                                  <Users className="h-4 w-4 text-blue-500" />
-                                  {platoon.name}
+                                  <Briefcase className="h-4 w-4 text-blue-500" />
+                                  {company.name}
                                 </button>
                               </div>
 
-                              {/* Squads */}
-                              {isPlatoonExpanded && (
+                              {/* Platoons */}
+                              {isCompanyExpanded && (
                                 <div className="ml-5 space-y-1">
-                                  {platoonSquads.map((squad) => {
-                                    const isSquadSelected = isSelected('squad', squad.id);
+                                  {companyPlatoons.map((platoon) => {
+                                    const isPlatoonSelected = isSelected('platoon', platoon.id);
 
                                     return (
                                       <button
-                                        key={squad.id}
+                                        key={platoon.id}
                                         type="button"
                                         className={cn(
                                           "w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm text-left hover:bg-muted transition-colors",
-                                          isSquadSelected && "bg-primary/20 text-primary font-medium"
+                                          isPlatoonSelected && "bg-primary/20 text-primary font-medium"
                                         )}
-                                        onClick={() => selectSquad(squad)}
+                                        onClick={() => selectPlatoon(platoon)}
                                       >
-                                        <UserSquare2 className="h-4 w-4 text-green-500" />
-                                        {squad.name}
+                                        <Users className="h-4 w-4 text-green-500" />
+                                        {platoon.name}
                                       </button>
                                     );
                                   })}
