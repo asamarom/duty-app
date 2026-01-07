@@ -25,8 +25,6 @@ interface PersonnelWithRoles extends Personnel {
 }
 
 function mapPersonnelRowToUI(row: any): PersonnelWithRoles {
-  const squadName = row?.squads?.name ?? 'Unassigned';
-
   return {
     id: row.id,
     serviceNumber: row.service_number,
@@ -34,8 +32,10 @@ function mapPersonnelRowToUI(row: any): PersonnelWithRoles {
     firstName: row.first_name,
     lastName: row.last_name,
     dutyPosition: (row.duty_position ?? 'Unassigned') as Personnel['dutyPosition'],
-    team: squadName,
-    squad: squadName,
+    battalionId: row.battalion_id ?? undefined,
+    companyId: row.company_id ?? undefined,
+    platoonId: row.platoon_id ?? undefined,
+    squadId: row.squad_id ?? undefined,
     role: 'user',
     phone: row.phone ?? '',
     email: row.email ?? '',
@@ -45,6 +45,7 @@ function mapPersonnelRowToUI(row: any): PersonnelWithRoles {
     driverLicenses: row.driver_licenses ?? [],
     profileImage: row.profile_image ?? undefined,
     readinessStatus: row.readiness_status ?? 'ready',
+    transferApproved: row.transfer_approved ?? false,
     userRoles: [],
   };
 }
@@ -68,7 +69,7 @@ export default function PersonnelPage() {
         const { data, error } = await supabase
           .from('personnel')
           .select(
-            'id, service_number, rank, first_name, last_name, duty_position, phone, email, local_address, location_status, readiness_status, skills, driver_licenses, profile_image, user_id, squads(name)'
+            'id, service_number, rank, first_name, last_name, duty_position, phone, email, local_address, location_status, readiness_status, skills, driver_licenses, profile_image, user_id, battalion_id, company_id, platoon_id, squad_id, transfer_approved'
           )
           .order('last_name', { ascending: true });
 
@@ -122,8 +123,9 @@ export default function PersonnelPage() {
     };
   }, [toast]);
 
-  const teams = useMemo(() => {
-    return ['all', ...new Set(personnel.map((p) => p.team).filter(Boolean))];
+  // No longer filtering by team since we removed that field
+  const uniquePlatoons = useMemo(() => {
+    return ['all', ...new Set(personnel.map((p) => p.platoonId).filter(Boolean))] as string[];
   }, [personnel]);
 
   const filteredPersonnel = useMemo(() => {
@@ -132,8 +134,8 @@ export default function PersonnelPage() {
         person.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         person.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         person.serviceNumber.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesTeam = teamFilter === 'all' || person.team === teamFilter;
-      return matchesSearch && matchesTeam;
+      const matchesFilter = teamFilter === 'all' || person.platoonId === teamFilter;
+      return matchesSearch && matchesFilter;
     });
   }, [personnel, searchQuery, teamFilter]);
 
@@ -203,12 +205,12 @@ export default function PersonnelPage() {
               </div>
               <Select value={teamFilter} onValueChange={setTeamFilter}>
                 <SelectTrigger className="w-full sm:w-[160px] bg-card border-border h-11">
-                  <SelectValue placeholder={t('personnel.allPositions')} />
+                  <SelectValue placeholder="All Units" />
                 </SelectTrigger>
                 <SelectContent>
-                  {teams.map((team) => (
-                    <SelectItem key={team} value={team}>
-                      {team === 'all' ? t('personnel.allPositions') : team}
+                  {uniquePlatoons.map((platoonId) => (
+                    <SelectItem key={platoonId} value={platoonId}>
+                      {platoonId === 'all' ? 'All Units' : platoonId}
                     </SelectItem>
                   ))}
                 </SelectContent>

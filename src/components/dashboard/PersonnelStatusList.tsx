@@ -41,7 +41,7 @@ export function PersonnelStatusList({ personnel, limit }: PersonnelStatusListPro
                 {person.rank} {person.lastName}, {person.firstName}
               </p>
               <p className="text-xs text-muted-foreground truncate">
-                {person.dutyPosition} • {person.team}
+                {person.dutyPosition}
               </p>
             </div>
 
