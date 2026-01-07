@@ -202,20 +202,28 @@ export default function EquipmentDetailPage() {
 
   // Get available companies
   const availableCompanies = useMemo(() => {
+    // For battalion-level items transferring to company, show companies in that battalion
+    if (currentLevel === 'battalion' && currentAssignmentInfo.battalionId) {
+      return getCompaniesForBattalion(currentAssignmentInfo.battalionId);
+    }
+    
+    // For unassigned items, use the selected battalion
     if (currentLevel === 'unassigned') {
       if (!selectedBattalionId) return [];
       return getCompaniesForBattalion(selectedBattalionId);
     }
     
+    // For items at company/platoon/individual level going back up, show current company
     if ((currentLevel === 'company' || currentLevel === 'platoon' || currentLevel === 'individual') && currentAssignmentInfo.companyId) {
       return companies.filter(c => c.id === currentAssignmentInfo.companyId);
     }
     
-    if (currentLevel === 'battalion' && currentAssignmentInfo.battalionId) {
-      return getCompaniesForBattalion(currentAssignmentInfo.battalionId);
+    // Fallback to selected battalion
+    if (selectedBattalionId) {
+      return getCompaniesForBattalion(selectedBattalionId);
     }
     
-    return getCompaniesForBattalion(selectedBattalionId);
+    return [];
   }, [currentLevel, currentAssignmentInfo, selectedBattalionId, getCompaniesForBattalion, companies]);
 
   // Get available platoons

@@ -143,7 +143,9 @@ export function useEquipment(): UseEquipmentReturn {
           currentPlatoonId: currentPlatoonId || activeAssignment?.platoon_id,
           assignmentLevel,
           hasPendingTransfer: pendingEquipmentIds.has(row.id),
-          currentQuantity: activeAssignment?.quantity || row.quantity,
+          // Use assignment quantity if available, otherwise fall back to equipment's total quantity
+          // For items without serial numbers, assignment quantity should reflect bulk quantity
+          currentQuantity: activeAssignment?.quantity ?? row.quantity,
           createdBy: row.created_by,
         };
       });
