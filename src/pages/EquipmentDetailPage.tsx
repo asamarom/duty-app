@@ -541,14 +541,34 @@ export default function EquipmentDetailPage() {
               <div className="space-y-2">
                 <Label>Transfer Quantity</Label>
                 <div className="flex items-center gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setTransferQuantity(Math.max(1, transferQuantity - 1))}
+                    disabled={transferQuantity <= 1}
+                    className="h-10 w-10"
+                  >
+                    -
+                  </Button>
                   <Input
                     type="number"
                     min={1}
                     max={maxQuantity}
                     value={transferQuantity}
                     onChange={(e) => setTransferQuantity(Math.min(maxQuantity, Math.max(1, parseInt(e.target.value) || 1)))}
-                    className="w-24 bg-background"
+                    className="w-20 text-center bg-background"
                   />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setTransferQuantity(Math.min(maxQuantity, transferQuantity + 1))}
+                    disabled={transferQuantity >= maxQuantity}
+                    className="h-10 w-10"
+                  >
+                    +
+                  </Button>
                   <span className="text-sm text-muted-foreground">
                     of {maxQuantity} available
                   </span>
@@ -612,17 +632,22 @@ export default function EquipmentDetailPage() {
                 {(assignedType === 'company' || assignedType === 'platoon' || assignedType === 'individual') && (
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Company</Label>
-                    {availableCompanies.length === 1 ? (
+                    {availableCompanies.length === 0 ? (
+                      <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm flex items-start gap-2">
+                        <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+                        <span>No companies available in this battalion.</span>
+                      </div>
+                    ) : availableCompanies.length === 1 ? (
                       <div className="flex items-center gap-2 h-10 px-3 rounded-md border border-input bg-muted/50">
                         <Users className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">{availableCompanies[0].name}</span>
                       </div>
                     ) : (
                       <Select value={selectedCompanyId} onValueChange={handleCompanyChange}>
-                        <SelectTrigger className="bg-background">
+                        <SelectTrigger className="bg-background h-10">
                           <SelectValue placeholder="Select Company" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-popover z-50">
                           {availableCompanies.map((c) => (
                             <SelectItem key={c.id} value={c.id}>
                               <div className="flex items-center gap-2">
@@ -641,17 +666,22 @@ export default function EquipmentDetailPage() {
                 {(assignedType === 'platoon' || assignedType === 'individual') && selectedCompanyId && (
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Platoon</Label>
-                    {availablePlatoons.length === 1 ? (
+                    {availablePlatoons.length === 0 ? (
+                      <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm flex items-start gap-2">
+                        <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+                        <span>No platoons available in this company.</span>
+                      </div>
+                    ) : availablePlatoons.length === 1 ? (
                       <div className="flex items-center gap-2 h-10 px-3 rounded-md border border-input bg-muted/50">
                         <Users className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">{availablePlatoons[0].name}</span>
                       </div>
                     ) : (
                       <Select value={selectedPlatoonId} onValueChange={handlePlatoonChange}>
-                        <SelectTrigger className="bg-background">
+                        <SelectTrigger className="bg-background h-10">
                           <SelectValue placeholder="Select Platoon" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-popover z-50">
                           {availablePlatoons.map((p) => (
                             <SelectItem key={p.id} value={p.id}>
                               <div className="flex items-center gap-2">
@@ -670,21 +700,28 @@ export default function EquipmentDetailPage() {
                 {assignedType === 'individual' && (
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Person</Label>
-                    <Select value={selectedPersonnelId} onValueChange={setSelectedPersonnelId}>
-                      <SelectTrigger className="bg-background">
-                        <SelectValue placeholder="Select Person" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availablePersonnel.map((p) => (
-                          <SelectItem key={p.id} value={p.id}>
-                            <div className="flex items-center gap-2">
-                              <User className="h-4 w-4" />
-                              {p.rank} {p.lastName}, {p.firstName}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {availablePersonnel.length === 0 ? (
+                      <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm flex items-start gap-2">
+                        <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+                        <span>No personnel available. {selectedPlatoonId ? 'This platoon has no assigned personnel.' : 'Select a platoon first.'}</span>
+                      </div>
+                    ) : (
+                      <Select value={selectedPersonnelId} onValueChange={setSelectedPersonnelId}>
+                        <SelectTrigger className="bg-background h-10">
+                          <SelectValue placeholder="Select Person" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-popover z-50">
+                          {availablePersonnel.map((p) => (
+                            <SelectItem key={p.id} value={p.id}>
+                              <div className="flex items-center gap-2">
+                                <User className="h-4 w-4" />
+                                {p.rank} {p.lastName}, {p.firstName}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
                 )}
               </div>
