@@ -65,8 +65,10 @@ export default function PersonnelDetailPage() {
     last_name: '',
     duty_positions: [] as string[],
     battalion_id: null as string | null,
+    company_id: null as string | null,
     platoon_id: null as string | null,
     squad_id: null as string | null,
+    transfer_approved: false,
     phone: '',
     email: '',
     local_address: '',
@@ -128,8 +130,10 @@ export default function PersonnelDetailPage() {
           last_name: person.last_name,
           duty_positions: dutyPositions,
           battalion_id: (person as any).battalion_id || null,
+          company_id: (person as any).company_id || null,
           platoon_id: (person as any).platoon_id || null,
-          squad_id: person.squad_id || null,
+          squad_id: (person as any).squad_id || null,
+          transfer_approved: (person as any).transfer_approved || false,
           phone: person.phone || '',
           email: person.email || '',
           local_address: person.local_address || '',
@@ -173,8 +177,10 @@ export default function PersonnelDetailPage() {
           last_name: formData.last_name,
           duty_position: primaryDutyPosition,
           battalion_id: formData.battalion_id || null,
+          company_id: formData.company_id || null,
           platoon_id: formData.platoon_id || null,
           squad_id: formData.squad_id || null,
+          transfer_approved: formData.transfer_approved,
           phone: formData.phone || null,
           email: formData.email || null,
           local_address: formData.local_address || null,
@@ -380,14 +386,14 @@ export default function PersonnelDetailPage() {
                   <UnitTreeSelector
                     value={{
                       battalion_id: formData.battalion_id,
+                      company_id: formData.company_id,
                       platoon_id: formData.platoon_id,
-                      squad_id: formData.squad_id,
                     }}
                     onChange={(assignment) => setFormData(prev => ({
                       ...prev,
                       battalion_id: assignment.battalion_id,
+                      company_id: assignment.company_id,
                       platoon_id: assignment.platoon_id,
-                      squad_id: assignment.squad_id,
                     }))}
                     disabled={!isEditing}
                   />
@@ -494,6 +500,47 @@ export default function PersonnelDetailPage() {
                 />
               </CardContent>
             </Card>
+
+            {/* Transfer Approved Card */}
+            {canManageRoles && (
+              <Card className="card-tactical">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Briefcase className="h-5 w-5 text-primary" />
+                    Transfer Authority
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Transfer Approved</p>
+                      <p className="text-xs text-muted-foreground">
+                        Can initiate and accept equipment transfers for their unit
+                      </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.transfer_approved}
+                        onChange={(e) => setFormData(prev => ({ ...prev, transfer_approved: e.target.checked }))}
+                        disabled={!isEditing}
+                        className="sr-only peer"
+                      />
+                      <div className={cn(
+                        "w-11 h-6 bg-muted rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary",
+                        !isEditing && "opacity-50 cursor-not-allowed"
+                      )} />
+                    </label>
+                  </div>
+                  {formData.transfer_approved && (
+                    <Badge variant="secondary" className="mt-3">
+                      <Briefcase className="mr-1 h-3 w-3" />
+                      Transfer Approved
+                    </Badge>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Role Management - only show if user has role or can manage */}
             {(roles.some(r => r !== 'user') || canManageRoles) && (
