@@ -21,19 +21,23 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Switch } from '@/components/ui/switch';
 
 export function MobileNav() {
   const { t } = useLanguage();
-  const { isAdmin, isLeader, isActualAdmin } = useUserRole();
+  const {
+    isLeader,
+    isActualAdmin,
+    loading: roleLoading,
+  } = useUserRole();
   const { isAdminMode, toggleAdminMode } = useAdminMode();
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const pendingCount = usePendingRequestsCount();
   const navigate = useNavigate();
   const location = useLocation();
-
   // Determine effective admin/leader status based on admin mode
   // Admin mode only affects admin privileges; leader privileges remain.
   const effectiveIsAdmin = isActualAdmin && isAdminMode;
@@ -121,7 +125,29 @@ export function MobileNav() {
               </span>
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="mb-2">
+          <DropdownMenuContent
+            side="top"
+            align="end"
+            className="mb-2 max-h-[70vh] overflow-x-hidden overflow-y-auto"
+          >
+            {user?.email && (
+              <>
+                <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+                  {user.email}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+              </>
+            )}
+
+            {roleLoading && (
+              <>
+                <DropdownMenuItem disabled className="text-xs text-muted-foreground">
+                  {t('common.loading')}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
+
             {isActualAdmin && (
               <>
                 <DropdownMenuItem
