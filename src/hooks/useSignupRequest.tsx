@@ -16,8 +16,9 @@ interface UseSignupRequestReturn {
     email: string;
     phone?: string;
     serviceNumber: string;
-    unitType: 'battalion' | 'platoon' | 'squad';
+    unitType: 'battalion' | 'company' | 'platoon' | 'squad';
     battalionId?: string;
+    companyId?: string;
     platoonId?: string;
     squadId?: string;
   }) => Promise<{ error: Error | null }>;
@@ -73,8 +74,9 @@ export function useSignupRequest(): UseSignupRequestReturn {
     email: string;
     phone?: string;
     serviceNumber: string;
-    unitType: 'battalion' | 'platoon' | 'squad';
+    unitType: 'battalion' | 'company' | 'platoon' | 'squad';
     battalionId?: string;
+    companyId?: string;
     platoonId?: string;
     squadId?: string;
   }) => {
@@ -91,6 +93,7 @@ export function useSignupRequest(): UseSignupRequestReturn {
         service_number: data.serviceNumber,
         requested_unit_type: data.unitType,
         requested_battalion_id: data.battalionId || null,
+        requested_company_id: data.companyId || null,
         requested_platoon_id: data.platoonId || null,
         requested_squad_id: data.squadId || null,
         status: 'pending',
