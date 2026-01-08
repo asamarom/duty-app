@@ -25,24 +25,46 @@ export function useUserRole(): UseUserRoleReturn {
 
   const fetchRoles = async () => {
     if (!user) {
+      setError(null);
       setLoading(false);
       setActualRoles([]);
       return;
     }
 
+    setError(null);
+    setLoading(true);
+
     try {
-      setLoading(true);
+      // Primary path: read roles from the roles table (preferred when RLS is configured).
       const { data, error: fetchError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', user.id);
 
-      if (fetchError) throw fetchError;
+      if (!fetchError) {
+        const userRoles = data?.map((r) => r.role as AppRole) || [];
+        setActualRoles(userRoles);
+        return;
+      }
 
-      const userRoles = data?.map((r) => r.role as AppRole) || [];
+      // Fallback path: use security-definer RPC checks (works even if direct SELECT is blocked).
+      const [adminRes, leaderRes] = await Promise.all([
+        supabase.rpc('has_role', { _role: 'admin', _user_id: user.id }),
+        supabase.rpc('has_role', { _role: 'leader', _user_id: user.id }),
+      ]);
+
+      if (adminRes.error) throw adminRes.error;
+      if (leaderRes.error) throw leaderRes.error;
+
+      const userRoles: AppRole[] = [
+        ...(adminRes.data ? (['admin'] as AppRole[]) : []),
+        ...(leaderRes.data ? (['leader'] as AppRole[]) : []),
+      ];
+
       setActualRoles(userRoles);
     } catch (err) {
       setError(err as Error);
+      setActualRoles([]);
     } finally {
       setLoading(false);
     }
