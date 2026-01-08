@@ -14,6 +14,7 @@ export const translations = {
     'nav.transfers': 'Transfers',
     'nav.approvals': 'Approvals',
     'nav.more': 'More',
+    'nav.signOut': 'Sign Out',
 
     // Dashboard
     'dashboard.title': 'Platoon Dashboard',
@@ -305,6 +306,7 @@ export const translations = {
     'nav.transfers': 'העברות',
     'nav.approvals': 'אישורים',
     'nav.more': 'עוד',
+    'nav.signOut': 'התנתק',
 
     // Dashboard
     'dashboard.title': 'לוח בקרה מחלקתי',
