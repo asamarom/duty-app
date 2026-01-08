@@ -25,7 +25,7 @@ export default function AdminApprovalsPage() {
   const { user } = useAuth();
   const { isAdmin, isLeader, isActualAdmin, loading: rolesLoading } = useUserRole();
   const { isAdminMode } = useAdminMode();
-  const { battalions, platoons, squads, loading: unitsLoading } = useUnits();
+  const { battalions, companies, platoons, squads, loading: unitsLoading } = useUnits();
   const { toast } = useToast();
   const { t } = useLanguage();
 
@@ -74,20 +74,27 @@ export default function AdminApprovalsPage() {
     }
   }, [hasAdminAccess]);
 
-  const getUnitName = (request: SignupRequest) => {
-    if (request.requested_squad_id) {
-      const squad = squads.find((s) => s.id === request.requested_squad_id);
-      return squad?.name || t('units.unknownSquad');
+  const getUnitPath = (request: SignupRequest): string => {
+    const parts: string[] = [];
+    
+    if (request.requested_battalion_id) {
+      const battalion = battalions.find((b) => b.id === request.requested_battalion_id);
+      parts.push(battalion?.name || t('units.unknownBattalion'));
+    }
+    if (request.requested_company_id) {
+      const company = companies.find((c) => c.id === request.requested_company_id);
+      parts.push(company?.name || 'Unknown company');
     }
     if (request.requested_platoon_id) {
       const platoon = platoons.find((p) => p.id === request.requested_platoon_id);
-      return platoon?.name || t('units.unknownPlatoon');
+      parts.push(platoon?.name || t('units.unknownPlatoon'));
     }
-    if (request.requested_battalion_id) {
-      const battalion = battalions.find((b) => b.id === request.requested_battalion_id);
-      return battalion?.name || t('units.unknownBattalion');
+    if (request.requested_squad_id) {
+      const squad = squads.find((s) => s.id === request.requested_squad_id);
+      parts.push(squad?.name || t('units.unknownSquad'));
     }
-    return t('units.noUnit');
+    
+    return parts.length > 0 ? parts.join(' → ') : t('units.noUnit');
   };
 
   const handleApprove = async (request: SignupRequest) => {
@@ -368,7 +375,7 @@ export default function AdminApprovalsPage() {
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">{t('approvals.unit')}</p>
-                          <p className="font-medium">{getUnitName(request)}</p>
+                          <p className="font-medium">{getUnitPath(request)}</p>
                         </div>
                       </div>
                       <div className="flex gap-2">
@@ -444,7 +451,7 @@ export default function AdminApprovalsPage() {
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">{t('approvals.unit')}</p>
-                          <p className="font-medium">{getUnitName(request)}</p>
+                          <p className="font-medium">{getUnitPath(request)}</p>
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">{t('approvals.reviewed')}</p>

@@ -2,53 +2,38 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useSignupRequest } from '@/hooks/useSignupRequest';
-import { useUnits } from '@/hooks/useUnits';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Shield, Loader2, Building2, Users, UserCheck } from 'lucide-react';
+import { Shield, Loader2, UserCheck } from 'lucide-react';
 import { z } from 'zod';
+import { BattalionUnitSelector, UnitSelection } from '@/components/signup/BattalionUnitSelector';
 
 const requestSchema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters'),
   serviceNumber: z.string().min(1, 'Service number is required'),
   phone: z.string().optional(),
-  unitType: z.enum(['battalion', 'platoon', 'squad']),
-  battalionId: z.string().optional(),
-  platoonId: z.string().optional(),
-  squadId: z.string().optional(),
-}).refine((data) => {
-  if (data.unitType === 'battalion') return !!data.battalionId;
-  if (data.unitType === 'platoon') return !!data.battalionId && !!data.platoonId;
-  if (data.unitType === 'squad') return !!data.battalionId && !!data.platoonId && !!data.squadId;
-  return false;
-}, {
-  message: 'Please select the appropriate unit',
-  path: ['unitType'],
+  battalionId: z.string().min(1, 'Please select your battalion'),
 });
 
 export default function SignupRequestPage() {
   const { user, signOut } = useAuth();
   const { submitRequest, status, loading: requestLoading } = useSignupRequest();
-  const { battalions, getPlatoonsForBattalion, getSquadsForPlatoon, loading: unitsLoading } = useUnits();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const [fullName, setFullName] = useState(user?.user_metadata?.full_name || '');
   const [serviceNumber, setServiceNumber] = useState('');
   const [phone, setPhone] = useState('');
-  const [unitType, setUnitType] = useState<'battalion' | 'platoon' | 'squad'>('battalion');
-  const [battalionId, setBattalionId] = useState('');
-  const [platoonId, setPlatoonId] = useState('');
-  const [squadId, setSquadId] = useState('');
+  const [unitSelection, setUnitSelection] = useState<UnitSelection>({
+    battalionId: '',
+    companyId: null,
+    platoonId: null,
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const platoons = battalionId ? getPlatoonsForBattalion(battalionId) : [];
-  const squads = platoonId ? getSquadsForPlatoon(platoonId) : [];
 
   // Redirect if already has a pending/approved request
   useEffect(() => {
@@ -59,16 +44,6 @@ export default function SignupRequestPage() {
     }
   }, [status, requestLoading, navigate]);
 
-  // Reset child selections when parent changes
-  useEffect(() => {
-    setPlatoonId('');
-    setSquadId('');
-  }, [battalionId]);
-
-  useEffect(() => {
-    setSquadId('');
-  }, [platoonId]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
@@ -77,10 +52,7 @@ export default function SignupRequestPage() {
       fullName,
       serviceNumber,
       phone,
-      unitType,
-      battalionId,
-      platoonId,
-      squadId,
+      battalionId: unitSelection.battalionId,
     });
 
     if (!validation.success) {
@@ -94,6 +66,14 @@ export default function SignupRequestPage() {
       return;
     }
 
+    // Determine unit type based on selection
+    let unitType: 'battalion' | 'company' | 'platoon' = 'battalion';
+    if (unitSelection.platoonId) {
+      unitType = 'platoon';
+    } else if (unitSelection.companyId) {
+      unitType = 'company';
+    }
+
     setIsSubmitting(true);
     const { error } = await submitRequest({
       fullName,
@@ -101,9 +81,9 @@ export default function SignupRequestPage() {
       phone: phone || undefined,
       serviceNumber,
       unitType,
-      battalionId: battalionId || undefined,
-      platoonId: platoonId || undefined,
-      squadId: squadId || undefined,
+      battalionId: unitSelection.battalionId,
+      companyId: unitSelection.companyId || undefined,
+      platoonId: unitSelection.platoonId || undefined,
     });
     setIsSubmitting(false);
 
@@ -127,7 +107,7 @@ export default function SignupRequestPage() {
     navigate('/auth');
   };
 
-  if (requestLoading || unitsLoading) {
+  if (requestLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -206,89 +186,15 @@ export default function SignupRequestPage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>Unit Level</Label>
-                <Select value={unitType} onValueChange={(v) => setUnitType(v as 'battalion' | 'platoon' | 'squad')}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select unit level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="battalion">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4" />
-                        Battalion
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="platoon">
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4" />
-                        Platoon
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="squad">
-                      <div className="flex items-center gap-2">
-                        <UserCheck className="h-4 w-4" />
-                        Squad
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.unitType && <p className="text-sm text-destructive">{errors.unitType}</p>}
-              </div>
+              {/* Battalion + Unit Tree Selector */}
+              <BattalionUnitSelector
+                value={unitSelection}
+                onChange={setUnitSelection}
+                disabled={isSubmitting}
+              />
+              {errors.battalionId && <p className="text-sm text-destructive">{errors.battalionId}</p>}
 
-              <div className="space-y-2">
-                <Label>Battalion</Label>
-                <Select value={battalionId} onValueChange={setBattalionId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select battalion" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {battalions.map((b) => (
-                      <SelectItem key={b.id} value={b.id}>
-                        {b.name} {b.designation && `(${b.designation})`}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {(unitType === 'platoon' || unitType === 'squad') && battalionId && (
-                <div className="space-y-2">
-                  <Label>Platoon</Label>
-                  <Select value={platoonId} onValueChange={setPlatoonId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select platoon" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {platoons.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>
-                          {p.name} {p.designation && `(${p.designation})`}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {unitType === 'squad' && platoonId && (
-                <div className="space-y-2">
-                  <Label>Squad</Label>
-                  <Select value={squadId} onValueChange={setSquadId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select squad" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {squads.map((s) => (
-                        <SelectItem key={s.id} value={s.id}>
-                          {s.name} {s.designation && `(${s.designation})`}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" className="w-full" disabled={isSubmitting || !unitSelection.battalionId}>
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
