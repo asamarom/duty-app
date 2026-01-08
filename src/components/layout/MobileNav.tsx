@@ -4,6 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAdminMode } from '@/contexts/AdminModeContext';
 import { usePendingRequestsCount } from '@/hooks/usePendingRequestsCount';
+import { useAuth } from '@/hooks/useAuth';
 import {
   LayoutDashboard,
   Users,
@@ -12,6 +13,7 @@ import {
   MoreHorizontal,
   ShieldCheck,
   User,
+  LogOut,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -27,6 +29,7 @@ export function MobileNav() {
   const { t } = useLanguage();
   const { isAdmin, isLeader, isActualAdmin } = useUserRole();
   const { isAdminMode, toggleAdminMode } = useAdminMode();
+  const { signOut } = useAuth();
   const pendingCount = usePendingRequestsCount();
   const navigate = useNavigate();
   const location = useLocation();
@@ -155,6 +158,14 @@ export function MobileNav() {
                 {item.name}
               </DropdownMenuItem>
             ))}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => signOut()}
+              className="text-destructive focus:text-destructive"
+            >
+              <LogOut className="h-4 w-4 me-2" />
+              {t('nav.signOut')}
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
