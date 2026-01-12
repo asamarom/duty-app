@@ -202,7 +202,8 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     toPersonnelId?: string;
     notes?: string;
   }) => {
-    const { error: insertError } = await supabase
+    // Insert the request and get the ID
+    const { data: insertedRequest, error: insertError } = await supabase
       .from('assignment_requests')
       .insert({
         equipment_id: data.equipmentId,
@@ -218,9 +219,23 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
         to_personnel_id: data.toPersonnelId || null,
         requested_by: user?.id || null,
         notes: data.notes || null,
-      });
+      })
+      .select('id')
+      .single();
 
     if (insertError) throw insertError;
+
+    // Auto-create approval record for the requester (sender approval)
+    // This counts as the sender's approval - no separate approval step needed
+    await supabase
+      .from('assignment_approvals')
+      .insert({
+        request_id: insertedRequest.id,
+        action: 'approved',
+        action_by: user?.id || null,
+        notes: 'Transfer initiated by sender',
+      });
+
     await fetchRequests();
   }, [user?.id, fetchRequests]);
 
@@ -330,11 +345,22 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     await fetchRequests();
   }, [user?.id, fetchRequests]);
 
-  // Recipient approves the incoming transfer
+  // Recipient approves the incoming transfer - this finalizes the transfer
   const recipientApprove = useCallback(async (requestId: string, notes?: string) => {
+    // Get the request details first
+    const { data: request, error: fetchError } = await supabase
+      .from('assignment_requests')
+      .select('*')
+      .eq('id', requestId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    // Update request status to approved and mark recipient approval
     const { error: updateError } = await supabase
       .from('assignment_requests')
       .update({ 
+        status: 'approved',
         recipient_approved: true,
         recipient_approved_at: new Date().toISOString(),
         recipient_approved_by: user?.id || null,
@@ -353,6 +379,26 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
         notes: notes ? `Recipient approved: ${notes}` : 'Recipient approved the transfer',
       });
 
+    // Actually perform the assignment - close old assignment
+    await supabase
+      .from('equipment_assignments')
+      .update({ returned_at: new Date().toISOString() })
+      .eq('equipment_id', request.equipment_id)
+      .is('returned_at', null);
+
+    // Create new assignment at destination
+    const { error: assignError } = await supabase
+      .from('equipment_assignments')
+      .insert({
+        equipment_id: request.equipment_id,
+        personnel_id: request.to_personnel_id || null,
+        platoon_id: request.to_platoon_id || null,
+        company_id: request.to_company_id || null,
+        battalion_id: request.to_battalion_id || null,
+        assigned_by: user?.id || null,
+      });
+
+    if (assignError) throw assignError;
     await fetchRequests();
   }, [user?.id, fetchRequests]);
 

@@ -94,10 +94,8 @@ export default function AssignmentRequestsPage() {
 
   const getStatusBadge = (request: AssignmentRequest) => {
     if (request.status === 'pending') {
-      if (request.recipient_approved) {
-        return <Badge className="bg-success/20 text-success border-success"><UserCheck className="h-3 w-3 mr-1" /> Recipient Approved</Badge>;
-      }
-      return <Badge variant="outline" className="text-warning border-warning"><Clock className="h-3 w-3 mr-1" /> {t('status.pending')}</Badge>;
+      // Pending means awaiting recipient approval
+      return <Badge variant="outline" className="text-warning border-warning"><Clock className="h-3 w-3 mr-1" /> Awaiting Recipient</Badge>;
     }
     if (request.status === 'approved') {
       return <Badge className="bg-success text-success-foreground"><Check className="h-3 w-3 mr-1" /> {t('status.approved')}</Badge>;
@@ -169,32 +167,7 @@ export default function AssignmentRequestsPage() {
                 </Button>
               </>
             )}
-            {showActions && !isIncoming && (
-              <>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-success border-success hover:bg-success/10"
-                  onClick={() => {
-                    setSelectedRequest(request);
-                    setActionType('approve');
-                  }}
-                >
-                  <Check className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-destructive border-destructive hover:bg-destructive/10"
-                  onClick={() => {
-                    setSelectedRequest(request);
-                    setActionType('reject');
-                  }}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </>
-            )}
+            {/* Pending tab now only shows status - no actions needed since sender auto-approved on creation */}
             {approvalHistory.length > 0 && (
               <Button
                 size="sm"
@@ -311,7 +284,7 @@ export default function AssignmentRequestsPage() {
                     </TableHeader>
                     <TableBody>
                       {pendingRequests.map(request => (
-                        <RequestRow key={request.id} request={request} showActions={true} />
+                        <RequestRow key={request.id} request={request} showActions={false} />
                       ))}
                     </TableBody>
                   </Table>
