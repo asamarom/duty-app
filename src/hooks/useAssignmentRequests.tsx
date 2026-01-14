@@ -202,47 +202,88 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     toPersonnelId?: string;
     notes?: string;
   }) => {
-    // Use RPC for atomic initiation with rule enforcement
-    const { error: rpcError } = await supabase.rpc('initiate_transfer_v2', {
-      _equipment_id: data.equipmentId,
-      _to_unit_type: data.toUnitType,
-      _to_battalion_id: data.toBattalionId || null,
-      _to_company_id: data.toCompanyId || null,
-      _to_platoon_id: data.toPlatoonId || null,
-      _to_personnel_id: data.toPersonnelId || null,
-      _notes: data.notes || null,
-    });
+    if (!user) throw new Error('Not authenticated');
 
-    if (rpcError) throw rpcError;
+    // Create the assignment request
+    const { data: requestData, error: insertError } = await supabase
+      .from('assignment_requests')
+      .insert({
+        equipment_id: data.equipmentId,
+        from_unit_type: data.fromUnitType,
+        from_battalion_id: data.fromBattalionId || null,
+        from_company_id: data.fromCompanyId || null,
+        from_platoon_id: data.fromPlatoonId || null,
+        from_personnel_id: data.fromPersonnelId || null,
+        to_unit_type: data.toUnitType,
+        to_battalion_id: data.toBattalionId || null,
+        to_company_id: data.toCompanyId || null,
+        to_platoon_id: data.toPlatoonId || null,
+        to_personnel_id: data.toPersonnelId || null,
+        notes: data.notes || null,
+        requested_by: user.id,
+        status: 'pending',
+      })
+      .select()
+      .single();
+
+    if (insertError) throw insertError;
+
+    // Auto-approve as sender (requester)
+    if (requestData) {
+      await supabase.from('assignment_approvals').insert({
+        request_id: requestData.id,
+        action: 'approved',
+        action_by: user.id,
+        notes: 'Sender initiated transfer',
+      });
+    }
 
     await fetchRequests();
-  }, [fetchRequests]);
+  }, [fetchRequests, user]);
 
   const approveRequest = useCallback(async (requestId: string, notes?: string) => {
-    // Process approval via RPC
-    const { error: rpcError } = await supabase.rpc('process_transfer_v2', {
-      _request_id: requestId,
-      _action: 'approved',
-      _notes: notes || null,
+    if (!user) throw new Error('Not authenticated');
+
+    // Update request status
+    const { error: updateError } = await supabase
+      .from('assignment_requests')
+      .update({ status: 'approved' })
+      .eq('id', requestId);
+
+    if (updateError) throw updateError;
+
+    // Record approval
+    await supabase.from('assignment_approvals').insert({
+      request_id: requestId,
+      action: 'approved',
+      action_by: user.id,
+      notes: notes || null,
     });
 
-    if (rpcError) throw rpcError;
-
     await fetchRequests();
-  }, [fetchRequests]);
+  }, [fetchRequests, user]);
 
   const rejectRequest = useCallback(async (requestId: string, notes?: string) => {
-    // Process rejection via RPC
-    const { error: rpcError } = await supabase.rpc('process_transfer_v2', {
-      _request_id: requestId,
-      _action: 'rejected',
-      _notes: notes || null,
+    if (!user) throw new Error('Not authenticated');
+
+    // Update request status
+    const { error: updateError } = await supabase
+      .from('assignment_requests')
+      .update({ status: 'rejected' })
+      .eq('id', requestId);
+
+    if (updateError) throw updateError;
+
+    // Record rejection
+    await supabase.from('assignment_approvals').insert({
+      request_id: requestId,
+      action: 'rejected',
+      action_by: user.id,
+      notes: notes || null,
     });
 
-    if (rpcError) throw rpcError;
-
     await fetchRequests();
-  }, [fetchRequests]);
+  }, [fetchRequests, user]);
 
   // Recipient approves the incoming transfer - this finalizes the transfer
   const recipientApprove = useCallback(async (requestId: string, notes?: string) => {

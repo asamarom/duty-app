@@ -33,7 +33,6 @@ function mapPersonnelRowToUI(row: PersonnelRow): Personnel {
     driverLicenses: row.driver_licenses || [],
     profileImage: row.profile_image || undefined,
     readinessStatus: row.readiness_status,
-    isSignatureApproved: row.is_signature_approved,
   };
 }
 
