@@ -44,7 +44,6 @@ function mapPersonnelRowToUI(row: any): PersonnelWithRoles {
     driverLicenses: row.driver_licenses ?? [],
     profileImage: row.profile_image ?? undefined,
     readinessStatus: row.readiness_status ?? 'ready',
-    isSignatureApproved: row.is_signature_approved ?? false,
     userRoles: [],
   };
 }
@@ -68,7 +67,7 @@ export default function PersonnelPage() {
         const { data, error } = await supabase
           .from('personnel')
           .select(
-            'id, service_number, rank, first_name, last_name, duty_position, phone, email, local_address, location_status, readiness_status, skills, driver_licenses, profile_image, user_id, battalion_id, company_id, platoon_id, is_signature_approved'
+            'id, service_number, rank, first_name, last_name, duty_position, phone, email, local_address, location_status, readiness_status, skills, driver_licenses, profile_image, user_id, battalion_id, company_id, platoon_id'
           )
           .order('last_name', { ascending: true });
 

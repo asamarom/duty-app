@@ -313,25 +313,27 @@ export function useEquipment(): UseEquipmentReturn {
 
   const assignEquipment = useCallback(async (id: string, assignment: AssignmentData, quantity?: number) => {
     const equipmentId = getBaseId(id);
-    // Direct assignment is now funneled through initiate_transfer_v2 to ensure rules are checked
-    // If successful, it creates a request. Finalizing it instantly for admins could be an optimization
-    // but for now, we follow the "everything is a transfer" rule.
-    const toUnitType = assignment.personnelId ? 'individual'
-      : assignment.platoonId ? 'platoon'
-        : assignment.companyId ? 'company'
-          : assignment.battalionId ? 'battalion'
-            : 'unassigned';
+    
+    // Close any existing active assignment
+    await supabase
+      .from('equipment_assignments')
+      .update({ returned_at: new Date().toISOString() })
+      .eq('equipment_id', equipmentId)
+      .is('returned_at', null);
 
-    const { error: rpcError } = await supabase.rpc('initiate_transfer_v2', {
-      _equipment_id: equipmentId,
-      _to_unit_type: toUnitType,
-      _to_battalion_id: assignment.battalionId || null,
-      _to_company_id: assignment.companyId || null,
-      _to_platoon_id: assignment.platoonId || null,
-      _to_personnel_id: assignment.personnelId || null,
-    });
+    // Create new assignment
+    const { error: assignError } = await supabase
+      .from('equipment_assignments')
+      .insert({
+        equipment_id: equipmentId,
+        personnel_id: assignment.personnelId || null,
+        platoon_id: assignment.platoonId || null,
+        company_id: assignment.companyId || null,
+        battalion_id: assignment.battalionId || null,
+        quantity: quantity || 1,
+      });
 
-    if (rpcError) throw rpcError;
+    if (assignError) throw assignError;
 
     await fetchEquipment();
   }, [fetchEquipment]);
@@ -395,26 +397,56 @@ export function useEquipment(): UseEquipmentReturn {
     notes?: string,
     quantity?: number
   ) => {
+    if (!user) throw new Error('Not authenticated');
+    
     const equipmentId = getBaseId(id);
+    
+    // Get current assignment info
+    const currentItem = equipment.find(e => e.id === id);
+    const fromUnitType = currentItem?.assignmentLevel || 'unassigned';
+    
     const toUnitType = assignment.personnelId ? 'individual'
       : assignment.platoonId ? 'platoon'
         : assignment.companyId ? 'company'
           : assignment.battalionId ? 'battalion'
             : 'unassigned';
 
-    const { error: rpcError } = await supabase.rpc('initiate_transfer_v2', {
-      _equipment_id: equipmentId,
-      _to_unit_type: toUnitType,
-      _to_battalion_id: assignment.battalionId || null,
-      _to_company_id: assignment.companyId || null,
-      _to_platoon_id: assignment.platoonId || null,
-      _to_personnel_id: assignment.personnelId || null,
-      _notes: notes || null,
-    });
+    // Create assignment request
+    const { data: requestData, error: insertError } = await supabase
+      .from('assignment_requests')
+      .insert({
+        equipment_id: equipmentId,
+        from_unit_type: fromUnitType,
+        from_battalion_id: currentItem?.currentBattalionId || null,
+        from_company_id: currentItem?.currentCompanyId || null,
+        from_platoon_id: currentItem?.currentPlatoonId || null,
+        from_personnel_id: currentItem?.currentPersonnelId || null,
+        to_unit_type: toUnitType,
+        to_battalion_id: assignment.battalionId || null,
+        to_company_id: assignment.companyId || null,
+        to_platoon_id: assignment.platoonId || null,
+        to_personnel_id: assignment.personnelId || null,
+        notes: notes || null,
+        requested_by: user.id,
+        status: 'pending',
+      })
+      .select()
+      .single();
 
-    if (rpcError) throw rpcError;
+    if (insertError) throw insertError;
+
+    // Auto-approve as sender
+    if (requestData) {
+      await supabase.from('assignment_approvals').insert({
+        request_id: requestData.id,
+        action: 'approved',
+        action_by: user.id,
+        notes: 'Sender initiated transfer',
+      });
+    }
+
     await fetchEquipment();
-  }, [fetchEquipment]);
+  }, [fetchEquipment, user, equipment]);
 
   useEffect(() => {
     fetchEquipment();

@@ -23,7 +23,6 @@ export interface Personnel {
   driverLicenses: string[];
   profileImage?: string;
   readinessStatus: ReadinessStatus;
-  isSignatureApproved?: boolean;
 }
 
 export interface Equipment {
