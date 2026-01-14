@@ -54,27 +54,27 @@ export default function EquipmentPage() {
     try {
       let directCount = 0;
       let requestCount = 0;
-      
+
       // Determine target level
-      const targetLevel: AssignmentLevel = assignment.personnelId ? 'individual' 
+      const targetLevel: AssignmentLevel = assignment.personnelId ? 'individual'
         : assignment.platoonId ? 'platoon'
-        : assignment.companyId ? 'company'
-        : assignment.battalionId ? 'battalion'
-        : 'unassigned';
-      
+          : assignment.companyId ? 'company'
+            : assignment.battalionId ? 'battalion'
+              : 'unassigned';
+
       // Process each selected item
       for (const itemId of selectedIds) {
         const item = equipment.find(e => e.id === itemId);
         if (!item) continue;
-        
+
         const currentLevel = item.assignmentLevel || 'unassigned';
-        
+
         // Check if this is an assignment to a member within the same unit
         // Assigning to individual from unit level is always direct (within same unit)
-        const isDirect = targetLevel === 'individual' || 
+        const isDirect = targetLevel === 'individual' ||
           isWithinSameUnit(currentLevel, targetLevel, item, assignment) ||
           currentLevel === 'unassigned';
-        
+
         if (isDirect) {
           await assignEquipment(itemId, assignment);
           directCount++;
@@ -83,7 +83,7 @@ export default function EquipmentPage() {
           requestCount++;
         }
       }
-      
+
       if (directCount > 0 && requestCount > 0) {
         toast.success(`Assigned ${directCount} item${directCount > 1 ? 's' : ''} directly. Created ${requestCount} transfer request${requestCount > 1 ? 's' : ''} pending approval.`);
       } else if (directCount > 0) {
@@ -91,7 +91,7 @@ export default function EquipmentPage() {
       } else if (requestCount > 0) {
         toast.success(`Created ${requestCount} transfer request${requestCount > 1 ? 's' : ''} pending approval.`);
       }
-      
+
       setSelectedIds(new Set());
       setSelectMode(false);
       await refetch();
@@ -114,9 +114,9 @@ export default function EquipmentPage() {
     <MainLayout>
       {/* Mobile Header */}
       <div className="lg:hidden">
-        <MobileHeader 
-          title={t('equipment.title')} 
-          subtitle={`${equipment.length} ${t('equipment.totalItems')}`}
+        <MobileHeader
+          title={t('equipment.title')}
+          subtitle={`${new Set(equipment.map(e => e.id.split('--')[0])).size} ${t('equipment.totalItems')}`}
         />
       </div>
 
@@ -133,8 +133,8 @@ export default function EquipmentPage() {
               </p>
             </div>
             <div className="flex gap-3">
-              <Button 
-                variant={selectMode ? 'default' : 'outline'} 
+              <Button
+                variant={selectMode ? 'default' : 'outline'}
                 onClick={handleToggleSelectMode}
               >
                 <CheckSquare className="me-2 h-4 w-4" />
@@ -159,9 +159,9 @@ export default function EquipmentPage() {
               <span className="text-sm font-medium">
                 {selectedIds.size} item{selectedIds.size > 1 ? 's' : ''} selected
               </span>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setSelectedIds(new Set())}
               >
                 <X className="h-4 w-4 me-1" />
@@ -181,7 +181,9 @@ export default function EquipmentPage() {
           <div className="card-tactical flex items-center gap-3 rounded-lg px-4 py-3 w-fit">
             <Package className="h-6 w-6 lg:h-8 lg:w-8 text-primary" />
             <div>
-              <p className="text-xl lg:text-2xl font-bold text-foreground">{equipment.length}</p>
+              <p className="text-xl lg:text-2xl font-bold text-foreground">
+                {new Set(equipment.map(e => e.id.split('--')[0])).size}
+              </p>
               <p className="text-[10px] lg:text-xs text-muted-foreground whitespace-nowrap">{t('equipment.totalItems')}</p>
             </div>
           </div>
@@ -236,8 +238,8 @@ export default function EquipmentPage() {
 
         {/* Mobile Select Mode Toggle */}
         <div className="mb-4 lg:hidden">
-          <Button 
-            variant={selectMode ? 'default' : 'outline'} 
+          <Button
+            variant={selectMode ? 'default' : 'outline'}
             size="sm"
             onClick={handleToggleSelectMode}
             className="w-full"
@@ -249,8 +251,8 @@ export default function EquipmentPage() {
 
         {/* Equipment Table */}
         <div className="overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0">
-          <EquipmentTable 
-            equipment={filteredEquipment} 
+          <EquipmentTable
+            equipment={filteredEquipment}
             selectable={selectMode}
             selectedIds={selectedIds}
             onSelectionChange={setSelectedIds}
@@ -269,18 +271,18 @@ export default function EquipmentPage() {
         {/* Mobile FAB - show Assign button when items selected, otherwise Add */}
         <div className="lg:hidden fixed bottom-24 end-4 z-40">
           {selectMode && selectedIds.size > 0 ? (
-            <Button 
-              variant="tactical" 
-              size="lg" 
+            <Button
+              variant="tactical"
+              size="lg"
               className="h-14 px-6 rounded-full shadow-lg"
               onClick={() => setBulkAssignOpen(true)}
             >
               Assign ({selectedIds.size})
             </Button>
           ) : (
-            <Button 
-              variant="tactical" 
-              size="lg" 
+            <Button
+              variant="tactical"
+              size="lg"
               className="h-14 w-14 rounded-full shadow-lg"
               onClick={() => navigate('/equipment/add')}
             >

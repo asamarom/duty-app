@@ -35,7 +35,6 @@ function mapPersonnelRowToUI(row: any): PersonnelWithRoles {
     battalionId: row.battalion_id ?? undefined,
     companyId: row.company_id ?? undefined,
     platoonId: row.platoon_id ?? undefined,
-    squadId: row.squad_id ?? undefined,
     role: 'user',
     phone: row.phone ?? '',
     email: row.email ?? '',
@@ -45,7 +44,7 @@ function mapPersonnelRowToUI(row: any): PersonnelWithRoles {
     driverLicenses: row.driver_licenses ?? [],
     profileImage: row.profile_image ?? undefined,
     readinessStatus: row.readiness_status ?? 'ready',
-    transferApproved: row.transfer_approved ?? false,
+    isSignatureApproved: row.is_signature_approved ?? false,
     userRoles: [],
   };
 }
@@ -69,7 +68,7 @@ export default function PersonnelPage() {
         const { data, error } = await supabase
           .from('personnel')
           .select(
-            'id, service_number, rank, first_name, last_name, duty_position, phone, email, local_address, location_status, readiness_status, skills, driver_licenses, profile_image, user_id, battalion_id, company_id, platoon_id, squad_id, transfer_approved'
+            'id, service_number, rank, first_name, last_name, duty_position, phone, email, local_address, location_status, readiness_status, skills, driver_licenses, profile_image, user_id, battalion_id, company_id, platoon_id, is_signature_approved'
           )
           .order('last_name', { ascending: true });
 
@@ -77,17 +76,17 @@ export default function PersonnelPage() {
         if (!active) return;
 
         const mappedPersonnel = (data ?? []).map(mapPersonnelRowToUI);
-        
+
         // Get user_ids that are not null
         const userIds = data?.filter(p => p.user_id).map(p => p.user_id) || [];
-        
+
         // Fetch roles for these users
         if (userIds.length > 0) {
           const { data: rolesData } = await supabase
             .from('user_roles')
             .select('user_id, role')
             .in('user_id', userIds);
-          
+
           // Build user_id to roles map
           const userRolesMap = new Map<string, AppRole[]>();
           rolesData?.forEach(r => {
@@ -95,7 +94,7 @@ export default function PersonnelPage() {
             existing.push(r.role as AppRole);
             userRolesMap.set(r.user_id, existing);
           });
-          
+
           // Attach roles to personnel
           mappedPersonnel.forEach((p, index) => {
             const userId = data?.[index]?.user_id;
@@ -143,8 +142,8 @@ export default function PersonnelPage() {
     <MainLayout>
       {/* Mobile Header */}
       <div className="lg:hidden">
-        <MobileHeader 
-          title={t('personnel.title')} 
+        <MobileHeader
+          title={t('personnel.title')}
           subtitle={loading ? t('common.loading') : `${personnel.length} ${t('nav.personnel')}`}
         />
       </div>

@@ -154,7 +154,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
 
       // Filter incoming transfers - those needing recipient approval
       // (pending requests where recipient hasn't approved yet)
-      const incoming = mappedRequests.filter(r => 
+      const incoming = mappedRequests.filter(r =>
         r.status === 'pending' && !r.recipient_approved
       );
       setIncomingTransfers(incoming);
@@ -202,205 +202,53 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     toPersonnelId?: string;
     notes?: string;
   }) => {
-    // Insert the request and get the ID
-    const { data: insertedRequest, error: insertError } = await supabase
-      .from('assignment_requests')
-      .insert({
-        equipment_id: data.equipmentId,
-        from_unit_type: data.fromUnitType,
-        from_battalion_id: data.fromBattalionId || null,
-        from_company_id: data.fromCompanyId || null,
-        from_platoon_id: data.fromPlatoonId || null,
-        from_personnel_id: data.fromPersonnelId || null,
-        to_unit_type: data.toUnitType,
-        to_battalion_id: data.toBattalionId || null,
-        to_company_id: data.toCompanyId || null,
-        to_platoon_id: data.toPlatoonId || null,
-        to_personnel_id: data.toPersonnelId || null,
-        requested_by: user?.id || null,
-        notes: data.notes || null,
-      })
-      .select('id')
-      .single();
+    // Use RPC for atomic initiation with rule enforcement
+    const { error: rpcError } = await supabase.rpc('initiate_transfer_v2', {
+      _equipment_id: data.equipmentId,
+      _to_unit_type: data.toUnitType,
+      _to_battalion_id: data.toBattalionId || null,
+      _to_company_id: data.toCompanyId || null,
+      _to_platoon_id: data.toPlatoonId || null,
+      _to_personnel_id: data.toPersonnelId || null,
+      _notes: data.notes || null,
+    });
 
-    if (insertError) throw insertError;
-
-    // Auto-create approval record for the requester (sender approval)
-    // This counts as the sender's approval - no separate approval step needed
-    await supabase
-      .from('assignment_approvals')
-      .insert({
-        request_id: insertedRequest.id,
-        action: 'approved',
-        action_by: user?.id || null,
-        notes: 'Transfer initiated by sender',
-      });
+    if (rpcError) throw rpcError;
 
     await fetchRequests();
-  }, [user?.id, fetchRequests]);
+  }, [fetchRequests]);
 
   const approveRequest = useCallback(async (requestId: string, notes?: string) => {
-    // Get the request details first
-    const { data: request, error: fetchError } = await supabase
-      .from('assignment_requests')
-      .select('*')
-      .eq('id', requestId)
-      .single();
+    // Process approval via RPC
+    const { error: rpcError } = await supabase.rpc('process_transfer_v2', {
+      _request_id: requestId,
+      _action: 'approved',
+      _notes: notes || null,
+    });
 
-    if (fetchError) throw fetchError;
+    if (rpcError) throw rpcError;
 
-    // Update request status
-    const { error: updateError } = await supabase
-      .from('assignment_requests')
-      .update({ status: 'approved' })
-      .eq('id', requestId);
-
-    if (updateError) throw updateError;
-
-    // Create approval record
-    const { error: approvalError } = await supabase
-      .from('assignment_approvals')
-      .insert({
-        request_id: requestId,
-        action: 'approved',
-        action_by: user?.id || null,
-        notes: notes || null,
-      });
-
-    if (approvalError) throw approvalError;
-
-    // Actually perform the assignment - close old assignment
-    await supabase
-      .from('equipment_assignments')
-      .update({ returned_at: new Date().toISOString() })
-      .eq('equipment_id', request.equipment_id)
-      .is('returned_at', null);
-
-    // Create new assignment
-    const { error: assignError } = await supabase
-      .from('equipment_assignments')
-      .insert({
-        equipment_id: request.equipment_id,
-        personnel_id: request.to_personnel_id || null,
-        platoon_id: request.to_platoon_id || null,
-        company_id: request.to_company_id || null,
-        battalion_id: request.to_battalion_id || null,
-        assigned_by: user?.id || null,
-      });
-
-    if (assignError) throw assignError;
     await fetchRequests();
-  }, [user?.id, fetchRequests]);
+  }, [fetchRequests]);
 
   const rejectRequest = useCallback(async (requestId: string, notes?: string) => {
-    // Get the request details first to know the original unit
-    const { data: request, error: fetchError } = await supabase
-      .from('assignment_requests')
-      .select('*')
-      .eq('id', requestId)
-      .single();
+    // Process rejection via RPC
+    const { error: rpcError } = await supabase.rpc('process_transfer_v2', {
+      _request_id: requestId,
+      _action: 'rejected',
+      _notes: notes || null,
+    });
 
-    if (fetchError) throw fetchError;
+    if (rpcError) throw rpcError;
 
-    const { error: updateError } = await supabase
-      .from('assignment_requests')
-      .update({ status: 'rejected' })
-      .eq('id', requestId);
-
-    if (updateError) throw updateError;
-
-    const { error: approvalError } = await supabase
-      .from('assignment_approvals')
-      .insert({
-        request_id: requestId,
-        action: 'rejected',
-        action_by: user?.id || null,
-        notes: notes || null,
-      });
-
-    if (approvalError) throw approvalError;
-
-    // Reassign the equipment back to the original unit
-    // Close any current pending assignment
-    await supabase
-      .from('equipment_assignments')
-      .update({ returned_at: new Date().toISOString() })
-      .eq('equipment_id', request.equipment_id)
-      .is('returned_at', null);
-
-    // Create assignment back to the original unit
-    const { error: assignError } = await supabase
-      .from('equipment_assignments')
-      .insert({
-        equipment_id: request.equipment_id,
-        personnel_id: request.from_personnel_id || null,
-        platoon_id: request.from_platoon_id || null,
-        company_id: request.from_company_id || null,
-        battalion_id: request.from_battalion_id || null,
-        assigned_by: user?.id || null,
-        notes: 'Reassigned after transfer rejection',
-      });
-
-    if (assignError) throw assignError;
     await fetchRequests();
-  }, [user?.id, fetchRequests]);
+  }, [fetchRequests]);
 
   // Recipient approves the incoming transfer - this finalizes the transfer
   const recipientApprove = useCallback(async (requestId: string, notes?: string) => {
-    // Get the request details first
-    const { data: request, error: fetchError } = await supabase
-      .from('assignment_requests')
-      .select('*')
-      .eq('id', requestId)
-      .single();
-
-    if (fetchError) throw fetchError;
-
-    // Update request status to approved and mark recipient approval
-    const { error: updateError } = await supabase
-      .from('assignment_requests')
-      .update({ 
-        status: 'approved',
-        recipient_approved: true,
-        recipient_approved_at: new Date().toISOString(),
-        recipient_approved_by: user?.id || null,
-      })
-      .eq('id', requestId);
-
-    if (updateError) throw updateError;
-    
-    // Create an approval record for this action
-    await supabase
-      .from('assignment_approvals')
-      .insert({
-        request_id: requestId,
-        action: 'approved',
-        action_by: user?.id || null,
-        notes: notes ? `Recipient approved: ${notes}` : 'Recipient approved the transfer',
-      });
-
-    // Actually perform the assignment - close old assignment
-    await supabase
-      .from('equipment_assignments')
-      .update({ returned_at: new Date().toISOString() })
-      .eq('equipment_id', request.equipment_id)
-      .is('returned_at', null);
-
-    // Create new assignment at destination
-    const { error: assignError } = await supabase
-      .from('equipment_assignments')
-      .insert({
-        equipment_id: request.equipment_id,
-        personnel_id: request.to_personnel_id || null,
-        platoon_id: request.to_platoon_id || null,
-        company_id: request.to_company_id || null,
-        battalion_id: request.to_battalion_id || null,
-        assigned_by: user?.id || null,
-      });
-
-    if (assignError) throw assignError;
-    await fetchRequests();
-  }, [user?.id, fetchRequests]);
+    // Recipient approval is now handled the same as general approval in process_transfer_v2
+    await approveRequest(requestId, notes ? `Recipient approved: ${notes}` : 'Recipient approved the transfer');
+  }, [approveRequest]);
 
   // Recipient rejects the incoming transfer (rejects the whole request)
   const recipientReject = useCallback(async (requestId: string, notes?: string) => {

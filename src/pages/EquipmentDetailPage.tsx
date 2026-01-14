@@ -46,10 +46,12 @@ export default function EquipmentDetailPage() {
   const { equipment, loading: equipmentLoading, deleteEquipment, assignEquipment, requestAssignment, isWithinSameUnit, canDeleteEquipment } = useEquipment();
   const { battalions, companies, platoons, loading: unitsLoading, getCompaniesForBattalion, getPlatoonsForCompany } = useUnits();
   const { battalionId: userBattalionId, loading: battalionLoading } = useUserBattalion();
-  const { history, loading: historyLoading } = useTransferHistory(id);
-  
+
+  const baseId = id?.split('--')[0];
+  const { history, loading: historyLoading } = useTransferHistory(baseId);
+
   const item = equipment.find((e) => e.id === id);
-  
+
   const [assignedType, setAssignedType] = useState<AssignmentType>('battalion');
   const [selectedBattalionId, setSelectedBattalionId] = useState('');
   const [selectedCompanyId, setSelectedCompanyId] = useState('');
@@ -82,7 +84,7 @@ export default function EquipmentDetailPage() {
     if (isSerializedItem) {
       return ['individual'];
     }
-    
+
     switch (currentLevel) {
       case 'battalion':
         return ['company'];
@@ -148,11 +150,11 @@ export default function EquipmentDetailPage() {
   // Get the current assignment's hierarchy info
   const currentAssignmentInfo = useMemo(() => {
     if (!item) return { battalionId: null, companyId: null, platoonId: null };
-    
+
     let battalionId = item.currentBattalionId || null;
     let companyId = item.currentCompanyId || null;
     let platoonId = item.currentPlatoonId || null;
-    
+
     if (item.currentPersonnelId) {
       const person = personnel.find(p => p.id === item.currentPersonnelId);
       if (person?.platoonId) {
@@ -167,7 +169,7 @@ export default function EquipmentDetailPage() {
         }
       }
     }
-    
+
     if (platoonId && !companyId) {
       const platoon = platoons.find(p => p.id === platoonId);
       if (platoon?.company_id) {
@@ -178,14 +180,14 @@ export default function EquipmentDetailPage() {
         }
       }
     }
-    
+
     if (companyId && !battalionId) {
       const company = companies.find(c => c.id === companyId);
       if (company) {
         battalionId = company.battalion_id;
       }
     }
-    
+
     return { battalionId, companyId, platoonId };
   }, [item, personnel, companies, platoons]);
 
@@ -206,23 +208,23 @@ export default function EquipmentDetailPage() {
     if (currentLevel === 'battalion' && currentAssignmentInfo.battalionId) {
       return getCompaniesForBattalion(currentAssignmentInfo.battalionId);
     }
-    
+
     // For unassigned items, use the selected battalion
     if (currentLevel === 'unassigned') {
       if (!selectedBattalionId) return [];
       return getCompaniesForBattalion(selectedBattalionId);
     }
-    
+
     // For items at company/platoon/individual level going back up, show current company
     if ((currentLevel === 'company' || currentLevel === 'platoon' || currentLevel === 'individual') && currentAssignmentInfo.companyId) {
       return companies.filter(c => c.id === currentAssignmentInfo.companyId);
     }
-    
+
     // Fallback to selected battalion
     if (selectedBattalionId) {
       return getCompaniesForBattalion(selectedBattalionId);
     }
-    
+
     return [];
   }, [currentLevel, currentAssignmentInfo, selectedBattalionId, getCompaniesForBattalion, companies]);
 
@@ -232,15 +234,15 @@ export default function EquipmentDetailPage() {
       if (!selectedCompanyId) return [];
       return getPlatoonsForCompany(selectedCompanyId);
     }
-    
+
     if ((currentLevel === 'platoon' || currentLevel === 'individual') && currentAssignmentInfo.platoonId) {
       return platoons.filter(p => p.id === currentAssignmentInfo.platoonId);
     }
-    
+
     if (currentLevel === 'company' && currentAssignmentInfo.companyId) {
       return getPlatoonsForCompany(currentAssignmentInfo.companyId);
     }
-    
+
     return getPlatoonsForCompany(selectedCompanyId);
   }, [currentLevel, currentAssignmentInfo, selectedCompanyId, getPlatoonsForCompany, platoons]);
 
@@ -252,19 +254,19 @@ export default function EquipmentDetailPage() {
       }
       return personnel;
     }
-    
+
     if (currentLevel === 'individual' && currentAssignmentInfo.platoonId) {
       return personnel.filter(p => p.platoonId === currentAssignmentInfo.platoonId);
     }
-    
+
     if (currentLevel === 'platoon' && currentAssignmentInfo.platoonId) {
       return personnel.filter(p => p.platoonId === currentAssignmentInfo.platoonId);
     }
-    
+
     if (selectedPlatoonId) {
       return personnel.filter(p => p.platoonId === selectedPlatoonId);
     }
-    
+
     return personnel;
   }, [currentLevel, currentAssignmentInfo, selectedPlatoonId, personnel]);
 
@@ -352,11 +354,11 @@ export default function EquipmentDetailPage() {
   const handleTransfer = async () => {
     try {
       setSaving(true);
-      
+
       // Build assignment based on type
       let hasAssignment = false;
-      let assignment: { personnelId?: string; platoonId?: string; companyId?: string; battalionId?: string } = {};
-      
+      const assignment: { personnelId?: string; platoonId?: string; companyId?: string; battalionId?: string } = {};
+
       if (assignedType === 'battalion' && selectedBattalionId) {
         assignment.battalionId = selectedBattalionId;
         hasAssignment = true;
@@ -372,16 +374,16 @@ export default function EquipmentDetailPage() {
       }
 
       if (hasAssignment) {
-        const targetLevel: AssignmentLevel = assignment.personnelId ? 'individual' 
+        const targetLevel: AssignmentLevel = assignment.personnelId ? 'individual'
           : assignment.platoonId ? 'platoon'
-          : assignment.companyId ? 'company'
-          : assignment.battalionId ? 'battalion'
-          : 'unassigned';
-        
-        const isDirect = targetLevel === 'individual' || 
+            : assignment.companyId ? 'company'
+              : assignment.battalionId ? 'battalion'
+                : 'unassigned';
+
+        const isDirect = targetLevel === 'individual' ||
           isWithinSameUnit(currentLevel, targetLevel, item!, assignment) ||
           currentLevel === 'unassigned';
-        
+
         if (isDirect) {
           await assignEquipment(id!, assignment, transferQuantity);
           toast.success('Equipment transferred successfully');
@@ -416,7 +418,7 @@ export default function EquipmentDetailPage() {
   return (
     <MainLayout>
       <MobileHeader title={item.name} />
-      
+
       <div className="flex-1 p-4 lg:p-6 overflow-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -456,7 +458,7 @@ export default function EquipmentDetailPage() {
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Equipment</AlertDialogTitle>
+                    <AlertDialogTitle>{t('equipment.deleteTitle')}</AlertDialogTitle>
                     <AlertDialogDescription>
                       Are you sure you want to delete "{item.name}"? This will also remove all transfer history. This action cannot be undone.
                     </AlertDialogDescription>
@@ -484,7 +486,7 @@ export default function EquipmentDetailPage() {
               <Package className="h-5 w-5 text-primary" />
               Item Details
             </h2>
-            
+
             <div className="grid gap-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -493,23 +495,28 @@ export default function EquipmentDetailPage() {
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground">
-                    {item.serialNumber ? 'Serial Number' : 'Quantity'}
+                    {item.serialNumber ? 'Serial Number' : 'Current assignment Quantity'}
                   </Label>
                   <p className="font-medium font-mono">
-                    {item.serialNumber || maxQuantity}
+                    {item.serialNumber || item.currentQuantity}
                   </p>
+                  {item.quantity && item.quantity > (item.currentQuantity || 0) && (
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      of {item.quantity} total in system
+                    </p>
+                  )}
                 </div>
               </div>
-              
+
               {item.description && (
                 <div>
                   <Label className="text-xs text-muted-foreground">Description</Label>
                   <p className="text-sm">{item.description}</p>
                 </div>
               )}
-              
+
               <div>
-                <Label className="text-xs text-muted-foreground">Current Assignment</Label>
+                <Label className="text-xs text-muted-foreground">{t('equipment.currentAssignment')}</Label>
                 <div className="flex items-center gap-2 mt-1">
                   {currentLevel === 'individual' && <User className="h-4 w-4 text-muted-foreground" />}
                   {(currentLevel === 'platoon' || currentLevel === 'company') && <Users className="h-4 w-4 text-muted-foreground" />}
@@ -539,7 +546,7 @@ export default function EquipmentDetailPage() {
             {/* Quantity selector for bulk items */}
             {!isSerializedItem && maxQuantity > 1 && (
               <div className="space-y-2">
-                <Label>Transfer Quantity</Label>
+                <Label>{t('equipment.transferQuantity')}</Label>
                 <div className="flex items-center gap-3">
                   <Button
                     type="button"
@@ -575,11 +582,11 @@ export default function EquipmentDetailPage() {
                 </div>
               </div>
             )}
-            
+
             <div className="space-y-4">
               {/* Assignment Type */}
               <div className="space-y-2">
-                <Label>Transfer To</Label>
+                <Label>{t('equipment.transferTo')}</Label>
                 <div className="grid grid-cols-2 gap-2">
                   {(['battalion', 'company', 'platoon', 'individual'] as const).map((aType) => {
                     const isAllowed = allowedTypes.includes(aType);
@@ -645,7 +652,7 @@ export default function EquipmentDetailPage() {
                     ) : (
                       <Select value={selectedCompanyId} onValueChange={handleCompanyChange}>
                         <SelectTrigger className="bg-background h-10">
-                          <SelectValue placeholder="Select Company" />
+                          <SelectValue placeholder={t('units.selectCompany')} />
                         </SelectTrigger>
                         <SelectContent className="bg-popover z-50">
                           {availableCompanies.map((c) => (
@@ -679,7 +686,7 @@ export default function EquipmentDetailPage() {
                     ) : (
                       <Select value={selectedPlatoonId} onValueChange={handlePlatoonChange}>
                         <SelectTrigger className="bg-background h-10">
-                          <SelectValue placeholder="Select Platoon" />
+                          <SelectValue placeholder={t('units.selectPlatoon')} />
                         </SelectTrigger>
                         <SelectContent className="bg-popover z-50">
                           {availablePlatoons.map((p) => (
@@ -708,7 +715,7 @@ export default function EquipmentDetailPage() {
                     ) : (
                       <Select value={selectedPersonnelId} onValueChange={setSelectedPersonnelId}>
                         <SelectTrigger className="bg-background h-10">
-                          <SelectValue placeholder="Select Person" />
+                          <SelectValue placeholder={t('units.selectPerson')} />
                         </SelectTrigger>
                         <SelectContent className="bg-popover z-50">
                           {availablePersonnel.map((p) => (
@@ -726,8 +733,8 @@ export default function EquipmentDetailPage() {
                 )}
               </div>
 
-              <Button 
-                onClick={handleTransfer} 
+              <Button
+                onClick={handleTransfer}
                 className="w-full gap-2"
                 disabled={saving || item.hasPendingTransfer}
               >
@@ -747,7 +754,7 @@ export default function EquipmentDetailPage() {
               <History className="h-5 w-5 text-primary" />
               Transfer History
             </h2>
-            
+
             {historyLoading ? (
               <div className="flex justify-center py-4">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />

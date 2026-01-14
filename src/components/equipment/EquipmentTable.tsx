@@ -1,20 +1,20 @@
 import { useNavigate } from 'react-router-dom';
-import { Equipment } from '@/types/pmtb';
+import { EquipmentWithAssignment } from '@/hooks/useEquipment';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 
 interface EquipmentTableProps {
-  equipment: Equipment[];
+  equipment: EquipmentWithAssignment[];
   selectable?: boolean;
   selectedIds?: Set<string>;
   onSelectionChange?: (ids: Set<string>) => void;
 }
 
-export function EquipmentTable({ 
-  equipment, 
-  selectable = false, 
-  selectedIds = new Set(), 
-  onSelectionChange 
+export function EquipmentTable({
+  equipment,
+  selectable = false,
+  selectedIds = new Set(),
+  onSelectionChange
 }: EquipmentTableProps) {
   const navigate = useNavigate();
 
@@ -46,9 +46,8 @@ export function EquipmentTable({
         {equipment.map((item, index) => (
           <div
             key={item.id}
-            className={`p-4 transition-colors hover:bg-secondary/50 animate-fade-in ${
-              selectable ? '' : 'cursor-pointer active:bg-secondary/70'
-            } ${selectedIds.has(item.id) ? 'bg-primary/10' : ''}`}
+            className={`p-4 transition-colors hover:bg-secondary/50 animate-fade-in ${selectable ? '' : 'cursor-pointer active:bg-secondary/70'
+              } ${selectedIds.has(item.id) ? 'bg-primary/10' : ''}`}
             style={{ animationDelay: `${index * 30}ms` }}
             onClick={() => !selectable && navigate(`/equipment/${item.id}`)}
           >
@@ -64,7 +63,7 @@ export function EquipmentTable({
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <div className="min-w-0 flex-1">
-                    <p 
+                    <p
                       className={`font-medium text-foreground truncate ${selectable ? 'cursor-pointer hover:underline' : ''}`}
                       onClick={(e) => {
                         if (selectable) {
@@ -80,7 +79,7 @@ export function EquipmentTable({
                     </code>
                   </div>
                   <span className="font-mono text-sm text-muted-foreground shrink-0">
-                    x{item.quantity}
+                    x{item.currentQuantity}
                   </span>
                 </div>
                 {item.assignedTo && (
@@ -131,9 +130,8 @@ export function EquipmentTable({
           {equipment.map((item, index) => (
             <tr
               key={item.id}
-              className={`border-b border-border/30 transition-colors hover:bg-secondary/50 animate-fade-in ${
-                selectable ? '' : 'cursor-pointer'
-              } ${selectedIds.has(item.id) ? 'bg-primary/10' : ''}`}
+              className={`border-b border-border/30 transition-colors hover:bg-secondary/50 animate-fade-in ${selectable ? '' : 'cursor-pointer'
+                } ${selectedIds.has(item.id) ? 'bg-primary/10' : ''}`}
               style={{ animationDelay: `${index * 30}ms` }}
               onClick={() => !selectable && navigate(`/equipment/${item.id}`)}
             >
@@ -147,7 +145,7 @@ export function EquipmentTable({
               )}
               <td className="p-4">
                 <div>
-                  <p 
+                  <p
                     className={`font-medium text-foreground ${selectable ? 'cursor-pointer hover:underline' : ''}`}
                     onClick={(e) => {
                       if (selectable) {
@@ -167,7 +165,7 @@ export function EquipmentTable({
                 </code>
               </td>
               <td className="p-4">
-                <span className="font-mono text-sm">{item.quantity}</span>
+                <span className="font-mono text-sm">{item.currentQuantity}</span>
               </td>
               <td className="p-4">
                 {item.assignedTo ? (

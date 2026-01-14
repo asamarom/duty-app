@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Shield, Loader2, Eye, EyeOff } from 'lucide-react';
 import { z } from 'zod';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -26,6 +27,7 @@ const signupSchema = z.object({
 });
 
 export default function AuthPage() {
+  const { t } = useLanguage();
   const { user, loading, signIn, signUp, signInWithGoogle } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -71,7 +73,7 @@ export default function AuthPage() {
       toast({
         variant: 'destructive',
         title: 'Login failed',
-        description: error.message === 'Invalid login credentials' 
+        description: error.message === 'Invalid login credentials'
           ? 'Invalid email or password. Please try again.'
           : error.message,
       });
@@ -171,7 +173,7 @@ export default function AuthPage() {
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                <TabsTrigger value="signup">{t('auth.signUp')}</TabsTrigger>
               </TabsList>
 
               {/* Login Tab */}
@@ -268,11 +270,11 @@ export default function AuthPage() {
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
+                    <Label htmlFor="signup-name">{t('auth.fullName')}</Label>
                     <Input
                       id="signup-name"
                       type="text"
-                      placeholder="John Doe"
+                      placeholder={t('auth.namePlaceholder')}
                       value={signupFullName}
                       onChange={(e) => setSignupFullName(e.target.value)}
                       disabled={isSubmitting}
@@ -319,7 +321,7 @@ export default function AuthPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="signup-confirm">Confirm Password</Label>
+                    <Label htmlFor="signup-confirm">{t('auth.confirmPassword')}</Label>
                     <Input
                       id="signup-confirm"
                       type="password"

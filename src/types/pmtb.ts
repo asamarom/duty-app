@@ -1,5 +1,5 @@
 export type UserRole = 'admin' | 'leader' | 'user';
-export type DutyPosition = 'Platoon Leader' | 'Platoon Sergeant' | 'Squad Leader' | 'Team Leader' | 'RTO' | 'Medic' | 'Rifleman' | 'Driver' | 'Gunner';
+export type DutyPosition = 'Platoon Leader' | 'Platoon Sergeant' | 'RTO' | 'Medic' | 'Rifleman' | 'Driver' | 'Gunner';
 export type LocationStatus = 'home' | 'on_duty' | 'off_duty' | 'active_mission' | 'leave' | 'tdy';
 
 export type ReadinessStatus = 'ready' | 'warning' | 'critical';
@@ -14,7 +14,6 @@ export interface Personnel {
   battalionId?: string;
   companyId?: string;
   platoonId?: string;
-  squadId?: string;
   role: UserRole;
   phone: string;
   email: string;
@@ -24,7 +23,7 @@ export interface Personnel {
   driverLicenses: string[];
   profileImage?: string;
   readinessStatus: ReadinessStatus;
-  transferApproved?: boolean;
+  isSignatureApproved?: boolean;
 }
 
 export interface Equipment {

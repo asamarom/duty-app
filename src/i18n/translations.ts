@@ -16,6 +16,12 @@ export const translations = {
     'nav.more': 'More',
     'nav.signOut': 'Sign Out',
 
+    // Auth
+    'auth.signUp': 'Sign Up',
+    'auth.fullName': 'Full Name',
+    'auth.confirmPassword': 'Confirm Password',
+    'auth.namePlaceholder': 'John Doe',
+
     // Dashboard
     'dashboard.title': 'Platoon Dashboard',
     'dashboard.subtitle': 'Real-time operational overview',
@@ -39,6 +45,7 @@ export const translations = {
     'dashboard.certsDue': 'Certs Due',
     'dashboard.next30Days': 'Next 30 days',
     'dashboard.licenseExpiration': 'License Expiration',
+    'dashboard.licenseExp': 'License Expiration',
     'dashboard.equipmentIssue': 'Equipment Issue',
     'dashboard.scheduledEvent': 'Scheduled Event',
 
@@ -53,6 +60,24 @@ export const translations = {
     'personnel.skills': 'Skills',
     'personnel.licenses': 'Licenses',
     'personnel.readiness': 'Readiness',
+    'personnel.details': 'Personnel Details',
+    'personnel.rank': 'Rank',
+    'personnel.firstName': 'First Name',
+    'personnel.lastName': 'Last Name',
+    'personnel.serviceNumber': 'Service Number',
+    'personnel.personalInfo': 'Personal Information',
+    'personnel.contactInfo': 'Contact Information',
+    'personnel.phone': 'Phone',
+    'personnel.email': 'Email',
+    'personnel.localAddress': 'Local Address',
+    'personnel.addressPlaceholder': 'Enter address',
+    'personnel.addPosition': 'Add position',
+    'personnel.addSkill': 'Add skill',
+    'personnel.addLicense': 'Add license',
+    'personnel.signatureAuthority': 'Signature Authority',
+    'personnel.signatureDesc': 'Can initiate and accept unit equipment transfers',
+    'personnel.signatureApprovedBadge': 'Signature Approved',
+    'personnel.noPosition': 'No position assigned',
 
     // Equipment
     'equipment.title': 'Equipment Inventory',
@@ -69,6 +94,10 @@ export const translations = {
     'equipment.assignedTo': 'Assigned To',
     'equipment.status': 'Status',
     'equipment.unassigned': 'Unassigned',
+    'equipment.deleteTitle': 'Delete Equipment',
+    'equipment.currentAssignment': 'Current Assignment',
+    'equipment.transferQuantity': 'Transfer Quantity',
+    'equipment.transferTo': 'Transfer To',
 
     // Add Equipment
     'addEquipment.title': 'Add Item',
@@ -84,7 +113,6 @@ export const translations = {
     'addEquipment.quantity': 'Quantity',
     'addEquipment.assignment': 'Assignment (Optional)',
     'addEquipment.individual': 'Individual',
-    'addEquipment.squad': 'Squad',
     'addEquipment.team': 'Team',
     'addEquipment.platoon': 'Platoon',
     'addEquipment.selectAssignee': 'Select assignee',
@@ -241,25 +269,24 @@ export const translations = {
     'approvals.errorLoading': 'Failed to load signup requests.',
     'approvals.errorApproving': 'Failed to approve request.',
     'approvals.errorDeclining': 'Failed to decline request.',
-    
+
     // Units
-    'units.unknownSquad': 'Unknown Squad',
     'units.unknownPlatoon': 'Unknown Platoon',
     'units.unknownBattalion': 'Unknown Battalion',
     'units.noUnit': 'No unit',
 
     // Units
     'units.title': 'Unit Management',
-    'units.subtitle': 'Manage battalions, platoons, and squads',
+    'units.subtitle': 'Manage battalions, companies, and platoons',
     'units.battalions': 'Battalions',
+    'units.companies': 'Companies',
     'units.platoons': 'Platoons',
-    'units.squads': 'Squads',
     'units.battalion': 'Battalion',
+    'units.company': 'Company',
     'units.platoon': 'Platoon',
-    'units.squad': 'Squad',
     'units.addBattalion': 'Add Battalion',
+    'units.addCompany': 'Add Company',
     'units.addPlatoon': 'Add Platoon',
-    'units.addSquad': 'Add Squad',
     'units.editUnit': 'Edit Unit',
     'units.deleteUnit': 'Delete Unit',
     'units.confirmDelete': 'Are you sure you want to delete this unit?',
@@ -267,6 +294,12 @@ export const translations = {
     'units.createFirst': 'Create your first battalion to get started',
     'units.loadingUnits': 'Loading units...',
     'units.noUnitsAvailable': 'No units available',
+    'units.manageStructure': 'Manage organizational structure',
+    'units.noBattalions': 'No Battalions',
+    'units.selectCompany': 'Select Company',
+    'units.selectPlatoon': 'Select Platoon',
+    'units.selectPerson': 'Select Person',
+    'units.allUnits': 'All Units',
 
     // Common
     'common.search': 'Search',
@@ -284,6 +317,10 @@ export const translations = {
     'common.confirm': 'Confirm',
     'common.close': 'Close',
     'common.na': 'N/A',
+    'common.saveChanges': 'Save Changes',
+    'common.noneListed': 'None listed',
+    'common.previous': 'Previous',
+    'common.next': 'Next',
 
     // Admin Mode
     'adminMode.title': 'Admin Mode',
@@ -308,6 +345,12 @@ export const translations = {
     'nav.more': 'עוד',
     'nav.signOut': 'התנתק',
 
+    // Auth
+    'auth.signUp': 'הרשמה',
+    'auth.fullName': 'שם מלא',
+    'auth.confirmPassword': 'אימות סיסמה',
+    'auth.namePlaceholder': 'ישראל ישראלי',
+
     // Dashboard
     'dashboard.title': 'לוח בקרה מחלקתי',
     'dashboard.subtitle': 'סקירה מבצעית בזמן אמת',
@@ -331,6 +374,7 @@ export const translations = {
     'dashboard.certsDue': 'תעודות לחידוש',
     'dashboard.next30Days': '30 ימים הקרובים',
     'dashboard.licenseExpiration': 'פקיעת רישיון',
+    'dashboard.licenseExp': 'פקיעת רישיון',
     'dashboard.equipmentIssue': 'בעיית ציוד',
     'dashboard.scheduledEvent': 'אירוע מתוכנן',
 
@@ -345,6 +389,24 @@ export const translations = {
     'personnel.skills': 'כישורים',
     'personnel.licenses': 'רישיונות',
     'personnel.readiness': 'כוננות',
+    'personnel.details': 'פרטי כוח אדם',
+    'personnel.rank': 'דרגה',
+    'personnel.firstName': 'שם פרטי',
+    'personnel.lastName': 'שם משפחה',
+    'personnel.serviceNumber': 'מספר אישי',
+    'personnel.personalInfo': 'מידע אישי',
+    'personnel.contactInfo': 'פרטי התקשרות',
+    'personnel.phone': 'טלפון',
+    'personnel.email': 'אימייל',
+    'personnel.localAddress': 'כתובת מגורים',
+    'personnel.addressPlaceholder': 'הזן כתובת',
+    'personnel.addPosition': 'הוסף תפקיד',
+    'personnel.addSkill': 'הוסף כישור',
+    'personnel.addLicense': 'הוסף רישיון',
+    'personnel.signatureAuthority': 'סמכות חתימה',
+    'personnel.signatureDesc': 'רשאי ליזום ולקבל העברות ציוד יחידתי',
+    'personnel.signatureApprovedBadge': 'מאושר חתימה',
+    'personnel.noPosition': 'אין תפקיד מוקצה',
 
     // Equipment
     'equipment.title': 'מלאי ציוד',
@@ -361,6 +423,10 @@ export const translations = {
     'equipment.assignedTo': 'מוקצה ל',
     'equipment.status': 'סטטוס',
     'equipment.unassigned': 'לא מוקצה',
+    'equipment.deleteTitle': 'מחיקת ציוד',
+    'equipment.currentAssignment': 'הקצאה נוכחית',
+    'equipment.transferQuantity': 'כמות להעברה',
+    'equipment.transferTo': 'העברה ל',
 
     // Add Equipment
     'addEquipment.title': 'הוספת פריט',
@@ -376,7 +442,6 @@ export const translations = {
     'addEquipment.quantity': 'כמות',
     'addEquipment.assignment': 'הקצאה (אופציונלי)',
     'addEquipment.individual': 'אישי',
-    'addEquipment.squad': 'כיתה',
     'addEquipment.team': 'צוות',
     'addEquipment.platoon': 'מחלקה',
     'addEquipment.selectAssignee': 'בחר מוקצה',
@@ -535,21 +600,20 @@ export const translations = {
     'approvals.errorDeclining': 'דחיית הבקשה נכשלה.',
 
     // Units
-    'units.unknownSquad': 'כיתה לא ידועה',
     'units.unknownPlatoon': 'מחלקה לא ידועה',
     'units.unknownBattalion': 'גדוד לא ידוע',
     'units.noUnit': 'ללא יחידה',
     'units.title': 'ניהול יחידות',
-    'units.subtitle': 'ניהול גדודים, מחלקות וכיתות',
+    'units.subtitle': 'ניהול גדודים, פלוגות ומחלקות',
     'units.battalions': 'גדודים',
+    'units.companies': 'פלוגות',
     'units.platoons': 'מחלקות',
-    'units.squads': 'כיתות',
     'units.battalion': 'גדוד',
+    'units.company': 'פלוגה',
     'units.platoon': 'מחלקה',
-    'units.squad': 'כיתה',
     'units.addBattalion': 'הוסף גדוד',
+    'units.addCompany': 'הוסף פלוגה',
     'units.addPlatoon': 'הוסף מחלקה',
-    'units.addSquad': 'הוסף כיתה',
     'units.editUnit': 'ערוך יחידה',
     'units.deleteUnit': 'מחק יחידה',
     'units.confirmDelete': 'האם אתה בטוח שברצונך למחוק יחידה זו?',
@@ -557,6 +621,12 @@ export const translations = {
     'units.createFirst': 'צור את הגדוד הראשון שלך כדי להתחיל',
     'units.loadingUnits': 'טוען יחידות...',
     'units.noUnitsAvailable': 'אין יחידות זמינות',
+    'units.manageStructure': 'ניהול המבנה הארגוני',
+    'units.noBattalions': 'אין גדודים',
+    'units.selectCompany': 'בחר פלוגה',
+    'units.selectPlatoon': 'בחר מחלקה',
+    'units.selectPerson': 'בחר חייל',
+    'units.allUnits': 'כל היחידות',
 
 
     // Common
@@ -575,6 +645,10 @@ export const translations = {
     'common.confirm': 'אישור',
     'common.close': 'סגור',
     'common.na': 'לא זמין',
+    'common.saveChanges': 'שמור שינויים',
+    'common.noneListed': 'לא צוין',
+    'common.previous': 'הקודם',
+    'common.next': 'הבא',
 
     // Admin Mode
     'adminMode.title': 'מצב מנהל',

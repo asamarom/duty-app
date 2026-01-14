@@ -25,7 +25,7 @@ export default function AdminApprovalsPage() {
   const { user } = useAuth();
   const { isAdmin, isLeader, isActualAdmin, loading: rolesLoading } = useUserRole();
   const { isAdminMode } = useAdminMode();
-  const { battalions, companies, platoons, squads, loading: unitsLoading } = useUnits();
+  const { battalions, companies, platoons, loading: unitsLoading } = useUnits();
   const { toast } = useToast();
   const { t } = useLanguage();
 
@@ -76,7 +76,7 @@ export default function AdminApprovalsPage() {
 
   const getUnitPath = (request: SignupRequest): string => {
     const parts: string[] = [];
-    
+
     if (request.requested_battalion_id) {
       const battalion = battalions.find((b) => b.id === request.requested_battalion_id);
       parts.push(battalion?.name || t('units.unknownBattalion'));
@@ -89,11 +89,7 @@ export default function AdminApprovalsPage() {
       const platoon = platoons.find((p) => p.id === request.requested_platoon_id);
       parts.push(platoon?.name || t('units.unknownPlatoon'));
     }
-    if (request.requested_squad_id) {
-      const squad = squads.find((s) => s.id === request.requested_squad_id);
-      parts.push(squad?.name || t('units.unknownSquad'));
-    }
-    
+
     return parts.length > 0 ? parts.join(' → ') : t('units.noUnit');
   };
 
@@ -129,23 +125,11 @@ export default function AdminApprovalsPage() {
       const nameParts = request.full_name.split(' ');
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
-      
-      // Determine which squad to assign based on the request
-      let squadId: string | null = null;
-      if (request.requested_squad_id) {
-        squadId = request.requested_squad_id;
-      } else if (request.requested_platoon_id) {
-        // Find the first squad in the platoon
-        const platoonSquad = squads.find(s => s.platoon_id === request.requested_platoon_id);
-        squadId = platoonSquad?.id || null;
-      } else if (request.requested_battalion_id) {
-        // Find the first squad in the battalion (through platoons)
-        const battalionPlatoon = platoons.find(p => p.battalion_id === request.requested_battalion_id);
-        if (battalionPlatoon) {
-          const platoonSquad = squads.find(s => s.platoon_id === battalionPlatoon.id);
-          squadId = platoonSquad?.id || null;
-        }
-      }
+
+      // Assign unit based on the request
+      const battalionId = request.requested_battalion_id;
+      const companyId = request.requested_company_id;
+      const platoonId = request.requested_platoon_id;
 
       const { error: personnelError } = await supabase
         .from('personnel')
@@ -156,8 +140,11 @@ export default function AdminApprovalsPage() {
           email: request.email,
           phone: request.phone,
           service_number: request.service_number,
-          squad_id: squadId,
+          battalion_id: battalionId,
+          company_id: companyId,
+          platoon_id: platoonId,
           rank: 'Private', // Default rank, can be updated later
+          is_signature_approved: false, // Default role
         });
 
       if (personnelError && !personnelError.message.includes('duplicate')) {
@@ -256,7 +243,7 @@ export default function AdminApprovalsPage() {
             <h1 className="text-2xl font-bold">{t('approvals.title')}</h1>
             <p className="text-muted-foreground">{t('approvals.subtitle')}</p>
           </div>
-          
+
           <Dialog open={addUserDialogOpen} onOpenChange={setAddUserDialogOpen}>
             <DialogTrigger asChild>
               <Button>

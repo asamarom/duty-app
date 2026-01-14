@@ -1,20 +1,16 @@
 import { supabase } from '@/integrations/supabase/client';
-import { useUnits, Battalion, Company, Platoon, Squad } from './useUnits';
+import { useUnits, Battalion, Company, Platoon } from './useUnits';
 import { useToast } from '@/hooks/use-toast';
 
 interface UseUnitsManagementReturn {
   battalions: Battalion[];
   companies: Company[];
   platoons: Platoon[];
-  squads: Squad[];
   loading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
   getCompaniesForBattalion: (battalionId: string) => Company[];
   getPlatoonsForCompany: (companyId: string) => Platoon[];
-  // Legacy functions
-  getPlatoonsForBattalion: (battalionId: string) => Platoon[];
-  getSquadsForPlatoon: (platoonId: string) => Squad[];
   // Battalion CRUD
   createBattalion: (data: { name: string; designation?: string }) => Promise<Battalion | null>;
   updateBattalion: (id: string, data: { name?: string; designation?: string; status?: 'active' | 'deployed' | 'inactive' }) => Promise<boolean>;
@@ -27,25 +23,18 @@ interface UseUnitsManagementReturn {
   createPlatoon: (data: { name: string; company_id: string; designation?: string }) => Promise<Platoon | null>;
   updatePlatoon: (id: string, data: { name?: string; designation?: string; status?: 'active' | 'deployed' | 'inactive' }) => Promise<boolean>;
   deletePlatoon: (id: string) => Promise<boolean>;
-  // Legacy Squad CRUD
-  createSquad: (data: { name: string; platoon_id: string; designation?: string }) => Promise<Squad | null>;
-  updateSquad: (id: string, data: { name?: string; designation?: string; status?: 'active' | 'deployed' | 'inactive' }) => Promise<boolean>;
-  deleteSquad: (id: string) => Promise<boolean>;
 }
 
 export function useUnitsManagement(): UseUnitsManagementReturn {
-  const { 
-    battalions, 
-    companies, 
-    platoons, 
-    squads, 
-    loading, 
-    error, 
-    refetch, 
-    getCompaniesForBattalion, 
+  const {
+    battalions,
+    companies,
+    platoons,
+    loading,
+    error,
+    refetch,
+    getCompaniesForBattalion,
     getPlatoonsForCompany,
-    getPlatoonsForBattalion, 
-    getSquadsForPlatoon 
   } = useUnits();
   const { toast } = useToast();
 
@@ -147,14 +136,14 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
   const createPlatoon = async (data: { name: string; company_id: string; designation?: string }): Promise<Platoon | null> => {
     // Get the company to find the battalion_id for legacy support
     const company = companies.find(c => c.id === data.company_id);
-    
+
     const { data: newPlatoon, error } = await supabase
       .from('platoons')
-      .insert({ 
-        name: data.name, 
-        company_id: data.company_id, 
+      .insert({
+        name: data.name,
+        company_id: data.company_id,
         battalion_id: company?.battalion_id || '',
-        designation: data.designation 
+        designation: data.designation
       })
       .select()
       .single();
@@ -198,65 +187,15 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
     return true;
   };
 
-  // Legacy Squad CRUD
-  const createSquad = async (data: { name: string; platoon_id: string; designation?: string }): Promise<Squad | null> => {
-    const { data: newSquad, error } = await supabase
-      .from('squads')
-      .insert({ name: data.name, platoon_id: data.platoon_id, designation: data.designation })
-      .select()
-      .single();
-
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-      return null;
-    }
-    toast({ title: 'Success', description: 'Squad created successfully' });
-    await refetch();
-    return newSquad;
-  };
-
-  const updateSquad = async (id: string, data: { name?: string; designation?: string; status?: 'active' | 'deployed' | 'inactive' }): Promise<boolean> => {
-    const { error } = await supabase
-      .from('squads')
-      .update(data)
-      .eq('id', id);
-
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-      return false;
-    }
-    toast({ title: 'Success', description: 'Squad updated successfully' });
-    await refetch();
-    return true;
-  };
-
-  const deleteSquad = async (id: string): Promise<boolean> => {
-    const { error } = await supabase
-      .from('squads')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-      return false;
-    }
-    toast({ title: 'Success', description: 'Squad deleted successfully' });
-    await refetch();
-    return true;
-  };
-
   return {
     battalions,
     companies,
     platoons,
-    squads,
     loading,
     error,
     refetch,
     getCompaniesForBattalion,
     getPlatoonsForCompany,
-    getPlatoonsForBattalion,
-    getSquadsForPlatoon,
     createBattalion,
     updateBattalion,
     deleteBattalion,
@@ -266,8 +205,5 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
     createPlatoon,
     updatePlatoon,
     deletePlatoon,
-    createSquad,
-    updateSquad,
-    deleteSquad,
   };
 }

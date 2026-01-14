@@ -34,8 +34,8 @@ export default function SettingsPage() {
     <MainLayout>
       {/* Mobile Header */}
       <div className="lg:hidden">
-        <MobileHeader 
-          title={t('settings.title')} 
+        <MobileHeader
+          title={t('settings.title')}
           subtitle={t('settings.subtitle')}
         />
       </div>
@@ -125,7 +125,7 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <CardTitle className="text-sm lg:text-base">{t('settings.notifications')}</CardTitle>
-                    <CardDescription className="text-xs lg:text-sm">Configure alerts</CardDescription>
+                    <CardDescription className="text-xs lg:text-sm">{t('settings.notifications')}</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -161,7 +161,7 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <CardTitle className="text-sm lg:text-base">{t('settings.accessControl')}</CardTitle>
-                    <CardDescription className="text-xs lg:text-sm">User roles</CardDescription>
+                    <CardDescription className="text-xs lg:text-sm">{t('approvals.role')}</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -177,7 +177,7 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between rounded-lg border border-border/50 bg-secondary/50 p-3">
                     <div className="flex items-center gap-2">
                       <Badge variant="tactical" className="text-xs">LEADER</Badge>
-                      <span className="text-xs lg:text-sm text-foreground">Squad Leaders</span>
+                      <span className="text-xs lg:text-sm text-foreground">{t('units.platoons')}</span>
                     </div>
                     <ChevronRight className={`h-4 w-4 text-muted-foreground ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                   </div>
@@ -204,7 +204,7 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <CardTitle className="text-sm lg:text-base">{t('settings.syncStatus')}</CardTitle>
-                    <CardDescription className="text-xs">Cloud sync</CardDescription>
+                    <CardDescription className="text-xs">{t('settings.syncStatus')}</CardDescription>
                   </div>
                 </div>
               </CardHeader>

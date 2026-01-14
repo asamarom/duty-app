@@ -35,8 +35,8 @@ export function PersonnelCard({ person, onClick, roles = [] }: PersonnelCardProp
             </div>
             <p className="text-sm font-medium text-primary">{person.dutyPosition}</p>
             <div className="mt-1 flex items-center gap-2">
-              {person.transferApproved && (
-                <Badge variant="tactical" className="text-[10px]">Transfer Approved</Badge>
+              {person.isSignatureApproved && (
+                <Badge variant="tactical" className="text-[10px]">Signature Approved</Badge>
               )}
               <span className="font-mono text-xs text-muted-foreground">
                 {person.serviceNumber}

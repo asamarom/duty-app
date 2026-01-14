@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface AutocompleteTagInputProps {
   values: string[];
@@ -22,6 +23,7 @@ export function AutocompleteTagInput({
   disabled = false,
   badgeVariant = 'default',
 }: AutocompleteTagInputProps) {
+  const { t } = useLanguage();
   const [inputValue, setInputValue] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -92,7 +94,7 @@ export function AutocompleteTagInput({
           </Badge>
         ))}
         {values.length === 0 && (
-          <p className="text-sm text-muted-foreground">None listed</p>
+          <p className="text-sm text-muted-foreground">{t('common.noneListed')}</p>
         )}
       </div>
     );

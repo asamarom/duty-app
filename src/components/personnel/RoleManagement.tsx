@@ -19,18 +19,16 @@ interface RoleManagementProps {
   canManage: boolean;
   battalionId?: string | null;
   platoonId?: string | null;
-  squadId?: string | null;
 }
 
-export function RoleManagement({ 
-  personnelId, 
-  userId, 
-  currentRoles, 
+export function RoleManagement({
+  personnelId,
+  userId,
+  currentRoles,
   onRolesChanged,
   canManage,
   battalionId,
   platoonId,
-  squadId,
 }: RoleManagementProps) {
   const { toast } = useToast();
   const { isAdmin: viewerIsAdmin } = useUserRole();
@@ -75,9 +73,7 @@ export function RoleManagement({
       } else {
         // Determine unit type and create unit assignment
         let unitType = 'battalion';
-        if (squadId) {
-          unitType = 'squad';
-        } else if (platoonId) {
+        if (platoonId) {
           unitType = 'platoon';
         } else if (battalionId) {
           unitType = 'battalion';
@@ -98,7 +94,6 @@ export function RoleManagement({
             unit_type: unitType,
             battalion_id: battalionId || null,
             platoon_id: platoonId || null,
-            squad_id: squadId || null,
           });
 
         if (unitError) {

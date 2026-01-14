@@ -22,8 +22,9 @@ export default function Dashboard() {
   const readyPersonnel = personnel.filter(p => p.readinessStatus === 'ready').length;
   const onMission = personnel.filter(p => p.locationStatus === 'active_mission').length;
   const onLeave = personnel.filter(p => p.locationStatus === 'leave').length;
-  const totalEquipment = equipment.length;
-  const serviceableEquipment = equipment.length; // All equipment from DB is serviceable by default
+  const uniqueEquipmentIds = new Set(equipment.map(e => e.id.split('--')[0]));
+  const totalEquipment = uniqueEquipmentIds.size;
+  const serviceableEquipment = uniqueEquipmentIds.size; // All equipment from DB is serviceable by default
 
   const readyPercentage = totalPersonnel > 0 ? Math.round((readyPersonnel / totalPersonnel) * 100) : 0;
   const equipmentPercentage = totalEquipment > 0 ? Math.round((serviceableEquipment / totalEquipment) * 100) : 0;
@@ -42,8 +43,8 @@ export default function Dashboard() {
     <MainLayout>
       {/* Mobile Header */}
       <div className="lg:hidden">
-        <MobileHeader 
-          title={t('dashboard.title')} 
+        <MobileHeader
+          title={t('dashboard.title')}
           subtitle={new Date().toLocaleDateString()}
         />
       </div>
@@ -99,7 +100,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-around gap-2">
               <ReadinessGauge percentage={readyPercentage} label={t('dashboard.totalPersonnel')} size="sm" />
               <ReadinessGauge percentage={equipmentPercentage} label={t('dashboard.equipmentItems')} size="sm" />
-              <ReadinessGauge percentage={92} label="Training" size="sm" />
+              <ReadinessGauge percentage={92} label={t('dashboard.training')} size="sm" />
             </div>
           </div>
         </section>
@@ -128,9 +129,9 @@ export default function Dashboard() {
             status="ready"
           />
           <StatCard
-            title="Certs Due"
+            title={t('dashboard.certsDue')}
             value={0}
-            subtitle="Next 30 days"
+            subtitle={t('dashboard.next30Days')}
             icon={AlertTriangle}
             status="ready"
           />
@@ -159,7 +160,7 @@ export default function Dashboard() {
               <div className="flex items-start gap-3 rounded-lg border border-warning/30 bg-warning/10 p-3">
                 <AlertTriangle className="mt-0.5 h-4 w-4 lg:h-5 lg:w-5 shrink-0 text-warning" />
                 <div className="min-w-0">
-                  <p className="font-medium text-warning text-sm">License Expiration</p>
+                  <p className="font-medium text-warning text-sm">{t('dashboard.licenseExp')}</p>
                   <p className="text-xs text-muted-foreground truncate">
                     PFC Park's HMMWV license expires in 7 days
                   </p>
@@ -168,7 +169,7 @@ export default function Dashboard() {
               <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3">
                 <Package className="mt-0.5 h-4 w-4 lg:h-5 lg:w-5 shrink-0 text-destructive" />
                 <div className="min-w-0">
-                  <p className="font-medium text-destructive text-sm">Equipment Issue</p>
+                  <p className="font-medium text-destructive text-sm">{t('dashboard.equipmentIssue')}</p>
                   <p className="text-xs text-muted-foreground truncate">
                     AN/PRC-117G reported unserviceable
                   </p>
@@ -177,7 +178,7 @@ export default function Dashboard() {
               <div className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/10 p-3">
                 <Calendar className="mt-0.5 h-4 w-4 lg:h-5 lg:w-5 shrink-0 text-primary" />
                 <div className="min-w-0">
-                  <p className="font-medium text-primary text-sm">Scheduled Event</p>
+                  <p className="font-medium text-primary text-sm">{t('dashboard.scheduledEvent')}</p>
                   <p className="text-xs text-muted-foreground truncate">
                     Equipment inventory due in 3 days
                   </p>

@@ -15,12 +15,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  ArrowLeft, 
-  Save, 
-  Loader2, 
-  Phone, 
-  Mail, 
+import {
+  ArrowLeft,
+  Save,
+  Loader2,
+  Phone,
+  Mail,
   MapPin,
   Award,
   Car,
@@ -67,8 +67,7 @@ export default function PersonnelDetailPage() {
     battalion_id: null as string | null,
     company_id: null as string | null,
     platoon_id: null as string | null,
-    squad_id: null as string | null,
-    transfer_approved: false,
+    is_signature_approved: false,
     phone: '',
     email: '',
     local_address: '',
@@ -87,7 +86,7 @@ export default function PersonnelDetailPage() {
         .from('user_roles')
         .select('role')
         .eq('user_id', personnelUserId);
-      
+
       if (error) throw error;
       setRoles(data?.map(r => r.role as AppRole) || []);
     } catch (err) {
@@ -112,15 +111,15 @@ export default function PersonnelDetailPage() {
 
         // Store user_id for role management
         setUserId(person.user_id || null);
-        
+
         // Fetch roles for this personnel
         await fetchRoles(person.user_id || null);
 
         // Parse duty_position - could be stored as string or already an array
-        const dutyPositions = person.duty_position 
-          ? (Array.isArray(person.duty_position) 
-              ? person.duty_position 
-              : [person.duty_position])
+        const dutyPositions = person.duty_position
+          ? (Array.isArray(person.duty_position)
+            ? person.duty_position
+            : [person.duty_position])
           : [];
 
         setFormData({
@@ -132,8 +131,7 @@ export default function PersonnelDetailPage() {
           battalion_id: (person as any).battalion_id || null,
           company_id: (person as any).company_id || null,
           platoon_id: (person as any).platoon_id || null,
-          squad_id: (person as any).squad_id || null,
-          transfer_approved: (person as any).transfer_approved || false,
+          is_signature_approved: (person as any).is_signature_approved || false,
           phone: person.phone || '',
           email: person.email || '',
           local_address: person.local_address || '',
@@ -164,8 +162,8 @@ export default function PersonnelDetailPage() {
       setSaving(true);
 
       // Store duty_positions as first item for backward compatibility
-      const primaryDutyPosition = formData.duty_positions.length > 0 
-        ? formData.duty_positions[0] 
+      const primaryDutyPosition = formData.duty_positions.length > 0
+        ? formData.duty_positions[0]
         : null;
 
       const { error } = await supabase
@@ -179,8 +177,7 @@ export default function PersonnelDetailPage() {
           battalion_id: formData.battalion_id || null,
           company_id: formData.company_id || null,
           platoon_id: formData.platoon_id || null,
-          squad_id: formData.squad_id || null,
-          transfer_approved: formData.transfer_approved,
+          is_signature_approved: formData.is_signature_approved,
           phone: formData.phone || null,
           email: formData.email || null,
           local_address: formData.local_address || null,
@@ -213,7 +210,7 @@ export default function PersonnelDetailPage() {
     return formData.duty_positions.length > 0 ? formData.duty_positions[0] : null;
   };
 
-  
+
 
   if (loading) {
     return (
@@ -231,7 +228,7 @@ export default function PersonnelDetailPage() {
       <div className="lg:hidden">
         <MobileHeader
           title={`${formData.rank} ${formData.last_name}`}
-          subtitle="Personnel Details"
+          subtitle={t('personnel.details')}
           showBack
         />
       </div>
@@ -252,7 +249,7 @@ export default function PersonnelDetailPage() {
                   <RoleBadges roles={roles} />
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {getPrimaryDutyPosition() || 'No position assigned'} • {formData.service_number}
+                  {getPrimaryDutyPosition() || t('personnel.noPosition')} • {formData.service_number}
                 </p>
               </div>
             </div>
@@ -261,7 +258,7 @@ export default function PersonnelDetailPage() {
                 <>
                   <Button variant="outline" onClick={() => setIsEditing(false)} disabled={saving}>
                     <X className="me-2 h-4 w-4" />
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button variant="tactical" onClick={handleSave} disabled={saving}>
                     {saving ? (
@@ -269,13 +266,13 @@ export default function PersonnelDetailPage() {
                     ) : (
                       <Save className="me-2 h-4 w-4" />
                     )}
-                    Save Changes
+                    {t('common.saveChanges')}
                   </Button>
                 </>
               ) : (
                 <Button variant="tactical" onClick={() => setIsEditing(true)}>
                   <Edit className="me-2 h-4 w-4" />
-                  Edit
+                  {t('common.edit')}
                 </Button>
               )}
             </div>
@@ -288,7 +285,7 @@ export default function PersonnelDetailPage() {
             <>
               <Button variant="outline" size="sm" onClick={() => setIsEditing(false)} disabled={saving}>
                 <X className="me-2 h-4 w-4" />
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button variant="tactical" size="sm" onClick={handleSave} disabled={saving}>
                 {saving ? (
@@ -296,7 +293,7 @@ export default function PersonnelDetailPage() {
                 ) : (
                   <Save className="me-2 h-4 w-4" />
                 )}
-                Save
+                {t('common.save')}
               </Button>
             </>
           ) : (
@@ -313,14 +310,14 @@ export default function PersonnelDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5 text-primary" />
-                Personal Information
+                {t('personnel.personalInfo')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Basic Info */}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Rank</Label>
+                  <Label>{t('personnel.rank')}</Label>
                   {isEditing ? (
                     <Input
                       value={formData.rank}
@@ -331,7 +328,7 @@ export default function PersonnelDetailPage() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label>Service Number</Label>
+                  <Label>{t('personnel.serviceNumber')}</Label>
                   {isEditing ? (
                     <Input
                       value={formData.service_number}
@@ -342,7 +339,7 @@ export default function PersonnelDetailPage() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label>First Name</Label>
+                  <Label>{t('personnel.firstName')}</Label>
                   {isEditing ? (
                     <Input
                       value={formData.first_name}
@@ -353,7 +350,7 @@ export default function PersonnelDetailPage() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label>Last Name</Label>
+                  <Label>{t('personnel.lastName')}</Label>
                   {isEditing ? (
                     <Input
                       value={formData.last_name}
@@ -376,13 +373,13 @@ export default function PersonnelDetailPage() {
                     values={formData.duty_positions}
                     onChange={(values) => setFormData(prev => ({ ...prev, duty_positions: values }))}
                     suggestions={dutyPositionSuggestions}
-                    placeholder="Add position"
+                    placeholder={t('personnel.addPosition')}
                     disabled={!isEditing}
                     badgeVariant="outline"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Unit Assignment</Label>
+                  <Label>{t('equipment.assignedTo')}</Label>
                   <UnitTreeSelector
                     value={{
                       battalion_id: formData.battalion_id,
@@ -404,11 +401,11 @@ export default function PersonnelDetailPage() {
               <div className="border-t border-border pt-6">
                 <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
                   <Phone className="h-4 w-4 text-primary" />
-                  Contact Information
+                  {t('personnel.contactInfo')}
                 </h4>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Phone</Label>
+                    <Label>{t('personnel.phone')}</Label>
                     {isEditing ? (
                       <Input
                         value={formData.phone}
@@ -418,12 +415,12 @@ export default function PersonnelDetailPage() {
                     ) : (
                       <p className="text-foreground flex items-center gap-2">
                         <Phone className="h-4 w-4 text-muted-foreground" />
-                        {formData.phone || 'Not provided'}
+                        {formData.phone || t('common.na')}
                       </p>
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label>Email</Label>
+                    <Label>{t('personnel.email')}</Label>
                     {isEditing ? (
                       <Input
                         type="email"
@@ -434,24 +431,24 @@ export default function PersonnelDetailPage() {
                     ) : (
                       <p className="text-foreground flex items-center gap-2">
                         <Mail className="h-4 w-4 text-muted-foreground" />
-                        {formData.email || 'Not provided'}
+                        {formData.email || t('common.na')}
                       </p>
                     )}
                   </div>
                 </div>
                 <div className="mt-4 space-y-2">
-                  <Label>Local Address</Label>
+                  <Label>{t('personnel.localAddress')}</Label>
                   {isEditing ? (
                     <Textarea
                       value={formData.local_address}
                       onChange={(e) => setFormData(prev => ({ ...prev, local_address: e.target.value }))}
-                      placeholder="Enter address"
+                      placeholder={t('personnel.addressPlaceholder')}
                       rows={2}
                     />
                   ) : (
                     <p className="text-foreground flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
-                      {formData.local_address || 'Not provided'}
+                      {formData.local_address || t('common.na')}
                     </p>
                   )}
                 </div>
@@ -474,7 +471,7 @@ export default function PersonnelDetailPage() {
                   values={formData.skills}
                   onChange={(values) => setFormData(prev => ({ ...prev, skills: values }))}
                   suggestions={skillSuggestions}
-                  placeholder="Add skill"
+                  placeholder={t('personnel.addSkill')}
                   disabled={!isEditing}
                   badgeVariant="tactical"
                 />
@@ -494,7 +491,7 @@ export default function PersonnelDetailPage() {
                   values={formData.driver_licenses}
                   onChange={(values) => setFormData(prev => ({ ...prev, driver_licenses: values }))}
                   suggestions={licenseSuggestions}
-                  placeholder="Add license"
+                  placeholder={t('personnel.addLicense')}
                   disabled={!isEditing}
                   badgeVariant="secondary"
                 />
@@ -507,22 +504,22 @@ export default function PersonnelDetailPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Briefcase className="h-5 w-5 text-primary" />
-                    Transfer Authority
+                    {t('personnel.signatureAuthority')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium">Transfer Approved</p>
+                      <p className="text-sm font-medium">{t('personnel.signatureApprovedBadge')}</p>
                       <p className="text-xs text-muted-foreground">
-                        Can initiate and accept equipment transfers for their unit
+                        {t('personnel.signatureDesc')}
                       </p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={formData.transfer_approved}
-                        onChange={(e) => setFormData(prev => ({ ...prev, transfer_approved: e.target.checked }))}
+                        checked={formData.is_signature_approved}
+                        onChange={(e) => setFormData(prev => ({ ...prev, is_signature_approved: e.target.checked }))}
                         disabled={!isEditing}
                         className="sr-only peer"
                       />
@@ -532,10 +529,10 @@ export default function PersonnelDetailPage() {
                       )} />
                     </label>
                   </div>
-                  {formData.transfer_approved && (
+                  {formData.is_signature_approved && (
                     <Badge variant="secondary" className="mt-3">
                       <Briefcase className="mr-1 h-3 w-3" />
-                      Transfer Approved
+                      {t('personnel.signatureApprovedBadge')}
                     </Badge>
                   )}
                 </CardContent>
@@ -552,7 +549,6 @@ export default function PersonnelDetailPage() {
                 canManage={canManageRoles}
                 battalionId={formData.battalion_id}
                 platoonId={formData.platoon_id}
-                squadId={formData.squad_id}
               />
             )}
           </div>

@@ -44,20 +44,20 @@ export default function AddEquipmentPage() {
   const { equipment, loading: equipmentLoading, addEquipment } = useEquipment();
   const { battalions, companies, platoons, loading: unitsLoading, getCompaniesForBattalion, getPlatoonsForCompany } = useUnits();
   const { battalionId: userBattalionId, loading: battalionLoading } = useUserBattalion();
-  
+
   const [name, setName] = useState('');
   const [nameOpen, setNameOpen] = useState(false);
   const [hasSerial, setHasSerial] = useState(true);
   const [serialNumber, setSerialNumber] = useState('');
   const [quantity, setQuantity] = useState('1');
   const [assignedType, setAssignedType] = useState<AssignmentType>('battalion');
-  
+
   // Hierarchical selection state - pre-set from user's battalion
   const [selectedBattalionId, setSelectedBattalionId] = useState('');
   const [selectedCompanyId, setSelectedCompanyId] = useState('');
   const [selectedPlatoonId, setSelectedPlatoonId] = useState('');
   const [selectedPersonnelId, setSelectedPersonnelId] = useState('');
-  
+
   const [saving, setSaving] = useState(false);
 
   const loading = personnelLoading || equipmentLoading || unitsLoading || battalionLoading;
@@ -127,7 +127,7 @@ export default function AddEquipmentPage() {
       toast.error('Serialized equipment must be assigned to an individual');
       return;
     }
-    
+
     setAssignedType(type);
     // Reset selections when type changes
     if (type === 'battalion') {
@@ -151,7 +151,7 @@ export default function AddEquipmentPage() {
       toast.error(t('addEquipment.serialRequired'));
       return;
     }
-    
+
     // Serialized items must have an individual assigned
     if (hasSerial && !selectedPersonnelId) {
       toast.error('Serialized equipment must be assigned to an individual');
@@ -160,7 +160,7 @@ export default function AddEquipmentPage() {
 
     // Build assignment based on type
     let assignment: { personnelId?: string; platoonId?: string; companyId?: string; battalionId?: string } = {};
-    
+
     if (assignedType === 'battalion' && selectedBattalionId) {
       assignment.battalionId = selectedBattalionId;
     } else if (assignedType === 'company' && selectedCompanyId) {
@@ -202,8 +202,8 @@ export default function AddEquipmentPage() {
     <MainLayout>
       {/* Mobile Header */}
       <div className="lg:hidden">
-        <MobileHeader 
-          title={t('addEquipment.title')} 
+        <MobileHeader
+          title={t('addEquipment.title')}
           showBack
           onBack={() => navigate('/equipment')}
         />
@@ -212,8 +212,8 @@ export default function AddEquipmentPage() {
       <div className="tactical-grid min-h-screen p-4 lg:p-6" dir={dir}>
         {/* Desktop Header */}
         <header className="mb-6 hidden lg:block">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             onClick={() => navigate('/equipment')}
             className="mb-4"
           >
@@ -255,7 +255,7 @@ export default function AddEquipmentPage() {
               </PopoverTrigger>
               <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
                 <Command>
-                  <CommandInput 
+                  <CommandInput
                     placeholder={t('addEquipment.namePlaceholder')}
                     value={name}
                     onValueChange={setName}
@@ -353,7 +353,7 @@ export default function AddEquipmentPage() {
             <Label className="text-sm font-medium">
               {t('addEquipment.assignment')}
             </Label>
-            
+
             {/* Assignment Type */}
             <div className="grid grid-cols-2 gap-2">
               {(['battalion', 'company', 'platoon', 'individual'] as const).map((aType) => {
@@ -466,8 +466,8 @@ export default function AddEquipmentPage() {
           </div>
 
           {/* Submit Button */}
-          <Button 
-            variant="tactical" 
+          <Button
+            variant="tactical"
             size="lg"
             onClick={handleSubmit}
             disabled={saving}

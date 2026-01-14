@@ -98,11 +98,11 @@ export function Sidebar() {
           <div className="mx-4 mt-3">
             <Tooltip>
               <TooltipTrigger asChild>
-                <div 
+                <div
                   className={cn(
                     "rounded-lg border p-3 transition-all cursor-pointer",
-                    isAdminMode 
-                      ? "border-primary/50 bg-primary/10" 
+                    isAdminMode
+                      ? "border-primary/50 bg-primary/10"
                       : "border-muted bg-muted/30"
                   )}
                   onClick={toggleAdminMode}
@@ -220,7 +220,7 @@ export function Sidebar() {
               size="icon"
               onClick={signOut}
               className="h-8 w-8 text-muted-foreground hover:text-destructive"
-              title="Sign out"
+              title={t('nav.signOut')}
             >
               <LogOut className="h-4 w-4" />
             </Button>

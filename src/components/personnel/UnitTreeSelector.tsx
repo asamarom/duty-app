@@ -8,8 +8,6 @@ interface UnitAssignment {
   battalion_id: string | null;
   company_id: string | null;
   platoon_id: string | null;
-  // Legacy support
-  squad_id?: string | null;
 }
 
 interface UnitTreeSelectorProps {
@@ -71,7 +69,6 @@ export function UnitTreeSelector({ value, onChange, disabled }: UnitTreeSelector
       battalion_id: battalion.id,
       company_id: null,
       platoon_id: null,
-      squad_id: null,
     });
   };
 
@@ -80,7 +77,6 @@ export function UnitTreeSelector({ value, onChange, disabled }: UnitTreeSelector
       battalion_id: company.battalion_id,
       company_id: company.id,
       platoon_id: null,
-      squad_id: null,
     });
   };
 
@@ -90,7 +86,6 @@ export function UnitTreeSelector({ value, onChange, disabled }: UnitTreeSelector
       battalion_id: company?.battalion_id || null,
       company_id: platoon.company_id,
       platoon_id: platoon.id,
-      squad_id: null,
     });
   };
 
@@ -99,7 +94,6 @@ export function UnitTreeSelector({ value, onChange, disabled }: UnitTreeSelector
       battalion_id: null,
       company_id: null,
       platoon_id: null,
-      squad_id: null,
     });
   };
 

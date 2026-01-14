@@ -14,7 +14,7 @@ import { BattalionUnitSelector, UnitSelection } from '@/components/signup/Battal
 const requestSchema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters'),
   serviceNumber: z.string().min(1, 'Service number is required'),
-  phone: z.string().optional(),
+  cellPhone: z.string().min(1, 'Cell phone number is required'),
   battalionId: z.string().min(1, 'Please select your battalion'),
 });
 
@@ -26,7 +26,7 @@ export default function SignupRequestPage() {
 
   const [fullName, setFullName] = useState(user?.user_metadata?.full_name || '');
   const [serviceNumber, setServiceNumber] = useState('');
-  const [phone, setPhone] = useState('');
+  const [cellPhone, setCellPhone] = useState('');
   const [unitSelection, setUnitSelection] = useState<UnitSelection>({
     battalionId: '',
     companyId: null,
@@ -51,7 +51,7 @@ export default function SignupRequestPage() {
     const validation = requestSchema.safeParse({
       fullName,
       serviceNumber,
-      phone,
+      cellPhone,
       battalionId: unitSelection.battalionId,
     });
 
@@ -78,7 +78,7 @@ export default function SignupRequestPage() {
     const { error } = await submitRequest({
       fullName,
       email: user?.email || '',
-      phone: phone || undefined,
+      phone: cellPhone,
       serviceNumber,
       unitType,
       battalionId: unitSelection.battalionId,
@@ -142,7 +142,7 @@ export default function SignupRequestPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
+                <Label htmlFor="fullName">{t('auth.fullName')}</Label>
                 <Input
                   id="fullName"
                   value={fullName}
@@ -164,7 +164,7 @@ export default function SignupRequestPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="serviceNumber">Service Number</Label>
+                <Label htmlFor="serviceNumber">{t('personnel.serviceNumber')}</Label>
                 <Input
                   id="serviceNumber"
                   value={serviceNumber}
@@ -176,14 +176,15 @@ export default function SignupRequestPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone (Optional)</Label>
+                <Label htmlFor="cellPhone">Cell Phone Number</Label>
                 <Input
-                  id="phone"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Enter your phone number"
+                  id="cellPhone"
+                  value={cellPhone}
+                  onChange={(e) => setCellPhone(e.target.value)}
+                  placeholder="Enter your cell phone number"
                   disabled={isSubmitting}
                 />
+                {errors.cellPhone && <p className="text-sm text-destructive">{errors.cellPhone}</p>}
               </div>
 
               {/* Battalion + Unit Tree Selector */}

@@ -224,14 +224,14 @@ export default function UnitsPage() {
     <MainLayout>
       {/* Mobile Header */}
       <div className="lg:hidden">
-        <MobileHeader title="Unit Management" subtitle="Manage organizational structure" />
+        <MobileHeader title={t('units.title')} subtitle={t('units.manageStructure')} />
       </div>
 
       <div className="tactical-grid min-h-screen p-4 lg:p-6">
         {/* Desktop Header */}
         <header className="mb-6 hidden lg:flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Unit Management</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">{t('units.title')}</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Manage battalions, companies, and platoons
             </p>
@@ -260,7 +260,7 @@ export default function UnitsPage() {
             <Card className="card-tactical">
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium text-foreground">No Battalions</h3>
+                <h3 className="text-lg font-medium text-foreground">{t('units.noBattalions')}</h3>
                 <p className="text-sm text-muted-foreground mt-1">
                   Create your first battalion to get started
                 </p>
@@ -313,7 +313,7 @@ export default function UnitsPage() {
                                 e.stopPropagation();
                                 openCreateDialog('company', battalion.id);
                               }}
-                              title="Add Company"
+                              title={t('units.addCompany')}
                             >
                               <Plus className="h-4 w-4" />
                             </Button>
@@ -393,7 +393,7 @@ export default function UnitsPage() {
                                               e.stopPropagation();
                                               openCreateDialog('platoon', company.id);
                                             }}
-                                            title="Add Platoon"
+                                            title={t('units.addPlatoon')}
                                           >
                                             <Plus className="h-3 w-3" />
                                           </Button>

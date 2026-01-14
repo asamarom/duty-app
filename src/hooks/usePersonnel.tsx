@@ -24,7 +24,6 @@ function mapPersonnelRowToUI(row: PersonnelRow): Personnel {
     battalionId: row.battalion_id || undefined,
     companyId: row.company_id || undefined,
     platoonId: row.platoon_id || undefined,
-    squadId: row.squad_id || undefined,
     role: 'user',
     phone: row.phone || '',
     email: row.email || '',
@@ -34,7 +33,7 @@ function mapPersonnelRowToUI(row: PersonnelRow): Personnel {
     driverLicenses: row.driver_licenses || [],
     profileImage: row.profile_image || undefined,
     readinessStatus: row.readiness_status,
-    transferApproved: row.transfer_approved,
+    isSignatureApproved: row.is_signature_approved,
   };
 }
 
