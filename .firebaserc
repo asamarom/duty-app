@@ -1,0 +1,17 @@
+{
+  "projects": {
+    "default": "duty-82f42"
+  },
+  "targets": {
+    "duty-82f42": {
+      "hosting": {
+        "production": [
+          "duty-82f42"
+        ],
+        "test": [
+          "duty-82f42-test"
+        ]
+      }
+    }
+  }
+}

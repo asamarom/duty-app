@@ -1,48 +1,60 @@
 import { supabase } from '@/integrations/supabase/client';
-import { useUnits, Battalion, Company, Platoon } from './useUnits';
+import { useUnits, Unit, UnitType, UnitWithChildren } from './useUnits';
 import { useToast } from '@/hooks/use-toast';
+import type { UnitInsert, UnitUpdate } from '@/integrations/supabase/types';
 
 interface UseUnitsManagementReturn {
-  battalions: Battalion[];
-  companies: Company[];
-  platoons: Platoon[];
+  units: Unit[];
+  battalions: Unit[];
+  companies: Unit[];
+  platoons: Unit[];
   loading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
-  getCompaniesForBattalion: (battalionId: string) => Company[];
-  getPlatoonsForCompany: (companyId: string) => Platoon[];
-  // Battalion CRUD
-  createBattalion: (data: { name: string; designation?: string }) => Promise<Battalion | null>;
-  updateBattalion: (id: string, data: { name?: string; designation?: string; status?: 'active' | 'deployed' | 'inactive' }) => Promise<boolean>;
-  deleteBattalion: (id: string) => Promise<boolean>;
-  // Company CRUD
-  createCompany: (data: { name: string; battalion_id: string; designation?: string }) => Promise<Company | null>;
-  updateCompany: (id: string, data: { name?: string; designation?: string; status?: 'active' | 'deployed' | 'inactive' }) => Promise<boolean>;
-  deleteCompany: (id: string) => Promise<boolean>;
-  // Platoon CRUD
-  createPlatoon: (data: { name: string; company_id: string; designation?: string }) => Promise<Platoon | null>;
-  updatePlatoon: (id: string, data: { name?: string; designation?: string; status?: 'active' | 'deployed' | 'inactive' }) => Promise<boolean>;
-  deletePlatoon: (id: string) => Promise<boolean>;
+  getUnitById: (id: string) => Unit | undefined;
+  getChildUnits: (parentId: string) => Unit[];
+  getUnitAncestors: (unitId: string) => Unit[];
+  getUnitPath: (unitId: string) => string;
+  buildUnitTree: () => UnitWithChildren[];
+  // Unit CRUD
+  createUnit: (data: { name: string; unit_type: UnitType; parent_id?: string; designation?: string }) => Promise<Unit | null>;
+  updateUnit: (id: string, data: Partial<UnitUpdate>) => Promise<boolean>;
+  deleteUnit: (id: string) => Promise<boolean>;
 }
 
 export function useUnitsManagement(): UseUnitsManagementReturn {
   const {
+    units,
     battalions,
     companies,
     platoons,
     loading,
     error,
     refetch,
-    getCompaniesForBattalion,
-    getPlatoonsForCompany,
+    getUnitById,
+    getChildUnits,
+    getUnitAncestors,
+    getUnitPath,
+    buildUnitTree,
   } = useUnits();
   const { toast } = useToast();
 
-  // Battalion CRUD
-  const createBattalion = async (data: { name: string; designation?: string }): Promise<Battalion | null> => {
-    const { data: newBattalion, error } = await supabase
-      .from('battalions')
-      .insert({ name: data.name, designation: data.designation })
+  const createUnit = async (data: {
+    name: string;
+    unit_type: UnitType;
+    parent_id?: string;
+    designation?: string;
+  }): Promise<Unit | null> => {
+    const insertData: UnitInsert = {
+      name: data.name,
+      unit_type: data.unit_type,
+      parent_id: data.parent_id || null,
+      designation: data.designation,
+    };
+
+    const { data: newUnit, error } = await supabase
+      .from('units')
+      .insert(insertData)
       .select()
       .single();
 
@@ -50,14 +62,21 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
       return null;
     }
-    toast({ title: 'Success', description: 'Battalion created successfully' });
+
+    const typeLabels: Record<UnitType, string> = {
+      battalion: 'Battalion',
+      company: 'Company',
+      platoon: 'Platoon',
+    };
+
+    toast({ title: 'Success', description: `${typeLabels[data.unit_type]} created successfully` });
     await refetch();
-    return newBattalion;
+    return newUnit;
   };
 
-  const updateBattalion = async (id: string, data: { name?: string; designation?: string; status?: 'active' | 'deployed' | 'inactive' }): Promise<boolean> => {
+  const updateUnit = async (id: string, data: Partial<UnitUpdate>): Promise<boolean> => {
     const { error } = await supabase
-      .from('battalions')
+      .from('units')
       .update(data)
       .eq('id', id);
 
@@ -65,14 +84,15 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
       return false;
     }
-    toast({ title: 'Success', description: 'Battalion updated successfully' });
+
+    toast({ title: 'Success', description: 'Unit updated successfully' });
     await refetch();
     return true;
   };
 
-  const deleteBattalion = async (id: string): Promise<boolean> => {
+  const deleteUnit = async (id: string): Promise<boolean> => {
     const { error } = await supabase
-      .from('battalions')
+      .from('units')
       .delete()
       .eq('id', id);
 
@@ -80,130 +100,27 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
       return false;
     }
-    toast({ title: 'Success', description: 'Battalion deleted successfully' });
-    await refetch();
-    return true;
-  };
 
-  // Company CRUD
-  const createCompany = async (data: { name: string; battalion_id: string; designation?: string }): Promise<Company | null> => {
-    const { data: newCompany, error } = await supabase
-      .from('companies')
-      .insert({ name: data.name, battalion_id: data.battalion_id, designation: data.designation })
-      .select()
-      .single();
-
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-      return null;
-    }
-    toast({ title: 'Success', description: 'Company created successfully' });
-    await refetch();
-    return newCompany;
-  };
-
-  const updateCompany = async (id: string, data: { name?: string; designation?: string; status?: 'active' | 'deployed' | 'inactive' }): Promise<boolean> => {
-    const { error } = await supabase
-      .from('companies')
-      .update(data)
-      .eq('id', id);
-
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-      return false;
-    }
-    toast({ title: 'Success', description: 'Company updated successfully' });
-    await refetch();
-    return true;
-  };
-
-  const deleteCompany = async (id: string): Promise<boolean> => {
-    const { error } = await supabase
-      .from('companies')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-      return false;
-    }
-    toast({ title: 'Success', description: 'Company deleted successfully' });
-    await refetch();
-    return true;
-  };
-
-  // Platoon CRUD - now under companies
-  const createPlatoon = async (data: { name: string; company_id: string; designation?: string }): Promise<Platoon | null> => {
-    // Get the company to find the battalion_id for legacy support
-    const company = companies.find(c => c.id === data.company_id);
-
-    const { data: newPlatoon, error } = await supabase
-      .from('platoons')
-      .insert({
-        name: data.name,
-        company_id: data.company_id,
-        battalion_id: company?.battalion_id || '',
-        designation: data.designation
-      })
-      .select()
-      .single();
-
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-      return null;
-    }
-    toast({ title: 'Success', description: 'Platoon created successfully' });
-    await refetch();
-    return newPlatoon;
-  };
-
-  const updatePlatoon = async (id: string, data: { name?: string; designation?: string; status?: 'active' | 'deployed' | 'inactive' }): Promise<boolean> => {
-    const { error } = await supabase
-      .from('platoons')
-      .update(data)
-      .eq('id', id);
-
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-      return false;
-    }
-    toast({ title: 'Success', description: 'Platoon updated successfully' });
-    await refetch();
-    return true;
-  };
-
-  const deletePlatoon = async (id: string): Promise<boolean> => {
-    const { error } = await supabase
-      .from('platoons')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-      return false;
-    }
-    toast({ title: 'Success', description: 'Platoon deleted successfully' });
+    toast({ title: 'Success', description: 'Unit deleted successfully' });
     await refetch();
     return true;
   };
 
   return {
+    units,
     battalions,
     companies,
     platoons,
     loading,
     error,
     refetch,
-    getCompaniesForBattalion,
-    getPlatoonsForCompany,
-    createBattalion,
-    updateBattalion,
-    deleteBattalion,
-    createCompany,
-    updateCompany,
-    deleteCompany,
-    createPlatoon,
-    updatePlatoon,
-    deletePlatoon,
+    getUnitById,
+    getChildUnits,
+    getUnitAncestors,
+    getUnitPath,
+    buildUnitTree,
+    createUnit,
+    updateUnit,
+    deleteUnit,
   };
 }

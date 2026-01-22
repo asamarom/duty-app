@@ -2,22 +2,28 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-interface UseUserBattalionReturn {
+interface UseUserUnitReturn {
+  unitId: string | null;
+  // Backwards compatibility alias
   battalionId: string | null;
   loading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
 }
 
-export function useUserBattalion(): UseUserBattalionReturn {
+/**
+ * Hook to get the current user's assigned unit from their profile.
+ * Returns unitId (and battalionId as alias for backwards compatibility).
+ */
+export function useUserBattalion(): UseUserUnitReturn {
   const { user } = useAuth();
-  const [battalionId, setBattalionId] = useState<string | null>(null);
+  const [unitId, setUnitId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchBattalion = useCallback(async () => {
+  const fetchUnit = useCallback(async () => {
     if (!user?.id) {
-      setBattalionId(null);
+      setUnitId(null);
       setLoading(false);
       return;
     }
@@ -26,12 +32,12 @@ export function useUserBattalion(): UseUserBattalionReturn {
       setLoading(true);
       const { data, error: fetchError } = await supabase
         .from('profiles')
-        .select('battalion_id')
+        .select('unit_id')
         .eq('id', user.id)
         .single();
 
       if (fetchError) throw fetchError;
-      setBattalionId(data?.battalion_id || null);
+      setUnitId(data?.unit_id || null);
     } catch (err) {
       setError(err as Error);
     } finally {
@@ -40,13 +46,14 @@ export function useUserBattalion(): UseUserBattalionReturn {
   }, [user?.id]);
 
   useEffect(() => {
-    fetchBattalion();
-  }, [fetchBattalion]);
+    fetchUnit();
+  }, [fetchUnit]);
 
   return {
-    battalionId,
+    unitId,
+    battalionId: unitId, // Backwards compatibility
     loading,
     error,
-    refetch: fetchBattalion,
+    refetch: fetchUnit,
   };
 }

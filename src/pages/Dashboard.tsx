@@ -1,13 +1,9 @@
 import { MainLayout } from '@/components/layout/MainLayout';
 import { MobileHeader } from '@/components/layout/MobileHeader';
 import { StatCard } from '@/components/dashboard/StatCard';
-import { ReadinessGauge } from '@/components/dashboard/ReadinessGauge';
-import { PersonnelStatusList } from '@/components/dashboard/PersonnelStatusList';
 import { usePersonnel } from '@/hooks/usePersonnel';
 import { useEquipment } from '@/hooks/useEquipment';
-import { Users, Package, AlertTriangle, Target, Calendar, Shield, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Users, Package, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Dashboard() {
@@ -19,15 +15,8 @@ export default function Dashboard() {
 
   // Calculate stats from real data
   const totalPersonnel = personnel.length;
-  const readyPersonnel = personnel.filter(p => p.readinessStatus === 'ready').length;
-  const onMission = personnel.filter(p => p.locationStatus === 'active_mission').length;
-  const onLeave = personnel.filter(p => p.locationStatus === 'leave').length;
   const uniqueEquipmentIds = new Set(equipment.map(e => e.id.split('--')[0]));
   const totalEquipment = uniqueEquipmentIds.size;
-  const serviceableEquipment = uniqueEquipmentIds.size; // All equipment from DB is serviceable by default
-
-  const readyPercentage = totalPersonnel > 0 ? Math.round((readyPersonnel / totalPersonnel) * 100) : 0;
-  const equipmentPercentage = totalEquipment > 0 ? Math.round((serviceableEquipment / totalEquipment) * 100) : 0;
 
   if (loading) {
     return (
@@ -61,130 +50,61 @@ export default function Dashboard() {
                 {t('dashboard.subtitle')} • {new Date().toLocaleTimeString()}
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm">
-                <Calendar className="me-2 h-4 w-4" />
-                {t('reports.submitDaily')}
-              </Button>
-              <Button variant="tactical" size="sm">
-                <Shield className="me-2 h-4 w-4" />
-                {t('reports.quickActions')}
-              </Button>
-            </div>
           </div>
         </header>
 
-        {/* Mobile Quick Actions */}
-        <div className="lg:hidden mb-4 flex gap-2">
-          <Button variant="tactical" size="sm" className="flex-1">
-            <Calendar className="me-2 h-4 w-4" />
-            {t('reports.submitDaily')}
-          </Button>
-          <Button variant="outline" size="sm" className="flex-1">
-            <Shield className="me-2 h-4 w-4" />
-            {t('reports.quickActions')}
-          </Button>
-        </div>
-
-        {/* Readiness Overview - Mobile Optimized */}
-        <section className="mb-4 lg:mb-8">
-          <div className="card-tactical rounded-xl p-4 lg:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base lg:text-lg font-semibold text-foreground">
-                {t('dashboard.readinessLevel')}
-              </h2>
-              <Badge variant="success" className="px-2 lg:px-4 py-1 text-xs">
-                {t('dashboard.operational').toUpperCase()}
-              </Badge>
-            </div>
-            <div className="flex items-center justify-around gap-2">
-              <ReadinessGauge percentage={readyPercentage} label={t('dashboard.totalPersonnel')} size="sm" />
-              <ReadinessGauge percentage={equipmentPercentage} label={t('dashboard.equipmentItems')} size="sm" />
-              <ReadinessGauge percentage={92} label={t('dashboard.training')} size="sm" />
-            </div>
-          </div>
-        </section>
-
-        {/* Stats Grid - Mobile Optimized */}
-        <section className="mb-4 lg:mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+        {/* Stats Grid */}
+        <section className="mb-4 lg:mb-8 grid grid-cols-2 gap-3 lg:gap-4">
           <StatCard
             title={t('dashboard.totalPersonnel')}
             value={totalPersonnel}
-            subtitle={`${readyPersonnel} ${t('dashboard.assigned')}`}
+            subtitle={t('dashboard.registered')}
             icon={Users}
             status="ready"
           />
           <StatCard
-            title={t('dashboard.onMission')}
-            value={onMission}
-            subtitle={t('dashboard.deployed')}
-            icon={Target}
-            status="warning"
-          />
-          <StatCard
             title={t('dashboard.equipmentItems')}
             value={totalEquipment}
-            subtitle={`${serviceableEquipment} ${t('dashboard.tracked')}`}
+            subtitle={t('dashboard.tracked')}
             icon={Package}
-            status="ready"
-          />
-          <StatCard
-            title={t('dashboard.certsDue')}
-            value={0}
-            subtitle={t('dashboard.next30Days')}
-            icon={AlertTriangle}
             status="ready"
           />
         </section>
 
-        {/* Personnel Status & Alerts - Stack on Mobile */}
-        <section className="grid grid-cols-1 gap-4 lg:gap-6 lg:grid-cols-2">
-          {/* Personnel Status */}
+        {/* Personnel Overview */}
+        <section>
           <div className="card-tactical rounded-xl p-4 lg:p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-semibold text-foreground">{t('dashboard.personnelStatus')}</h3>
-              <Button variant="ghost" size="sm" className="text-primary text-xs">
-                {t('common.view')}
-              </Button>
+              <h3 className="font-semibold text-foreground">{t('dashboard.personnelOverview')}</h3>
             </div>
-            <PersonnelStatusList personnel={personnel} limit={4} />
-          </div>
-
-          {/* Alerts & Notifications */}
-          <div className="card-tactical rounded-xl p-4 lg:p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-semibold text-foreground">{t('dashboard.alerts')}</h3>
-              <Badge variant="warning" className="text-xs">3</Badge>
-            </div>
-            <div className="space-y-2 lg:space-y-3">
-              <div className="flex items-start gap-3 rounded-lg border border-warning/30 bg-warning/10 p-3">
-                <AlertTriangle className="mt-0.5 h-4 w-4 lg:h-5 lg:w-5 shrink-0 text-warning" />
-                <div className="min-w-0">
-                  <p className="font-medium text-warning text-sm">{t('dashboard.licenseExp')}</p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    PFC Park's HMMWV license expires in 7 days
+            {personnel.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{t('dashboard.noPersonnel')}</p>
+            ) : (
+              <div className="space-y-2">
+                {personnel.slice(0, 5).map((person) => (
+                  <div key={person.id} className="flex items-center justify-between rounded-lg border border-border/50 bg-secondary/30 p-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">
+                        {person.firstName?.charAt(0)}{person.lastName?.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">
+                          {person.rank} {person.firstName} {person.lastName}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {person.serviceNumber}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {personnel.length > 5 && (
+                  <p className="text-xs text-muted-foreground text-center pt-2">
+                    +{personnel.length - 5} more
                   </p>
-                </div>
+                )}
               </div>
-              <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3">
-                <Package className="mt-0.5 h-4 w-4 lg:h-5 lg:w-5 shrink-0 text-destructive" />
-                <div className="min-w-0">
-                  <p className="font-medium text-destructive text-sm">{t('dashboard.equipmentIssue')}</p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    AN/PRC-117G reported unserviceable
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/10 p-3">
-                <Calendar className="mt-0.5 h-4 w-4 lg:h-5 lg:w-5 shrink-0 text-primary" />
-                <div className="min-w-0">
-                  <p className="font-medium text-primary text-sm">{t('dashboard.scheduledEvent')}</p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    Equipment inventory due in 3 days
-                  </p>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </section>
       </div>

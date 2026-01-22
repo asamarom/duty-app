@@ -9,15 +9,11 @@ export interface AssignmentRequest {
   equipment_id: string;
   equipment_name?: string;
   from_unit_type: string;
-  from_battalion_id?: string;
-  from_company_id?: string;
-  from_platoon_id?: string;
+  from_unit_id?: string;
   from_personnel_id?: string;
   from_unit_name?: string;
   to_unit_type: string;
-  to_battalion_id?: string;
-  to_company_id?: string;
-  to_platoon_id?: string;
+  to_unit_id?: string;
   to_personnel_id?: string;
   to_unit_name?: string;
   status: AssignmentRequestStatus;
@@ -30,34 +26,15 @@ export interface AssignmentRequest {
   recipient_approved_by?: string;
 }
 
-export interface AssignmentApproval {
-  id: string;
-  request_id: string;
-  action: 'approved' | 'rejected';
-  action_by?: string;
-  action_by_name?: string;
-  action_at: string;
-  notes?: string;
-}
-
 interface UseAssignmentRequestsReturn {
   requests: AssignmentRequest[];
-  approvals: AssignmentApproval[];
   incomingTransfers: AssignmentRequest[];
   loading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
   createRequest: (data: {
     equipmentId: string;
-    fromUnitType: string;
-    fromBattalionId?: string;
-    fromCompanyId?: string;
-    fromPlatoonId?: string;
-    fromPersonnelId?: string;
-    toUnitType: string;
-    toBattalionId?: string;
-    toCompanyId?: string;
-    toPlatoonId?: string;
+    toUnitId?: string;
     toPersonnelId?: string;
     notes?: string;
   }) => Promise<void>;
@@ -65,12 +42,10 @@ interface UseAssignmentRequestsReturn {
   rejectRequest: (requestId: string, notes?: string) => Promise<void>;
   recipientApprove: (requestId: string, notes?: string) => Promise<void>;
   recipientReject: (requestId: string, notes?: string) => Promise<void>;
-  getApprovalsForRequest: (requestId: string) => AssignmentApproval[];
 }
 
 export function useAssignmentRequests(): UseAssignmentRequestsReturn {
   const [requests, setRequests] = useState<AssignmentRequest[]>([]);
-  const [approvals, setApprovals] = useState<AssignmentApproval[]>([]);
   const [incomingTransfers, setIncomingTransfers] = useState<AssignmentRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -80,19 +55,15 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     try {
       setLoading(true);
 
-      // Fetch requests with equipment info
+      // Fetch requests with equipment and unit info
       const { data: requestsData, error: requestsError } = await supabase
         .from('assignment_requests')
         .select(`
           *,
           equipment(name),
-          from_battalion:battalions!assignment_requests_from_battalion_id_fkey(name),
-          from_company:companies!assignment_requests_from_company_id_fkey(name),
-          from_platoon:platoons!assignment_requests_from_platoon_id_fkey(name),
+          from_unit:units!assignment_requests_from_unit_id_fkey(name, unit_type),
           from_personnel:personnel!assignment_requests_from_personnel_id_fkey(first_name, last_name),
-          to_battalion:battalions!assignment_requests_to_battalion_id_fkey(name),
-          to_company:companies!assignment_requests_to_company_id_fkey(name),
-          to_platoon:platoons!assignment_requests_to_platoon_id_fkey(name),
+          to_unit:units!assignment_requests_to_unit_id_fkey(name, unit_type),
           to_personnel:personnel!assignment_requests_to_personnel_id_fkey(first_name, last_name),
           requester:profiles!assignment_requests_requested_by_fkey(full_name)
         `)
@@ -102,25 +73,17 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
 
       const mappedRequests: AssignmentRequest[] = (requestsData || []).map((r: any) => {
         let fromUnitName = 'Unassigned';
-        if (r.from_unit_type === 'battalion' && r.from_battalion) {
-          fromUnitName = r.from_battalion.name;
-        } else if (r.from_unit_type === 'company' && r.from_company) {
-          fromUnitName = r.from_company.name;
-        } else if (r.from_unit_type === 'platoon' && r.from_platoon) {
-          fromUnitName = r.from_platoon.name;
-        } else if (r.from_unit_type === 'individual' && r.from_personnel) {
+        if (r.from_unit_type === 'individual' && r.from_personnel) {
           fromUnitName = `${r.from_personnel.first_name} ${r.from_personnel.last_name}`;
+        } else if (r.from_unit) {
+          fromUnitName = r.from_unit.name;
         }
 
         let toUnitName = 'Unassigned';
-        if (r.to_unit_type === 'battalion' && r.to_battalion) {
-          toUnitName = r.to_battalion.name;
-        } else if (r.to_unit_type === 'company' && r.to_company) {
-          toUnitName = r.to_company.name;
-        } else if (r.to_unit_type === 'platoon' && r.to_platoon) {
-          toUnitName = r.to_platoon.name;
-        } else if (r.to_unit_type === 'individual' && r.to_personnel) {
+        if (r.to_unit_type === 'individual' && r.to_personnel) {
           toUnitName = `${r.to_personnel.first_name} ${r.to_personnel.last_name}`;
+        } else if (r.to_unit) {
+          toUnitName = r.to_unit.name;
         }
 
         return {
@@ -128,15 +91,11 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
           equipment_id: r.equipment_id,
           equipment_name: r.equipment?.name,
           from_unit_type: r.from_unit_type,
-          from_battalion_id: r.from_battalion_id,
-          from_company_id: r.from_company_id,
-          from_platoon_id: r.from_platoon_id,
+          from_unit_id: r.from_unit_id,
           from_personnel_id: r.from_personnel_id,
           from_unit_name: fromUnitName,
           to_unit_type: r.to_unit_type,
-          to_battalion_id: r.to_battalion_id,
-          to_company_id: r.to_company_id,
-          to_platoon_id: r.to_platoon_id,
+          to_unit_id: r.to_unit_id,
           to_personnel_id: r.to_personnel_id,
           to_unit_name: toUnitName,
           status: r.status as AssignmentRequestStatus,
@@ -153,34 +112,10 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
       setRequests(mappedRequests);
 
       // Filter incoming transfers - those needing recipient approval
-      // (pending requests where recipient hasn't approved yet)
       const incoming = mappedRequests.filter(r =>
         r.status === 'pending' && !r.recipient_approved
       );
       setIncomingTransfers(incoming);
-
-      // Fetch approvals
-      const { data: approvalsData, error: approvalsError } = await supabase
-        .from('assignment_approvals')
-        .select(`
-          *,
-          actor:profiles!assignment_approvals_action_by_fkey(full_name)
-        `)
-        .order('action_at', { ascending: false });
-
-      if (approvalsError) throw approvalsError;
-
-      const mappedApprovals: AssignmentApproval[] = (approvalsData || []).map((a: any) => ({
-        id: a.id,
-        request_id: a.request_id,
-        action: a.action as 'approved' | 'rejected',
-        action_by: a.action_by,
-        action_by_name: a.actor?.full_name,
-        action_at: a.action_at,
-        notes: a.notes,
-      }));
-
-      setApprovals(mappedApprovals);
     } catch (err) {
       setError(err as Error);
     } finally {
@@ -190,27 +125,15 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
 
   const createRequest = useCallback(async (data: {
     equipmentId: string;
-    fromUnitType: string;
-    fromBattalionId?: string;
-    fromCompanyId?: string;
-    fromPlatoonId?: string;
-    fromPersonnelId?: string;
-    toUnitType: string;
-    toBattalionId?: string;
-    toCompanyId?: string;
-    toPlatoonId?: string;
+    toUnitId?: string;
     toPersonnelId?: string;
     notes?: string;
   }) => {
-    // Use RPC for atomic initiation with rule enforcement
-    const { error: rpcError } = await supabase.rpc('initiate_transfer_v2', {
-      _equipment_id: data.equipmentId,
-      _to_unit_type: data.toUnitType,
-      _to_battalion_id: data.toBattalionId || null,
-      _to_company_id: data.toCompanyId || null,
-      _to_platoon_id: data.toPlatoonId || null,
-      _to_personnel_id: data.toPersonnelId || null,
-      _notes: data.notes || null,
+    const { error: rpcError } = await supabase.rpc('initiate_transfer', {
+      p_equipment_id: data.equipmentId,
+      p_to_unit_id: data.toUnitId || null,
+      p_to_personnel_id: data.toPersonnelId || null,
+      p_notes: data.notes || null,
     });
 
     if (rpcError) throw rpcError;
@@ -219,11 +142,10 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
   }, [fetchRequests]);
 
   const approveRequest = useCallback(async (requestId: string, notes?: string) => {
-    // Process approval via RPC
-    const { error: rpcError } = await supabase.rpc('process_transfer_v2', {
-      _request_id: requestId,
-      _action: 'approved',
-      _notes: notes || null,
+    const { error: rpcError } = await supabase.rpc('process_transfer', {
+      p_request_id: requestId,
+      p_action: 'approved',
+      p_notes: notes || null,
     });
 
     if (rpcError) throw rpcError;
@@ -232,11 +154,10 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
   }, [fetchRequests]);
 
   const rejectRequest = useCallback(async (requestId: string, notes?: string) => {
-    // Process rejection via RPC
-    const { error: rpcError } = await supabase.rpc('process_transfer_v2', {
-      _request_id: requestId,
-      _action: 'rejected',
-      _notes: notes || null,
+    const { error: rpcError } = await supabase.rpc('process_transfer', {
+      p_request_id: requestId,
+      p_action: 'rejected',
+      p_notes: notes || null,
     });
 
     if (rpcError) throw rpcError;
@@ -244,21 +165,13 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     await fetchRequests();
   }, [fetchRequests]);
 
-  // Recipient approves the incoming transfer - this finalizes the transfer
   const recipientApprove = useCallback(async (requestId: string, notes?: string) => {
-    // Recipient approval is now handled the same as general approval in process_transfer_v2
     await approveRequest(requestId, notes ? `Recipient approved: ${notes}` : 'Recipient approved the transfer');
   }, [approveRequest]);
 
-  // Recipient rejects the incoming transfer (rejects the whole request)
   const recipientReject = useCallback(async (requestId: string, notes?: string) => {
-    // Recipient rejection rejects the entire request
     await rejectRequest(requestId, notes ? `Recipient rejected: ${notes}` : 'Recipient rejected the transfer');
   }, [rejectRequest]);
-
-  const getApprovalsForRequest = useCallback((requestId: string) => {
-    return approvals.filter(a => a.request_id === requestId);
-  }, [approvals]);
 
   useEffect(() => {
     fetchRequests();
@@ -266,7 +179,6 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
 
   return {
     requests,
-    approvals,
     incomingTransfers,
     loading,
     error,
@@ -276,6 +188,5 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     rejectRequest,
     recipientApprove,
     recipientReject,
-    getApprovalsForRequest,
   };
 }

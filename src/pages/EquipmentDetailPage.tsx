@@ -44,7 +44,7 @@ export default function EquipmentDetailPage() {
   const { user } = useAuth();
   const { personnel, loading: personnelLoading } = usePersonnel();
   const { equipment, loading: equipmentLoading, deleteEquipment, assignEquipment, requestAssignment, isWithinSameUnit, canDeleteEquipment } = useEquipment();
-  const { battalions, companies, platoons, loading: unitsLoading, getCompaniesForBattalion, getPlatoonsForCompany } = useUnits();
+  const { battalions, companies, platoons, loading: unitsLoading, getCompaniesForBattalion, getPlatoonsForCompany, getUnitById, getUnitAncestors } = useUnits();
   const { battalionId: userBattalionId, loading: battalionLoading } = useUserBattalion();
 
   const baseId = id?.split('--')[0];
@@ -60,9 +60,27 @@ export default function EquipmentDetailPage() {
   const [transferQuantity, setTransferQuantity] = useState(1);
   const [saving, setSaving] = useState(false);
 
-  // Get current user's personnel record - search by matching email or check personnel hook for user_id mapping
+  // Helper to get battalion from any unit
+  const getBattalionForUnit = (unitId: string): string | null => {
+    const unit = getUnitById(unitId);
+    if (!unit) return null;
+    if (unit.unit_type === 'battalion') return unit.id;
+    const ancestors = getUnitAncestors(unitId);
+    const battalion = ancestors.find(a => a.unit_type === 'battalion');
+    return battalion?.id || null;
+  };
+
+  // Helper to get company from any unit
+  const getCompanyForUnit = (unitId: string): string | null => {
+    const unit = getUnitById(unitId);
+    if (!unit) return null;
+    if (unit.unit_type === 'company') return unit.id;
+    if (unit.unit_type === 'platoon') return unit.parent_id || null;
+    return null;
+  };
+
+  // Get current user's personnel record
   const currentUserPersonnel = useMemo(() => {
-    // Personnel records may be linked via email or a user_id field
     return personnel.find(p => p.email === user?.email);
   }, [personnel, user?.email]);
 
@@ -80,7 +98,6 @@ export default function EquipmentDetailPage() {
 
   // Determine which assignment types are allowed based on current level and serialization
   const allowedTypes = useMemo((): AssignmentType[] => {
-    // Serialized items must go to individuals
     if (isSerializedItem) {
       return ['individual'];
     }
@@ -100,43 +117,83 @@ export default function EquipmentDetailPage() {
     }
   }, [currentLevel, isSerializedItem]);
 
-  // Initialize state when equipment is loaded
-  useEffect(() => {
-    if (item) {
-      // Set transfer quantity to current quantity
-      setTransferQuantity(item.currentQuantity || item.quantity || 1);
+  // Get the current assignment's hierarchy info using the unified units
+  const currentAssignmentInfo = useMemo(() => {
+    if (!item) return { battalionId: null, companyId: null, platoonId: null };
 
-      // Set current assignment state
-      if (item.currentBattalionId && item.assignmentLevel === 'battalion') {
-        setSelectedBattalionId(item.currentBattalionId);
-        setAssignedType('battalion');
-      }
-      if (item.currentCompanyId && item.assignmentLevel === 'company') {
-        setSelectedCompanyId(item.currentCompanyId);
-        const company = companies.find(c => c.id === item.currentCompanyId);
-        if (company) {
-          setSelectedBattalionId(company.battalion_id);
-        }
-        setAssignedType('company');
-      }
-      if (item.currentPlatoonId && item.assignmentLevel === 'platoon') {
-        setSelectedPlatoonId(item.currentPlatoonId);
-        const platoon = platoons.find(p => p.id === item.currentPlatoonId);
-        if (platoon?.company_id) {
-          setSelectedCompanyId(platoon.company_id);
-          const company = companies.find(c => c.id === platoon.company_id);
-          if (company) {
-            setSelectedBattalionId(company.battalion_id);
+    let battalionId: string | null = null;
+    let companyId: string | null = null;
+    let platoonId: string | null = null;
+
+    // If assigned to a person, get their unit hierarchy
+    if (item.currentPersonnelId) {
+      const person = personnel.find(p => p.id === item.currentPersonnelId);
+      if (person?.unitId) {
+        const personUnit = getUnitById(person.unitId);
+        if (personUnit) {
+          if (personUnit.unit_type === 'platoon') {
+            platoonId = personUnit.id;
+            companyId = personUnit.parent_id || null;
+            if (companyId) battalionId = getBattalionForUnit(companyId);
+          } else if (personUnit.unit_type === 'company') {
+            companyId = personUnit.id;
+            battalionId = personUnit.parent_id || null;
+          } else if (personUnit.unit_type === 'battalion') {
+            battalionId = personUnit.id;
           }
         }
-        setAssignedType('platoon');
       }
-      if (item.currentPersonnelId) {
-        setSelectedPersonnelId(item.currentPersonnelId);
-        setAssignedType('individual');
+    } else if (item.currentUnitId) {
+      // Assigned to a unit directly
+      const unit = getUnitById(item.currentUnitId);
+      if (unit) {
+        if (unit.unit_type === 'platoon') {
+          platoonId = unit.id;
+          companyId = unit.parent_id || null;
+          if (companyId) battalionId = getBattalionForUnit(companyId);
+        } else if (unit.unit_type === 'company') {
+          companyId = unit.id;
+          battalionId = unit.parent_id || null;
+        } else if (unit.unit_type === 'battalion') {
+          battalionId = unit.id;
+        }
       }
     }
-  }, [item, companies, platoons]);
+
+    return { battalionId, companyId, platoonId };
+  }, [item, personnel, getUnitById, getUnitAncestors]);
+
+  // Initialize state when equipment is loaded
+  useEffect(() => {
+    if (item && item.currentUnitId) {
+      const unit = getUnitById(item.currentUnitId);
+      if (unit) {
+        if (unit.unit_type === 'battalion') {
+          setSelectedBattalionId(unit.id);
+          setAssignedType('battalion');
+        } else if (unit.unit_type === 'company') {
+          setSelectedCompanyId(unit.id);
+          if (unit.parent_id) setSelectedBattalionId(unit.parent_id);
+          setAssignedType('company');
+        } else if (unit.unit_type === 'platoon') {
+          setSelectedPlatoonId(unit.id);
+          if (unit.parent_id) {
+            setSelectedCompanyId(unit.parent_id);
+            const company = getUnitById(unit.parent_id);
+            if (company?.parent_id) setSelectedBattalionId(company.parent_id);
+          }
+          setAssignedType('platoon');
+        }
+      }
+    }
+    if (item?.currentPersonnelId) {
+      setSelectedPersonnelId(item.currentPersonnelId);
+      setAssignedType('individual');
+    }
+    if (item) {
+      setTransferQuantity(item.currentQuantity || item.quantity || 1);
+    }
+  }, [item, getUnitById]);
 
   const loading = personnelLoading || equipmentLoading || unitsLoading || battalionLoading;
 
@@ -146,50 +203,6 @@ export default function EquipmentDetailPage() {
       setSelectedBattalionId(userBattalionId);
     }
   }, [userBattalionId, selectedBattalionId, currentLevel]);
-
-  // Get the current assignment's hierarchy info
-  const currentAssignmentInfo = useMemo(() => {
-    if (!item) return { battalionId: null, companyId: null, platoonId: null };
-
-    let battalionId = item.currentBattalionId || null;
-    let companyId = item.currentCompanyId || null;
-    let platoonId = item.currentPlatoonId || null;
-
-    if (item.currentPersonnelId) {
-      const person = personnel.find(p => p.id === item.currentPersonnelId);
-      if (person?.platoonId) {
-        platoonId = person.platoonId;
-        const platoon = platoons.find(p => p.id === platoonId);
-        if (platoon?.company_id) {
-          companyId = platoon.company_id;
-          const company = companies.find(c => c.id === companyId);
-          if (company) {
-            battalionId = company.battalion_id;
-          }
-        }
-      }
-    }
-
-    if (platoonId && !companyId) {
-      const platoon = platoons.find(p => p.id === platoonId);
-      if (platoon?.company_id) {
-        companyId = platoon.company_id;
-        const company = companies.find(c => c.id === companyId);
-        if (company) {
-          battalionId = company.battalion_id;
-        }
-      }
-    }
-
-    if (companyId && !battalionId) {
-      const company = companies.find(c => c.id === companyId);
-      if (company) {
-        battalionId = company.battalion_id;
-      }
-    }
-
-    return { battalionId, companyId, platoonId };
-  }, [item, personnel, companies, platoons]);
 
   // Get available battalions
   const availableBattalions = useMemo(() => {
@@ -204,23 +217,19 @@ export default function EquipmentDetailPage() {
 
   // Get available companies
   const availableCompanies = useMemo(() => {
-    // For battalion-level items transferring to company, show companies in that battalion
     if (currentLevel === 'battalion' && currentAssignmentInfo.battalionId) {
       return getCompaniesForBattalion(currentAssignmentInfo.battalionId);
     }
 
-    // For unassigned items, use the selected battalion
     if (currentLevel === 'unassigned') {
       if (!selectedBattalionId) return [];
       return getCompaniesForBattalion(selectedBattalionId);
     }
 
-    // For items at company/platoon/individual level going back up, show current company
     if ((currentLevel === 'company' || currentLevel === 'platoon' || currentLevel === 'individual') && currentAssignmentInfo.companyId) {
       return companies.filter(c => c.id === currentAssignmentInfo.companyId);
     }
 
-    // Fallback to selected battalion
     if (selectedBattalionId) {
       return getCompaniesForBattalion(selectedBattalionId);
     }
@@ -250,21 +259,21 @@ export default function EquipmentDetailPage() {
   const availablePersonnel = useMemo(() => {
     if (currentLevel === 'unassigned') {
       if (selectedPlatoonId) {
-        return personnel.filter(p => p.platoonId === selectedPlatoonId);
+        return personnel.filter(p => p.unitId === selectedPlatoonId);
       }
       return personnel;
     }
 
     if (currentLevel === 'individual' && currentAssignmentInfo.platoonId) {
-      return personnel.filter(p => p.platoonId === currentAssignmentInfo.platoonId);
+      return personnel.filter(p => p.unitId === currentAssignmentInfo.platoonId);
     }
 
     if (currentLevel === 'platoon' && currentAssignmentInfo.platoonId) {
-      return personnel.filter(p => p.platoonId === currentAssignmentInfo.platoonId);
+      return personnel.filter(p => p.unitId === currentAssignmentInfo.platoonId);
     }
 
     if (selectedPlatoonId) {
-      return personnel.filter(p => p.platoonId === selectedPlatoonId);
+      return personnel.filter(p => p.unitId === selectedPlatoonId);
     }
 
     return personnel;
@@ -357,16 +366,16 @@ export default function EquipmentDetailPage() {
 
       // Build assignment based on type
       let hasAssignment = false;
-      const assignment: { personnelId?: string; platoonId?: string; companyId?: string; battalionId?: string } = {};
+      const assignment: { personnelId?: string; unitId?: string } = {};
 
       if (assignedType === 'battalion' && selectedBattalionId) {
-        assignment.battalionId = selectedBattalionId;
+        assignment.unitId = selectedBattalionId;
         hasAssignment = true;
       } else if (assignedType === 'company' && selectedCompanyId) {
-        assignment.companyId = selectedCompanyId;
+        assignment.unitId = selectedCompanyId;
         hasAssignment = true;
       } else if (assignedType === 'platoon' && selectedPlatoonId) {
-        assignment.platoonId = selectedPlatoonId;
+        assignment.unitId = selectedPlatoonId;
         hasAssignment = true;
       } else if (assignedType === 'individual' && selectedPersonnelId) {
         assignment.personnelId = selectedPersonnelId;
@@ -375,10 +384,8 @@ export default function EquipmentDetailPage() {
 
       if (hasAssignment) {
         const targetLevel: AssignmentLevel = assignment.personnelId ? 'individual'
-          : assignment.platoonId ? 'platoon'
-            : assignment.companyId ? 'company'
-              : assignment.battalionId ? 'battalion'
-                : 'unassigned';
+          : assignment.unitId ? 'battalion' // Will be refined by actual unit type
+            : 'unassigned';
 
         const isDirect = targetLevel === 'individual' ||
           isWithinSameUnit(currentLevel, targetLevel, item!, assignment) ||

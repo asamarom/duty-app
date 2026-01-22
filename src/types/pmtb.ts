@@ -1,8 +1,8 @@
 export type UserRole = 'admin' | 'leader' | 'user';
-export type DutyPosition = 'Platoon Leader' | 'Platoon Sergeant' | 'RTO' | 'Medic' | 'Rifleman' | 'Driver' | 'Gunner';
+export type DutyPosition = 'Platoon Leader' | 'Platoon Sergeant' | 'RTO' | 'Medic' | 'Rifleman' | 'Driver' | 'Gunner' | 'Unassigned';
 export type LocationStatus = 'home' | 'on_duty' | 'off_duty' | 'active_mission' | 'leave' | 'tdy';
-
 export type ReadinessStatus = 'ready' | 'warning' | 'critical';
+export type UnitType = 'battalion' | 'company' | 'platoon';
 
 export interface Personnel {
   id: string;
@@ -10,10 +10,8 @@ export interface Personnel {
   rank: string;
   firstName: string;
   lastName: string;
-  dutyPosition: DutyPosition;
-  battalionId?: string;
-  companyId?: string;
-  platoonId?: string;
+  dutyPosition: DutyPosition | string;
+  unitId?: string;
   role: UserRole;
   phone: string;
   email: string;
@@ -33,7 +31,8 @@ export interface Equipment {
   description?: string;
   quantity: number;
   assignedTo?: string;
-  assignedType?: 'individual' | 'company' | 'platoon' | 'battalion';
+  assignedUnitId?: string;
+  assignedType?: 'individual' | 'unit' | 'unassigned';
   createdBy?: string;
 }
 
@@ -42,8 +41,10 @@ export interface TransferHistoryRecord {
   equipmentId: string;
   quantity: number;
   fromUnitType: string;
+  fromUnitId?: string;
   fromName?: string;
   toUnitType: string;
+  toUnitId?: string;
   toName?: string;
   transferredBy?: string;
   transferredByName?: string;
@@ -63,7 +64,7 @@ export interface DailyReport {
   }[];
 }
 
-export interface PlatoonStats {
+export interface UnitStats {
   totalPersonnel: number;
   readyPersonnel: number;
   onMission: number;
@@ -72,3 +73,6 @@ export interface PlatoonStats {
   equipmentTotal: number;
   certificationsDue: number;
 }
+
+// Backwards compatibility alias
+export type PlatoonStats = UnitStats;

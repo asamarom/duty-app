@@ -7,13 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import {
   ArrowLeft,
@@ -22,8 +15,6 @@ import {
   Phone,
   Mail,
   MapPin,
-  Award,
-  Car,
   User,
   Edit,
   X,
@@ -35,8 +26,6 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 import { UnitTreeSelector } from '@/components/personnel/UnitTreeSelector';
-import { AutocompleteTagInput } from '@/components/personnel/AutocompleteTagInput';
-import { usePersonnelSuggestions } from '@/hooks/usePersonnelSuggestions';
 import { RoleManagement } from '@/components/personnel/RoleManagement';
 import { RoleBadges } from '@/components/personnel/RoleBadge';
 import { useCanManageRole } from '@/hooks/useCanManageRole';
@@ -48,7 +37,6 @@ export default function PersonnelDetailPage() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { toast } = useToast();
-  const { dutyPositions: dutyPositionSuggestions, skills: skillSuggestions, driverLicenses: licenseSuggestions } = usePersonnelSuggestions();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -57,23 +45,18 @@ export default function PersonnelDetailPage() {
   const [roles, setRoles] = useState<AppRole[]>([]);
   const { canManage: canManageRoles, loading: canManageLoading } = useCanManageRole(id);
 
-  // Form state
+  // Form state - using unit_id instead of separate battalion/company/platoon IDs
   const [formData, setFormData] = useState({
     service_number: '',
     rank: '',
     first_name: '',
     last_name: '',
     duty_positions: [] as string[],
-    battalion_id: null as string | null,
-    company_id: null as string | null,
-    platoon_id: null as string | null,
+    unit_id: null as string | null,
     is_signature_approved: false,
     phone: '',
     email: '',
     local_address: '',
-    skills: [] as string[],
-    driver_licenses: [] as string[],
-    profile_image: '' as string | null,
   });
 
   const fetchRoles = useCallback(async (personnelUserId: string | null) => {
@@ -128,16 +111,11 @@ export default function PersonnelDetailPage() {
           first_name: person.first_name,
           last_name: person.last_name,
           duty_positions: dutyPositions,
-          battalion_id: (person as any).battalion_id || null,
-          company_id: (person as any).company_id || null,
-          platoon_id: (person as any).platoon_id || null,
-          is_signature_approved: (person as any).is_signature_approved || false,
+          unit_id: person.unit_id || null,
+          is_signature_approved: person.is_signature_approved || false,
           phone: person.phone || '',
           email: person.email || '',
           local_address: person.local_address || '',
-          skills: person.skills || [],
-          driver_licenses: person.driver_licenses || [],
-          profile_image: person.profile_image,
         });
       } catch (error) {
         console.error('Error fetching personnel:', error);
@@ -174,17 +152,12 @@ export default function PersonnelDetailPage() {
           first_name: formData.first_name,
           last_name: formData.last_name,
           duty_position: primaryDutyPosition,
-          battalion_id: formData.battalion_id || null,
-          company_id: formData.company_id || null,
-          platoon_id: formData.platoon_id || null,
+          unit_id: formData.unit_id || null,
           is_signature_approved: formData.is_signature_approved,
           phone: formData.phone || null,
           email: formData.email || null,
           local_address: formData.local_address || null,
-          skills: formData.skills,
-          driver_licenses: formData.driver_licenses,
-          profile_image: formData.profile_image || null,
-        } as any)
+        })
         .eq('id', id);
 
       if (error) throw error;
@@ -367,30 +340,25 @@ export default function PersonnelDetailPage() {
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Briefcase className="h-4 w-4 text-primary" />
-                    Duty Positions
+                    {t('personnel.dutyPosition')}
                   </Label>
-                  <AutocompleteTagInput
-                    values={formData.duty_positions}
-                    onChange={(values) => setFormData(prev => ({ ...prev, duty_positions: values }))}
-                    suggestions={dutyPositionSuggestions}
-                    placeholder={t('personnel.addPosition')}
-                    disabled={!isEditing}
-                    badgeVariant="outline"
-                  />
+                  {isEditing ? (
+                    <Input
+                      value={formData.duty_positions[0] || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, duty_positions: e.target.value ? [e.target.value] : [] }))}
+                      placeholder={t('personnel.addPosition')}
+                    />
+                  ) : (
+                    <p className="text-foreground">{formData.duty_positions[0] || t('common.na')}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label>{t('equipment.assignedTo')}</Label>
                   <UnitTreeSelector
-                    value={{
-                      battalion_id: formData.battalion_id,
-                      company_id: formData.company_id,
-                      platoon_id: formData.platoon_id,
-                    }}
+                    value={{ unit_id: formData.unit_id }}
                     onChange={(assignment) => setFormData(prev => ({
                       ...prev,
-                      battalion_id: assignment.battalion_id,
-                      company_id: assignment.company_id,
-                      platoon_id: assignment.platoon_id,
+                      unit_id: assignment.unit_id,
                     }))}
                     disabled={!isEditing}
                   />
@@ -456,48 +424,8 @@ export default function PersonnelDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Skills & Licenses */}
+          {/* Sidebar Cards */}
           <div className="space-y-6">
-            {/* Skills Card */}
-            <Card className="card-tactical">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5 text-primary" />
-                  Skills
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <AutocompleteTagInput
-                  values={formData.skills}
-                  onChange={(values) => setFormData(prev => ({ ...prev, skills: values }))}
-                  suggestions={skillSuggestions}
-                  placeholder={t('personnel.addSkill')}
-                  disabled={!isEditing}
-                  badgeVariant="tactical"
-                />
-              </CardContent>
-            </Card>
-
-            {/* Licenses Card */}
-            <Card className="card-tactical">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Car className="h-5 w-5 text-primary" />
-                  Driver Licenses
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <AutocompleteTagInput
-                  values={formData.driver_licenses}
-                  onChange={(values) => setFormData(prev => ({ ...prev, driver_licenses: values }))}
-                  suggestions={licenseSuggestions}
-                  placeholder={t('personnel.addLicense')}
-                  disabled={!isEditing}
-                  badgeVariant="secondary"
-                />
-              </CardContent>
-            </Card>
-
             {/* Transfer Approved Card */}
             {canManageRoles && (
               <Card className="card-tactical">
@@ -547,8 +475,7 @@ export default function PersonnelDetailPage() {
                 currentRoles={roles}
                 onRolesChanged={() => fetchRoles(userId)}
                 canManage={canManageRoles}
-                battalionId={formData.battalion_id}
-                platoonId={formData.platoon_id}
+                unitId={formData.unit_id}
               />
             )}
           </div>

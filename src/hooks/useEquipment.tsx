@@ -12,19 +12,15 @@ export interface EquipmentWithAssignment extends Equipment {
   assigneeName?: string;
   currentAssignmentId?: string;
   currentPersonnelId?: string;
-  currentBattalionId?: string;
-  currentCompanyId?: string;
-  currentPlatoonId?: string;
+  currentUnitId?: string;
   assignmentLevel: AssignmentLevel;
   hasPendingTransfer?: boolean;
-  currentQuantity?: number; // The quantity at current assignment
+  currentQuantity?: number;
 }
 
 interface AssignmentData {
   personnelId?: string;
-  platoonId?: string;
-  companyId?: string;
-  battalionId?: string;
+  unitId?: string;
 }
 
 interface UseEquipmentReturn {
@@ -37,17 +33,7 @@ interface UseEquipmentReturn {
   assignEquipment: (equipmentId: string, assignment: AssignmentData, quantity?: number) => Promise<void>;
   unassignEquipment: (equipmentId: string) => Promise<void>;
   requestAssignment: (equipmentId: string, assignment: AssignmentData, notes?: string, quantity?: number) => Promise<void>;
-  isWithinSameUnit: (currentLevel: AssignmentLevel, targetLevel: AssignmentLevel, equipmentItem: EquipmentWithAssignment, assignment: AssignmentData) => boolean;
   canDeleteEquipment: (equipmentItem: EquipmentWithAssignment, currentUserPersonnelId?: string) => boolean;
-  recordTransferHistory: (
-    equipmentId: string,
-    quantity: number,
-    fromUnitType: string,
-    fromIds: { battalionId?: string; companyId?: string; platoonId?: string; personnelId?: string },
-    toUnitType: string,
-    toIds: { battalionId?: string; companyId?: string; platoonId?: string; personnelId?: string },
-    notes?: string
-  ) => Promise<void>;
 }
 
 export function useEquipment(): UseEquipmentReturn {
@@ -60,7 +46,7 @@ export function useEquipment(): UseEquipmentReturn {
     try {
       setLoading(true);
 
-      // Fetch equipment with assignments including quantity
+      // Fetch equipment with assignments
       const { data: equipmentData, error: fetchError } = await supabase
         .from('equipment')
         .select(`
@@ -68,15 +54,11 @@ export function useEquipment(): UseEquipmentReturn {
           equipment_assignments(
             id,
             personnel_id,
-            platoon_id,
-            company_id,
-            battalion_id,
+            unit_id,
             returned_at,
             quantity,
             personnel(first_name, last_name),
-            platoons(name),
-            companies(name),
-            battalions(name)
+            units(name, unit_type)
           )
         `)
         .order('name');
@@ -104,31 +86,17 @@ export function useEquipment(): UseEquipmentReturn {
         // 1. Create rows for each active assignment
         activeAssignments.forEach((assignment: any) => {
           let assigneeName: string | undefined;
-          let assignedType: 'individual' | 'company' | 'platoon' | 'battalion' = 'individual';
+          let assignedType: 'individual' | 'unit' | 'unassigned' = 'unassigned';
           let assignmentLevel: AssignmentLevel = 'unassigned';
-          let currentBattalionId: string | undefined;
-          let currentCompanyId: string | undefined;
-          let currentPlatoonId: string | undefined;
 
           if (assignment.personnel) {
             assigneeName = `${assignment.personnel.first_name} ${assignment.personnel.last_name}`;
             assignedType = 'individual';
             assignmentLevel = 'individual';
-          } else if (assignment.platoons) {
-            assigneeName = assignment.platoons.name;
-            assignedType = 'platoon';
-            assignmentLevel = 'platoon';
-            currentPlatoonId = assignment.platoon_id;
-          } else if (assignment.companies) {
-            assigneeName = assignment.companies.name;
-            assignedType = 'company';
-            assignmentLevel = 'company';
-            currentCompanyId = assignment.company_id;
-          } else if (assignment.battalions) {
-            assigneeName = assignment.battalions.name;
-            assignedType = 'battalion';
-            assignmentLevel = 'battalion';
-            currentBattalionId = assignment.battalion_id;
+          } else if (assignment.units) {
+            assigneeName = assignment.units.name;
+            assignedType = 'unit';
+            assignmentLevel = assignment.units.unit_type as AssignmentLevel;
           }
 
           mappedEquipment.push({
@@ -136,18 +104,17 @@ export function useEquipment(): UseEquipmentReturn {
             serialNumber: row.serial_number || undefined,
             name: row.name,
             description: row.description || undefined,
-            quantity: row.quantity, // Total quantity of the base item
+            quantity: row.quantity,
             assignedTo: assigneeName,
             assignedType,
+            assignedUnitId: assignment.unit_id || undefined,
             assigneeName,
             currentAssignmentId: assignment.id,
             currentPersonnelId: assignment.personnel_id,
-            currentBattalionId: currentBattalionId || assignment.battalion_id,
-            currentCompanyId: currentCompanyId || assignment.company_id,
-            currentPlatoonId: currentPlatoonId || assignment.platoon_id,
+            currentUnitId: assignment.unit_id,
             assignmentLevel,
             hasPendingTransfer: pendingEquipmentIds.has(row.id) || row.status === 'pending_transfer',
-            currentQuantity: assignment.quantity || 1, // Quantity of THIS assignment
+            currentQuantity: assignment.quantity || 1,
             createdBy: row.created_by,
           });
         });
@@ -161,7 +128,7 @@ export function useEquipment(): UseEquipmentReturn {
             description: row.description || undefined,
             quantity: row.quantity,
             assignedTo: 'Unassigned',
-            assignedType: 'individual', // Default type for unassigned
+            assignedType: 'unassigned',
             assigneeName: 'Unassigned',
             assignmentLevel: 'unassigned',
             hasPendingTransfer: pendingEquipmentIds.has(row.id) || row.status === 'pending_transfer',
@@ -179,69 +146,30 @@ export function useEquipment(): UseEquipmentReturn {
     }
   }, []);
 
-  // Record transfer in history table
-  const recordTransferHistory = useCallback(async (
-    equipmentId: string,
-    quantity: number,
-    fromUnitType: string,
-    fromIds: { battalionId?: string; companyId?: string; platoonId?: string; personnelId?: string },
-    toUnitType: string,
-    toIds: { battalionId?: string; companyId?: string; platoonId?: string; personnelId?: string },
-    notes?: string
-  ) => {
-    await supabase.from('equipment_transfer_history').insert({
-      equipment_id: equipmentId,
-      quantity,
-      from_unit_type: fromUnitType,
-      from_battalion_id: fromIds.battalionId || null,
-      from_company_id: fromIds.companyId || null,
-      from_platoon_id: fromIds.platoonId || null,
-      from_personnel_id: fromIds.personnelId || null,
-      to_unit_type: toUnitType,
-      to_battalion_id: toIds.battalionId || null,
-      to_company_id: toIds.companyId || null,
-      to_platoon_id: toIds.platoonId || null,
-      to_personnel_id: toIds.personnelId || null,
-      transferred_by: user?.id || null,
-      notes: notes || null,
-    });
-  }, [user?.id]);
-
   const addEquipment = useCallback(async (item: Omit<Equipment, 'id'>, assignment?: AssignmentData) => {
     // For bulk items (no serial), check if equipment with same name exists at same assignment
     if (!item.serialNumber && assignment) {
-      // Build assignment key for matching
       const assignmentKey = assignment.personnelId
         ? `personnel:${assignment.personnelId}`
-        : assignment.platoonId
-          ? `platoon:${assignment.platoonId}`
-          : assignment.companyId
-            ? `company:${assignment.companyId}`
-            : assignment.battalionId
-              ? `battalion:${assignment.battalionId}`
-              : null;
+        : assignment.unitId
+          ? `unit:${assignment.unitId}`
+          : null;
 
       if (assignmentKey) {
-        // Find existing equipment with same name at same location
         const existingItem = equipment.find(e => {
-          if (e.serialNumber) return false; // Skip serialized items
+          if (e.serialNumber) return false;
           if (e.name.toLowerCase() !== item.name.toLowerCase()) return false;
 
           const existingKey = e.currentPersonnelId
             ? `personnel:${e.currentPersonnelId}`
-            : e.currentPlatoonId
-              ? `platoon:${e.currentPlatoonId}`
-              : e.currentCompanyId
-                ? `company:${e.currentCompanyId}`
-                : e.currentBattalionId
-                  ? `battalion:${e.currentBattalionId}`
-                  : null;
+            : e.currentUnitId
+              ? `unit:${e.currentUnitId}`
+              : null;
 
           return existingKey === assignmentKey;
         });
 
         if (existingItem && existingItem.currentAssignmentId) {
-          // Add to existing assignment's quantity
           const newQuantity = (existingItem.currentQuantity || existingItem.quantity) + (item.quantity || 1);
 
           await supabase
@@ -249,11 +177,11 @@ export function useEquipment(): UseEquipmentReturn {
             .update({ quantity: newQuantity })
             .eq('id', existingItem.currentAssignmentId);
 
-          // Update the equipment's total quantity as well
+          const baseId = existingItem.id.split('--')[0];
           await supabase
             .from('equipment')
             .update({ quantity: existingItem.quantity + (item.quantity || 1) })
-            .eq('id', existingItem.id);
+            .eq('id', baseId);
 
           await fetchEquipment();
           return;
@@ -277,15 +205,13 @@ export function useEquipment(): UseEquipmentReturn {
     if (insertError) throw insertError;
 
     // Create assignment if provided
-    if (assignment && inserted && (assignment.personnelId || assignment.platoonId || assignment.companyId || assignment.battalionId)) {
+    if (assignment && inserted && (assignment.personnelId || assignment.unitId)) {
       const { error: assignError } = await supabase
         .from('equipment_assignments')
         .insert({
           equipment_id: inserted.id,
           personnel_id: assignment.personnelId || null,
-          platoon_id: assignment.platoonId || null,
-          company_id: assignment.companyId || null,
-          battalion_id: assignment.battalionId || null,
+          unit_id: assignment.unitId || null,
           quantity: item.quantity || 1,
         });
 
@@ -295,14 +221,10 @@ export function useEquipment(): UseEquipmentReturn {
     await fetchEquipment();
   }, [fetchEquipment, equipment, user?.id]);
 
-
-  // Check if user can delete equipment (creator only, when assigned back to them)
   const canDeleteEquipment = useCallback((equipmentItem: EquipmentWithAssignment, currentUserPersonnelId?: string): boolean => {
-    // Must be assigned to the current user's personnel record
     if (!currentUserPersonnelId || equipmentItem.currentPersonnelId !== currentUserPersonnelId) {
       return false;
     }
-    // Equipment must have been created by current user
     if (equipmentItem.createdBy !== user?.id) {
       return false;
     }
@@ -313,22 +235,11 @@ export function useEquipment(): UseEquipmentReturn {
 
   const assignEquipment = useCallback(async (id: string, assignment: AssignmentData, quantity?: number) => {
     const equipmentId = getBaseId(id);
-    // Direct assignment is now funneled through initiate_transfer_v2 to ensure rules are checked
-    // If successful, it creates a request. Finalizing it instantly for admins could be an optimization
-    // but for now, we follow the "everything is a transfer" rule.
-    const toUnitType = assignment.personnelId ? 'individual'
-      : assignment.platoonId ? 'platoon'
-        : assignment.companyId ? 'company'
-          : assignment.battalionId ? 'battalion'
-            : 'unassigned';
 
-    const { error: rpcError } = await supabase.rpc('initiate_transfer_v2', {
-      _equipment_id: equipmentId,
-      _to_unit_type: toUnitType,
-      _to_battalion_id: assignment.battalionId || null,
-      _to_company_id: assignment.companyId || null,
-      _to_platoon_id: assignment.platoonId || null,
-      _to_personnel_id: assignment.personnelId || null,
+    const { error: rpcError } = await supabase.rpc('initiate_transfer', {
+      p_equipment_id: equipmentId,
+      p_to_unit_id: assignment.unitId || null,
+      p_to_personnel_id: assignment.personnelId || null,
     });
 
     if (rpcError) throw rpcError;
@@ -359,36 +270,6 @@ export function useEquipment(): UseEquipmentReturn {
     await fetchEquipment();
   }, [fetchEquipment]);
 
-  // Helper function to determine if assignment is within same unit (to member)
-  const isWithinSameUnit = useCallback((
-    currentLevel: AssignmentLevel,
-    targetLevel: AssignmentLevel,
-    equipmentItem: EquipmentWithAssignment,
-    assignment: AssignmentData
-  ): boolean => {
-    // Assigning to individual within current unit is direct
-    if (targetLevel === 'individual' && assignment.personnelId) {
-      return true; // For now, consider individual assignment from any level as direct
-    }
-
-    // If target and current are same type/id, it's within same unit
-    if (currentLevel === 'battalion' && targetLevel === 'battalion' &&
-      equipmentItem.currentBattalionId === assignment.battalionId) {
-      return true;
-    }
-    if (currentLevel === 'company' && targetLevel === 'company' &&
-      equipmentItem.currentCompanyId === assignment.companyId) {
-      return true;
-    }
-    if (currentLevel === 'platoon' && targetLevel === 'platoon' &&
-      equipmentItem.currentPlatoonId === assignment.platoonId) {
-      return true;
-    }
-
-    return false;
-  }, []);
-
-  // Create an assignment request for cross-unit transfers
   const requestAssignment = useCallback(async (
     id: string,
     assignment: AssignmentData,
@@ -396,20 +277,12 @@ export function useEquipment(): UseEquipmentReturn {
     quantity?: number
   ) => {
     const equipmentId = getBaseId(id);
-    const toUnitType = assignment.personnelId ? 'individual'
-      : assignment.platoonId ? 'platoon'
-        : assignment.companyId ? 'company'
-          : assignment.battalionId ? 'battalion'
-            : 'unassigned';
 
-    const { error: rpcError } = await supabase.rpc('initiate_transfer_v2', {
-      _equipment_id: equipmentId,
-      _to_unit_type: toUnitType,
-      _to_battalion_id: assignment.battalionId || null,
-      _to_company_id: assignment.companyId || null,
-      _to_platoon_id: assignment.platoonId || null,
-      _to_personnel_id: assignment.personnelId || null,
-      _notes: notes || null,
+    const { error: rpcError } = await supabase.rpc('initiate_transfer', {
+      p_equipment_id: equipmentId,
+      p_to_unit_id: assignment.unitId || null,
+      p_to_personnel_id: assignment.personnelId || null,
+      p_notes: notes || null,
     });
 
     if (rpcError) throw rpcError;
@@ -430,8 +303,6 @@ export function useEquipment(): UseEquipmentReturn {
     assignEquipment,
     unassignEquipment,
     requestAssignment,
-    isWithinSameUnit,
     canDeleteEquipment,
-    recordTransferHistory,
   };
 }

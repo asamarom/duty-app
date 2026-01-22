@@ -25,7 +25,7 @@ export default function AdminApprovalsPage() {
   const { user } = useAuth();
   const { isAdmin, isLeader, isActualAdmin, loading: rolesLoading } = useUserRole();
   const { isAdminMode } = useAdminMode();
-  const { battalions, companies, platoons, loading: unitsLoading } = useUnits();
+  const { units, getUnitPath: getUnitPathFromHook, loading: unitsLoading } = useUnits();
   const { toast } = useToast();
   const { t } = useLanguage();
 
@@ -75,22 +75,8 @@ export default function AdminApprovalsPage() {
   }, [hasAdminAccess]);
 
   const getUnitPath = (request: SignupRequest): string => {
-    const parts: string[] = [];
-
-    if (request.requested_battalion_id) {
-      const battalion = battalions.find((b) => b.id === request.requested_battalion_id);
-      parts.push(battalion?.name || t('units.unknownBattalion'));
-    }
-    if (request.requested_company_id) {
-      const company = companies.find((c) => c.id === request.requested_company_id);
-      parts.push(company?.name || 'Unknown company');
-    }
-    if (request.requested_platoon_id) {
-      const platoon = platoons.find((p) => p.id === request.requested_platoon_id);
-      parts.push(platoon?.name || t('units.unknownPlatoon'));
-    }
-
-    return parts.length > 0 ? parts.join(' → ') : t('units.noUnit');
+    if (!request.requested_unit_id) return t('units.noUnit');
+    return getUnitPathFromHook(request.requested_unit_id) || t('units.noUnit');
   };
 
   const handleApprove = async (request: SignupRequest) => {
@@ -126,11 +112,6 @@ export default function AdminApprovalsPage() {
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
 
-      // Assign unit based on the request
-      const battalionId = request.requested_battalion_id;
-      const companyId = request.requested_company_id;
-      const platoonId = request.requested_platoon_id;
-
       const { error: personnelError } = await supabase
         .from('personnel')
         .insert({
@@ -140,11 +121,11 @@ export default function AdminApprovalsPage() {
           email: request.email,
           phone: request.phone,
           service_number: request.service_number,
-          battalion_id: battalionId,
-          company_id: companyId,
-          platoon_id: platoonId,
-          rank: 'Private', // Default rank, can be updated later
-          is_signature_approved: false, // Default role
+          unit_id: request.requested_unit_id,
+          rank: 'טוראי', // Default rank, can be updated later
+          location_status: 'on_duty',
+          readiness_status: 'ready',
+          is_signature_approved: false,
         });
 
       if (personnelError && !personnelError.message.includes('duplicate')) {
@@ -356,11 +337,7 @@ export default function AdminApprovalsPage() {
                           <p className="text-xs text-muted-foreground">{t('approvals.phone')}</p>
                           <p className="font-medium">{request.phone || 'N/A'}</p>
                         </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">{t('approvals.unitType')}</p>
-                          <p className="font-medium capitalize">{request.requested_unit_type}</p>
-                        </div>
-                        <div>
+                        <div className="col-span-2">
                           <p className="text-xs text-muted-foreground">{t('approvals.unit')}</p>
                           <p className="font-medium">{getUnitPath(request)}</p>
                         </div>

@@ -97,7 +97,7 @@ export default function AddEquipmentPage() {
   // Get available personnel (could filter by platoon if needed)
   const availablePersonnel = useMemo(() => {
     if (selectedPlatoonId) {
-      return personnel.filter(p => p.platoonId === selectedPlatoonId);
+      return personnel.filter(p => p.unitId === selectedPlatoonId);
     }
     return personnel;
   }, [personnel, selectedPlatoonId]);
@@ -159,14 +159,14 @@ export default function AddEquipmentPage() {
     }
 
     // Build assignment based on type
-    let assignment: { personnelId?: string; platoonId?: string; companyId?: string; battalionId?: string } = {};
+    let assignment: { personnelId?: string; unitId?: string } = {};
 
     if (assignedType === 'battalion' && selectedBattalionId) {
-      assignment.battalionId = selectedBattalionId;
+      assignment.unitId = selectedBattalionId;
     } else if (assignedType === 'company' && selectedCompanyId) {
-      assignment.companyId = selectedCompanyId;
+      assignment.unitId = selectedCompanyId;
     } else if (assignedType === 'platoon' && selectedPlatoonId) {
-      assignment.platoonId = selectedPlatoonId;
+      assignment.unitId = selectedPlatoonId;
     } else if (assignedType === 'individual' && selectedPersonnelId) {
       assignment.personnelId = selectedPersonnelId;
     }

@@ -48,6 +48,9 @@ export const translations = {
     'dashboard.licenseExp': 'License Expiration',
     'dashboard.equipmentIssue': 'Equipment Issue',
     'dashboard.scheduledEvent': 'Scheduled Event',
+    'dashboard.personnelOverview': 'Personnel Overview',
+    'dashboard.noPersonnel': 'No personnel registered yet.',
+    'dashboard.registered': 'Registered',
 
     // Personnel
     'personnel.title': 'Personnel Management',
@@ -74,6 +77,7 @@ export const translations = {
     'personnel.addPosition': 'Add position',
     'personnel.addSkill': 'Add skill',
     'personnel.addLicense': 'Add license',
+    'personnel.dutyPosition': 'Duty Position',
     'personnel.signatureAuthority': 'Signature Authority',
     'personnel.signatureDesc': 'Can initiate and accept unit equipment transfers',
     'personnel.signatureApprovedBadge': 'Signature Approved',
@@ -144,6 +148,8 @@ export const translations = {
     'reports.trainingRecord': 'Training Record',
     'reports.trainingRecordDesc': 'Personnel training and certification tracking',
     'reports.generate': 'Generate',
+    'reports.comingSoon': 'Coming Soon',
+    'reports.comingSoonDesc': 'Reports and analytics features are under development.',
 
     // Settings
     'settings.title': 'System Settings',
@@ -178,6 +184,9 @@ export const translations = {
     'settings.exportDesc': 'Download all platoon data',
     'settings.backupRestore': 'Backup & Restore',
     'settings.backupDesc': 'Manage data backups',
+    'settings.fullAccess': 'Full system access',
+    'settings.unitManagement': 'Unit management',
+    'settings.standardAccess': 'Standard access',
 
     // Status
     'status.home': 'Home',
@@ -377,6 +386,9 @@ export const translations = {
     'dashboard.licenseExp': 'פקיעת רישיון',
     'dashboard.equipmentIssue': 'בעיית ציוד',
     'dashboard.scheduledEvent': 'אירוע מתוכנן',
+    'dashboard.personnelOverview': 'סקירת כוח אדם',
+    'dashboard.noPersonnel': 'אין אנשים רשומים עדיין.',
+    'dashboard.registered': 'רשומים',
 
     // Personnel
     'personnel.title': 'ניהול כוח אדם',
@@ -403,6 +415,7 @@ export const translations = {
     'personnel.addPosition': 'הוסף תפקיד',
     'personnel.addSkill': 'הוסף כישור',
     'personnel.addLicense': 'הוסף רישיון',
+    'personnel.dutyPosition': 'תפקיד',
     'personnel.signatureAuthority': 'סמכות חתימה',
     'personnel.signatureDesc': 'רשאי ליזום ולקבל העברות ציוד יחידתי',
     'personnel.signatureApprovedBadge': 'מאושר חתימה',
@@ -473,6 +486,8 @@ export const translations = {
     'reports.trainingRecord': 'רישום הכשרות',
     'reports.trainingRecordDesc': 'מעקב הכשרות והסמכות אנשים',
     'reports.generate': 'יצירה',
+    'reports.comingSoon': 'בקרוב',
+    'reports.comingSoonDesc': 'תכונות דוחות וניתוח נתונים בפיתוח.',
 
     // Settings
     'settings.title': 'הגדרות מערכת',
@@ -507,6 +522,9 @@ export const translations = {
     'settings.exportDesc': 'הורדת כל נתוני המחלקה',
     'settings.backupRestore': 'גיבוי ושחזור',
     'settings.backupDesc': 'ניהול גיבויי נתונים',
+    'settings.fullAccess': 'גישה מלאה למערכת',
+    'settings.unitManagement': 'ניהול יחידה',
+    'settings.standardAccess': 'גישה רגילה',
 
     // Status
     'status.home': 'בבית',

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -7,6 +6,7 @@ import { Crown, Shield, Loader2, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useUnits } from '@/hooks/useUnits';
 import { RoleBadges } from './RoleBadge';
 import { cn } from '@/lib/utils';
 import type { AppRole } from '@/hooks/useUserRole';
@@ -17,8 +17,7 @@ interface RoleManagementProps {
   currentRoles: AppRole[];
   onRolesChanged: () => void;
   canManage: boolean;
-  battalionId?: string | null;
-  platoonId?: string | null;
+  unitId?: string | null;
 }
 
 export function RoleManagement({
@@ -27,11 +26,11 @@ export function RoleManagement({
   currentRoles,
   onRolesChanged,
   canManage,
-  battalionId,
-  platoonId,
+  unitId,
 }: RoleManagementProps) {
   const { toast } = useToast();
   const { isAdmin: viewerIsAdmin } = useUserRole();
+  const { getUnitById } = useUnits();
   const [saving, setSaving] = useState(false);
 
   const isLeader = currentRoles.includes('leader');
@@ -71,13 +70,9 @@ export function RoleManagement({
           description: 'Leader role has been removed.',
         });
       } else {
-        // Determine unit type and create unit assignment
-        let unitType = 'battalion';
-        if (platoonId) {
-          unitType = 'platoon';
-        } else if (battalionId) {
-          unitType = 'battalion';
-        }
+        // Get unit type from the unit
+        const unit = unitId ? getUnitById(unitId) : null;
+        const unitType = unit?.unit_type || 'battalion';
 
         // Add leader role
         const { error } = await supabase
@@ -87,18 +82,18 @@ export function RoleManagement({
         if (error) throw error;
 
         // Create unit assignment for the leader
-        const { error: unitError } = await supabase
-          .from('admin_unit_assignments')
-          .insert({
-            user_id: userId,
-            unit_type: unitType,
-            battalion_id: battalionId || null,
-            platoon_id: platoonId || null,
-          });
+        if (unitId) {
+          const { error: unitError } = await supabase
+            .from('admin_unit_assignments')
+            .insert({
+              user_id: userId,
+              unit_type: unitType,
+              unit_id: unitId,
+            });
 
-        if (unitError) {
-          console.error('Error creating unit assignment:', unitError);
-          // Don't fail the whole operation if unit assignment fails
+          if (unitError) {
+            console.error('Error creating unit assignment:', unitError);
+          }
         }
 
         toast({

@@ -1,0 +1,140 @@
+import { defineConfig, devices } from '@playwright/test';
+
+/**
+ * Playwright E2E Test Configuration
+ *
+ * Local testing (with test login form):
+ *   npm run test:e2e
+ *
+ * Production testing (Firebase - manual OAuth):
+ *   npm run test:e2e:prod
+ *
+ * UI mode:
+ *   npm run test:e2e:ui
+ */
+
+// Firebase URLs
+const FIREBASE_PROD_URL = 'https://duty-82f42.web.app';
+const FIREBASE_TEST_URL = 'https://duty-82f42-test.web.app';
+
+// Check test environment
+const testEnv = process.env.TEST_ENV; // 'production' | 'staging' | undefined
+const baseURL = testEnv === 'production'
+  ? FIREBASE_PROD_URL
+  : testEnv === 'staging'
+    ? FIREBASE_TEST_URL
+    : (process.env.BASE_URL || 'http://localhost:8082');
+
+const isRemote = testEnv === 'production' || testEnv === 'staging';
+
+export default defineConfig({
+  testDir: './e2e',
+
+  // Run tests in parallel
+  fullyParallel: true,
+
+  // Fail the build on CI if you accidentally left test.only in the source code
+  forbidOnly: !!process.env.CI,
+
+  // Retry on CI only
+  retries: process.env.CI ? 2 : 0,
+
+  // Limit parallel workers on CI
+  workers: process.env.CI ? 1 : undefined,
+
+  // Reporter to use
+  reporter: [
+    ['html', { outputFolder: 'playwright-report' }],
+    ['list']
+  ],
+
+  // Shared settings for all projects
+  use: {
+    baseURL,
+
+    // Collect trace when retrying the failed test
+    trace: 'on-first-retry',
+
+    // Screenshot on failure
+    screenshot: 'only-on-failure',
+
+    // Video on failure
+    video: 'on-first-retry',
+  },
+
+  // Configure projects for major browsers
+  projects: [
+    // Setup project for manual OAuth login (run once to save session)
+    {
+      name: 'setup',
+      testMatch: /auth\.setup\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        headless: false, // Must be visible for manual OAuth
+      },
+    },
+    // Main tests - depend on setup for auth state
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+      dependencies: [], // Remove dependency if running without auth
+    },
+    // Tests requiring authentication
+    {
+      name: 'chromium-auth',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: './e2e/.auth/user.json',
+      },
+      dependencies: ['setup'],
+      testIgnore: /auth\.spec\.ts/, // Skip auth tests (they don't need login)
+    },
+    // Production tests (no test login form, uses manual OAuth)
+    {
+      name: 'production',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: FIREBASE_PROD_URL,
+      },
+      testIgnore: [/auth\.setup\.ts/, /user-lifecycle\.spec\.ts/], // Skip tests requiring test mode
+    },
+    // Production tests with saved auth
+    {
+      name: 'production-auth',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: FIREBASE_PROD_URL,
+        storageState: './e2e/.auth/user.json',
+      },
+      dependencies: ['setup'],
+      testIgnore: [/auth\.spec\.ts/, /auth\.setup\.ts/, /user-lifecycle\.spec\.ts/],
+    },
+    // Staging/Test environment (has test login form enabled)
+    {
+      name: 'staging',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: FIREBASE_TEST_URL,
+      },
+    },
+    // Staging with test user auth
+    {
+      name: 'staging-auth',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: FIREBASE_TEST_URL,
+        storageState: './e2e/.auth/user.json',
+      },
+      dependencies: ['setup'],
+      testIgnore: /auth\.spec\.ts/,
+    },
+  ],
+
+  // Run local dev server only when not testing remote (production/staging)
+  webServer: isRemote ? undefined : {
+    command: 'npx cross-env VITE_TEST_MODE=true npm run dev',
+    url: baseURL,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
+  },
+});

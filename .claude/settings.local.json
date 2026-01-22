@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(for f in \"c:\\\\Users\\\\ilana\\\\OneDrive\\\\מסמכים\\\\code\\\\duty\\\\duty-app\\\\supabase\\\\migrations\"/*.sql)",
+      "Bash(do grep -l \"admin_unit_assignments\\\\|signup_requests\" \"$f\")",
+      "Bash(done)",
+      "Bash(find:*)",
+      "Bash(for file in \"c:\\\\Users\\\\ilana\\\\OneDrive\\\\מסמכים\\\\code\\\\duty\\\\duty-app\\\\supabase\\\\migrations\"/*.sql)",
+      "Bash(do if grep -q \"CREATE TABLE.*signup_requests\\\\|CREATE TABLE.*admin_unit_assignments\" \"$file\")",
+      "Bash(then echo \"=== $file ===\" cat \"$file\" echo \"\" fi done)",
+      "Bash(npx supabase:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(supabase link:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(powershell:*)",
+      "Bash(npm run test:e2e:*)",
+      "Bash(npm run deploy:test:*)",
+      "Bash(npm run test:e2e:staging:*)",
+      "Bash(curl:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(cross-env TEST_ENV=staging npx playwright test:*)",
+      "Bash(npx cross-env TEST_ENV=staging npx playwright test --project=staging --workers=1 e2e/user-lifecycle.spec.ts)",
+      "Bash(git checkout:*)"
+    ]
+  }
+}

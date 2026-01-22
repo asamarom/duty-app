@@ -69,10 +69,6 @@ export default function PendingApprovalPage() {
                   <span className="font-medium">{request?.service_number}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Unit Type:</span>
-                  <span className="font-medium capitalize">{request?.requested_unit_type}</span>
-                </div>
-                <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Submitted:</span>
                   <span className="font-medium">
                     {request?.created_at && new Date(request.created_at).toLocaleDateString()}

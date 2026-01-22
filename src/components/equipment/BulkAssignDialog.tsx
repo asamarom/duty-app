@@ -27,13 +27,13 @@ interface BulkAssignDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   selectedItems: EquipmentWithAssignment[];
-  onAssign: (assignment: { personnelId?: string; platoonId?: string; companyId?: string; battalionId?: string }) => Promise<void>;
+  onAssign: (assignment: { personnelId?: string; unitId?: string }) => Promise<void>;
 }
 
 export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }: BulkAssignDialogProps) {
   const { personnel, loading: personnelLoading } = usePersonnel();
-  const { battalions, companies, platoons, loading: unitsLoading, getCompaniesForBattalion, getPlatoonsForCompany } = useUnits();
-  
+  const { battalions, companies, platoons, loading: unitsLoading, getCompaniesForBattalion, getPlatoonsForCompany, getUnitById, getUnitAncestors } = useUnits();
+
   const [assignedType, setAssignedType] = useState<AssignmentType>('battalion');
   const [selectedBattalionId, setSelectedBattalionId] = useState('');
   const [selectedCompanyId, setSelectedCompanyId] = useState('');
@@ -56,15 +56,34 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
   // Determine the common level among all selected items
   const commonLevel = useMemo((): AssignmentLevel | 'mixed' => {
     if (selectedItems.length === 0) return 'unassigned';
-    
+
     const levels = selectedItems.map(item => item.assignmentLevel || 'unassigned');
     const uniqueLevels = [...new Set(levels)];
-    
+
     if (uniqueLevels.length === 1) {
       return uniqueLevels[0];
     }
     return 'mixed';
   }, [selectedItems]);
+
+  // Helper to get battalion from any unit
+  const getBattalionForUnit = (unitId: string): string | null => {
+    const unit = getUnitById(unitId);
+    if (!unit) return null;
+    if (unit.unit_type === 'battalion') return unit.id;
+    const ancestors = getUnitAncestors(unitId);
+    const battalion = ancestors.find(a => a.unit_type === 'battalion');
+    return battalion?.id || null;
+  };
+
+  // Helper to get company from any unit
+  const getCompanyForUnit = (unitId: string): string | null => {
+    const unit = getUnitById(unitId);
+    if (!unit) return null;
+    if (unit.unit_type === 'company') return unit.id;
+    if (unit.unit_type === 'platoon') return unit.parent_id || null;
+    return null;
+  };
 
   // Get common hierarchy info
   const commonHierarchyInfo = useMemo(() => {
@@ -72,48 +91,42 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
       return { battalionId: null, companyId: null, platoonId: null, isCommon: commonLevel === 'unassigned' };
     }
 
-    let battalionId: string | null = null;
-    let companyId: string | null = null;
-    let platoonId: string | null = null;
-
     const hierarchies = selectedItems.map(item => {
-      let bId = item.currentBattalionId || null;
-      let cId = item.currentCompanyId || null;
-      let pId = item.currentPlatoonId || null;
+      let bId: string | null = null;
+      let cId: string | null = null;
+      let pId: string | null = null;
 
-      // If assigned to individual, find their platoon
+      // If assigned to individual, find their unit hierarchy
       if (item.currentPersonnelId) {
         const person = personnel.find(p => p.id === item.currentPersonnelId);
-        if (person?.platoonId) {
-          pId = person.platoonId;
-          const platoon = platoons.find(p => p.id === pId);
-          if (platoon?.company_id) {
-            cId = platoon.company_id;
-            const company = companies.find(c => c.id === cId);
-            if (company) {
-              bId = company.battalion_id;
+        if (person?.unitId) {
+          const personUnit = getUnitById(person.unitId);
+          if (personUnit) {
+            if (personUnit.unit_type === 'platoon') {
+              pId = personUnit.id;
+              cId = personUnit.parent_id || null;
+              if (cId) bId = getBattalionForUnit(cId);
+            } else if (personUnit.unit_type === 'company') {
+              cId = personUnit.id;
+              bId = personUnit.parent_id || null;
+            } else if (personUnit.unit_type === 'battalion') {
+              bId = personUnit.id;
             }
           }
         }
-      }
-
-      // If assigned to platoon, find its company and battalion
-      if (pId && !cId) {
-        const platoon = platoons.find(p => p.id === pId);
-        if (platoon?.company_id) {
-          cId = platoon.company_id;
-          const company = companies.find(c => c.id === cId);
-          if (company) {
-            bId = company.battalion_id;
+      } else if (item.currentUnitId) {
+        const unit = getUnitById(item.currentUnitId);
+        if (unit) {
+          if (unit.unit_type === 'platoon') {
+            pId = unit.id;
+            cId = unit.parent_id || null;
+            if (cId) bId = getBattalionForUnit(cId);
+          } else if (unit.unit_type === 'company') {
+            cId = unit.id;
+            bId = unit.parent_id || null;
+          } else if (unit.unit_type === 'battalion') {
+            bId = unit.id;
           }
-        }
-      }
-
-      // If assigned to company, find its battalion
-      if (cId && !bId) {
-        const company = companies.find(c => c.id === cId);
-        if (company) {
-          bId = company.battalion_id;
         }
       }
 
@@ -133,13 +146,13 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
       return { battalionId: null, companyId: null, platoonId: null, isCommon: false };
     }
 
-    return { 
-      battalionId: firstHierarchy.battalionId, 
+    return {
+      battalionId: firstHierarchy.battalionId,
       companyId: firstHierarchy.companyId,
       platoonId: firstHierarchy.platoonId,
-      isCommon: true 
+      isCommon: true
     };
-  }, [selectedItems, commonLevel, personnel, companies, platoons]);
+  }, [selectedItems, commonLevel, personnel, getUnitById, getUnitAncestors]);
 
   // Determine allowed types based on common level
   const allowedTypes = useMemo((): AssignmentType[] => {
@@ -188,15 +201,15 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
       if (!selectedBattalionId) return [];
       return getCompaniesForBattalion(selectedBattalionId);
     }
-    
+
     if ((commonLevel === 'company' || commonLevel === 'platoon' || commonLevel === 'individual') && commonHierarchyInfo.companyId) {
       return companies.filter(c => c.id === commonHierarchyInfo.companyId);
     }
-    
+
     if (commonLevel === 'battalion' && commonHierarchyInfo.battalionId) {
       return getCompaniesForBattalion(commonHierarchyInfo.battalionId);
     }
-    
+
     return getCompaniesForBattalion(selectedBattalionId);
   }, [commonLevel, commonHierarchyInfo, selectedBattalionId, getCompaniesForBattalion, companies]);
 
@@ -206,15 +219,15 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
       if (!selectedCompanyId) return [];
       return getPlatoonsForCompany(selectedCompanyId);
     }
-    
+
     if ((commonLevel === 'platoon' || commonLevel === 'individual') && commonHierarchyInfo.platoonId) {
       return platoons.filter(p => p.id === commonHierarchyInfo.platoonId);
     }
-    
+
     if (commonLevel === 'company' && commonHierarchyInfo.companyId) {
       return getPlatoonsForCompany(commonHierarchyInfo.companyId);
     }
-    
+
     return getPlatoonsForCompany(selectedCompanyId);
   }, [commonLevel, commonHierarchyInfo, selectedCompanyId, getPlatoonsForCompany, platoons]);
 
@@ -222,19 +235,19 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
   const availablePersonnel = useMemo(() => {
     if (commonLevel === 'unassigned') {
       if (selectedPlatoonId) {
-        return personnel.filter(p => p.platoonId === selectedPlatoonId);
+        return personnel.filter(p => p.unitId === selectedPlatoonId);
       }
       return personnel;
     }
-    
+
     if ((commonLevel === 'individual' || commonLevel === 'platoon') && commonHierarchyInfo.platoonId) {
-      return personnel.filter(p => p.platoonId === commonHierarchyInfo.platoonId);
+      return personnel.filter(p => p.unitId === commonHierarchyInfo.platoonId);
     }
-    
+
     if (selectedPlatoonId) {
-      return personnel.filter(p => p.platoonId === selectedPlatoonId);
+      return personnel.filter(p => p.unitId === selectedPlatoonId);
     }
-    
+
     return personnel;
   }, [commonLevel, commonHierarchyInfo, selectedPlatoonId, personnel]);
 
@@ -290,14 +303,14 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
   };
 
   const handleSubmit = async () => {
-    let assignment: { personnelId?: string; platoonId?: string; companyId?: string; battalionId?: string } = {};
-    
+    let assignment: { personnelId?: string; unitId?: string } = {};
+
     if (assignedType === 'battalion' && selectedBattalionId) {
-      assignment.battalionId = selectedBattalionId;
+      assignment.unitId = selectedBattalionId;
     } else if (assignedType === 'company' && selectedCompanyId) {
-      assignment.companyId = selectedCompanyId;
+      assignment.unitId = selectedCompanyId;
     } else if (assignedType === 'platoon' && selectedPlatoonId) {
-      assignment.platoonId = selectedPlatoonId;
+      assignment.unitId = selectedPlatoonId;
     } else if (assignedType === 'individual' && selectedPersonnelId) {
       assignment.personnelId = selectedPersonnelId;
     } else {
@@ -363,7 +376,7 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
         {!canBulkAssign ? (
           <div className="py-6 text-center">
             <p className="text-muted-foreground">
-              {commonLevel === 'mixed' 
+              {commonLevel === 'mixed'
                 ? 'Selected items are at different assignment levels. Please select items at the same level for bulk assignment.'
                 : 'Selected items are in different hierarchies. Please select items from the same hierarchy for bulk assignment.'
               }
@@ -378,7 +391,7 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
                 <div>
                   <p className="font-medium">Serialized items detected</p>
                   <p className="text-muted-foreground">
-                    {serializedItems.length} item(s) have serial numbers and must be assigned to individuals. 
+                    {serializedItems.length} item(s) have serial numbers and must be assigned to individuals.
                     They will be skipped for unit assignments.
                   </p>
                 </div>
@@ -520,8 +533,8 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
             Cancel
           </Button>
           {canBulkAssign && (
-            <Button 
-              onClick={handleSubmit} 
+            <Button
+              onClick={handleSubmit}
               disabled={!isValid() || isSubmitting}
             >
               {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}

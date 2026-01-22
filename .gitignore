@@ -22,3 +22,20 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment files
+.env
+.env.local
+.env.test.local
+
+# Playwright
+/playwright-report/
+/playwright/.cache/
+/test-results/
+/e2e/.auth/user.json
+
+# Firebase
+.firebase/
+firebase-debug.log
+nul
+supabase/.temp/

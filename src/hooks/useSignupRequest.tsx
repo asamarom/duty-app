@@ -16,10 +16,7 @@ interface UseSignupRequestReturn {
     email: string;
     phone?: string;
     serviceNumber: string;
-    unitType: 'battalion' | 'company' | 'platoon';
-    battalionId?: string;
-    companyId?: string;
-    platoonId?: string;
+    unitId: string;
   }) => Promise<{ error: Error | null }>;
   refetch: () => Promise<void>;
 }
@@ -73,10 +70,7 @@ export function useSignupRequest(): UseSignupRequestReturn {
     email: string;
     phone?: string;
     serviceNumber: string;
-    unitType: 'battalion' | 'company' | 'platoon';
-    battalionId?: string;
-    companyId?: string;
-    platoonId?: string;
+    unitId: string;
   }) => {
     if (!user) {
       return { error: new Error('Not authenticated') };
@@ -89,10 +83,7 @@ export function useSignupRequest(): UseSignupRequestReturn {
         email: data.email,
         phone: data.phone || null,
         service_number: data.serviceNumber,
-        requested_unit_type: data.unitType,
-        requested_battalion_id: data.battalionId || null,
-        requested_company_id: data.companyId || null,
-        requested_platoon_id: data.platoonId || null,
+        requested_unit_id: data.unitId,
         status: 'pending',
       });
 

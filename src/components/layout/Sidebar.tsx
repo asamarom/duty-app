@@ -12,7 +12,6 @@ import {
   ClipboardList,
   Settings,
   Shield,
-  Radio,
   LogOut,
   UserCheck,
   Building2,
@@ -78,18 +77,6 @@ export function Sidebar() {
             <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
               Platoon Management
             </p>
-          </div>
-        </div>
-
-        {/* Status Indicator */}
-        <div className="mx-4 mt-4 rounded-lg border border-success/30 bg-success/10 p-3">
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 animate-pulse rounded-full bg-success" />
-            <span className="text-xs font-medium text-success">{t('nav.systemOnline')}</span>
-          </div>
-          <div className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground">
-            <Radio className="h-3 w-3" />
-            <span>{t('settings.lastSync')}: 2 min ago</span>
           </div>
         </div>
 

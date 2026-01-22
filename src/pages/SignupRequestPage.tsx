@@ -10,12 +10,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Shield, Loader2, UserCheck } from 'lucide-react';
 import { z } from 'zod';
 import { BattalionUnitSelector, UnitSelection } from '@/components/signup/BattalionUnitSelector';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const requestSchema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters'),
   serviceNumber: z.string().min(1, 'Service number is required'),
   cellPhone: z.string().min(1, 'Cell phone number is required'),
-  battalionId: z.string().min(1, 'Please select your battalion'),
+  unitId: z.string().min(1, 'Please select your unit'),
 });
 
 export default function SignupRequestPage() {
@@ -23,14 +24,13 @@ export default function SignupRequestPage() {
   const { submitRequest, status, loading: requestLoading } = useSignupRequest();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const [fullName, setFullName] = useState(user?.user_metadata?.full_name || '');
   const [serviceNumber, setServiceNumber] = useState('');
   const [cellPhone, setCellPhone] = useState('');
   const [unitSelection, setUnitSelection] = useState<UnitSelection>({
-    battalionId: '',
-    companyId: null,
-    platoonId: null,
+    unitId: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -52,7 +52,7 @@ export default function SignupRequestPage() {
       fullName,
       serviceNumber,
       cellPhone,
-      battalionId: unitSelection.battalionId,
+      unitId: unitSelection.unitId,
     });
 
     if (!validation.success) {
@@ -66,24 +66,13 @@ export default function SignupRequestPage() {
       return;
     }
 
-    // Determine unit type based on selection
-    let unitType: 'battalion' | 'company' | 'platoon' = 'battalion';
-    if (unitSelection.platoonId) {
-      unitType = 'platoon';
-    } else if (unitSelection.companyId) {
-      unitType = 'company';
-    }
-
     setIsSubmitting(true);
     const { error } = await submitRequest({
       fullName,
       email: user?.email || '',
       phone: cellPhone,
       serviceNumber,
-      unitType,
-      battalionId: unitSelection.battalionId,
-      companyId: unitSelection.companyId || undefined,
-      platoonId: unitSelection.platoonId || undefined,
+      unitId: unitSelection.unitId,
     });
     setIsSubmitting(false);
 
@@ -193,9 +182,9 @@ export default function SignupRequestPage() {
                 onChange={setUnitSelection}
                 disabled={isSubmitting}
               />
-              {errors.battalionId && <p className="text-sm text-destructive">{errors.battalionId}</p>}
+              {errors.unitId && <p className="text-sm text-destructive">{errors.unitId}</p>}
 
-              <Button type="submit" className="w-full" disabled={isSubmitting || !unitSelection.battalionId}>
+              <Button type="submit" className="w-full" disabled={isSubmitting || !unitSelection.unitId}>
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

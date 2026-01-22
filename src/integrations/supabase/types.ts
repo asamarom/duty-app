@@ -7,8 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.1"
   }
@@ -16,120 +14,42 @@ export type Database = {
     Tables: {
       admin_unit_assignments: {
         Row: {
-          battalion_id: string | null
-          company_id: string | null
           created_at: string
           id: string
-          platoon_id: string | null
-          squad_id: string | null
+          unit_id: string | null
           unit_type: string
           user_id: string
         }
         Insert: {
-          battalion_id?: string | null
-          company_id?: string | null
           created_at?: string
           id?: string
-          platoon_id?: string | null
-          squad_id?: string | null
+          unit_id?: string | null
           unit_type: string
           user_id: string
         }
         Update: {
-          battalion_id?: string | null
-          company_id?: string | null
           created_at?: string
           id?: string
-          platoon_id?: string | null
-          squad_id?: string | null
+          unit_id?: string | null
           unit_type?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "admin_unit_assignments_battalion_id_fkey"
-            columns: ["battalion_id"]
+            foreignKeyName: "admin_unit_assignments_unit_id_fkey"
+            columns: ["unit_id"]
             isOneToOne: false
-            referencedRelation: "battalions"
+            referencedRelation: "units"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "admin_unit_assignments_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "admin_unit_assignments_platoon_id_fkey"
-            columns: ["platoon_id"]
-            isOneToOne: false
-            referencedRelation: "platoons"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "admin_unit_assignments_squad_id_fkey"
-            columns: ["squad_id"]
-            isOneToOne: false
-            referencedRelation: "squads"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      assignment_approvals: {
-        Row: {
-          action: string
-          action_at: string
-          action_by: string | null
-          created_at: string
-          id: string
-          notes: string | null
-          request_id: string
-        }
-        Insert: {
-          action: string
-          action_at?: string
-          action_by?: string | null
-          created_at?: string
-          id?: string
-          notes?: string | null
-          request_id: string
-        }
-        Update: {
-          action?: string
-          action_at?: string
-          action_by?: string | null
-          created_at?: string
-          id?: string
-          notes?: string | null
-          request_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "assignment_approvals_action_by_fkey"
-            columns: ["action_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "assignment_approvals_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "assignment_requests"
-            referencedColumns: ["id"]
-          },
+          }
         ]
       }
       assignment_requests: {
         Row: {
           created_at: string
           equipment_id: string
-          from_battalion_id: string | null
-          from_company_id: string | null
           from_personnel_id: string | null
-          from_platoon_id: string | null
-          from_squad_id: string | null
+          from_unit_id: string | null
           from_unit_type: string
           id: string
           notes: string | null
@@ -139,22 +59,16 @@ export type Database = {
           requested_at: string
           requested_by: string | null
           status: Database["public"]["Enums"]["assignment_request_status"]
-          to_battalion_id: string | null
-          to_company_id: string | null
           to_personnel_id: string | null
-          to_platoon_id: string | null
-          to_squad_id: string | null
+          to_unit_id: string | null
           to_unit_type: string
           updated_at: string
         }
         Insert: {
           created_at?: string
           equipment_id: string
-          from_battalion_id?: string | null
-          from_company_id?: string | null
           from_personnel_id?: string | null
-          from_platoon_id?: string | null
-          from_squad_id?: string | null
+          from_unit_id?: string | null
           from_unit_type: string
           id?: string
           notes?: string | null
@@ -164,22 +78,16 @@ export type Database = {
           requested_at?: string
           requested_by?: string | null
           status?: Database["public"]["Enums"]["assignment_request_status"]
-          to_battalion_id?: string | null
-          to_company_id?: string | null
           to_personnel_id?: string | null
-          to_platoon_id?: string | null
-          to_squad_id?: string | null
+          to_unit_id?: string | null
           to_unit_type: string
           updated_at?: string
         }
         Update: {
           created_at?: string
           equipment_id?: string
-          from_battalion_id?: string | null
-          from_company_id?: string | null
           from_personnel_id?: string | null
-          from_platoon_id?: string | null
-          from_squad_id?: string | null
+          from_unit_id?: string | null
           from_unit_type?: string
           id?: string
           notes?: string | null
@@ -189,11 +97,8 @@ export type Database = {
           requested_at?: string
           requested_by?: string | null
           status?: Database["public"]["Enums"]["assignment_request_status"]
-          to_battalion_id?: string | null
-          to_company_id?: string | null
           to_personnel_id?: string | null
-          to_platoon_id?: string | null
-          to_squad_id?: string | null
+          to_unit_id?: string | null
           to_unit_type?: string
           updated_at?: string
         }
@@ -206,20 +111,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "assignment_requests_from_battalion_id_fkey"
-            columns: ["from_battalion_id"]
-            isOneToOne: false
-            referencedRelation: "battalions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "assignment_requests_from_company_id_fkey"
-            columns: ["from_company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "assignment_requests_from_personnel_id_fkey"
             columns: ["from_personnel_id"]
             isOneToOne: false
@@ -227,17 +118,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "assignment_requests_from_platoon_id_fkey"
-            columns: ["from_platoon_id"]
+            foreignKeyName: "assignment_requests_from_unit_id_fkey"
+            columns: ["from_unit_id"]
             isOneToOne: false
-            referencedRelation: "platoons"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "assignment_requests_from_squad_id_fkey"
-            columns: ["from_squad_id"]
-            isOneToOne: false
-            referencedRelation: "squads"
+            referencedRelation: "units"
             referencedColumns: ["id"]
           },
           {
@@ -255,20 +139,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "assignment_requests_to_battalion_id_fkey"
-            columns: ["to_battalion_id"]
-            isOneToOne: false
-            referencedRelation: "battalions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "assignment_requests_to_company_id_fkey"
-            columns: ["to_company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "assignment_requests_to_personnel_id_fkey"
             columns: ["to_personnel_id"]
             isOneToOne: false
@@ -276,105 +146,12 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "assignment_requests_to_platoon_id_fkey"
-            columns: ["to_platoon_id"]
+            foreignKeyName: "assignment_requests_to_unit_id_fkey"
+            columns: ["to_unit_id"]
             isOneToOne: false
-            referencedRelation: "platoons"
+            referencedRelation: "units"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "assignment_requests_to_squad_id_fkey"
-            columns: ["to_squad_id"]
-            isOneToOne: false
-            referencedRelation: "squads"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      battalions: {
-        Row: {
-          commander_id: string | null
-          created_at: string
-          designation: string | null
-          id: string
-          name: string
-          status: Database["public"]["Enums"]["unit_status"]
-          updated_at: string
-        }
-        Insert: {
-          commander_id?: string | null
-          created_at?: string
-          designation?: string | null
-          id?: string
-          name: string
-          status?: Database["public"]["Enums"]["unit_status"]
-          updated_at?: string
-        }
-        Update: {
-          commander_id?: string | null
-          created_at?: string
-          designation?: string | null
-          id?: string
-          name?: string
-          status?: Database["public"]["Enums"]["unit_status"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "battalions_commander_id_fkey"
-            columns: ["commander_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      companies: {
-        Row: {
-          battalion_id: string
-          created_at: string
-          designation: string | null
-          id: string
-          leader_id: string | null
-          name: string
-          status: Database["public"]["Enums"]["unit_status"]
-          updated_at: string
-        }
-        Insert: {
-          battalion_id: string
-          created_at?: string
-          designation?: string | null
-          id?: string
-          leader_id?: string | null
-          name: string
-          status?: Database["public"]["Enums"]["unit_status"]
-          updated_at?: string
-        }
-        Update: {
-          battalion_id?: string
-          created_at?: string
-          designation?: string | null
-          id?: string
-          leader_id?: string | null
-          name?: string
-          status?: Database["public"]["Enums"]["unit_status"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "companies_battalion_id_fkey"
-            columns: ["battalion_id"]
-            isOneToOne: false
-            referencedRelation: "battalions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "companies_leader_id_fkey"
-            columns: ["leader_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
+          }
         ]
       }
       equipment: {
@@ -420,63 +197,40 @@ export type Database = {
         Row: {
           assigned_at: string
           assigned_by: string | null
-          battalion_id: string | null
-          company_id: string | null
           created_at: string
           equipment_id: string
           id: string
           notes: string | null
           personnel_id: string | null
-          platoon_id: string | null
           quantity: number
           returned_at: string | null
-          squad_id: string | null
+          unit_id: string | null
         }
         Insert: {
           assigned_at?: string
           assigned_by?: string | null
-          battalion_id?: string | null
-          company_id?: string | null
           created_at?: string
           equipment_id: string
           id?: string
           notes?: string | null
           personnel_id?: string | null
-          platoon_id?: string | null
           quantity?: number
           returned_at?: string | null
-          squad_id?: string | null
+          unit_id?: string | null
         }
         Update: {
           assigned_at?: string
           assigned_by?: string | null
-          battalion_id?: string | null
-          company_id?: string | null
           created_at?: string
           equipment_id?: string
           id?: string
           notes?: string | null
           personnel_id?: string | null
-          platoon_id?: string | null
           quantity?: number
           returned_at?: string | null
-          squad_id?: string | null
+          unit_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "equipment_assignments_battalion_id_fkey"
-            columns: ["battalion_id"]
-            isOneToOne: false
-            referencedRelation: "battalions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "equipment_assignments_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "equipment_assignments_equipment_id_fkey"
             columns: ["equipment_id"]
@@ -492,340 +246,121 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "equipment_assignments_platoon_id_fkey"
-            columns: ["platoon_id"]
+            foreignKeyName: "equipment_assignments_unit_id_fkey"
+            columns: ["unit_id"]
             isOneToOne: false
-            referencedRelation: "platoons"
+            referencedRelation: "units"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "equipment_assignments_squad_id_fkey"
-            columns: ["squad_id"]
-            isOneToOne: false
-            referencedRelation: "squads"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      equipment_transfer_history: {
-        Row: {
-          created_at: string
-          equipment_id: string
-          from_battalion_id: string | null
-          from_company_id: string | null
-          from_personnel_id: string | null
-          from_platoon_id: string | null
-          from_unit_type: string
-          id: string
-          notes: string | null
-          quantity: number
-          to_battalion_id: string | null
-          to_company_id: string | null
-          to_personnel_id: string | null
-          to_platoon_id: string | null
-          to_unit_type: string
-          transferred_at: string
-          transferred_by: string | null
-        }
-        Insert: {
-          created_at?: string
-          equipment_id: string
-          from_battalion_id?: string | null
-          from_company_id?: string | null
-          from_personnel_id?: string | null
-          from_platoon_id?: string | null
-          from_unit_type: string
-          id?: string
-          notes?: string | null
-          quantity?: number
-          to_battalion_id?: string | null
-          to_company_id?: string | null
-          to_personnel_id?: string | null
-          to_platoon_id?: string | null
-          to_unit_type: string
-          transferred_at?: string
-          transferred_by?: string | null
-        }
-        Update: {
-          created_at?: string
-          equipment_id?: string
-          from_battalion_id?: string | null
-          from_company_id?: string | null
-          from_personnel_id?: string | null
-          from_platoon_id?: string | null
-          from_unit_type?: string
-          id?: string
-          notes?: string | null
-          quantity?: number
-          to_battalion_id?: string | null
-          to_company_id?: string | null
-          to_personnel_id?: string | null
-          to_platoon_id?: string | null
-          to_unit_type?: string
-          transferred_at?: string
-          transferred_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "equipment_transfer_history_equipment_id_fkey"
-            columns: ["equipment_id"]
-            isOneToOne: false
-            referencedRelation: "equipment"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "equipment_transfer_history_from_battalion_id_fkey"
-            columns: ["from_battalion_id"]
-            isOneToOne: false
-            referencedRelation: "battalions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "equipment_transfer_history_from_company_id_fkey"
-            columns: ["from_company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "equipment_transfer_history_from_personnel_id_fkey"
-            columns: ["from_personnel_id"]
-            isOneToOne: false
-            referencedRelation: "personnel"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "equipment_transfer_history_from_platoon_id_fkey"
-            columns: ["from_platoon_id"]
-            isOneToOne: false
-            referencedRelation: "platoons"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "equipment_transfer_history_to_battalion_id_fkey"
-            columns: ["to_battalion_id"]
-            isOneToOne: false
-            referencedRelation: "battalions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "equipment_transfer_history_to_company_id_fkey"
-            columns: ["to_company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "equipment_transfer_history_to_personnel_id_fkey"
-            columns: ["to_personnel_id"]
-            isOneToOne: false
-            referencedRelation: "personnel"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "equipment_transfer_history_to_platoon_id_fkey"
-            columns: ["to_platoon_id"]
-            isOneToOne: false
-            referencedRelation: "platoons"
-            referencedColumns: ["id"]
-          },
+          }
         ]
       }
       personnel: {
         Row: {
-          battalion_id: string | null
-          company_id: string | null
           created_at: string
           driver_licenses: string[] | null
           duty_position: string | null
           email: string | null
           first_name: string
           id: string
+          is_signature_approved: boolean
           last_name: string
           local_address: string | null
           location_status: Database["public"]["Enums"]["location_status"]
           phone: string | null
-          platoon_id: string | null
           profile_image: string | null
           rank: string
           readiness_status: Database["public"]["Enums"]["readiness_status"]
           service_number: string
           skills: string[] | null
-          squad_id: string | null
-          transfer_approved: boolean
+          unit_id: string | null
           updated_at: string
           user_id: string | null
         }
         Insert: {
-          battalion_id?: string | null
-          company_id?: string | null
           created_at?: string
           driver_licenses?: string[] | null
           duty_position?: string | null
           email?: string | null
           first_name: string
           id?: string
+          is_signature_approved?: boolean
           last_name: string
           local_address?: string | null
           location_status?: Database["public"]["Enums"]["location_status"]
           phone?: string | null
-          platoon_id?: string | null
           profile_image?: string | null
           rank: string
           readiness_status?: Database["public"]["Enums"]["readiness_status"]
           service_number: string
           skills?: string[] | null
-          squad_id?: string | null
-          transfer_approved?: boolean
+          unit_id?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Update: {
-          battalion_id?: string | null
-          company_id?: string | null
           created_at?: string
           driver_licenses?: string[] | null
           duty_position?: string | null
           email?: string | null
           first_name?: string
           id?: string
+          is_signature_approved?: boolean
           last_name?: string
           local_address?: string | null
           location_status?: Database["public"]["Enums"]["location_status"]
           phone?: string | null
-          platoon_id?: string | null
           profile_image?: string | null
           rank?: string
           readiness_status?: Database["public"]["Enums"]["readiness_status"]
           service_number?: string
           skills?: string[] | null
-          squad_id?: string | null
-          transfer_approved?: boolean
+          unit_id?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "personnel_battalion_id_fkey"
-            columns: ["battalion_id"]
+            foreignKeyName: "personnel_unit_id_fkey"
+            columns: ["unit_id"]
             isOneToOne: false
-            referencedRelation: "battalions"
+            referencedRelation: "units"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "personnel_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "personnel_platoon_id_fkey"
-            columns: ["platoon_id"]
-            isOneToOne: false
-            referencedRelation: "platoons"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "personnel_squad_id_fkey"
-            columns: ["squad_id"]
-            isOneToOne: false
-            referencedRelation: "squads"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      platoons: {
-        Row: {
-          battalion_id: string
-          company_id: string | null
-          created_at: string
-          designation: string | null
-          id: string
-          leader_id: string | null
-          name: string
-          status: Database["public"]["Enums"]["unit_status"]
-          updated_at: string
-        }
-        Insert: {
-          battalion_id: string
-          company_id?: string | null
-          created_at?: string
-          designation?: string | null
-          id?: string
-          leader_id?: string | null
-          name: string
-          status?: Database["public"]["Enums"]["unit_status"]
-          updated_at?: string
-        }
-        Update: {
-          battalion_id?: string
-          company_id?: string | null
-          created_at?: string
-          designation?: string | null
-          id?: string
-          leader_id?: string | null
-          name?: string
-          status?: Database["public"]["Enums"]["unit_status"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "platoons_battalion_id_fkey"
-            columns: ["battalion_id"]
-            isOneToOne: false
-            referencedRelation: "battalions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "platoons_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "platoons_leader_id_fkey"
-            columns: ["leader_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
+          }
         ]
       }
       profiles: {
         Row: {
           avatar_url: string | null
-          battalion_id: string | null
           created_at: string
           full_name: string | null
           id: string
+          unit_id: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
-          battalion_id?: string | null
           created_at?: string
           full_name?: string | null
           id: string
+          unit_id?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
-          battalion_id?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
+          unit_id?: string | null
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "profiles_battalion_id_fkey"
-            columns: ["battalion_id"]
+            foreignKeyName: "profiles_unit_id_fkey"
+            columns: ["unit_id"]
             isOneToOne: false
-            referencedRelation: "battalions"
+            referencedRelation: "units"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       signup_requests: {
@@ -836,11 +371,7 @@ export type Database = {
           full_name: string
           id: string
           phone: string | null
-          requested_battalion_id: string | null
-          requested_company_id: string | null
-          requested_platoon_id: string | null
-          requested_squad_id: string | null
-          requested_unit_type: string
+          requested_unit_id: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           service_number: string
@@ -855,11 +386,7 @@ export type Database = {
           full_name: string
           id?: string
           phone?: string | null
-          requested_battalion_id?: string | null
-          requested_company_id?: string | null
-          requested_platoon_id?: string | null
-          requested_squad_id?: string | null
-          requested_unit_type: string
+          requested_unit_id?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           service_number: string
@@ -874,11 +401,7 @@ export type Database = {
           full_name?: string
           id?: string
           phone?: string | null
-          requested_battalion_id?: string | null
-          requested_company_id?: string | null
-          requested_platoon_id?: string | null
-          requested_squad_id?: string | null
-          requested_unit_type?: string
+          requested_unit_id?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           service_number?: string
@@ -888,44 +411,24 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "signup_requests_requested_battalion_id_fkey"
-            columns: ["requested_battalion_id"]
+            foreignKeyName: "signup_requests_requested_unit_id_fkey"
+            columns: ["requested_unit_id"]
             isOneToOne: false
-            referencedRelation: "battalions"
+            referencedRelation: "units"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "signup_requests_requested_company_id_fkey"
-            columns: ["requested_company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "signup_requests_requested_platoon_id_fkey"
-            columns: ["requested_platoon_id"]
-            isOneToOne: false
-            referencedRelation: "platoons"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "signup_requests_requested_squad_id_fkey"
-            columns: ["requested_squad_id"]
-            isOneToOne: false
-            referencedRelation: "squads"
-            referencedColumns: ["id"]
-          },
+          }
         ]
       }
-      squads: {
+      units: {
         Row: {
           created_at: string
           designation: string | null
           id: string
           leader_id: string | null
           name: string
-          platoon_id: string
+          parent_id: string | null
           status: Database["public"]["Enums"]["unit_status"]
+          unit_type: Database["public"]["Enums"]["unit_type"]
           updated_at: string
         }
         Insert: {
@@ -934,8 +437,9 @@ export type Database = {
           id?: string
           leader_id?: string | null
           name: string
-          platoon_id: string
+          parent_id?: string | null
           status?: Database["public"]["Enums"]["unit_status"]
+          unit_type: Database["public"]["Enums"]["unit_type"]
           updated_at?: string
         }
         Update: {
@@ -944,25 +448,26 @@ export type Database = {
           id?: string
           leader_id?: string | null
           name?: string
-          platoon_id?: string
+          parent_id?: string | null
           status?: Database["public"]["Enums"]["unit_status"]
+          unit_type?: Database["public"]["Enums"]["unit_type"]
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "squads_leader_id_fkey"
+            foreignKeyName: "units_leader_id_fkey"
             columns: ["leader_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "squads_platoon_id_fkey"
-            columns: ["platoon_id"]
+            foreignKeyName: "units_parent_id_fkey"
+            columns: ["parent_id"]
             isOneToOne: false
-            referencedRelation: "platoons"
+            referencedRelation: "units"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       user_roles: {
@@ -991,41 +496,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      can_accept_transfer: {
-        Args: { _request_id: string; _user_id: string }
+      can_manage_unit: {
+        Args: { p_user_id: string; p_unit_id: string }
         Returns: boolean
       }
-      can_admin_manage_unit:
-        | {
-            Args: {
-              _admin_user_id: string
-              _battalion_id: string
-              _platoon_id: string
-              _squad_id: string
-              _unit_type: string
-            }
-            Returns: boolean
-          }
-        | {
-            Args: {
-              _admin_user_id: string
-              _battalion_id: string
-              _company_id?: string
-              _platoon_id: string
-              _squad_id: string
-              _unit_type: string
-            }
-            Returns: boolean
-          }
-      can_assign_leader_role: {
-        Args: { _assigner_user_id: string; _target_personnel_id: string }
-        Returns: boolean
+      get_unit_ancestors: {
+        Args: { p_unit_id: string }
+        Returns: string[]
       }
-      can_initiate_transfer: {
-        Args: { _equipment_id: string; _user_id: string }
-        Returns: boolean
+      get_unit_battalion: {
+        Args: { p_unit_id: string }
+        Returns: string
       }
-      get_user_squad_id: { Args: { _user_id: string }; Returns: string }
+      get_unit_descendants: {
+        Args: { p_unit_id: string }
+        Returns: string[]
+      }
+      get_user_unit_id: {
+        Args: { p_user_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1033,16 +523,35 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_approved_user: { Args: { _user_id: string }; Returns: boolean }
-      is_transfer_approved_for_unit: {
+      initiate_transfer: {
         Args: {
-          _battalion_id: string
-          _company_id: string
-          _platoon_id: string
-          _unit_type: string
-          _user_id: string
+          p_equipment_id: string
+          p_to_unit_id?: string
+          p_to_personnel_id?: string
+          p_notes?: string
+        }
+        Returns: string
+      }
+      is_approved_user: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
+      is_valid_transfer_target: {
+        Args: {
+          p_from_unit_id: string
+          p_from_personnel_id: string
+          p_to_unit_id: string
+          p_to_personnel_id: string
         }
         Returns: boolean
+      }
+      process_transfer: {
+        Args: {
+          p_request_id: string
+          p_action: string
+          p_notes?: string
+        }
+        Returns: undefined
       }
     }
     Enums: {
@@ -1053,6 +562,7 @@ export type Database = {
         | "unserviceable"
         | "in_maintenance"
         | "missing"
+        | "pending_transfer"
       location_status:
         | "home"
         | "on_duty"
@@ -1063,6 +573,7 @@ export type Database = {
       readiness_status: "ready" | "warning" | "critical"
       signup_request_status: "pending" | "approved" | "declined"
       unit_status: "active" | "inactive" | "deployed"
+      unit_type: "battalion" | "company" | "platoon"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1197,6 +708,7 @@ export const Constants = {
         "unserviceable",
         "in_maintenance",
         "missing",
+        "pending_transfer",
       ],
       location_status: [
         "home",
@@ -1209,6 +721,13 @@ export const Constants = {
       readiness_status: ["ready", "warning", "critical"],
       signup_request_status: ["pending", "approved", "declined"],
       unit_status: ["active", "inactive", "deployed"],
+      unit_type: ["battalion", "company", "platoon"],
     },
   },
 } as const
+
+// Convenience types for the new unified units table
+export type Unit = Tables<"units">
+export type UnitInsert = TablesInsert<"units">
+export type UnitUpdate = TablesUpdate<"units">
+export type UnitType = Enums<"unit_type">

@@ -24,76 +24,64 @@ export function useTransferHistory(equipmentId: string | undefined): UseTransfer
     try {
       setLoading(true);
 
+      // Use approved assignment_requests as transfer history
       const { data, error: fetchError } = await supabase
-        .from('equipment_transfer_history')
+        .from('assignment_requests')
         .select(`
           id,
           equipment_id,
-          quantity,
           from_unit_type,
-          from_battalion_id,
-          from_company_id,
-          from_platoon_id,
+          from_unit_id,
           from_personnel_id,
           to_unit_type,
-          to_battalion_id,
-          to_company_id,
-          to_platoon_id,
+          to_unit_id,
           to_personnel_id,
-          transferred_by,
-          transferred_at,
+          requested_by,
+          requested_at,
           notes,
-          from_personnel:personnel!equipment_transfer_history_from_personnel_id_fkey(first_name, last_name),
-          to_personnel:personnel!equipment_transfer_history_to_personnel_id_fkey(first_name, last_name),
-          from_battalion:battalions!equipment_transfer_history_from_battalion_id_fkey(name),
-          to_battalion:battalions!equipment_transfer_history_to_battalion_id_fkey(name),
-          from_company:companies!equipment_transfer_history_from_company_id_fkey(name),
-          to_company:companies!equipment_transfer_history_to_company_id_fkey(name),
-          from_platoon:platoons!equipment_transfer_history_from_platoon_id_fkey(name),
-          to_platoon:platoons!equipment_transfer_history_to_platoon_id_fkey(name),
-          transferred_by_profile:profiles!equipment_transfer_history_transferred_by_fkey(full_name)
+          status,
+          from_unit:units!assignment_requests_from_unit_id_fkey(name),
+          from_personnel:personnel!assignment_requests_from_personnel_id_fkey(first_name, last_name),
+          to_unit:units!assignment_requests_to_unit_id_fkey(name),
+          to_personnel:personnel!assignment_requests_to_personnel_id_fkey(first_name, last_name),
+          requester:profiles!assignment_requests_requested_by_fkey(full_name)
         `)
         .eq('equipment_id', equipmentId)
-        .order('transferred_at', { ascending: false });
+        .eq('status', 'approved')
+        .order('requested_at', { ascending: false });
 
       if (fetchError) throw fetchError;
 
       const mappedHistory: TransferHistoryRecord[] = (data || []).map((row: any) => {
         // Determine from name
-        let fromName = 'Unknown';
+        let fromName = 'Unassigned';
         if (row.from_personnel) {
           fromName = `${row.from_personnel.first_name} ${row.from_personnel.last_name}`;
-        } else if (row.from_platoon) {
-          fromName = row.from_platoon.name;
-        } else if (row.from_company) {
-          fromName = row.from_company.name;
-        } else if (row.from_battalion) {
-          fromName = row.from_battalion.name;
+        } else if (row.from_unit) {
+          fromName = row.from_unit.name;
         }
 
         // Determine to name
-        let toName = 'Unknown';
+        let toName = 'Unassigned';
         if (row.to_personnel) {
           toName = `${row.to_personnel.first_name} ${row.to_personnel.last_name}`;
-        } else if (row.to_platoon) {
-          toName = row.to_platoon.name;
-        } else if (row.to_company) {
-          toName = row.to_company.name;
-        } else if (row.to_battalion) {
-          toName = row.to_battalion.name;
+        } else if (row.to_unit) {
+          toName = row.to_unit.name;
         }
 
         return {
           id: row.id,
           equipmentId: row.equipment_id,
-          quantity: row.quantity,
+          quantity: 1,
           fromUnitType: row.from_unit_type,
+          fromUnitId: row.from_unit_id,
           fromName,
           toUnitType: row.to_unit_type,
+          toUnitId: row.to_unit_id,
           toName,
-          transferredBy: row.transferred_by,
-          transferredByName: row.transferred_by_profile?.full_name,
-          transferredAt: row.transferred_at,
+          transferredBy: row.requested_by,
+          transferredByName: row.requester?.full_name,
+          transferredAt: row.requested_at,
           notes: row.notes,
         };
       });

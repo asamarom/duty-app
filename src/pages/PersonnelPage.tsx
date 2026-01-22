@@ -32,9 +32,7 @@ function mapPersonnelRowToUI(row: any): PersonnelWithRoles {
     firstName: row.first_name,
     lastName: row.last_name,
     dutyPosition: (row.duty_position ?? 'Unassigned') as Personnel['dutyPosition'],
-    battalionId: row.battalion_id ?? undefined,
-    companyId: row.company_id ?? undefined,
-    platoonId: row.platoon_id ?? undefined,
+    unitId: row.unit_id ?? undefined,
     role: 'user',
     phone: row.phone ?? '',
     email: row.email ?? '',
@@ -68,7 +66,7 @@ export default function PersonnelPage() {
         const { data, error } = await supabase
           .from('personnel')
           .select(
-            'id, service_number, rank, first_name, last_name, duty_position, phone, email, local_address, location_status, readiness_status, skills, driver_licenses, profile_image, user_id, battalion_id, company_id, platoon_id, is_signature_approved'
+            'id, service_number, rank, first_name, last_name, duty_position, phone, email, local_address, location_status, readiness_status, skills, driver_licenses, profile_image, user_id, unit_id, is_signature_approved'
           )
           .order('last_name', { ascending: true });
 
@@ -122,9 +120,9 @@ export default function PersonnelPage() {
     };
   }, [toast]);
 
-  // No longer filtering by team since we removed that field
-  const uniquePlatoons = useMemo(() => {
-    return ['all', ...new Set(personnel.map((p) => p.platoonId).filter(Boolean))] as string[];
+  // Filter by unit
+  const uniqueUnits = useMemo(() => {
+    return ['all', ...new Set(personnel.map((p) => p.unitId).filter(Boolean))] as string[];
   }, [personnel]);
 
   const filteredPersonnel = useMemo(() => {
@@ -133,7 +131,7 @@ export default function PersonnelPage() {
         person.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         person.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         person.serviceNumber.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesFilter = teamFilter === 'all' || person.platoonId === teamFilter;
+      const matchesFilter = teamFilter === 'all' || person.unitId === teamFilter;
       return matchesSearch && matchesFilter;
     });
   }, [personnel, searchQuery, teamFilter]);
@@ -207,9 +205,9 @@ export default function PersonnelPage() {
                   <SelectValue placeholder="All Units" />
                 </SelectTrigger>
                 <SelectContent>
-                  {uniquePlatoons.map((platoonId) => (
-                    <SelectItem key={platoonId} value={platoonId}>
-                      {platoonId === 'all' ? 'All Units' : platoonId}
+                  {uniqueUnits.map((unitId) => (
+                    <SelectItem key={unitId} value={unitId}>
+                      {unitId === 'all' ? 'All Units' : unitId}
                     </SelectItem>
                   ))}
                 </SelectContent>
