@@ -1,14 +1,41 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  limit,
+  getDocs,
+  addDoc,
+  serverTimestamp,
+  Timestamp,
+} from 'firebase/firestore';
+import { db } from '@/integrations/firebase/client';
 import { useAuth } from './useAuth';
-import type { Tables } from '@/integrations/supabase/types';
+import type { SignupRequestDoc, SignupRequestStatus } from '@/integrations/firebase/types';
 
-export type SignupRequest = Tables<'signup_requests'>;
-export type SignupRequestStatus = 'pending' | 'approved' | 'declined' | 'none';
+export interface SignupRequest {
+  id: string;
+  user_id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  service_number: string;
+  requested_unit_id: string | null;
+  status: SignupRequestStatus;
+  decline_reason: string | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type { SignupRequestStatus };
+export type SignupRequestStatusWithNone = SignupRequestStatus | 'none';
 
 interface UseSignupRequestReturn {
   request: SignupRequest | null;
-  status: SignupRequestStatus;
+  status: SignupRequestStatusWithNone;
   loading: boolean;
   error: Error | null;
   submitRequest: (data: {
@@ -21,10 +48,28 @@ interface UseSignupRequestReturn {
   refetch: () => Promise<void>;
 }
 
+function mapDocToSignupRequest(id: string, data: SignupRequestDoc): SignupRequest {
+  return {
+    id,
+    user_id: data.userId,
+    full_name: data.fullName,
+    email: data.email,
+    phone: data.phone,
+    service_number: data.serviceNumber,
+    requested_unit_id: data.requestedUnitId,
+    status: data.status,
+    decline_reason: data.declineReason,
+    reviewed_by: data.reviewedBy,
+    reviewed_at: data.reviewedAt?.toDate().toISOString() || null,
+    created_at: data.createdAt?.toDate().toISOString() || new Date().toISOString(),
+    updated_at: data.updatedAt?.toDate().toISOString() || new Date().toISOString(),
+  };
+}
+
 export function useSignupRequest(): UseSignupRequestReturn {
   const { user } = useAuth();
   const [request, setRequest] = useState<SignupRequest | null>(null);
-  const [status, setStatus] = useState<SignupRequestStatus>('none');
+  const [status, setStatus] = useState<SignupRequestStatusWithNone>('none');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -37,19 +82,22 @@ export function useSignupRequest(): UseSignupRequestReturn {
 
     try {
       setLoading(true);
-      const { data, error: fetchError } = await supabase
-        .from('signup_requests')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const requestsRef = collection(db, 'signupRequests');
+      const q = query(
+        requestsRef,
+        where('userId', '==', user.uid),
+        orderBy('createdAt', 'desc'),
+        limit(1)
+      );
 
-      if (fetchError) throw fetchError;
+      const snapshot = await getDocs(q);
 
-      if (data) {
-        setRequest(data);
-        setStatus(data.status);
+      if (!snapshot.empty) {
+        const doc = snapshot.docs[0];
+        const data = doc.data() as SignupRequestDoc;
+        const mappedRequest = mapDocToSignupRequest(doc.id, data);
+        setRequest(mappedRequest);
+        setStatus(mappedRequest.status);
       } else {
         setRequest(null);
         setStatus('none');
@@ -63,7 +111,7 @@ export function useSignupRequest(): UseSignupRequestReturn {
 
   useEffect(() => {
     fetchRequest();
-  }, [user?.id]);
+  }, [user?.uid]);
 
   const submitRequest = async (data: {
     fullName: string;
@@ -77,17 +125,21 @@ export function useSignupRequest(): UseSignupRequestReturn {
     }
 
     try {
-      const { error: insertError } = await supabase.from('signup_requests').insert({
-        user_id: user.id,
-        full_name: data.fullName,
+      const requestsRef = collection(db, 'signupRequests');
+      await addDoc(requestsRef, {
+        userId: user.uid,
+        fullName: data.fullName,
         email: data.email,
         phone: data.phone || null,
-        service_number: data.serviceNumber,
-        requested_unit_id: data.unitId,
+        serviceNumber: data.serviceNumber,
+        requestedUnitId: data.unitId,
         status: 'pending',
-      });
-
-      if (insertError) throw insertError;
+        declineReason: null,
+        reviewedBy: null,
+        reviewedAt: null,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      } as Omit<SignupRequestDoc, 'createdAt' | 'updatedAt'> & { createdAt: ReturnType<typeof serverTimestamp>; updatedAt: ReturnType<typeof serverTimestamp> });
 
       await fetchRequest();
       return { error: null };

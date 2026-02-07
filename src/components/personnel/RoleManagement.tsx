@@ -1,15 +1,16 @@
 import { useState } from 'react';
+import { doc, getDoc, updateDoc, addDoc, deleteDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/integrations/firebase/client';
+import type { UserDoc, UnitDoc, AppRole } from '@/integrations/firebase/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Crown, Shield, Loader2, AlertCircle } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useUnits } from '@/hooks/useUnits';
 import { RoleBadges } from './RoleBadge';
 import { cn } from '@/lib/utils';
-import type { AppRole } from '@/hooks/useUserRole';
 
 interface RoleManagementProps {
   personnelId: string;
@@ -49,21 +50,22 @@ export function RoleManagement({
     try {
       setSaving(true);
 
+      const userDocRef = doc(db, 'users', userId);
+      const userDocSnap = await getDoc(userDocRef);
+      const userData = userDocSnap.exists() ? (userDocSnap.data() as UserDoc) : { roles: [] };
+      const currentUserRoles = userData.roles || [];
+
       if (isLeader) {
         // Remove leader role
-        const { error } = await supabase
-          .from('user_roles')
-          .delete()
-          .eq('user_id', userId)
-          .eq('role', 'leader');
-
-        if (error) throw error;
+        const newRoles = currentUserRoles.filter((r) => r !== 'leader');
+        await updateDoc(userDocRef, { roles: newRoles });
 
         // Also remove unit assignment
-        await supabase
-          .from('admin_unit_assignments')
-          .delete()
-          .eq('user_id', userId);
+        const assignmentsRef = collection(db, 'adminUnitAssignments');
+        const q = query(assignmentsRef, where('userId', '==', userId));
+        const assignmentsSnap = await getDocs(q);
+        const deletePromises = assignmentsSnap.docs.map((d) => deleteDoc(d.ref));
+        await Promise.all(deletePromises);
 
         toast({
           title: 'Role removed',
@@ -75,23 +77,19 @@ export function RoleManagement({
         const unitType = unit?.unit_type || 'battalion';
 
         // Add leader role
-        const { error } = await supabase
-          .from('user_roles')
-          .insert({ user_id: userId, role: 'leader' });
-
-        if (error) throw error;
+        const newRoles = [...currentUserRoles.filter((r) => r !== 'leader'), 'leader'] as AppRole[];
+        await updateDoc(userDocRef, { roles: newRoles });
 
         // Create unit assignment for the leader
         if (unitId) {
-          const { error: unitError } = await supabase
-            .from('admin_unit_assignments')
-            .insert({
-              user_id: userId,
-              unit_type: unitType,
-              unit_id: unitId,
+          try {
+            const assignmentsRef = collection(db, 'adminUnitAssignments');
+            await addDoc(assignmentsRef, {
+              userId,
+              unitType,
+              unitId,
             });
-
-          if (unitError) {
+          } catch (unitError) {
             console.error('Error creating unit assignment:', unitError);
           }
         }
@@ -128,15 +126,15 @@ export function RoleManagement({
     try {
       setSaving(true);
 
+      const userDocRef = doc(db, 'users', userId);
+      const userDocSnap = await getDoc(userDocRef);
+      const userData = userDocSnap.exists() ? (userDocSnap.data() as UserDoc) : { roles: [] };
+      const currentUserRoles = userData.roles || [];
+
       if (isAdmin) {
         // Remove admin role
-        const { error } = await supabase
-          .from('user_roles')
-          .delete()
-          .eq('user_id', userId)
-          .eq('role', 'admin');
-
-        if (error) throw error;
+        const newRoles = currentUserRoles.filter((r) => r !== 'admin');
+        await updateDoc(userDocRef, { roles: newRoles });
 
         toast({
           title: 'Role removed',
@@ -144,11 +142,8 @@ export function RoleManagement({
         });
       } else {
         // Add admin role
-        const { error } = await supabase
-          .from('user_roles')
-          .insert({ user_id: userId, role: 'admin' });
-
-        if (error) throw error;
+        const newRoles = [...currentUserRoles.filter((r) => r !== 'admin'), 'admin'] as AppRole[];
+        await updateDoc(userDocRef, { roles: newRoles });
 
         toast({
           title: 'Role assigned',

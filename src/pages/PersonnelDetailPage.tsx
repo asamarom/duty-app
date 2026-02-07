@@ -1,5 +1,17 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  documentId,
+} from 'firebase/firestore';
+import { db } from '@/integrations/firebase/client';
+import type { PersonnelDoc, UserDoc, AppRole } from '@/integrations/firebase/types';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { MobileHeader } from '@/components/layout/MobileHeader';
 import { Button } from '@/components/ui/button';
@@ -21,7 +33,6 @@ import {
   Briefcase
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -29,7 +40,6 @@ import { UnitTreeSelector } from '@/components/personnel/UnitTreeSelector';
 import { RoleManagement } from '@/components/personnel/RoleManagement';
 import { RoleBadges } from '@/components/personnel/RoleBadge';
 import { useCanManageRole } from '@/hooks/useCanManageRole';
-import type { AppRole } from '@/hooks/useUserRole';
 
 
 export default function PersonnelDetailPage() {
@@ -65,13 +75,15 @@ export default function PersonnelDetailPage() {
       return;
     }
     try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', personnelUserId);
+      const userDocRef = doc(db, 'users', personnelUserId);
+      const userDocSnap = await getDoc(userDocRef);
 
-      if (error) throw error;
-      setRoles(data?.map(r => r.role as AppRole) || []);
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data() as UserDoc;
+        setRoles(userData.roles || []);
+      } else {
+        setRoles([]);
+      }
     } catch (err) {
       console.error('Error fetching roles:', err);
     }
@@ -84,38 +96,45 @@ export default function PersonnelDetailPage() {
       try {
         setLoading(true);
 
-        const { data: person, error } = await supabase
-          .from('personnel')
-          .select('*')
-          .eq('id', id)
-          .single();
+        const personRef = doc(db, 'personnel', id);
+        const personSnap = await getDoc(personRef);
 
-        if (error) throw error;
+        if (!personSnap.exists()) {
+          toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Personnel not found.',
+          });
+          navigate('/personnel');
+          return;
+        }
+
+        const person = personSnap.data() as PersonnelDoc;
 
         // Store user_id for role management
-        setUserId(person.user_id || null);
+        setUserId(person.userId || null);
 
         // Fetch roles for this personnel
-        await fetchRoles(person.user_id || null);
+        await fetchRoles(person.userId || null);
 
         // Parse duty_position - could be stored as string or already an array
-        const dutyPositions = person.duty_position
-          ? (Array.isArray(person.duty_position)
-            ? person.duty_position
-            : [person.duty_position])
+        const dutyPositions = person.dutyPosition
+          ? (Array.isArray(person.dutyPosition)
+            ? person.dutyPosition
+            : [person.dutyPosition])
           : [];
 
         setFormData({
-          service_number: person.service_number,
+          service_number: person.serviceNumber,
           rank: person.rank,
-          first_name: person.first_name,
-          last_name: person.last_name,
+          first_name: person.firstName,
+          last_name: person.lastName,
           duty_positions: dutyPositions,
-          unit_id: person.unit_id || null,
-          is_signature_approved: person.is_signature_approved || false,
+          unit_id: person.unitId || null,
+          is_signature_approved: person.isSignatureApproved || false,
           phone: person.phone || '',
           email: person.email || '',
-          local_address: person.local_address || '',
+          local_address: person.localAddress || '',
         });
       } catch (error) {
         console.error('Error fetching personnel:', error);
@@ -144,23 +163,18 @@ export default function PersonnelDetailPage() {
         ? formData.duty_positions[0]
         : null;
 
-      const { error } = await supabase
-        .from('personnel')
-        .update({
-          service_number: formData.service_number,
-          rank: formData.rank,
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          duty_position: primaryDutyPosition,
-          unit_id: formData.unit_id || null,
-          is_signature_approved: formData.is_signature_approved,
-          phone: formData.phone || null,
-          email: formData.email || null,
-          local_address: formData.local_address || null,
-        })
-        .eq('id', id);
-
-      if (error) throw error;
+      await updateDoc(doc(db, 'personnel', id), {
+        serviceNumber: formData.service_number,
+        rank: formData.rank,
+        firstName: formData.first_name,
+        lastName: formData.last_name,
+        dutyPosition: primaryDutyPosition,
+        unitId: formData.unit_id || null,
+        isSignatureApproved: formData.is_signature_approved,
+        phone: formData.phone || null,
+        email: formData.email || null,
+        localAddress: formData.local_address || null,
+      });
 
       toast({
         title: 'Success',

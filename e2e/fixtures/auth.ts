@@ -17,8 +17,8 @@ export const AUTH_FILE = path.join(__dirname, '../.auth/user.json');
  *    This opens a browser for you to log in manually.
  *    Your session is saved and reused for subsequent tests.
  *
- * 2. MOCK AUTH (For CI/automated testing):
- *    Set localStorage tokens directly (see mockAuth function below)
+ * 2. TEST MODE AUTH (For CI/automated testing):
+ *    Set VITE_TEST_MODE=true to use the test login form with Firebase emulators.
  */
 export const test = base.extend<{ authenticatedPage: Page }>({
   authenticatedPage: async ({ browser }, use) => {
@@ -35,35 +35,5 @@ export const test = base.extend<{ authenticatedPage: Page }>({
     await context.close();
   },
 });
-
-/**
- * Mock Supabase auth by setting localStorage tokens.
- * Use this for CI testing without real Google OAuth.
- *
- * You'll need to provide valid test tokens from your Supabase project.
- */
-export async function mockSupabaseAuth(page: Page, tokens: {
-  accessToken: string;
-  refreshToken: string;
-  userId: string;
-  email: string;
-}) {
-  await page.addInitScript((tokens) => {
-    const supabaseKey = 'sb-' + window.location.hostname.split('.')[0] + '-auth-token';
-    const authData = {
-      access_token: tokens.accessToken,
-      refresh_token: tokens.refreshToken,
-      token_type: 'bearer',
-      expires_in: 3600,
-      expires_at: Math.floor(Date.now() / 1000) + 3600,
-      user: {
-        id: tokens.userId,
-        email: tokens.email,
-        role: 'authenticated',
-      }
-    };
-    localStorage.setItem(supabaseKey, JSON.stringify(authData));
-  }, tokens);
-}
 
 export { expect } from '@playwright/test';

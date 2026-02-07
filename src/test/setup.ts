@@ -7,27 +7,13 @@ afterEach(() => {
     cleanup();
 });
 
-// Mock Supabase
-vi.mock('@/integrations/supabase/client', () => ({
-    supabase: {
-        from: vi.fn(() => ({
-            select: vi.fn().mockReturnThis(),
-            insert: vi.fn().mockReturnThis(),
-            update: vi.fn().mockReturnThis(),
-            delete: vi.fn().mockReturnThis(),
-            eq: vi.fn().mockReturnThis(),
-            order: vi.fn().mockReturnThis(),
-            single: vi.fn().mockReturnThis(),
-            is: vi.fn().mockReturnThis(),
-        })),
-        rpc: vi.fn(),
-        auth: {
-            getSession: vi.fn(),
-            onAuthStateChange: vi.fn(() => ({
-                data: { subscription: { unsubscribe: vi.fn() } },
-            })),
-        },
+// Mock Firebase
+vi.mock('@/integrations/firebase/client', () => ({
+    auth: {
+        currentUser: { uid: 'test-user-id', email: 'test@example.com' },
+        onAuthStateChanged: vi.fn(),
     },
+    db: {},
 }));
 
 // Mock Auth context

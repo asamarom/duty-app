@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/integrations/firebase/client';
+import type { PersonnelDoc } from '@/integrations/firebase/types';
 
 interface PersonnelSuggestions {
   dutyPositions: string[];
@@ -17,35 +19,28 @@ export function usePersonnelSuggestions(): PersonnelSuggestions {
   useEffect(() => {
     const fetchSuggestions = async () => {
       try {
-        const { data, error } = await supabase
-          .from('personnel')
-          .select('duty_position, skills, driver_licenses');
+        const personnelRef = collection(db, 'personnel');
+        const snapshot = await getDocs(personnelRef);
 
-        if (error) throw error;
-
-        // Extract unique duty positions
         const uniqueDutyPositions = new Set<string>();
-        // Extract unique skills
         const uniqueSkills = new Set<string>();
-        // Extract unique driver licenses
         const uniqueLicenses = new Set<string>();
 
-        (data || []).forEach((person) => {
-          // Duty positions
-          if (person.duty_position) {
-            uniqueDutyPositions.add(person.duty_position);
+        snapshot.docs.forEach((doc) => {
+          const data = doc.data() as PersonnelDoc;
+
+          if (data.dutyPosition) {
+            uniqueDutyPositions.add(data.dutyPosition);
           }
-          
-          // Skills array
-          if (person.skills && Array.isArray(person.skills)) {
-            person.skills.forEach((skill: string) => {
+
+          if (data.skills && Array.isArray(data.skills)) {
+            data.skills.forEach((skill: string) => {
               if (skill) uniqueSkills.add(skill);
             });
           }
-          
-          // Driver licenses array
-          if (person.driver_licenses && Array.isArray(person.driver_licenses)) {
-            person.driver_licenses.forEach((license: string) => {
+
+          if (data.driverLicenses && Array.isArray(data.driverLicenses)) {
+            data.driverLicenses.forEach((license: string) => {
               if (license) uniqueLicenses.add(license);
             });
           }

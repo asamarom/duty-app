@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { collection, getDocs, query, where, documentId } from 'firebase/firestore';
+import { db } from '@/integrations/firebase/client';
 import type { AppRole } from './useUserRole';
+import type { PersonnelDoc, UserDoc } from '@/integrations/firebase/types';
 
 interface PersonnelWithRole {
   personnelId: string;
@@ -25,54 +27,96 @@ export function usePersonnelRoles(personnelIds?: string[]): UsePersonnelRolesRet
   const fetchRoles = useCallback(async () => {
     try {
       setLoading(true);
-      
-      // First get personnel with their user_ids
-      let personnelQuery = supabase
-        .from('personnel')
-        .select('id, user_id');
-      
+
+      // Fetch personnel with their user_ids
+      const personnelRef = collection(db, 'personnel');
+      let personnelQuery;
+
       if (personnelIds && personnelIds.length > 0) {
-        personnelQuery = personnelQuery.in('id', personnelIds);
-      }
-      
-      const { data: personnelData, error: personnelError } = await personnelQuery;
-      
-      if (personnelError) throw personnelError;
-      
-      // Get unique user_ids that are not null
-      const userIds = [...new Set(personnelData?.filter(p => p.user_id).map(p => p.user_id) || [])];
-      
-      // Fetch roles for these user_ids
-      let rolesData: { user_id: string; role: string }[] = [];
-      if (userIds.length > 0) {
-        const { data, error: rolesError } = await supabase
-          .from('user_roles')
-          .select('user_id, role')
-          .in('user_id', userIds);
-        
-        if (rolesError) throw rolesError;
-        rolesData = data || [];
-      }
-      
-      // Build a map from user_id to roles
-      const userRolesMap = new Map<string, AppRole[]>();
-      rolesData.forEach(r => {
-        const existing = userRolesMap.get(r.user_id) || [];
-        existing.push(r.role as AppRole);
-        userRolesMap.set(r.user_id, existing);
-      });
-      
-      // Build the personnel roles map
-      const result = new Map<string, PersonnelWithRole>();
-      personnelData?.forEach(p => {
-        result.set(p.id, {
-          personnelId: p.id,
-          userId: p.user_id,
-          roles: p.user_id ? (userRolesMap.get(p.user_id) || []) : [],
+        // Firestore 'in' query limited to 30 items at a time
+        const batches = [];
+        for (let i = 0; i < personnelIds.length; i += 30) {
+          const batch = personnelIds.slice(i, i + 30);
+          batches.push(batch);
+        }
+
+        const allPersonnelData: { id: string; userId: string | null }[] = [];
+        for (const batch of batches) {
+          const q = query(personnelRef, where(documentId(), 'in', batch));
+          const snapshot = await getDocs(q);
+          snapshot.docs.forEach((doc) => {
+            const data = doc.data() as PersonnelDoc;
+            allPersonnelData.push({ id: doc.id, userId: data.userId });
+          });
+        }
+
+        // Get unique user_ids that are not null
+        const userIds = [...new Set(allPersonnelData.filter(p => p.userId).map(p => p.userId!))];
+
+        // Fetch roles from users collection
+        const userRolesMap = new Map<string, AppRole[]>();
+        if (userIds.length > 0) {
+          for (let i = 0; i < userIds.length; i += 30) {
+            const batch = userIds.slice(i, i + 30);
+            const usersRef = collection(db, 'users');
+            const q = query(usersRef, where(documentId(), 'in', batch));
+            const snapshot = await getDocs(q);
+            snapshot.docs.forEach((doc) => {
+              const data = doc.data() as UserDoc;
+              userRolesMap.set(doc.id, data.roles || []);
+            });
+          }
+        }
+
+        // Build the personnel roles map
+        const result = new Map<string, PersonnelWithRole>();
+        allPersonnelData.forEach(p => {
+          result.set(p.id, {
+            personnelId: p.id,
+            userId: p.userId,
+            roles: p.userId ? (userRolesMap.get(p.userId) || []) : [],
+          });
         });
-      });
-      
-      setPersonnelRoles(result);
+
+        setPersonnelRoles(result);
+      } else {
+        // Fetch all personnel
+        const snapshot = await getDocs(personnelRef);
+        const allPersonnelData = snapshot.docs.map((doc) => {
+          const data = doc.data() as PersonnelDoc;
+          return { id: doc.id, userId: data.userId };
+        });
+
+        // Get unique user_ids
+        const userIds = [...new Set(allPersonnelData.filter(p => p.userId).map(p => p.userId!))];
+
+        // Fetch roles from users collection
+        const userRolesMap = new Map<string, AppRole[]>();
+        if (userIds.length > 0) {
+          for (let i = 0; i < userIds.length; i += 30) {
+            const batch = userIds.slice(i, i + 30);
+            const usersRef = collection(db, 'users');
+            const q = query(usersRef, where(documentId(), 'in', batch));
+            const usersSnapshot = await getDocs(q);
+            usersSnapshot.docs.forEach((doc) => {
+              const data = doc.data() as UserDoc;
+              userRolesMap.set(doc.id, data.roles || []);
+            });
+          }
+        }
+
+        // Build the personnel roles map
+        const result = new Map<string, PersonnelWithRole>();
+        allPersonnelData.forEach(p => {
+          result.set(p.id, {
+            personnelId: p.id,
+            userId: p.userId,
+            roles: p.userId ? (userRolesMap.get(p.userId) || []) : [],
+          });
+        });
+
+        setPersonnelRoles(result);
+      }
     } catch (err) {
       setError(err as Error);
     } finally {

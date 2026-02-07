@@ -23,7 +23,7 @@ const baseURL = testEnv === 'production'
   ? FIREBASE_PROD_URL
   : testEnv === 'staging'
     ? FIREBASE_TEST_URL
-    : (process.env.BASE_URL || 'http://localhost:8082');
+    : (process.env.BASE_URL || 'http://localhost:8080');
 
 const isRemote = testEnv === 'production' || testEnv === 'staging';
 
@@ -130,11 +130,19 @@ export default defineConfig({
     },
   ],
 
-  // Run local dev server only when not testing remote (production/staging)
-  webServer: isRemote ? undefined : {
-    command: 'npx cross-env VITE_TEST_MODE=true npm run dev',
-    url: baseURL,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-  },
+  // Run Firebase emulators and local dev server when not testing remote
+  webServer: isRemote ? undefined : [
+    {
+      command: 'node scripts/start-emulators.cjs',
+      url: 'http://localhost:9099/',
+      reuseExistingServer: !process.env.CI,
+      timeout: 60 * 1000,
+    },
+    {
+      command: 'npx cross-env VITE_TEST_MODE=true VITE_FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 VITE_FIRESTORE_EMULATOR_HOST=localhost:8085 npm run dev',
+      url: baseURL,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120 * 1000,
+    },
+  ],
 });

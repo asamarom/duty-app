@@ -1,8 +1,8 @@
 # Duty Tactical Management System (DTMS)
 
-Duty is a comprehensive, mission-critical application designed for military and security organizations to manage their most vital assets: **Manpower**, **Equipment**, and **Unit Readiness**.
+Duty is a comprehensive, mission-critical application designed for military and security organizations to manage their most vital assets: **Manpower** and **Equipment**.
 
-The system provides real-time operational oversight, ensuring that commanders at every level have an accurate picture of their unit's status, location, and capability.
+The system provides real-time operational oversight, ensuring that commanders at every level have an accurate picture of their unit manpower, location, and capability.
 
 ---
 
@@ -24,6 +24,7 @@ The application follows a standard military organizational structure, allowing f
 - [PERS-2] Personnel list is viewable with table or list format.
 - [PERS-3] Personnel can be searched/filtered.
 - [PERS-4] Personnel detail page shows individual information.
+- users can only filter/search/view personnels in their battalion.
 
 ### Equipment Inventory (Property Book)
 
@@ -68,8 +69,9 @@ The application follows a standard military organizational structure, allowing f
 *   **Frontend**: React (Vite), TypeScript, Tailwind CSS.
 *   **UI Components**: shadcn/ui (Radix UI), Lucide Icons.
 *   **Data Layer**: TanStack Query (React Query).
-*   **Backend**: Supabase (PostgreSQL, Auth, Realtime).
-*   **Database Security**: Row Level Security (RLS) with custom PostgreSQL functions.
+*   **Backend**: Firebase (Firestore, Auth).
+*   **Database Security**: Firestore Security Rules with custom helper functions.
+*   **Deployment**: Vercel.
 
 ---
 

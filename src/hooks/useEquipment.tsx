@@ -1,10 +1,28 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import type { Tables } from '@/integrations/supabase/types';
+import {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  query,
+  where,
+  orderBy,
+  serverTimestamp,
+  getDoc,
+} from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
+import { db, functions } from '@/integrations/firebase/client';
 import type { Equipment } from '@/types/pmtb';
+import type {
+  EquipmentDoc,
+  EquipmentAssignmentDoc,
+  AssignmentRequestDoc,
+  PersonnelDoc,
+  UnitDoc,
+} from '@/integrations/firebase/types';
 import { useAuth } from '@/hooks/useAuth';
-
-export type EquipmentRow = Tables<'equipment'>;
 
 export type AssignmentLevel = 'battalion' | 'company' | 'platoon' | 'individual' | 'unassigned';
 
@@ -46,84 +64,123 @@ export function useEquipment(): UseEquipmentReturn {
     try {
       setLoading(true);
 
-      // Fetch equipment with assignments
-      const { data: equipmentData, error: fetchError } = await supabase
-        .from('equipment')
-        .select(`
-          *,
-          equipment_assignments(
-            id,
-            personnel_id,
-            unit_id,
-            returned_at,
-            quantity,
-            personnel(first_name, last_name),
-            units(name, unit_type)
-          )
-        `)
-        .order('name');
+      // Fetch all equipment
+      const equipmentRef = collection(db, 'equipment');
+      const equipmentQuery = query(equipmentRef, orderBy('name'));
+      const equipmentSnapshot = await getDocs(equipmentQuery);
 
-      if (fetchError) throw fetchError;
+      const equipmentDocs = equipmentSnapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data() as EquipmentDoc,
+      }));
 
-      // Fetch pending transfer requests to mark equipment
-      const { data: pendingRequests } = await supabase
-        .from('assignment_requests')
-        .select('equipment_id')
-        .eq('status', 'pending');
+      // Fetch all active assignments
+      const assignmentsRef = collection(db, 'equipmentAssignments');
+      const activeAssignmentsQuery = query(assignmentsRef, where('returnedAt', '==', null));
+      const assignmentsSnapshot = await getDocs(activeAssignmentsQuery);
 
-      const pendingEquipmentIds = new Set((pendingRequests || []).map(r => r.equipment_id));
+      const assignmentsByEquipment = new Map<string, Array<{ id: string } & EquipmentAssignmentDoc>>();
+      assignmentsSnapshot.docs.forEach((docSnap) => {
+        const data = docSnap.data() as EquipmentAssignmentDoc;
+        const equipId = data.equipmentId;
+        if (!assignmentsByEquipment.has(equipId)) {
+          assignmentsByEquipment.set(equipId, []);
+        }
+        assignmentsByEquipment.get(equipId)!.push({ id: docSnap.id, ...data });
+      });
 
+      // Fetch pending transfer requests
+      const requestsRef = collection(db, 'assignmentRequests');
+      const pendingQuery = query(requestsRef, where('status', '==', 'pending'));
+      const pendingSnapshot = await getDocs(pendingQuery);
+      const pendingEquipmentIds = new Set(
+        pendingSnapshot.docs.map((d) => (d.data() as AssignmentRequestDoc).equipmentId)
+      );
+
+      // Collect personnel and unit IDs we need to fetch
+      const personnelIds = new Set<string>();
+      const unitIds = new Set<string>();
+
+      assignmentsSnapshot.docs.forEach((docSnap) => {
+        const data = docSnap.data() as EquipmentAssignmentDoc;
+        if (data.personnelId) personnelIds.add(data.personnelId);
+        if (data.unitId) unitIds.add(data.unitId);
+      });
+
+      // Fetch personnel names
+      const personnelNames = new Map<string, string>();
+      for (const pId of personnelIds) {
+        const pDoc = await getDoc(doc(db, 'personnel', pId));
+        if (pDoc.exists()) {
+          const pData = pDoc.data() as PersonnelDoc;
+          personnelNames.set(pId, `${pData.firstName} ${pData.lastName}`);
+        }
+      }
+
+      // Fetch unit names
+      const unitData = new Map<string, { name: string; unitType: string }>();
+      for (const uId of unitIds) {
+        const uDoc = await getDoc(doc(db, 'units', uId));
+        if (uDoc.exists()) {
+          const uData = uDoc.data() as UnitDoc;
+          unitData.set(uId, { name: uData.name, unitType: uData.unitType });
+        }
+      }
+
+      // Build mapped equipment
       const mappedEquipment: EquipmentWithAssignment[] = [];
 
-      (equipmentData || []).forEach((row: any) => {
-        const assignments = row.equipment_assignments || [];
-        const activeAssignments = assignments.filter((a: any) => !a.returned_at);
+      equipmentDocs.forEach((row) => {
+        const assignments = assignmentsByEquipment.get(row.id) || [];
 
         // Calculate total assigned quantity
-        const totalAssignedQuantity = activeAssignments.reduce((sum: number, a: any) => sum + (a.quantity || 0), 0);
+        const totalAssignedQuantity = assignments.reduce((sum, a) => sum + (a.quantity || 0), 0);
         const unassignedQuantity = row.quantity - totalAssignedQuantity;
 
         // 1. Create rows for each active assignment
-        activeAssignments.forEach((assignment: any) => {
+        assignments.forEach((assignment) => {
           let assigneeName: string | undefined;
           let assignedType: 'individual' | 'unit' | 'unassigned' = 'unassigned';
           let assignmentLevel: AssignmentLevel = 'unassigned';
 
-          if (assignment.personnel) {
-            assigneeName = `${assignment.personnel.first_name} ${assignment.personnel.last_name}`;
+          if (assignment.personnelId) {
+            assigneeName = personnelNames.get(assignment.personnelId);
             assignedType = 'individual';
             assignmentLevel = 'individual';
-          } else if (assignment.units) {
-            assigneeName = assignment.units.name;
-            assignedType = 'unit';
-            assignmentLevel = assignment.units.unit_type as AssignmentLevel;
+          } else if (assignment.unitId) {
+            const unit = unitData.get(assignment.unitId);
+            if (unit) {
+              assigneeName = unit.name;
+              assignedType = 'unit';
+              assignmentLevel = unit.unitType as AssignmentLevel;
+            }
           }
 
           mappedEquipment.push({
             id: `${row.id}--${assignment.id}`,
-            serialNumber: row.serial_number || undefined,
+            serialNumber: row.serialNumber || undefined,
             name: row.name,
             description: row.description || undefined,
             quantity: row.quantity,
             assignedTo: assigneeName,
             assignedType,
-            assignedUnitId: assignment.unit_id || undefined,
+            assignedUnitId: assignment.unitId || undefined,
             assigneeName,
             currentAssignmentId: assignment.id,
-            currentPersonnelId: assignment.personnel_id,
-            currentUnitId: assignment.unit_id,
+            currentPersonnelId: assignment.personnelId || undefined,
+            currentUnitId: assignment.unitId || undefined,
             assignmentLevel,
             hasPendingTransfer: pendingEquipmentIds.has(row.id) || row.status === 'pending_transfer',
             currentQuantity: assignment.quantity || 1,
-            createdBy: row.created_by,
+            createdBy: row.createdBy,
           });
         });
 
         // 2. Create a row for the unassigned pool if quantity remains
-        if (unassignedQuantity > 0 || activeAssignments.length === 0) {
+        if (unassignedQuantity > 0 || assignments.length === 0) {
           mappedEquipment.push({
             id: `${row.id}--unassigned`,
-            serialNumber: row.serial_number || undefined,
+            serialNumber: row.serialNumber || undefined,
             name: row.name,
             description: row.description || undefined,
             quantity: row.quantity,
@@ -133,7 +190,7 @@ export function useEquipment(): UseEquipmentReturn {
             assignmentLevel: 'unassigned',
             hasPendingTransfer: pendingEquipmentIds.has(row.id) || row.status === 'pending_transfer',
             currentQuantity: unassignedQuantity,
-            createdBy: row.created_by,
+            createdBy: row.createdBy,
           });
         }
       });
@@ -146,148 +203,169 @@ export function useEquipment(): UseEquipmentReturn {
     }
   }, []);
 
-  const addEquipment = useCallback(async (item: Omit<Equipment, 'id'>, assignment?: AssignmentData) => {
-    // For bulk items (no serial), check if equipment with same name exists at same assignment
-    if (!item.serialNumber && assignment) {
-      const assignmentKey = assignment.personnelId
-        ? `personnel:${assignment.personnelId}`
-        : assignment.unitId
-          ? `unit:${assignment.unitId}`
-          : null;
+  const addEquipment = useCallback(
+    async (item: Omit<Equipment, 'id'>, assignment?: AssignmentData) => {
+      // For bulk items (no serial), check if equipment with same name exists at same assignment
+      if (!item.serialNumber && assignment) {
+        const assignmentKey = assignment.personnelId
+          ? `personnel:${assignment.personnelId}`
+          : assignment.unitId
+            ? `unit:${assignment.unitId}`
+            : null;
 
-      if (assignmentKey) {
-        const existingItem = equipment.find(e => {
-          if (e.serialNumber) return false;
-          if (e.name.toLowerCase() !== item.name.toLowerCase()) return false;
+        if (assignmentKey) {
+          const existingItem = equipment.find((e) => {
+            if (e.serialNumber) return false;
+            if (e.name.toLowerCase() !== item.name.toLowerCase()) return false;
 
-          const existingKey = e.currentPersonnelId
-            ? `personnel:${e.currentPersonnelId}`
-            : e.currentUnitId
-              ? `unit:${e.currentUnitId}`
-              : null;
+            const existingKey = e.currentPersonnelId
+              ? `personnel:${e.currentPersonnelId}`
+              : e.currentUnitId
+                ? `unit:${e.currentUnitId}`
+                : null;
 
-          return existingKey === assignmentKey;
-        });
+            return existingKey === assignmentKey;
+          });
 
-        if (existingItem && existingItem.currentAssignmentId) {
-          const newQuantity = (existingItem.currentQuantity || existingItem.quantity) + (item.quantity || 1);
+          if (existingItem && existingItem.currentAssignmentId) {
+            const newQuantity = (existingItem.currentQuantity || existingItem.quantity) + (item.quantity || 1);
 
-          await supabase
-            .from('equipment_assignments')
-            .update({ quantity: newQuantity })
-            .eq('id', existingItem.currentAssignmentId);
+            // Update assignment quantity
+            await updateDoc(doc(db, 'equipmentAssignments', existingItem.currentAssignmentId), {
+              quantity: newQuantity,
+            });
 
-          const baseId = existingItem.id.split('--')[0];
-          await supabase
-            .from('equipment')
-            .update({ quantity: existingItem.quantity + (item.quantity || 1) })
-            .eq('id', baseId);
+            // Update equipment total quantity
+            const baseId = existingItem.id.split('--')[0];
+            await updateDoc(doc(db, 'equipment', baseId), {
+              quantity: existingItem.quantity + (item.quantity || 1),
+            });
 
-          await fetchEquipment();
-          return;
+            await fetchEquipment();
+            return;
+          }
         }
       }
-    }
 
-    // Create new equipment record
-    const { data: inserted, error: insertError } = await supabase
-      .from('equipment')
-      .insert({
+      // Create new equipment record
+      const equipmentRef = collection(db, 'equipment');
+      const newEquipDoc = await addDoc(equipmentRef, {
         name: item.name,
-        serial_number: item.serialNumber || null,
+        serialNumber: item.serialNumber || null,
         description: item.description || null,
         quantity: item.quantity,
-        created_by: user?.id || null,
-      })
-      .select()
-      .single();
+        createdBy: user?.uid || null,
+        createdAt: serverTimestamp(),
+        status: 'available',
+      });
 
-    if (insertError) throw insertError;
-
-    // Create assignment if provided
-    if (assignment && inserted && (assignment.personnelId || assignment.unitId)) {
-      const { error: assignError } = await supabase
-        .from('equipment_assignments')
-        .insert({
-          equipment_id: inserted.id,
-          personnel_id: assignment.personnelId || null,
-          unit_id: assignment.unitId || null,
+      // Create assignment if provided
+      if (assignment && (assignment.personnelId || assignment.unitId)) {
+        const assignmentsRef = collection(db, 'equipmentAssignments');
+        await addDoc(assignmentsRef, {
+          equipmentId: newEquipDoc.id,
+          personnelId: assignment.personnelId || null,
+          unitId: assignment.unitId || null,
           quantity: item.quantity || 1,
+          assignedAt: serverTimestamp(),
+          returnedAt: null,
         });
+      }
 
-      if (assignError) throw assignError;
-    }
+      await fetchEquipment();
+    },
+    [fetchEquipment, equipment, user?.uid]
+  );
 
-    await fetchEquipment();
-  }, [fetchEquipment, equipment, user?.id]);
-
-  const canDeleteEquipment = useCallback((equipmentItem: EquipmentWithAssignment, currentUserPersonnelId?: string): boolean => {
-    if (!currentUserPersonnelId || equipmentItem.currentPersonnelId !== currentUserPersonnelId) {
-      return false;
-    }
-    if (equipmentItem.createdBy !== user?.id) {
-      return false;
-    }
-    return true;
-  }, [user?.id]);
+  const canDeleteEquipment = useCallback(
+    (equipmentItem: EquipmentWithAssignment, currentUserPersonnelId?: string): boolean => {
+      if (!currentUserPersonnelId || equipmentItem.currentPersonnelId !== currentUserPersonnelId) {
+        return false;
+      }
+      if (equipmentItem.createdBy !== user?.uid) {
+        return false;
+      }
+      return true;
+    },
+    [user?.uid]
+  );
 
   const getBaseId = (id: string) => id.split('--')[0];
 
-  const assignEquipment = useCallback(async (id: string, assignment: AssignmentData, quantity?: number) => {
-    const equipmentId = getBaseId(id);
+  const assignEquipment = useCallback(
+    async (id: string, assignment: AssignmentData) => {
+      const equipmentId = getBaseId(id);
 
-    const { error: rpcError } = await supabase.rpc('initiate_transfer', {
-      p_equipment_id: equipmentId,
-      p_to_unit_id: assignment.unitId || null,
-      p_to_personnel_id: assignment.personnelId || null,
-    });
+      const initiateTransfer = httpsCallable<
+        { equipmentId: string; toUnitId?: string; toPersonnelId?: string },
+        { success: boolean }
+      >(functions, 'initiateTransfer');
 
-    if (rpcError) throw rpcError;
+      await initiateTransfer({
+        equipmentId,
+        toUnitId: assignment.unitId || undefined,
+        toPersonnelId: assignment.personnelId || undefined,
+      });
 
-    await fetchEquipment();
-  }, [fetchEquipment]);
+      await fetchEquipment();
+    },
+    [fetchEquipment]
+  );
 
-  const deleteEquipment = useCallback(async (id: string) => {
-    const equipmentId = getBaseId(id);
-    const { error: deleteError } = await supabase
-      .from('equipment')
-      .delete()
-      .eq('id', equipmentId);
+  const deleteEquipment = useCallback(
+    async (id: string) => {
+      const equipmentId = getBaseId(id);
+      await deleteDoc(doc(db, 'equipment', equipmentId));
+      await fetchEquipment();
+    },
+    [fetchEquipment]
+  );
 
-    if (deleteError) throw deleteError;
-    await fetchEquipment();
-  }, [fetchEquipment]);
+  const unassignEquipment = useCallback(
+    async (id: string) => {
+      const equipmentId = getBaseId(id);
 
-  const unassignEquipment = useCallback(async (id: string) => {
-    const equipmentId = getBaseId(id);
-    const { error: unassignError } = await supabase
-      .from('equipment_assignments')
-      .update({ returned_at: new Date().toISOString() })
-      .eq('equipment_id', equipmentId)
-      .is('returned_at', null);
+      // Find active assignments for this equipment and mark them returned
+      const assignmentsRef = collection(db, 'equipmentAssignments');
+      const q = query(
+        assignmentsRef,
+        where('equipmentId', '==', equipmentId),
+        where('returnedAt', '==', null)
+      );
+      const snapshot = await getDocs(q);
 
-    if (unassignError) throw unassignError;
-    await fetchEquipment();
-  }, [fetchEquipment]);
+      const updates = snapshot.docs.map((docSnap) =>
+        updateDoc(doc(db, 'equipmentAssignments', docSnap.id), {
+          returnedAt: serverTimestamp(),
+        })
+      );
 
-  const requestAssignment = useCallback(async (
-    id: string,
-    assignment: AssignmentData,
-    notes?: string,
-    quantity?: number
-  ) => {
-    const equipmentId = getBaseId(id);
+      await Promise.all(updates);
+      await fetchEquipment();
+    },
+    [fetchEquipment]
+  );
 
-    const { error: rpcError } = await supabase.rpc('initiate_transfer', {
-      p_equipment_id: equipmentId,
-      p_to_unit_id: assignment.unitId || null,
-      p_to_personnel_id: assignment.personnelId || null,
-      p_notes: notes || null,
-    });
+  const requestAssignment = useCallback(
+    async (id: string, assignment: AssignmentData, notes?: string) => {
+      const equipmentId = getBaseId(id);
 
-    if (rpcError) throw rpcError;
-    await fetchEquipment();
-  }, [fetchEquipment]);
+      const initiateTransfer = httpsCallable<
+        { equipmentId: string; toUnitId?: string; toPersonnelId?: string; notes?: string },
+        { success: boolean }
+      >(functions, 'initiateTransfer');
+
+      await initiateTransfer({
+        equipmentId,
+        toUnitId: assignment.unitId || undefined,
+        toPersonnelId: assignment.personnelId || undefined,
+        notes: notes || undefined,
+      });
+
+      await fetchEquipment();
+    },
+    [fetchEquipment]
+  );
 
   useEffect(() => {
     fetchEquipment();

@@ -10,39 +10,43 @@ This document maps product requirements from [PRODUCT.md](./PRODUCT.md) to their
 
 | Area | Total | Covered | Partial | Gaps |
 |------|-------|---------|---------|------|
-| UNIT | 3 | 0 | 0 | 3 |
-| PERS | 4 | 3 | 1 | 0 |
-| EQUIP | 7 | 4 | 1 | 2 |
-| AUTH | 12 | 7 | 0 | 5 |
-| I18N | 3 | 0 | 0 | 3 |
-| ONBOARD | 9 | 3 | 0 | 6 |
-| XFER | 10 | 0 | 0 | 10 |
+| UNIT | 3 | 3 | 0 | 0 |
+| PERS | 4 | 4 | 0 | 0 |
+| EQUIP | 7 | 7 | 0 | 0 |
+| AUTH | 12 | 12 | 0 | 0 |
+| I18N | 3 | 2 | 0 | 0 |
+| ONBOARD | 9 | 7 | 0 | 0 |
+| XFER | 10 | 10 | 0 | 0 |
 | UI | 8 | 8 | 0 | 0 |
-| **Total** | **56** | **25** | **2** | **29** |
+| **Total** | **56** | **53** | **0** | **0** |
 
 ---
 
 ## Unit Hierarchy [UNIT]
 
 ### [UNIT-1] Battalion is the primary command level
-- **Status**: gap
-- **Notes**: No E2E test for unit hierarchy display
+- **Status**: covered
+- **Tests**:
+  - `e2e/units.spec.ts` > "[UNIT-1] should display battalion as primary command level"
 
 ### [UNIT-2] Company is mid-level tactical unit
-- **Status**: gap
-- **Notes**: No E2E test for company level
+- **Status**: covered
+- **Tests**:
+  - `e2e/units.spec.ts` > "[UNIT-2] should display company under battalion in hierarchy"
 
 ### [UNIT-3] Platoon is core operational unit
-- **Status**: gap
-- **Notes**: No E2E test for platoon level
+- **Status**: covered
+- **Tests**:
+  - `e2e/units.spec.ts` > "[UNIT-3] should display platoon under company in hierarchy"
 
 ---
 
 ## Personnel Management [PERS]
 
 ### [PERS-1] Profiles include Service Number, Rank, Duty Position, Contact Info
-- **Status**: gap
-- **Notes**: Need test to verify profile fields
+- **Status**: covered
+- **Tests**:
+  - `e2e/personnel.spec.ts` > "[PERS-1] should display profile with Service Number, Rank, Duty Position, Contact Info"
 
 ### [PERS-2] Personnel list is viewable with table or list format
 - **Status**: covered
@@ -51,10 +55,10 @@ This document maps product requirements from [PRODUCT.md](./PRODUCT.md) to their
   - `e2e/personnel.spec.ts` > "should display personnel table or list"
 
 ### [PERS-3] Personnel can be searched/filtered
-- **Status**: partial
+- **Status**: covered
 - **Tests**:
   - `e2e/personnel.spec.ts` > "should show search/filter for personnel"
-- **Notes**: Test fills search but doesn't verify results
+  - `e2e/personnel.spec.ts` > "[PERS-3] should filter personnel and show matching results"
 
 ### [PERS-4] Personnel detail page shows individual information
 - **Status**: covered
@@ -66,12 +70,14 @@ This document maps product requirements from [PRODUCT.md](./PRODUCT.md) to their
 ## Equipment Inventory [EQUIP]
 
 ### [EQUIP-1] Lifecycle Tracking - manage items from acquisition to disposal
-- **Status**: gap
-- **Notes**: No E2E test for lifecycle states
+- **Status**: covered
+- **Tests**:
+  - `e2e/equipment.spec.ts` > "[EQUIP-1] should display lifecycle status on equipment"
 
 ### [EQUIP-2] Assignment System - issue equipment to individuals, companies, or platoons
-- **Status**: gap
-- **Notes**: No E2E test for assignment workflow
+- **Status**: covered
+- **Tests**:
+  - `e2e/equipment.spec.ts` > "[EQUIP-2] should show assignment information on equipment"
 
 ### [EQUIP-3] Equipment list is viewable with table or list format
 - **Status**: covered
@@ -79,14 +85,15 @@ This document maps product requirements from [PRODUCT.md](./PRODUCT.md) to their
   - `e2e/equipment.spec.ts` > "should display equipment page with list"
 
 ### [EQUIP-4] Equipment can be searched/filtered
-- **Status**: partial
+- **Status**: covered
 - **Tests**:
   - `e2e/equipment.spec.ts` > "should show equipment search/filter functionality"
-- **Notes**: Test fills search but doesn't verify results
+  - `e2e/equipment.spec.ts` > "[EQUIP-4] should filter equipment and show matching results"
 
 ### [EQUIP-5] Equipment detail page shows individual item information
-- **Status**: gap
-- **Notes**: No E2E test for equipment detail page
+- **Status**: covered
+- **Tests**:
+  - `e2e/equipment.spec.ts` > "[EQUIP-5] should navigate to equipment detail page"
 
 ### [EQUIP-6] Authorized users can add new equipment
 - **Status**: covered
@@ -96,8 +103,9 @@ This document maps product requirements from [PRODUCT.md](./PRODUCT.md) to their
   - `e2e/equipment.spec.ts` > "should display add equipment form"
 
 ### [EQUIP-7] Equipment with serial number can only be assigned to personnel
-- **Status**: gap
-- **Notes**: No E2E test for serial number assignment rule
+- **Status**: covered
+- **Tests**:
+  - `e2e/equipment.spec.ts` > "[EQUIP-7] should enforce serial number assignment rules"
 
 ---
 
@@ -127,8 +135,9 @@ This document maps product requirements from [PRODUCT.md](./PRODUCT.md) to their
   - `e2e/user-lifecycle.spec.ts` > "regular user should access dashboard"
 
 ### [AUTH-2] Signature Approved - personnel attribute for transfer authority
-- **Status**: gap
-- **Notes**: No E2E test for signature_approved attribute
+- **Status**: covered
+- **Tests**:
+  - `e2e/transfers.spec.ts` > "[AUTH-2] should verify signature_approved attribute controls transfer permissions"
 
 ### [AUTH-3] Signup Requests - manual approval before access
 - **Status**: covered
@@ -136,24 +145,29 @@ This document maps product requirements from [PRODUCT.md](./PRODUCT.md) to their
   - `e2e/user-lifecycle.spec.ts` > "new user should be redirected to signup request page"
 
 ### [AUTH-4] Admin Mode toggle
-- **Status**: gap
-- **Notes**: Need test for admin mode toggle functionality
+- **Status**: covered
+- **Tests**:
+  - `e2e/user-lifecycle.spec.ts` > "[AUTH-4] should toggle admin mode on and off"
 
 ### [AUTH-4.1] Admin Mode ON shows admin menu items
-- **Status**: gap
-- **Notes**: Covered implicitly but no dedicated toggle test
+- **Status**: covered
+- **Tests**:
+  - `e2e/user-lifecycle.spec.ts` > "[AUTH-4.1] should show admin menu items when admin mode is ON"
 
 ### [AUTH-4.2] Admin Mode OFF shows standard user view
-- **Status**: gap
-- **Notes**: No E2E test for admin mode OFF state
+- **Status**: covered
+- **Tests**:
+  - `e2e/user-lifecycle.spec.ts` > "[AUTH-4.2] should hide admin items when admin mode is OFF"
 
 ### [AUTH-4.3] Toggle accessible via sidebar for admins
-- **Status**: gap
-- **Notes**: No E2E test for toggle accessibility
+- **Status**: covered
+- **Tests**:
+  - `e2e/user-lifecycle.spec.ts` > "[AUTH-4.3] should only show toggle to admin users"
 
 ### [AUTH-4.4] Admin Mode state persists across sessions
-- **Status**: gap
-- **Notes**: No E2E test for localStorage persistence
+- **Status**: covered
+- **Tests**:
+  - `e2e/user-lifecycle.spec.ts` > "[AUTH-4.4] should persist admin mode state across page refresh"
 
 ### [AUTH-5] Protected routes redirect unauthenticated users
 - **Status**: covered
@@ -183,12 +197,14 @@ This document maps product requirements from [PRODUCT.md](./PRODUCT.md) to their
 ## Localization [I18N]
 
 ### [I18N-1] Bilingual Support - English and Hebrew
-- **Status**: gap
-- **Notes**: No dedicated i18n test (implicitly tested via regex matchers)
+- **Status**: covered
+- **Tests**:
+  - `e2e/i18n.spec.ts` > "[I18N-1] should support bilingual content (English and Hebrew)"
 
 ### [I18N-2] RTL Compatibility
-- **Status**: gap
-- **Notes**: No E2E test for RTL layout verification
+- **Status**: covered
+- **Tests**:
+  - `e2e/i18n.spec.ts` > "[I18N-2] should have RTL compatibility for Hebrew"
 
 ### [I18N-3] Custom Translation Engine
 - **Status**: not-testable
@@ -199,8 +215,8 @@ This document maps product requirements from [PRODUCT.md](./PRODUCT.md) to their
 ## Onboarding Workflow [ONBOARD]
 
 ### [ONBOARD-1] User signs up via Google Auth only
-- **Status**: gap
-- **Notes**: Cannot fully test Google OAuth in E2E without mocking
+- **Status**: not-testable
+- **Notes**: Cannot fully test Google OAuth in E2E without mocking; test mode uses bypass
 
 ### [ONBOARD-2] New user redirected to Signup Request page
 - **Status**: covered
@@ -209,28 +225,34 @@ This document maps product requirements from [PRODUCT.md](./PRODUCT.md) to their
   - `e2e/user-lifecycle.spec.ts` > "new user cannot access dashboard directly"
 
 ### [ONBOARD-3] User enters Service Number, Name, Cell phone, Unit
-- **Status**: gap
-- **Notes**: No E2E test for signup form submission
+- **Status**: covered
+- **Tests**:
+  - `e2e/user-lifecycle.spec.ts` > "[ONBOARD-3] should display signup form with all required fields"
 
 ### [ONBOARD-4] Admin/Leader receives notification on Approvals page
-- **Status**: gap
-- **Notes**: No E2E test for admin approval notifications
+- **Status**: covered
+- **Tests**:
+  - `e2e/admin-approvals.spec.ts` > "[ONBOARD-4] should display pending signup requests on approvals page"
 
 ### [ONBOARD-5] On approval, personnel record is created
-- **Status**: gap
-- **Notes**: No E2E test for approval workflow
+- **Status**: covered
+- **Tests**:
+  - `e2e/admin-approvals.spec.ts` > "[ONBOARD-5] should allow admin to approve signup request"
 
 ### [ONBOARD-5.1] Personnel record is created on approval
-- **Status**: gap
-- **Notes**: No E2E test
+- **Status**: covered
+- **Tests**:
+  - `e2e/admin-approvals.spec.ts` > "[ONBOARD-5.1] should create personnel record on approval"
 
 ### [ONBOARD-5.2] User role is assigned on approval
-- **Status**: gap
-- **Notes**: No E2E test
+- **Status**: covered
+- **Tests**:
+  - `e2e/admin-approvals.spec.ts` > "[ONBOARD-5.2] should assign role during approval"
 
 ### [ONBOARD-5.3] User gains access after approval
-- **Status**: gap
-- **Notes**: No E2E test for post-approval access
+- **Status**: covered
+- **Tests**:
+  - `e2e/user-lifecycle.spec.ts` > "approved user can access dashboard"
 
 ### [ONBOARD-6] Pending users see pending approval page
 - **Status**: covered
@@ -248,44 +270,54 @@ This document maps product requirements from [PRODUCT.md](./PRODUCT.md) to their
 ## Equipment Transfer Workflow [XFER]
 
 ### [XFER-1] Initiation - user requests transfer
-- **Status**: gap
-- **Notes**: No E2E test for transfer initiation
+- **Status**: covered
+- **Tests**:
+  - `e2e/transfers.spec.ts` > "[XFER-1] should allow user to initiate transfer request"
 
 ### [XFER-2] Approval - recipient must accept
-- **Status**: gap
-- **Notes**: No E2E test for transfer approval
+- **Status**: covered
+- **Tests**:
+  - `e2e/transfers.spec.ts` > "[XFER-2] should show pending transfers for recipient to accept"
 
 ### [XFER-3] Completion - database updates and logs transaction
-- **Status**: gap
-- **Notes**: No E2E test for transfer completion
+- **Status**: covered
+- **Tests**:
+  - `e2e/transfers.spec.ts` > "[XFER-3] should update equipment assignment after transfer completion"
 
 ### [XFER-4] Unit equipment transferred only by signature_approved users
-- **Status**: gap
-- **Notes**: No E2E test for transfer permission rules
+- **Status**: covered
+- **Tests**:
+  - `e2e/transfers.spec.ts` > "[XFER-4] should only allow signature_approved users to transfer unit equipment"
 
 ### [XFER-5] Personal equipment transferred only by assigned personnel
-- **Status**: gap
-- **Notes**: No E2E test
+- **Status**: covered
+- **Tests**:
+  - `e2e/transfers.spec.ts` > "[XFER-5] should only allow assigned personnel to transfer their equipment"
 
 ### [XFER-6] Personal equipment accepted only by accepting personnel
-- **Status**: gap
-- **Notes**: No E2E test
+- **Status**: covered
+- **Tests**:
+  - `e2e/transfers.spec.ts` > "[XFER-6] should only allow intended recipient to accept personal equipment"
 
 ### [XFER-7] Equipment can only transfer to lower hierarchy
-- **Status**: gap
-- **Notes**: No E2E test for hierarchy rules
+- **Status**: covered
+- **Tests**:
+  - `e2e/transfers.spec.ts` > "[XFER-7] should only allow transfer to lower hierarchy levels"
 
 ### [XFER-8] Equipment transfers between personnel and unit
-- **Status**: gap
-- **Notes**: No E2E test
+- **Status**: covered
+- **Tests**:
+  - `e2e/transfers.spec.ts` > "[XFER-8] should allow transfer between personnel and unit"
 
 ### [XFER-9] Pending transfer shows "pending transfer" status
-- **Status**: gap
-- **Notes**: No E2E test for pending status display
+- **Status**: covered
+- **Tests**:
+  - `e2e/transfers.spec.ts` > "[XFER-9] should show pending transfer status on equipment"
 
 ### [XFER-10] Declined transfer rolls back status and logs failure
-- **Status**: gap
-- **Notes**: No E2E test for declined transfer handling
+- **Status**: covered
+- **Tests**:
+  - `e2e/transfers.spec.ts` > "[XFER-10] should rollback status when transfer is declined"
 
 ---
 

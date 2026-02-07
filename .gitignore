@@ -37,5 +37,10 @@ dist-ssr
 # Firebase
 .firebase/
 firebase-debug.log
+firebase-service-account.json
+service-account.json
+ui-debug.log
+firestore-debug.log
 nul
-supabase/.temp/
+# Vercel
+.vercel

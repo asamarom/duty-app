@@ -1,20 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/integrations/firebase/client';
 import { useAuth } from './useAuth';
+import type { UserDoc } from '@/integrations/firebase/types';
 
 interface UseUserUnitReturn {
   unitId: string | null;
-  // Backwards compatibility alias
   battalionId: string | null;
   loading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
 }
 
-/**
- * Hook to get the current user's assigned unit from their profile.
- * Returns unitId (and battalionId as alias for backwards compatibility).
- */
 export function useUserBattalion(): UseUserUnitReturn {
   const { user } = useAuth();
   const [unitId, setUnitId] = useState<string | null>(null);
@@ -22,7 +19,7 @@ export function useUserBattalion(): UseUserUnitReturn {
   const [error, setError] = useState<Error | null>(null);
 
   const fetchUnit = useCallback(async () => {
-    if (!user?.id) {
+    if (!user?.uid) {
       setUnitId(null);
       setLoading(false);
       return;
@@ -30,20 +27,21 @@ export function useUserBattalion(): UseUserUnitReturn {
 
     try {
       setLoading(true);
-      const { data, error: fetchError } = await supabase
-        .from('profiles')
-        .select('unit_id')
-        .eq('id', user.id)
-        .single();
+      const userDocRef = doc(db, 'users', user.uid);
+      const snapshot = await getDoc(userDocRef);
 
-      if (fetchError) throw fetchError;
-      setUnitId(data?.unit_id || null);
+      if (snapshot.exists()) {
+        const data = snapshot.data() as UserDoc;
+        setUnitId(data.unitId || null);
+      } else {
+        setUnitId(null);
+      }
     } catch (err) {
       setError(err as Error);
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.uid]);
 
   useEffect(() => {
     fetchUnit();
@@ -51,7 +49,7 @@ export function useUserBattalion(): UseUserUnitReturn {
 
   return {
     unitId,
-    battalionId: unitId, // Backwards compatibility
+    battalionId: unitId,
     loading,
     error,
     refetch: fetchUnit,

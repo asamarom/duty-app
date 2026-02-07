@@ -1,7 +1,16 @@
-import { supabase } from '@/integrations/supabase/client';
+import { doc, addDoc, updateDoc, deleteDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/integrations/firebase/client';
 import { useUnits, Unit, UnitType, UnitWithChildren } from './useUnits';
 import { useToast } from '@/hooks/use-toast';
-import type { UnitInsert, UnitUpdate } from '@/integrations/supabase/types';
+
+interface UnitUpdate {
+  name?: string;
+  unit_type?: UnitType;
+  parent_id?: string | null;
+  designation?: string | null;
+  leader_id?: string | null;
+  status?: 'active' | 'inactive' | 'deployed';
+}
 
 interface UseUnitsManagementReturn {
   units: Unit[];
@@ -16,7 +25,6 @@ interface UseUnitsManagementReturn {
   getUnitAncestors: (unitId: string) => Unit[];
   getUnitPath: (unitId: string) => string;
   buildUnitTree: () => UnitWithChildren[];
-  // Unit CRUD
   createUnit: (data: { name: string; unit_type: UnitType; parent_id?: string; designation?: string }) => Promise<Unit | null>;
   updateUnit: (id: string, data: Partial<UnitUpdate>) => Promise<boolean>;
   deleteUnit: (id: string) => Promise<boolean>;
@@ -45,65 +53,80 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
     parent_id?: string;
     designation?: string;
   }): Promise<Unit | null> => {
-    const insertData: UnitInsert = {
-      name: data.name,
-      unit_type: data.unit_type,
-      parent_id: data.parent_id || null,
-      designation: data.designation,
-    };
+    try {
+      const unitsRef = collection(db, 'units');
+      const docRef = await addDoc(unitsRef, {
+        name: data.name,
+        unitType: data.unit_type,
+        parentId: data.parent_id || null,
+        designation: data.designation || null,
+        leaderId: null,
+        status: 'active',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
 
-    const { data: newUnit, error } = await supabase
-      .from('units')
-      .insert(insertData)
-      .select()
-      .single();
+      const typeLabels: Record<UnitType, string> = {
+        battalion: 'Battalion',
+        company: 'Company',
+        platoon: 'Platoon',
+      };
 
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: 'Success', description: `${typeLabels[data.unit_type]} created successfully` });
+      await refetch();
+
+      return {
+        id: docRef.id,
+        name: data.name,
+        unit_type: data.unit_type,
+        parent_id: data.parent_id || null,
+        designation: data.designation || null,
+        leader_id: null,
+        status: 'active',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+    } catch (err) {
+      toast({ title: 'Error', description: (err as Error).message, variant: 'destructive' });
       return null;
     }
-
-    const typeLabels: Record<UnitType, string> = {
-      battalion: 'Battalion',
-      company: 'Company',
-      platoon: 'Platoon',
-    };
-
-    toast({ title: 'Success', description: `${typeLabels[data.unit_type]} created successfully` });
-    await refetch();
-    return newUnit;
   };
 
   const updateUnit = async (id: string, data: Partial<UnitUpdate>): Promise<boolean> => {
-    const { error } = await supabase
-      .from('units')
-      .update(data)
-      .eq('id', id);
+    try {
+      const unitDocRef = doc(db, 'units', id);
+      const updateData: Record<string, unknown> = { updatedAt: serverTimestamp() };
 
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      if (data.name !== undefined) updateData.name = data.name;
+      if (data.unit_type !== undefined) updateData.unitType = data.unit_type;
+      if (data.parent_id !== undefined) updateData.parentId = data.parent_id;
+      if (data.designation !== undefined) updateData.designation = data.designation;
+      if (data.leader_id !== undefined) updateData.leaderId = data.leader_id;
+      if (data.status !== undefined) updateData.status = data.status;
+
+      await updateDoc(unitDocRef, updateData);
+
+      toast({ title: 'Success', description: 'Unit updated successfully' });
+      await refetch();
+      return true;
+    } catch (err) {
+      toast({ title: 'Error', description: (err as Error).message, variant: 'destructive' });
       return false;
     }
-
-    toast({ title: 'Success', description: 'Unit updated successfully' });
-    await refetch();
-    return true;
   };
 
-  const deleteUnit = async (id: string): Promise<boolean> => {
-    const { error } = await supabase
-      .from('units')
-      .delete()
-      .eq('id', id);
+  const deleteUnitFn = async (id: string): Promise<boolean> => {
+    try {
+      const unitDocRef = doc(db, 'units', id);
+      await deleteDoc(unitDocRef);
 
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: 'Success', description: 'Unit deleted successfully' });
+      await refetch();
+      return true;
+    } catch (err) {
+      toast({ title: 'Error', description: (err as Error).message, variant: 'destructive' });
       return false;
     }
-
-    toast({ title: 'Success', description: 'Unit deleted successfully' });
-    await refetch();
-    return true;
   };
 
   return {
@@ -121,6 +144,6 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
     buildUnitTree,
     createUnit,
     updateUnit,
-    deleteUnit,
+    deleteUnit: deleteUnitFn,
   };
 }

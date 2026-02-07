@@ -1,0 +1,145 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function getUserDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function hasRole(role) {
+      return isAuthenticated() &&
+        getUserDoc().data.roles != null &&
+        role in getUserDoc().data.roles;
+    }
+
+    function isAdmin() {
+      return hasRole('admin');
+    }
+
+    function isLeader() {
+      return hasRole('leader');
+    }
+
+    function isAdminOrLeader() {
+      return isAdmin() || isLeader();
+    }
+
+    function hasAnyRole() {
+      return isAuthenticated() &&
+        getUserDoc().data.roles != null &&
+        getUserDoc().data.roles.size() > 0;
+    }
+
+    // Users collection - stores user profiles and roles
+    match /users/{userId} {
+      // Users can read their own doc, admins can read all
+      allow read: if isOwner(userId) || isAdmin();
+
+      // Users can create their own doc on signup
+      allow create: if isOwner(userId);
+
+      // Only admins can update roles, users can update their own non-role fields
+      allow update: if isOwner(userId) &&
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['roles'])) ||
+        isAdmin();
+
+      // Only admins can delete users
+      allow delete: if isAdmin();
+    }
+
+    // Units collection
+    match /units/{unitId} {
+      // Anyone authenticated with a role can read units
+      allow read: if hasAnyRole();
+
+      // Only admins can create/update/delete units
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Personnel collection
+    match /personnel/{personnelId} {
+      // Anyone authenticated with a role can read personnel
+      allow read: if hasAnyRole();
+
+      // Admins and leaders can create/update personnel
+      allow create, update: if isAdminOrLeader();
+
+      // Only admins can delete personnel
+      allow delete: if isAdmin();
+    }
+
+    // Equipment collection
+    match /equipment/{equipmentId} {
+      // Anyone authenticated with a role can read equipment
+      allow read: if hasAnyRole();
+
+      // Admins and leaders can create equipment
+      allow create: if isAdminOrLeader();
+
+      // Admins and leaders can update equipment
+      allow update: if isAdminOrLeader();
+
+      // Only admins can delete equipment
+      allow delete: if isAdmin();
+    }
+
+    // Equipment Assignments collection
+    match /equipmentAssignments/{assignmentId} {
+      // Anyone authenticated with a role can read assignments
+      allow read: if hasAnyRole();
+
+      // Admins and leaders can manage assignments
+      allow create, update, delete: if isAdminOrLeader();
+    }
+
+    // Assignment Requests collection (transfer requests)
+    match /assignmentRequests/{requestId} {
+      // Anyone authenticated with a role can read requests
+      allow read: if hasAnyRole();
+
+      // Any authenticated user with a role can create requests
+      allow create: if hasAnyRole();
+
+      // Only admins and leaders can update requests (approve/reject)
+      allow update: if isAdminOrLeader();
+
+      // Only admins can delete requests
+      allow delete: if isAdmin();
+    }
+
+    // Signup Requests collection
+    match /signupRequests/{requestId} {
+      // Users can read their own requests, admins can read all
+      allow read: if (isAuthenticated() && resource.data.userId == request.auth.uid) || isAdmin();
+
+      // Authenticated users can create their own signup request
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+
+      // Only admins can update (approve/decline) signup requests
+      allow update: if isAdmin();
+
+      // Only admins can delete signup requests
+      allow delete: if isAdmin();
+    }
+
+    // Admin Unit Assignments collection (which units a leader/admin can manage)
+    match /adminUnitAssignments/{assignmentId} {
+      // Admins can read all, leaders can read their own
+      allow read: if isAdmin() ||
+        (isLeader() && resource.data.userId == request.auth.uid);
+
+      // Only admins can create/update/delete
+      allow create, update, delete: if isAdmin();
+    }
+  }
+}

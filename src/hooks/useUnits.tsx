@@ -1,10 +1,24 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import type { Unit, UnitType } from '@/integrations/supabase/types';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { db } from '@/integrations/firebase/client';
+import type { UnitDoc, UnitType } from '@/integrations/firebase/types';
 
-export type { Unit, UnitType };
+// Re-export types for backwards compatibility
+export type { UnitType };
 
-// Helper type for unit with children
+// Unit type matching the existing interface
+export interface Unit {
+  id: string;
+  name: string;
+  unit_type: UnitType;
+  parent_id: string | null;
+  designation: string | null;
+  leader_id: string | null;
+  status: 'active' | 'inactive' | 'deployed';
+  created_at: string;
+  updated_at: string;
+}
+
 export interface UnitWithChildren extends Unit {
   children: UnitWithChildren[];
 }
@@ -34,14 +48,34 @@ export function useUnits(): UseUnitsReturn {
   const fetchUnits = useCallback(async () => {
     try {
       setLoading(true);
-      const { data, error: fetchError } = await supabase
-        .from('units')
-        .select('*')
-        .order('unit_type')
-        .order('name');
+      const unitsRef = collection(db, 'units');
+      const q = query(unitsRef, orderBy('name'));
+      const snapshot = await getDocs(q);
 
-      if (fetchError) throw fetchError;
-      setUnits(data || []);
+      const fetchedUnits: Unit[] = snapshot.docs.map((doc) => {
+        const data = doc.data() as UnitDoc;
+        return {
+          id: doc.id,
+          name: data.name,
+          unit_type: data.unitType,
+          parent_id: data.parentId,
+          designation: data.designation,
+          leader_id: data.leaderId,
+          status: data.status,
+          created_at: data.createdAt?.toDate().toISOString() || new Date().toISOString(),
+          updated_at: data.updatedAt?.toDate().toISOString() || new Date().toISOString(),
+        };
+      });
+
+      // Sort by unit_type then name
+      fetchedUnits.sort((a, b) => {
+        const typeOrder = { battalion: 0, company: 1, platoon: 2 };
+        const typeCompare = typeOrder[a.unit_type] - typeOrder[b.unit_type];
+        if (typeCompare !== 0) return typeCompare;
+        return a.name.localeCompare(b.name);
+      });
+
+      setUnits(fetchedUnits);
     } catch (err) {
       setError(err as Error);
     } finally {
@@ -53,7 +87,6 @@ export function useUnits(): UseUnitsReturn {
     fetchUnits();
   }, [fetchUnits]);
 
-  // Filter units by type
   const battalions = useMemo(() =>
     units.filter(u => u.unit_type === 'battalion'), [units]);
 
@@ -63,17 +96,14 @@ export function useUnits(): UseUnitsReturn {
   const platoons = useMemo(() =>
     units.filter(u => u.unit_type === 'platoon'), [units]);
 
-  // Get unit by ID
   const getUnitById = useCallback((id: string) => {
     return units.find(u => u.id === id);
   }, [units]);
 
-  // Get direct children of a unit
   const getChildUnits = useCallback((parentId: string) => {
     return units.filter(u => u.parent_id === parentId);
   }, [units]);
 
-  // Get all ancestors of a unit (from immediate parent to root)
   const getUnitAncestors = useCallback((unitId: string): Unit[] => {
     const ancestors: Unit[] = [];
     let current = units.find(u => u.id === unitId);
@@ -91,7 +121,6 @@ export function useUnits(): UseUnitsReturn {
     return ancestors;
   }, [units]);
 
-  // Get full path string for a unit (e.g., "Battalion > Company > Platoon")
   const getUnitPath = useCallback((unitId: string): string => {
     const unit = units.find(u => u.id === unitId);
     if (!unit) return '';
@@ -101,18 +130,15 @@ export function useUnits(): UseUnitsReturn {
     return path.map(u => u.name).join(' > ');
   }, [units, getUnitAncestors]);
 
-  // Build hierarchical tree structure
   const buildUnitTree = useCallback((): UnitWithChildren[] => {
     const unitMap = new Map<string, UnitWithChildren>();
 
-    // Create map with empty children arrays
     units.forEach(unit => {
       unitMap.set(unit.id, { ...unit, children: [] });
     });
 
     const roots: UnitWithChildren[] = [];
 
-    // Build tree by assigning children to parents
     unitMap.forEach(unit => {
       if (unit.parent_id) {
         const parent = unitMap.get(unit.parent_id);
@@ -127,12 +153,10 @@ export function useUnits(): UseUnitsReturn {
     return roots;
   }, [units]);
 
-  // Get companies for a specific battalion
   const getCompaniesForBattalion = useCallback((battalionId: string): Unit[] => {
     return units.filter(u => u.unit_type === 'company' && u.parent_id === battalionId);
   }, [units]);
 
-  // Get platoons for a specific company
   const getPlatoonsForCompany = useCallback((companyId: string): Unit[] => {
     return units.filter(u => u.unit_type === 'platoon' && u.parent_id === companyId);
   }, [units]);

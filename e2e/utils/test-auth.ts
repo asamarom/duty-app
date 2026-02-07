@@ -112,9 +112,9 @@ export async function loginAsTestUser(
   if (hasError) {
     throw new Error(
       `Login failed for test user "${userType}": Invalid login credentials\n\n` +
-      `Test users are not seeded in the database.\n` +
-      `Run: psql <connection-string> -f supabase/seed-test-users.sql\n` +
-      `Or use Supabase Dashboard to run the seed script.`
+      `Test users may not be seeded in the Auth Emulator.\n` +
+      `Ensure the emulator is running: firebase emulators:start --only auth,firestore\n` +
+      `Then seed users: node scripts/seed-emulator-users.js`
     );
   }
 
@@ -199,11 +199,19 @@ export async function clearAuthState(page: Page): Promise<void> {
     await page.goto('/auth');
   }
 
-  await page.evaluate(() => {
-    // Clear all Supabase auth tokens from localStorage
+  await page.evaluate(async () => {
+    // Clear Firebase auth state from IndexedDB
+    const databases = await indexedDB.databases();
+    for (const db of databases) {
+      if (db.name && (db.name.includes('firebase') || db.name.includes('firebaseLocalStorage'))) {
+        indexedDB.deleteDatabase(db.name);
+      }
+    }
+
+    // Clear Firebase auth tokens from localStorage
     const keys = Object.keys(localStorage);
     for (const key of keys) {
-      if (key.includes('supabase') || key.includes('sb-')) {
+      if (key.includes('firebase') || key.includes('auth')) {
         localStorage.removeItem(key);
       }
     }

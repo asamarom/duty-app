@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { collection, getDocs, query, orderBy, where, documentId } from 'firebase/firestore';
+import { db } from '@/integrations/firebase/client';
+import type { PersonnelDoc, UserDoc, AppRole } from '@/integrations/firebase/types';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { MobileHeader } from '@/components/layout/MobileHeader';
 import { PersonnelCard } from '@/components/personnel/PersonnelCard';
@@ -15,34 +18,32 @@ import {
 } from '@/components/ui/select';
 import { Search, Plus, Users, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import type { DutyPosition, Personnel } from '@/types/pmtb';
-import type { AppRole } from '@/hooks/useUserRole';
+import type { Personnel } from '@/types/pmtb';
 
 interface PersonnelWithRoles extends Personnel {
   userRoles: AppRole[];
 }
 
-function mapPersonnelRowToUI(row: any): PersonnelWithRoles {
+function mapPersonnelDocToUI(id: string, doc: PersonnelDoc): PersonnelWithRoles {
   return {
-    id: row.id,
-    serviceNumber: row.service_number,
-    rank: row.rank,
-    firstName: row.first_name,
-    lastName: row.last_name,
-    dutyPosition: (row.duty_position ?? 'Unassigned') as Personnel['dutyPosition'],
-    unitId: row.unit_id ?? undefined,
+    id,
+    serviceNumber: doc.serviceNumber,
+    rank: doc.rank,
+    firstName: doc.firstName,
+    lastName: doc.lastName,
+    dutyPosition: (doc.dutyPosition ?? 'Unassigned') as Personnel['dutyPosition'],
+    unitId: doc.unitId ?? undefined,
     role: 'user',
-    phone: row.phone ?? '',
-    email: row.email ?? '',
-    localAddress: row.local_address ?? '',
-    locationStatus: row.location_status ?? 'home',
-    skills: row.skills ?? [],
-    driverLicenses: row.driver_licenses ?? [],
-    profileImage: row.profile_image ?? undefined,
-    readinessStatus: row.readiness_status ?? 'ready',
-    isSignatureApproved: row.is_signature_approved ?? false,
+    phone: doc.phone ?? '',
+    email: doc.email ?? '',
+    localAddress: doc.localAddress ?? '',
+    locationStatus: doc.locationStatus ?? 'home',
+    skills: doc.skills ?? [],
+    driverLicenses: doc.driverLicenses ?? [],
+    profileImage: doc.profileImage ?? undefined,
+    readinessStatus: doc.readinessStatus ?? 'ready',
+    isSignatureApproved: doc.isSignatureApproved ?? false,
     userRoles: [],
   };
 }
@@ -63,39 +64,46 @@ export default function PersonnelPage() {
     const fetchPersonnel = async () => {
       try {
         setLoading(true);
-        const { data, error } = await supabase
-          .from('personnel')
-          .select(
-            'id, service_number, rank, first_name, last_name, duty_position, phone, email, local_address, location_status, readiness_status, skills, driver_licenses, profile_image, user_id, unit_id, is_signature_approved'
-          )
-          .order('last_name', { ascending: true });
+        const personnelRef = collection(db, 'personnel');
+        const q = query(personnelRef, orderBy('lastName'));
+        const snapshot = await getDocs(q);
 
-        if (error) throw error;
         if (!active) return;
 
-        const mappedPersonnel = (data ?? []).map(mapPersonnelRowToUI);
+        const personnelDocs = snapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          data: docSnap.data() as PersonnelDoc,
+        }));
+
+        const mappedPersonnel = personnelDocs.map((p) =>
+          mapPersonnelDocToUI(p.id, p.data)
+        );
 
         // Get user_ids that are not null
-        const userIds = data?.filter(p => p.user_id).map(p => p.user_id) || [];
+        const userIds = personnelDocs
+          .filter((p) => p.data.userId)
+          .map((p) => p.data.userId!);
 
         // Fetch roles for these users
         if (userIds.length > 0) {
-          const { data: rolesData } = await supabase
-            .from('user_roles')
-            .select('user_id, role')
-            .in('user_id', userIds);
-
-          // Build user_id to roles map
           const userRolesMap = new Map<string, AppRole[]>();
-          rolesData?.forEach(r => {
-            const existing = userRolesMap.get(r.user_id) || [];
-            existing.push(r.role as AppRole);
-            userRolesMap.set(r.user_id, existing);
-          });
+
+          // Batch fetch users (30 at a time due to Firestore limit)
+          for (let i = 0; i < userIds.length; i += 30) {
+            const batch = userIds.slice(i, i + 30);
+            const usersRef = collection(db, 'users');
+            const usersQuery = query(usersRef, where(documentId(), 'in', batch));
+            const usersSnapshot = await getDocs(usersQuery);
+
+            usersSnapshot.docs.forEach((docSnap) => {
+              const userData = docSnap.data() as UserDoc;
+              userRolesMap.set(docSnap.id, userData.roles || []);
+            });
+          }
 
           // Attach roles to personnel
           mappedPersonnel.forEach((p, index) => {
-            const userId = data?.[index]?.user_id;
+            const userId = personnelDocs[index]?.data.userId;
             if (userId) {
               p.userRoles = userRolesMap.get(userId) || [];
             }
@@ -248,4 +256,3 @@ export default function PersonnelPage() {
     </MainLayout>
   );
 }
-

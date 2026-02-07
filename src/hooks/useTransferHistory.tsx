@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { collection, query, where, orderBy, getDocs, doc, getDoc } from 'firebase/firestore';
+import { db } from '@/integrations/firebase/client';
 import type { TransferHistoryRecord } from '@/types/pmtb';
+import type { AssignmentRequestDoc, UnitDoc, PersonnelDoc, UserDoc } from '@/integrations/firebase/types';
 
 interface UseTransferHistoryReturn {
   history: TransferHistoryRecord[];
@@ -24,67 +26,79 @@ export function useTransferHistory(equipmentId: string | undefined): UseTransfer
     try {
       setLoading(true);
 
-      // Use approved assignment_requests as transfer history
-      const { data, error: fetchError } = await supabase
-        .from('assignment_requests')
-        .select(`
-          id,
-          equipment_id,
-          from_unit_type,
-          from_unit_id,
-          from_personnel_id,
-          to_unit_type,
-          to_unit_id,
-          to_personnel_id,
-          requested_by,
-          requested_at,
-          notes,
-          status,
-          from_unit:units!assignment_requests_from_unit_id_fkey(name),
-          from_personnel:personnel!assignment_requests_from_personnel_id_fkey(first_name, last_name),
-          to_unit:units!assignment_requests_to_unit_id_fkey(name),
-          to_personnel:personnel!assignment_requests_to_personnel_id_fkey(first_name, last_name),
-          requester:profiles!assignment_requests_requested_by_fkey(full_name)
-        `)
-        .eq('equipment_id', equipmentId)
-        .eq('status', 'approved')
-        .order('requested_at', { ascending: false });
+      const requestsRef = collection(db, 'assignmentRequests');
+      const q = query(
+        requestsRef,
+        where('equipmentId', '==', equipmentId),
+        where('status', '==', 'approved'),
+        orderBy('requestedAt', 'desc')
+      );
 
-      if (fetchError) throw fetchError;
+      const snapshot = await getDocs(q);
 
-      const mappedHistory: TransferHistoryRecord[] = (data || []).map((row: any) => {
-        // Determine from name
-        let fromName = 'Unassigned';
-        if (row.from_personnel) {
-          fromName = `${row.from_personnel.first_name} ${row.from_personnel.last_name}`;
-        } else if (row.from_unit) {
-          fromName = row.from_unit.name;
-        }
+      const mappedHistory: TransferHistoryRecord[] = await Promise.all(
+        snapshot.docs.map(async (docSnap) => {
+          const data = docSnap.data() as AssignmentRequestDoc;
 
-        // Determine to name
-        let toName = 'Unassigned';
-        if (row.to_personnel) {
-          toName = `${row.to_personnel.first_name} ${row.to_personnel.last_name}`;
-        } else if (row.to_unit) {
-          toName = row.to_unit.name;
-        }
+          // Fetch related names if not denormalized
+          let fromName = data.fromName || 'Unassigned';
+          let toName = data.toName || 'Unassigned';
+          let transferredByName = data.requestedByName;
 
-        return {
-          id: row.id,
-          equipmentId: row.equipment_id,
-          quantity: 1,
-          fromUnitType: row.from_unit_type,
-          fromUnitId: row.from_unit_id,
-          fromName,
-          toUnitType: row.to_unit_type,
-          toUnitId: row.to_unit_id,
-          toName,
-          transferredBy: row.requested_by,
-          transferredByName: row.requester?.full_name,
-          transferredAt: row.requested_at,
-          notes: row.notes,
-        };
-      });
+          if (!data.fromName) {
+            if (data.fromPersonnelId) {
+              const persDoc = await getDoc(doc(db, 'personnel', data.fromPersonnelId));
+              if (persDoc.exists()) {
+                const pers = persDoc.data() as PersonnelDoc;
+                fromName = `${pers.firstName} ${pers.lastName}`;
+              }
+            } else if (data.fromUnitId) {
+              const unitDoc = await getDoc(doc(db, 'units', data.fromUnitId));
+              if (unitDoc.exists()) {
+                fromName = (unitDoc.data() as UnitDoc).name;
+              }
+            }
+          }
+
+          if (!data.toName) {
+            if (data.toPersonnelId) {
+              const persDoc = await getDoc(doc(db, 'personnel', data.toPersonnelId));
+              if (persDoc.exists()) {
+                const pers = persDoc.data() as PersonnelDoc;
+                toName = `${pers.firstName} ${pers.lastName}`;
+              }
+            } else if (data.toUnitId) {
+              const unitDoc = await getDoc(doc(db, 'units', data.toUnitId));
+              if (unitDoc.exists()) {
+                toName = (unitDoc.data() as UnitDoc).name;
+              }
+            }
+          }
+
+          if (!transferredByName && data.requestedBy) {
+            const userDoc = await getDoc(doc(db, 'users', data.requestedBy));
+            if (userDoc.exists()) {
+              transferredByName = (userDoc.data() as UserDoc).fullName || undefined;
+            }
+          }
+
+          return {
+            id: docSnap.id,
+            equipmentId: data.equipmentId,
+            quantity: 1,
+            fromUnitType: data.fromUnitType,
+            fromUnitId: data.fromUnitId || undefined,
+            fromName,
+            toUnitType: data.toUnitType,
+            toUnitId: data.toUnitId || undefined,
+            toName,
+            transferredBy: data.requestedBy || undefined,
+            transferredByName,
+            transferredAt: data.requestedAt?.toDate().toISOString() || new Date().toISOString(),
+            notes: data.notes || undefined,
+          };
+        })
+      );
 
       setHistory(mappedHistory);
     } catch (err) {

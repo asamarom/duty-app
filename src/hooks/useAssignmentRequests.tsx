@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { collection, getDocs, orderBy, query, doc, getDoc } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
+import { db, functions } from '@/integrations/firebase/client';
 import { useAuth } from '@/hooks/useAuth';
+import type { AssignmentRequestDoc, EquipmentDoc, UnitDoc, PersonnelDoc, UserDoc } from '@/integrations/firebase/types';
 
 export type AssignmentRequestStatus = 'pending' | 'approved' | 'rejected';
 
@@ -55,63 +58,91 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     try {
       setLoading(true);
 
-      // Fetch requests with equipment and unit info
-      const { data: requestsData, error: requestsError } = await supabase
-        .from('assignment_requests')
-        .select(`
-          *,
-          equipment(name),
-          from_unit:units!assignment_requests_from_unit_id_fkey(name, unit_type),
-          from_personnel:personnel!assignment_requests_from_personnel_id_fkey(first_name, last_name),
-          to_unit:units!assignment_requests_to_unit_id_fkey(name, unit_type),
-          to_personnel:personnel!assignment_requests_to_personnel_id_fkey(first_name, last_name),
-          requester:profiles!assignment_requests_requested_by_fkey(full_name)
-        `)
-        .order('requested_at', { ascending: false });
+      const requestsRef = collection(db, 'assignmentRequests');
+      const q = query(requestsRef, orderBy('requestedAt', 'desc'));
+      const snapshot = await getDocs(q);
 
-      if (requestsError) throw requestsError;
+      const mappedRequests: AssignmentRequest[] = await Promise.all(
+        snapshot.docs.map(async (docSnap) => {
+          const data = docSnap.data() as AssignmentRequestDoc;
 
-      const mappedRequests: AssignmentRequest[] = (requestsData || []).map((r: any) => {
-        let fromUnitName = 'Unassigned';
-        if (r.from_unit_type === 'individual' && r.from_personnel) {
-          fromUnitName = `${r.from_personnel.first_name} ${r.from_personnel.last_name}`;
-        } else if (r.from_unit) {
-          fromUnitName = r.from_unit.name;
-        }
+          // Use denormalized names if available, otherwise fetch
+          let equipmentName = data.equipmentName;
+          let fromUnitName = data.fromName || 'Unassigned';
+          let toUnitName = data.toName || 'Unassigned';
+          let requestedByName = data.requestedByName;
 
-        let toUnitName = 'Unassigned';
-        if (r.to_unit_type === 'individual' && r.to_personnel) {
-          toUnitName = `${r.to_personnel.first_name} ${r.to_personnel.last_name}`;
-        } else if (r.to_unit) {
-          toUnitName = r.to_unit.name;
-        }
+          // If names not denormalized, fetch them
+          if (!equipmentName && data.equipmentId) {
+            const equipDoc = await getDoc(doc(db, 'equipment', data.equipmentId));
+            if (equipDoc.exists()) {
+              equipmentName = (equipDoc.data() as EquipmentDoc).name;
+            }
+          }
 
-        return {
-          id: r.id,
-          equipment_id: r.equipment_id,
-          equipment_name: r.equipment?.name,
-          from_unit_type: r.from_unit_type,
-          from_unit_id: r.from_unit_id,
-          from_personnel_id: r.from_personnel_id,
-          from_unit_name: fromUnitName,
-          to_unit_type: r.to_unit_type,
-          to_unit_id: r.to_unit_id,
-          to_personnel_id: r.to_personnel_id,
-          to_unit_name: toUnitName,
-          status: r.status as AssignmentRequestStatus,
-          requested_by: r.requested_by,
-          requested_by_name: r.requester?.full_name,
-          requested_at: r.requested_at,
-          notes: r.notes,
-          recipient_approved: r.recipient_approved || false,
-          recipient_approved_at: r.recipient_approved_at,
-          recipient_approved_by: r.recipient_approved_by,
-        };
-      });
+          if (!data.fromName) {
+            if (data.fromPersonnelId) {
+              const persDoc = await getDoc(doc(db, 'personnel', data.fromPersonnelId));
+              if (persDoc.exists()) {
+                const pers = persDoc.data() as PersonnelDoc;
+                fromUnitName = `${pers.firstName} ${pers.lastName}`;
+              }
+            } else if (data.fromUnitId) {
+              const unitDoc = await getDoc(doc(db, 'units', data.fromUnitId));
+              if (unitDoc.exists()) {
+                fromUnitName = (unitDoc.data() as UnitDoc).name;
+              }
+            }
+          }
+
+          if (!data.toName) {
+            if (data.toPersonnelId) {
+              const persDoc = await getDoc(doc(db, 'personnel', data.toPersonnelId));
+              if (persDoc.exists()) {
+                const pers = persDoc.data() as PersonnelDoc;
+                toUnitName = `${pers.firstName} ${pers.lastName}`;
+              }
+            } else if (data.toUnitId) {
+              const unitDoc = await getDoc(doc(db, 'units', data.toUnitId));
+              if (unitDoc.exists()) {
+                toUnitName = (unitDoc.data() as UnitDoc).name;
+              }
+            }
+          }
+
+          if (!requestedByName && data.requestedBy) {
+            const userDoc = await getDoc(doc(db, 'users', data.requestedBy));
+            if (userDoc.exists()) {
+              requestedByName = (userDoc.data() as UserDoc).fullName || undefined;
+            }
+          }
+
+          return {
+            id: docSnap.id,
+            equipment_id: data.equipmentId,
+            equipment_name: equipmentName,
+            from_unit_type: data.fromUnitType,
+            from_unit_id: data.fromUnitId || undefined,
+            from_personnel_id: data.fromPersonnelId || undefined,
+            from_unit_name: fromUnitName,
+            to_unit_type: data.toUnitType,
+            to_unit_id: data.toUnitId || undefined,
+            to_personnel_id: data.toPersonnelId || undefined,
+            to_unit_name: toUnitName,
+            status: data.status,
+            requested_by: data.requestedBy || undefined,
+            requested_by_name: requestedByName,
+            requested_at: data.requestedAt?.toDate().toISOString() || new Date().toISOString(),
+            notes: data.notes || undefined,
+            recipient_approved: data.recipientApproved || false,
+            recipient_approved_at: data.recipientApprovedAt?.toDate().toISOString(),
+            recipient_approved_by: data.recipientApprovedBy || undefined,
+          };
+        })
+      );
 
       setRequests(mappedRequests);
 
-      // Filter incoming transfers - those needing recipient approval
       const incoming = mappedRequests.filter(r =>
         r.status === 'pending' && !r.recipient_approved
       );
@@ -129,38 +160,35 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     toPersonnelId?: string;
     notes?: string;
   }) => {
-    const { error: rpcError } = await supabase.rpc('initiate_transfer', {
-      p_equipment_id: data.equipmentId,
-      p_to_unit_id: data.toUnitId || null,
-      p_to_personnel_id: data.toPersonnelId || null,
-      p_notes: data.notes || null,
+    const initiateTransfer = httpsCallable(functions, 'initiateTransfer');
+    await initiateTransfer({
+      equipmentId: data.equipmentId,
+      toUnitId: data.toUnitId || null,
+      toPersonnelId: data.toPersonnelId || null,
+      notes: data.notes || null,
     });
-
-    if (rpcError) throw rpcError;
 
     await fetchRequests();
   }, [fetchRequests]);
 
   const approveRequest = useCallback(async (requestId: string, notes?: string) => {
-    const { error: rpcError } = await supabase.rpc('process_transfer', {
-      p_request_id: requestId,
-      p_action: 'approved',
-      p_notes: notes || null,
+    const processTransfer = httpsCallable(functions, 'processTransfer');
+    await processTransfer({
+      requestId,
+      action: 'approved',
+      notes: notes || null,
     });
-
-    if (rpcError) throw rpcError;
 
     await fetchRequests();
   }, [fetchRequests]);
 
   const rejectRequest = useCallback(async (requestId: string, notes?: string) => {
-    const { error: rpcError } = await supabase.rpc('process_transfer', {
-      p_request_id: requestId,
-      p_action: 'rejected',
-      p_notes: notes || null,
+    const processTransfer = httpsCallable(functions, 'processTransfer');
+    await processTransfer({
+      requestId,
+      action: 'rejected',
+      notes: notes || null,
     });
-
-    if (rpcError) throw rpcError;
 
     await fetchRequests();
   }, [fetchRequests]);

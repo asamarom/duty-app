@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import type { Tables } from '@/integrations/supabase/types';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { db } from '@/integrations/firebase/client';
+import type { PersonnelDoc } from '@/integrations/firebase/types';
 import type { Personnel } from '@/types/pmtb';
-
-export type PersonnelRow = Tables<'personnel'>;
 
 interface UsePersonnelReturn {
   personnel: Personnel[];
@@ -12,26 +11,25 @@ interface UsePersonnelReturn {
   refetch: () => Promise<void>;
 }
 
-// Map database row to UI Personnel type
-function mapPersonnelRowToUI(row: PersonnelRow): Personnel {
+function mapDocToPersonnel(id: string, data: PersonnelDoc): Personnel {
   return {
-    id: row.id,
-    serviceNumber: row.service_number,
-    rank: row.rank,
-    firstName: row.first_name,
-    lastName: row.last_name,
-    dutyPosition: row.duty_position || 'Unassigned',
-    unitId: row.unit_id || undefined,
+    id,
+    serviceNumber: data.serviceNumber,
+    rank: data.rank,
+    firstName: data.firstName,
+    lastName: data.lastName,
+    dutyPosition: data.dutyPosition || 'Unassigned',
+    unitId: data.unitId || undefined,
     role: 'user',
-    phone: row.phone || '',
-    email: row.email || '',
-    localAddress: row.local_address || '',
-    locationStatus: row.location_status,
-    skills: row.skills || [],
-    driverLicenses: row.driver_licenses || [],
-    profileImage: row.profile_image || undefined,
-    readinessStatus: row.readiness_status,
-    isSignatureApproved: row.is_signature_approved,
+    phone: data.phone || '',
+    email: data.email || '',
+    localAddress: data.localAddress || '',
+    locationStatus: data.locationStatus,
+    skills: data.skills || [],
+    driverLicenses: data.driverLicenses || [],
+    profileImage: data.profileImage || undefined,
+    readinessStatus: data.readinessStatus,
+    isSignatureApproved: data.isSignatureApproved,
   };
 }
 
@@ -43,14 +41,14 @@ export function usePersonnel(): UsePersonnelReturn {
   const fetchPersonnel = useCallback(async () => {
     try {
       setLoading(true);
-      const { data, error: fetchError } = await supabase
-        .from('personnel')
-        .select('*')
-        .order('last_name');
+      const personnelRef = collection(db, 'personnel');
+      const q = query(personnelRef, orderBy('lastName'));
+      const snapshot = await getDocs(q);
 
-      if (fetchError) throw fetchError;
+      const mappedPersonnel = snapshot.docs.map((doc) =>
+        mapDocToPersonnel(doc.id, doc.data() as PersonnelDoc)
+      );
 
-      const mappedPersonnel = (data || []).map(mapPersonnelRowToUI);
       setPersonnel(mappedPersonnel);
     } catch (err) {
       setError(err as Error);

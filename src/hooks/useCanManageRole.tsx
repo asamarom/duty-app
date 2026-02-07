@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '@/integrations/firebase/client';
 import { useAuth } from './useAuth';
 import { useUserRole } from './useUserRole';
 
@@ -42,27 +43,22 @@ export function useCanManageRole(personnelId: string | undefined): UseCanManageR
 
     try {
       setLoading(true);
-      
-      // Check via the database function
-      const { data, error } = await supabase
-        .rpc('can_assign_leader_role', {
-          _assigner_user_id: user.id,
-          _target_personnel_id: personnelId,
-        });
 
-      if (error) {
-        console.error('Error checking permission:', error);
-        setCanManage(false);
-      } else {
-        setCanManage(data === true);
-      }
+      // Call Cloud Function to check permission
+      const canManageUnit = httpsCallable<
+        { personnelId: string },
+        { canManage: boolean }
+      >(functions, 'canManageUnit');
+
+      const result = await canManageUnit({ personnelId });
+      setCanManage(result.data.canManage === true);
     } catch (err) {
       console.error('Error checking permission:', err);
       setCanManage(false);
     } finally {
       setLoading(false);
     }
-  }, [user?.id, personnelId, isAdmin, isLeader]);
+  }, [user?.uid, personnelId, isAdmin, isLeader]);
 
   useEffect(() => {
     if (!roleLoading) {

@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '@/integrations/firebase/client';
 import { useAuth } from './useAuth';
-import type { Tables } from '@/integrations/supabase/types';
+import type { UserDoc, AppRole } from '@/integrations/firebase/types';
 
-export type UserRole = Tables<'user_roles'>;
-export type AppRole = 'admin' | 'leader' | 'user';
+export type { AppRole };
 
 interface UseUserRoleReturn {
   roles: AppRole[];
-  actualRoles: AppRole[]; // The actual roles from DB, unaffected by admin mode
+  actualRoles: AppRole[];
   isAdmin: boolean;
   isLeader: boolean;
-  isActualAdmin: boolean; // True if user is actually an admin (regardless of mode)
+  isActualAdmin: boolean;
   loading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
@@ -23,56 +23,41 @@ export function useUserRole(): UseUserRoleReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchRoles = async () => {
+  useEffect(() => {
     if (!user) {
-      setError(null);
-      setLoading(false);
       setActualRoles([]);
+      setLoading(false);
+      setError(null);
       return;
     }
 
-    setError(null);
-    setLoading(true);
-
-    try {
-      // Primary path: read roles from the roles table (preferred when RLS is configured).
-      const { data, error: fetchError } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id);
-
-      if (!fetchError) {
-        const userRoles = data?.map((r) => r.role as AppRole) || [];
-        setActualRoles(userRoles);
-        return;
+    const userDocRef = doc(db, 'users', user.uid);
+    const unsubscribe = onSnapshot(
+      userDocRef,
+      (snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.data() as UserDoc;
+          setActualRoles(data.roles || []);
+        } else {
+          setActualRoles([]);
+        }
+        setLoading(false);
+      },
+      (err) => {
+        setError(err);
+        setActualRoles([]);
+        setLoading(false);
       }
+    );
 
-      // Fallback path: use security-definer RPC checks (works even if direct SELECT is blocked).
-      const [adminRes, leaderRes] = await Promise.all([
-        supabase.rpc('has_role', { _role: 'admin', _user_id: user.id }),
-        supabase.rpc('has_role', { _role: 'leader', _user_id: user.id }),
-      ]);
+    return () => unsubscribe();
+  }, [user?.uid]);
 
-      if (adminRes.error) throw adminRes.error;
-      if (leaderRes.error) throw leaderRes.error;
-
-      const userRoles: AppRole[] = [
-        ...(adminRes.data ? (['admin'] as AppRole[]) : []),
-        ...(leaderRes.data ? (['leader'] as AppRole[]) : []),
-      ];
-
-      setActualRoles(userRoles);
-    } catch (err) {
-      setError(err as Error);
-      setActualRoles([]);
-    } finally {
-      setLoading(false);
-    }
+  const fetchRoles = async () => {
+    // Roles are kept in sync via onSnapshot, but we expose refetch for compatibility
+    setLoading(true);
+    setLoading(false);
   };
-
-  useEffect(() => {
-    fetchRoles();
-  }, [user?.id]);
 
   const isActualAdmin = actualRoles.includes('admin');
 

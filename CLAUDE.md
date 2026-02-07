@@ -4,71 +4,30 @@ This document provides instructions for AI assistants working on this codebase.
 
 ## Project Overview
 
-Duty Tactical Management System (DTMS) - A military/security asset management application built with React, TypeScript, and Supabase.
+Duty Tactical Management System (DTMS) - A military/security asset management application built with React, TypeScript, and Firebase.
 
-## Requirements-Driven Development Workflow
+## Sprint Workflow
 
-This project uses a two-document system for requirement tracking:
-
-### Key Documents
-
-1. **[PRODUCT.md](./PRODUCT.md)** - Source of truth for all product requirements
-   - Human-readable prose with inline requirement IDs
-   - Format: `[AREA-N]` or `[AREA-N.M]` for sub-requirements
-   - Areas: `AUTH`, `PERS`, `EQUIP`, `XFER`, `ONBOARD`, `UI`, `I18N`, `UNIT`
-
-2. **[TESTS.md](./TESTS.md)** - Test coverage matrix
-   - Maps every requirement to its E2E tests
-   - Status values: `covered`, `partial`, `gap`, `not-testable`
-   - Contains summary table and detailed per-requirement status
-
-### LLM Workflow
-
-When the user modifies requirements:
-
-1. **Adding a requirement to PRODUCT.md**:
-   - Add a corresponding entry to TESTS.md with status `gap`
-   - Update the summary table counts
-
-2. **Requesting test generation**:
-   - Check TESTS.md for `gap` status items
-   - Generate E2E tests that cover the requirement
-   - Update TESTS.md status to `covered` with test references
-
-3. **Requesting coverage report**:
-   - Parse both documents
-   - Report total coverage percentage
-   - List all gaps grouped by area
-
-4. **Deleting a requirement from PRODUCT.md**:
-   - Remove corresponding entry from TESTS.md
-   - Update summary table counts
-   - Note: Do not delete the E2E test files unless explicitly asked
-
-### Requirement ID Format
-
-- Pattern: `[AREA-N]` or `[AREA-N.M]`
-- Examples: `[AUTH-1]`, `[XFER-4.2]`, `[UI-3]`
-- Always use the next available number in sequence
+The full sprint workflow, requirements-driven development process, and skill definitions are in [`.claude/agents/sprint-workflow.md`](.claude/agents/sprint-workflow.md).
 
 ## E2E Testing
 
 ### Test Structure
 
 - Tests are in `e2e/` directory using Playwright
-- Test users are seeded via `scripts/seed-test-users.js`
+- Test users are seeded via `scripts/seed-emulator-users.cjs`
 - Test mode enabled via `VITE_TEST_MODE=true` environment variable
 
 ### Test User Types
 
 | Type | Email | Status |
 |------|-------|--------|
-| admin | test-admin@duty.test | Approved with admin role |
-| leader | test-leader@duty.test | Approved with leader role |
-| user | test-user@duty.test | Approved with user role |
-| new | test-new@duty.test | No signup request |
-| pending | test-pending@duty.test | Pending approval |
-| declined | test-declined@duty.test | Declined |
+| admin | test-admin@e2e.local | Approved with admin role |
+| leader | test-leader@e2e.local | Approved with leader role |
+| user | test-user@e2e.local | Approved with user role |
+| new | test-new@e2e.local | No signup request |
+| pending | test-pending@e2e.local | Pending approval |
+| declined | test-declined@e2e.local | Declined |
 
 ### Running Tests
 
@@ -82,23 +41,25 @@ npm run test:e2e:staging
 
 ## Deployment
 
-### Firebase Hosting
+### Vercel
 
-- **Production**: `duty-82f42.web.app`
-- **Test/Staging**: `duty-82f42-test.web.app`
+- **Production**: Deployed via Vercel (connected to main branch)
+- **Preview**: Automatic preview deployments for PRs
+
+The Firebase project `duty-82f42` is used for Firestore and Auth only.
 
 ```bash
-# Deploy production
-npm run deploy
+# Local development
+npm run dev
 
-# Deploy test (with VITE_TEST_MODE=true)
-npm run deploy:test
+# Build
+npm run build
 ```
 
 ## Code Conventions
 
 - Use TypeScript strictly
 - Follow existing component patterns in `src/components/`
-- Use Supabase hooks in `src/hooks/`
+- Use Firebase hooks in `src/hooks/`
 - Translations in `src/i18n/translations.ts`
 - Bilingual support: English and Hebrew (RTL)

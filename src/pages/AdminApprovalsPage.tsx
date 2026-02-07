@@ -1,5 +1,17 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import {
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+  addDoc,
+  query,
+  orderBy,
+  serverTimestamp,
+  getDoc,
+} from 'firebase/firestore';
+import { db } from '@/integrations/firebase/client';
+import type { SignupRequestDoc, UserDoc, AppRole } from '@/integrations/firebase/types';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAdminMode } from '@/contexts/AdminModeContext';
@@ -17,9 +29,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, CheckCircle, XCircle, Clock, UserPlus } from 'lucide-react';
-import type { Tables } from '@/integrations/supabase/types';
 
-type SignupRequest = Tables<'signup_requests'>;
+interface SignupRequest extends SignupRequestDoc {
+  id: string;
+}
 
 export default function AdminApprovalsPage() {
   const { user } = useAuth();
@@ -50,13 +63,16 @@ export default function AdminApprovalsPage() {
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('signup_requests')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const requestsRef = collection(db, 'signupRequests');
+      const q = query(requestsRef, orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(q);
 
-      if (error) throw error;
-      setRequests(data || []);
+      const data = snapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
+      })) as SignupRequest[];
+
+      setRequests(data);
     } catch (err) {
       toast({
         variant: 'destructive',
@@ -75,67 +91,69 @@ export default function AdminApprovalsPage() {
   }, [hasAdminAccess]);
 
   const getUnitPath = (request: SignupRequest): string => {
-    if (!request.requested_unit_id) return t('units.noUnit');
-    return getUnitPathFromHook(request.requested_unit_id) || t('units.noUnit');
+    if (!request.requestedUnitId) return t('units.noUnit');
+    return getUnitPathFromHook(request.requestedUnitId) || t('units.noUnit');
   };
 
   const handleApprove = async (request: SignupRequest) => {
     setProcessingId(request.id);
     try {
       // Update the request status
-      const { error: updateError } = await supabase
-        .from('signup_requests')
-        .update({
-          status: 'approved',
-          reviewed_at: new Date().toISOString(),
-          reviewed_by: user?.id,
-        })
-        .eq('id', request.id);
+      await updateDoc(doc(db, 'signupRequests', request.id), {
+        status: 'approved',
+        reviewedAt: serverTimestamp(),
+        reviewedBy: user?.uid,
+      });
 
-      if (updateError) throw updateError;
+      // Get or create user doc and add 'user' role
+      const userDocRef = doc(db, 'users', request.userId);
+      const userDocSnap = await getDoc(userDocRef);
 
-      // Add user role
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert({
-          user_id: request.user_id,
-          role: 'user',
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data() as UserDoc;
+        const currentRoles = userData.roles || [];
+        if (!currentRoles.includes('user')) {
+          await updateDoc(userDocRef, {
+            roles: [...currentRoles, 'user'],
+          });
+        }
+      } else {
+        // Create user doc with 'user' role
+        await updateDoc(userDocRef, {
+          roles: ['user'],
+          fullName: request.fullName,
         });
-
-      // Ignore if role already exists
-      if (roleError && !roleError.message.includes('duplicate')) {
-        throw roleError;
       }
 
       // Create personnel record linked to the user
-      const nameParts = request.full_name.split(' ');
+      const nameParts = request.fullName.split(' ');
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
 
-      const { error: personnelError } = await supabase
-        .from('personnel')
-        .insert({
-          user_id: request.user_id,
-          first_name: firstName,
-          last_name: lastName,
+      const personnelRef = collection(db, 'personnel');
+      try {
+        await addDoc(personnelRef, {
+          userId: request.userId,
+          firstName,
+          lastName,
           email: request.email,
-          phone: request.phone,
-          service_number: request.service_number,
-          unit_id: request.requested_unit_id,
-          rank: 'טוראי', // Default rank, can be updated later
-          location_status: 'on_duty',
-          readiness_status: 'ready',
-          is_signature_approved: false,
+          phone: request.phone || null,
+          serviceNumber: request.serviceNumber,
+          unitId: request.requestedUnitId || null,
+          rank: 'טוראי', // Default rank
+          locationStatus: 'on_duty',
+          readinessStatus: 'ready',
+          isSignatureApproved: false,
+          createdAt: serverTimestamp(),
         });
-
-      if (personnelError && !personnelError.message.includes('duplicate')) {
+      } catch (personnelError) {
         console.error('Failed to create personnel record:', personnelError);
-        // Don't throw - approval still succeeded, just personnel creation failed
+        // Don't throw - approval still succeeded
       }
 
       toast({
         title: t('approvals.approved'),
-        description: `${request.full_name} ${t('approvals.approvedDesc')}`,
+        description: `${request.fullName} ${t('approvals.approvedDesc')}`,
       });
 
       fetchRequests();
@@ -155,21 +173,16 @@ export default function AdminApprovalsPage() {
 
     setProcessingId(selectedRequest.id);
     try {
-      const { error } = await supabase
-        .from('signup_requests')
-        .update({
-          status: 'declined',
-          decline_reason: declineReason || null,
-          reviewed_at: new Date().toISOString(),
-          reviewed_by: user?.id,
-        })
-        .eq('id', selectedRequest.id);
-
-      if (error) throw error;
+      await updateDoc(doc(db, 'signupRequests', selectedRequest.id), {
+        status: 'declined',
+        declineReason: declineReason || null,
+        reviewedAt: serverTimestamp(),
+        reviewedBy: user?.uid,
+      });
 
       toast({
         title: t('approvals.declined'),
-        description: `${selectedRequest.full_name} ${t('approvals.declinedDesc')}`,
+        description: `${selectedRequest.fullName} ${t('approvals.declinedDesc')}`,
       });
 
       setDeclineDialogOpen(false);
@@ -267,8 +280,7 @@ export default function AdminApprovalsPage() {
                   {t('common.cancel')}
                 </Button>
                 <Button onClick={async () => {
-                  // This would require an edge function to look up user by email
-                  // For now, show a message
+                  // This would require a Cloud Function to look up user by email
                   toast({
                     title: t('approvals.featureComingSoon'),
                     description: t('approvals.featureComingSoonDesc'),
@@ -318,7 +330,7 @@ export default function AdminApprovalsPage() {
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div>
-                          <CardTitle className="text-lg">{request.full_name}</CardTitle>
+                          <CardTitle className="text-lg">{request.fullName}</CardTitle>
                           <CardDescription>{request.email}</CardDescription>
                         </div>
                         <Badge variant="outline" className="gap-1">
@@ -331,7 +343,7 @@ export default function AdminApprovalsPage() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                         <div>
                           <p className="text-xs text-muted-foreground">{t('approvals.serviceNumber')}</p>
-                          <p className="font-medium">{request.service_number}</p>
+                          <p className="font-medium">{request.serviceNumber}</p>
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">{t('approvals.phone')}</p>
@@ -391,7 +403,7 @@ export default function AdminApprovalsPage() {
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div>
-                          <CardTitle className="text-lg">{request.full_name}</CardTitle>
+                          <CardTitle className="text-lg">{request.fullName}</CardTitle>
                           <CardDescription>{request.email}</CardDescription>
                         </div>
                         <Badge
@@ -411,7 +423,7 @@ export default function AdminApprovalsPage() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
                           <p className="text-xs text-muted-foreground">{t('approvals.serviceNumber')}</p>
-                          <p className="font-medium">{request.service_number}</p>
+                          <p className="font-medium">{request.serviceNumber}</p>
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">{t('approvals.unit')}</p>
@@ -420,13 +432,13 @@ export default function AdminApprovalsPage() {
                         <div>
                           <p className="text-xs text-muted-foreground">{t('approvals.reviewed')}</p>
                           <p className="font-medium">
-                            {request.reviewed_at && new Date(request.reviewed_at).toLocaleDateString()}
+                            {request.reviewedAt && (request.reviewedAt as any).toDate?.()?.toLocaleDateString()}
                           </p>
                         </div>
-                        {request.decline_reason && (
+                        {request.declineReason && (
                           <div className="col-span-2">
                             <p className="text-xs text-muted-foreground">{t('approvals.declineReason')}</p>
-                            <p className="font-medium text-destructive">{request.decline_reason}</p>
+                            <p className="font-medium text-destructive">{request.declineReason}</p>
                           </div>
                         )}
                       </div>
@@ -444,7 +456,7 @@ export default function AdminApprovalsPage() {
             <DialogHeader>
               <DialogTitle>{t('approvals.declineRequest')}</DialogTitle>
               <DialogDescription>
-                {t('approvals.declineDesc')} {selectedRequest?.full_name}
+                {t('approvals.declineDesc')} {selectedRequest?.fullName}
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
