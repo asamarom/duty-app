@@ -74,7 +74,7 @@ export function Sidebar() {
           </div>
           <div>
             <h1 className="text-sm font-bold tracking-tight text-sidebar-foreground">PMTB</h1>
-            <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+            <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
               Platoon Management
             </p>
           </div>
@@ -114,7 +114,7 @@ export function Sidebar() {
                       className="scale-75"
                     />
                   </div>
-                  <p className="mt-1 text-[10px] text-muted-foreground">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     {isAdminMode ? t('adminMode.enabled') : t('adminMode.disabled')}
                   </p>
                 </div>
@@ -151,7 +151,7 @@ export function Sidebar() {
                       )}
                     />
                     {item.showBadge && pendingCount > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+                      <span className="absolute -top-1.5 -end-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-bold text-destructive-foreground">
                         {pendingCount > 99 ? '99+' : pendingCount}
                       </span>
                     )}

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH9K1W2KTWNNSMBHCYKQ2FJ5",
+  "taskId": "execute-fixes",
+  "invocationKey": "duty-tdd-rebuild:S000006:execute-fixes",
+  "stepId": "S000006",
+  "kind": "agent",
+  "title": "Execute test failure fixes",
+  "io": {
+    "inputJsonPath": "tasks/01KH9K1W2KTWNNSMBHCYKQ2FJ5/input.json",
+    "outputJsonPath": "tasks/01KH9K1W2KTWNNSMBHCYKQ2FJ5/output.json"
+  },
+  "inputs": {
+    "diagnosis": {
+      "estimatedEffort": "6.5-9.5 hours",
+      "failureCount": 34,
+      "fixPlan": [
+        {
+          "area": "Firestore queries",
+          "description": "Fix hanging Firestore connections",
+          "effort": "4-6h",
+          "priority": "Critical"
+        },
+        {
+          "area": "Test selector",
+          "description": "Fix invalid CSS selector",
+          "effort": "30min",
+          "priority": "Critical"
+        },
+        {
+          "area": "Admin mode",
+          "description": "Fix menu visibility",
+          "effort": "2-3h",
+          "priority": "High"
+        }
+      ],
+      "rootCauses": [
+        {
+          "category": "Firestore networkidle timeout",
+          "count": 32,
+          "rootCause": "Pages never reach networkidle - Firestore queries hanging"
+        },
+        {
+          "category": "Invalid test selector",
+          "count": 1,
+          "rootCause": "CSS selector syntax error in admin-approvals test"
+        },
+        {
+          "category": "Admin mode UI",
+          "count": 1,
+          "rootCause": "Admin menu items not visible when mode enabled"
+        }
+      ]
+    },
+    "fixPlan": "Investigate and fix Firestore issue"
+  }
+}

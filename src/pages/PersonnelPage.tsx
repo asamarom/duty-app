@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Plus, Users, Loader2 } from 'lucide-react';
+import { Search, Plus, Users, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import type { Personnel } from '@/types/pmtb';
@@ -57,6 +57,7 @@ export default function PersonnelPage() {
   const [teamFilter, setTeamFilter] = useState('all');
   const [personnel, setPersonnel] = useState<PersonnelWithRoles[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filtersExpanded, setFiltersExpanded] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -174,8 +175,9 @@ export default function PersonnelPage() {
         </header>
 
         {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="flex flex-col items-center justify-center h-64 gap-3">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Loading personnel...</p>
           </div>
         ) : (
           <>
@@ -197,29 +199,42 @@ export default function PersonnelPage() {
               </div>
             </div>
 
-            {/* Filters - Mobile Optimized */}
-            <div className="mb-4 lg:mb-6 flex flex-col sm:flex-row gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder={t('personnel.searchPlaceholder')}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="ps-10 bg-card border-border h-11"
-                />
+            {/* Filters - Mobile Optimized with Collapse */}
+            <div className="mb-4 lg:mb-6">
+              <Button
+                variant="outline"
+                onClick={() => setFiltersExpanded(!filtersExpanded)}
+                className="w-full sm:hidden mb-3 justify-between"
+              >
+                <span className="flex items-center gap-2">
+                  <Search className="h-4 w-4" />
+                  Filters
+                </span>
+                {filtersExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </Button>
+              <div className={`flex flex-col sm:flex-row gap-3 ${filtersExpanded ? 'block' : 'hidden sm:flex'}`}>
+                <div className="relative flex-1">
+                  <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder={t('personnel.searchPlaceholder')}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="ps-10 bg-card border-border"
+                  />
+                </div>
+                <Select value={teamFilter} onValueChange={setTeamFilter}>
+                  <SelectTrigger className="w-full sm:w-[160px] bg-card border-border">
+                    <SelectValue placeholder="All Units" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {uniqueUnits.map((unitId) => (
+                      <SelectItem key={unitId} value={unitId}>
+                        {unitId === 'all' ? 'All Units' : unitId}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <Select value={teamFilter} onValueChange={setTeamFilter}>
-                <SelectTrigger className="w-full sm:w-[160px] bg-card border-border h-11">
-                  <SelectValue placeholder="All Units" />
-                </SelectTrigger>
-                <SelectContent>
-                  {uniqueUnits.map((unitId) => (
-                    <SelectItem key={unitId} value={unitId}>
-                      {unitId === 'all' ? 'All Units' : unitId}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
 
             {/* Personnel Grid - Mobile Single Column */}
@@ -245,7 +260,7 @@ export default function PersonnelPage() {
             )}
 
             {/* Mobile FAB */}
-            <div className="lg:hidden fixed bottom-24 end-4 z-40">
+            <div className="lg:hidden fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] end-4 z-40">
               <Button variant="tactical" size="lg" className="h-14 w-14 rounded-full shadow-lg">
                 <Plus className="h-6 w-6" />
               </Button>

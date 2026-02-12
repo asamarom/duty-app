@@ -35,7 +35,7 @@ export function MobileHeader({ title, subtitle, showBack, onBack }: MobileHeader
         {!showBack && (
           <div className="flex items-center gap-1.5">
             <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
-            <span className="text-[10px] font-medium text-success hidden sm:inline">
+            <span className="text-xs font-medium text-success hidden sm:inline">
               {t('nav.systemOnline')}
             </span>
           </div>

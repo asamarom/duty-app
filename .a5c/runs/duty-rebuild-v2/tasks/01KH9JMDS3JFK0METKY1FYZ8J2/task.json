@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH9JMDS3JFK0METKY1FYZ8J2",
+  "taskId": "audit-requirements",
+  "invocationKey": "duty-tdd-rebuild:S000001:audit-requirements",
+  "stepId": "S000001",
+  "kind": "agent",
+  "title": "Audit requirements coverage",
+  "io": {
+    "inputJsonPath": "tasks/01KH9JMDS3JFK0METKY1FYZ8J2/input.json",
+    "outputJsonPath": "tasks/01KH9JMDS3JFK0METKY1FYZ8J2/output.json"
+  },
+  "inputs": {
+    "productMdPath": "PRODUCT.md",
+    "testsMdPath": "TESTS.md"
+  }
+}

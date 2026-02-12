@@ -1,0 +1,12 @@
+{
+  "type": "RUN_FAILED",
+  "recordedAt": "2026-02-12T18:44:31.315Z",
+  "data": {
+    "error": {
+      "name": "TypeError",
+      "message": "process.cwd is not a function",
+      "stack": "TypeError: process.cwd is not a function\n    at file:///C:/Users/ilana/OneDrive/%D7%9E%D7%A1%D7%9E%D7%9B%D7%99%D7%9D/code/duty/duty-app/.a5c/processes/duty-tdd-rebuild.js:311:18\n    at Object.build (C:\\Users\\ilana\\OneDrive\\מסמכים\\code\\duty\\duty-app\\node_modules\\@a5c-ai\\babysitter-sdk\\dist\\tasks\\defineTask.js:11:51)\n    at requestNewEffect (C:\\Users\\ilana\\AppData\\Roaming\\npm\\node_modules\\@a5c-ai\\babysitter-sdk\\dist\\runtime\\intrinsics\\task.js:67:56)\n    at runTaskIntrinsic (C:\\Users\\ilana\\AppData\\Roaming\\npm\\node_modules\\@a5c-ai\\babysitter-sdk\\dist\\runtime\\intrinsics\\task.js:33:12)\n    at Object.task (C:\\Users\\ilana\\AppData\\Roaming\\npm\\node_modules\\@a5c-ai\\babysitter-sdk\\dist\\runtime\\processContext.js:30:68)\n    at process (file:///C:/Users/ilana/OneDrive/%D7%9E%D7%A1%D7%9E%D7%9B%D7%99%D7%9D/code/duty/duty-app/.a5c/processes/duty-tdd-rebuild.js:51:37)\n    at async C:\\Users\\ilana\\AppData\\Roaming\\npm\\node_modules\\@a5c-ai\\babysitter-sdk\\dist\\runtime\\orchestrateIteration.js:86:28\n    at async withRunLock (C:\\Users\\ilana\\AppData\\Roaming\\npm\\node_modules\\@a5c-ai\\babysitter-sdk\\dist\\storage\\lock.js:69:16)\n    at async orchestrateIteration (C:\\Users\\ilana\\AppData\\Roaming\\npm\\node_modules\\@a5c-ai\\babysitter-sdk\\dist\\runtime\\orchestrateIteration.js:61:12)\n    at async runIterate (C:\\Users\\ilana\\AppData\\Roaming\\npm\\node_modules\\@a5c-ai\\babysitter-sdk\\dist\\cli\\commands\\runIterate.js:67:29)"
+    }
+  },
+  "checksum": "fd0c2400ddb26b61ca412f2bd645eaae1fb7b92a09ffa35b4a6aab423ada2221"
+}

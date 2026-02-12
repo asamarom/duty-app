@@ -111,6 +111,10 @@ export default {
         "card-tactical": "var(--shadow-card)",
         glow: "var(--shadow-glow)",
       },
+      zIndex: {
+        '60': '60',
+        '70': '70',
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

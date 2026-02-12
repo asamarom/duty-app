@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH9JN1SZ4M24KABYSS2QKHV5",
+  "taskId": "__sdk.breakpoint",
+  "invocationKey": "duty-tdd-rebuild:S000002:__sdk.breakpoint",
+  "stepId": "S000002",
+  "kind": "breakpoint",
+  "title": "breakpoint",
+  "metadata": {
+    "label": "breakpoint",
+    "payload": {
+      "context": {
+        "files": [
+          {
+            "format": "json",
+            "label": "Audit Results",
+            "path": "tasks/undefined/result.json"
+          }
+        ]
+      },
+      "question": "Requirements audit complete. Found 2 gaps. Review findings and approve to continue?",
+      "title": "Requirements Audit Review"
+    },
+    "requestedAt": "2026-02-12T18:43:42.015Z"
+  },
+  "inputs": {
+    "label": "breakpoint",
+    "payload": {
+      "context": {
+        "files": [
+          {
+            "format": "json",
+            "label": "Audit Results",
+            "path": "tasks/undefined/result.json"
+          }
+        ]
+      },
+      "question": "Requirements audit complete. Found 2 gaps. Review findings and approve to continue?",
+      "title": "Requirements Audit Review"
+    },
+    "requestedAt": "2026-02-12T18:43:42.015Z"
+  }
+}

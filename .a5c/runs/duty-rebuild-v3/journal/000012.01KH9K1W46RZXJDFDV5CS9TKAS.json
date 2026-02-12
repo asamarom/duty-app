@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-12T18:50:42.182Z",
+  "data": {
+    "effectId": "01KH9K1W2KTWNNSMBHCYKQ2FJ5",
+    "invocationKey": "duty-tdd-rebuild:S000006:execute-fixes",
+    "invocationHash": "43e87e347a8146e90c08c797b72e7ba15ada3c0ac24a42d421af08e2261b5346",
+    "stepId": "S000006",
+    "taskId": "execute-fixes",
+    "kind": "agent",
+    "label": "Execute test failure fixes",
+    "taskDefRef": "tasks/01KH9K1W2KTWNNSMBHCYKQ2FJ5/task.json"
+  },
+  "checksum": "a740c0caebf6acdf1d08da502902b5f029784333c7ed10cf66752475a3b81b3a"
+}

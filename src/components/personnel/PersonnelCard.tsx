@@ -23,7 +23,7 @@ export function PersonnelCard({ person, onClick, roles = [] }: PersonnelCardProp
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-4">
           {/* Rank Badge */}
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-tactical font-mono text-sm font-bold text-primary-foreground shadow-tactical">
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-tactical font-mono text-sm md:text-sm font-bold text-primary-foreground shadow-tactical">
             {person.rank}
           </div>
           <div>
@@ -36,7 +36,7 @@ export function PersonnelCard({ person, onClick, roles = [] }: PersonnelCardProp
             <p className="text-sm font-medium text-primary">{person.dutyPosition}</p>
             <div className="mt-1 flex items-center gap-2">
               {person.isSignatureApproved && (
-                <Badge variant="tactical" className="text-[10px]">Signature Approved</Badge>
+                <Badge variant="tactical" className="text-xs">Signature Approved</Badge>
               )}
               <span className="font-mono text-xs text-muted-foreground">
                 {person.serviceNumber}
@@ -47,7 +47,7 @@ export function PersonnelCard({ person, onClick, roles = [] }: PersonnelCardProp
       </div>
 
       {/* Contact Info */}
-      <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border/50 pt-4">
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-border/50 pt-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Phone className="h-4 w-4" />
           <span className="truncate">{person.phone}</span>
@@ -60,18 +60,23 @@ export function PersonnelCard({ person, onClick, roles = [] }: PersonnelCardProp
 
       {/* Skills & Licenses */}
       <div className="mt-4 flex flex-wrap gap-2">
-        {person.skills.slice(0, 3).map((skill) => (
-          <Badge key={skill} variant="tactical" className="text-[10px]">
-            <Award className="mr-1 h-3 w-3" />
+        {person.skills.slice(0, 2).map((skill) => (
+          <Badge key={skill} variant="tactical" className="text-xs">
+            <Award className="me-1 h-3 w-3" />
             {skill}
           </Badge>
         ))}
-        {person.driverLicenses.slice(0, 2).map((license) => (
-          <Badge key={license} variant="secondary" className="text-[10px]">
-            <Car className="mr-1 h-3 w-3" />
+        {person.driverLicenses.slice(0, 1).map((license) => (
+          <Badge key={license} variant="secondary" className="text-xs">
+            <Car className="me-1 h-3 w-3" />
             {license}
           </Badge>
         ))}
+        {(person.skills.length > 2 || person.driverLicenses.length > 1) && (
+          <Badge variant="outline" className="text-xs hidden sm:inline-flex">
+            +{Math.max(0, person.skills.length - 2) + Math.max(0, person.driverLicenses.length - 1)} more
+          </Badge>
+        )}
       </div>
 
       {/* View Details */}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH9JRNNHXMP8GYC7W7QM4SXK",
+  "taskId": "run-local-e2e",
+  "invocationKey": "duty-tdd-rebuild:S000003:run-local-e2e",
+  "stepId": "S000003",
+  "kind": "shell",
+  "title": "Run local E2E tests with Playwright",
+  "io": {
+    "outputJsonPath": "tasks/01KH9JRNNHXMP8GYC7W7QM4SXK/output.json",
+    "stderrFile": "tasks/01KH9JRNNHXMP8GYC7W7QM4SXK/stderr.log",
+    "stdoutFile": "tasks/01KH9JRNNHXMP8GYC7W7QM4SXK/stdout.log"
+  },
+  "inputs": {}
+}

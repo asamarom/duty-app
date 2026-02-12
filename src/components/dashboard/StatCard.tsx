@@ -45,7 +45,7 @@ export function StatCard({
     >
       <div className="flex items-start justify-between">
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] lg:text-xs font-medium uppercase tracking-wider text-muted-foreground truncate">
+          <p className="text-xs lg:text-xs font-medium uppercase tracking-wider text-muted-foreground truncate">
             {title}
           </p>
           <p className="mt-1 lg:mt-2 text-2xl lg:text-3xl font-bold tracking-tight text-foreground">
@@ -57,7 +57,7 @@ export function StatCard({
           {trend && (
             <div
               className={cn(
-                'mt-1 lg:mt-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] lg:text-xs font-medium',
+                'mt-1 lg:mt-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs lg:text-xs font-medium',
                 trend.positive
                   ? 'bg-success/20 text-success'
                   : 'bg-destructive/20 text-destructive'

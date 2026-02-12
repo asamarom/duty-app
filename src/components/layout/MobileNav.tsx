@@ -72,7 +72,7 @@ export function MobileNav() {
             to={item.href}
             className={({ isActive }) =>
               cn(
-                'flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all min-w-[60px] relative',
+                'flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all min-w-[72px] relative',
                 isActive
                   ? 'text-primary'
                   : 'text-muted-foreground'
@@ -82,18 +82,18 @@ export function MobileNav() {
             {({ isActive }) => (
               <>
                 <div className={cn(
-                  'p-2 rounded-xl transition-all relative',
+                  'p-3 rounded-xl transition-all relative',
                   isActive && 'bg-primary/20'
                 )}>
-                  <item.icon className={cn('h-5 w-5', isActive && 'text-primary')} />
+                  <item.icon className={cn('h-6 w-6', isActive && 'text-primary')} />
                   {item.showBadge && pendingCount > 0 && (
-                    <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+                    <span className="absolute -top-1 -end-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-bold text-destructive-foreground">
                       {pendingCount > 99 ? '99+' : pendingCount}
                     </span>
                   )}
                 </div>
                 <span className={cn(
-                  'text-[10px] font-medium',
+                  'text-xs font-medium',
                   isActive && 'text-primary'
                 )}>
                   {item.name}
@@ -107,18 +107,18 @@ export function MobileNav() {
           <DropdownMenuTrigger asChild>
             <button
               className={cn(
-                'flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all min-w-[60px]',
+                'flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all min-w-[72px]',
                 isMoreActive ? 'text-primary' : 'text-muted-foreground'
               )}
             >
               <div className={cn(
-                'p-2 rounded-xl transition-all',
+                'p-3 rounded-xl transition-all',
                 isMoreActive && 'bg-primary/20'
               )}>
-                <MoreHorizontal className={cn('h-5 w-5', isMoreActive && 'text-primary')} />
+                <MoreHorizontal className={cn('h-6 w-6', isMoreActive && 'text-primary')} />
               </div>
               <span className={cn(
-                'text-[10px] font-medium',
+                'text-xs font-medium',
                 isMoreActive && 'text-primary'
               )}>
                 {t('nav.more')}

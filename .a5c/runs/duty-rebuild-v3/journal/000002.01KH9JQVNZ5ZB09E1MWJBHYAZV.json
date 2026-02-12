@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-12T18:45:14.047Z",
+  "data": {
+    "effectId": "01KH9JQVMMGAZ4MPFHKT41HT99",
+    "invocationKey": "duty-tdd-rebuild:S000001:audit-requirements",
+    "invocationHash": "91dee9522028f2ca07b797e27c07b35cb8722586ff41089e988a2ce4c0ed2ed1",
+    "stepId": "S000001",
+    "taskId": "audit-requirements",
+    "kind": "agent",
+    "label": "Audit requirements coverage",
+    "taskDefRef": "tasks/01KH9JQVMMGAZ4MPFHKT41HT99/task.json"
+  },
+  "checksum": "96b250f2602ab672b511b63f6ad4af22949a8dbd003de448b0e682ff2b8cf62e"
+}

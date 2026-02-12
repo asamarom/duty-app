@@ -21,8 +21,9 @@ export default function Dashboard() {
   if (loading) {
     return (
       <MainLayout>
-        <div className="min-h-screen flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="min-h-screen flex flex-col items-center justify-center gap-3">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading dashboard...</p>
         </div>
       </MainLayout>
     );
@@ -54,7 +55,7 @@ export default function Dashboard() {
         </header>
 
         {/* Stats Grid */}
-        <section className="mb-4 lg:mb-8 grid grid-cols-2 gap-3 lg:gap-4">
+        <section className="mb-4 lg:mb-8 grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4">
           <StatCard
             title={t('dashboard.totalPersonnel')}
             value={totalPersonnel}

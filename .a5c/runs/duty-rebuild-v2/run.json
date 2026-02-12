@@ -1,0 +1,13 @@
+{
+  "runId": "duty-rebuild-v2",
+  "request": "duty-tdd-rebuild",
+  "processId": "duty-tdd-rebuild",
+  "entrypoint": {
+    "importPath": "../../processes/duty-tdd-rebuild.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/duty-tdd-rebuild.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-02-12T18:38:14.368Z",
+  "completionSecret": "e367dd14d1c85657013c464c9c74369f"
+}

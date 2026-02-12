@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-12T18:45:40.701Z",
+  "data": {
+    "effectId": "01KH9JRNNHXMP8GYC7W7QM4SXK",
+    "invocationKey": "duty-tdd-rebuild:S000003:run-local-e2e",
+    "invocationHash": "083184552244e7a90fe272ae82b7d05fe05baea0c300472b15dcbbdccef34d11",
+    "stepId": "S000003",
+    "taskId": "run-local-e2e",
+    "kind": "shell",
+    "label": "Run local E2E tests with Playwright",
+    "taskDefRef": "tasks/01KH9JRNNHXMP8GYC7W7QM4SXK/task.json"
+  },
+  "checksum": "56e08e28d273ff91b9c5b5523f9223272b0c475d850d56ef65442e48ba095650"
+}

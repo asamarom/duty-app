@@ -1,0 +1,14 @@
+{
+  "failureCount": 34,
+  "rootCauses": [
+    {"category": "Firestore networkidle timeout", "count": 32, "rootCause": "Pages never reach networkidle - Firestore queries hanging"},
+    {"category": "Invalid test selector", "count": 1, "rootCause": "CSS selector syntax error in admin-approvals test"},
+    {"category": "Admin mode UI", "count": 1, "rootCause": "Admin menu items not visible when mode enabled"}
+  ],
+  "fixPlan": [
+    {"priority": "Critical", "area": "Firestore queries", "description": "Fix hanging Firestore connections", "effort": "4-6h"},
+    {"priority": "Critical", "area": "Test selector", "description": "Fix invalid CSS selector", "effort": "30min"},
+    {"priority": "High", "area": "Admin mode", "description": "Fix menu visibility", "effort": "2-3h"}
+  ],
+  "estimatedEffort": "6.5-9.5 hours"
+}

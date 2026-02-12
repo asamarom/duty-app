@@ -1,0 +1,17 @@
+{
+  "projectName": "Duty Tactical Management System",
+  "environment": "development",
+  "goals": [
+    "Verify all PRODUCT.md requirements are implemented correctly",
+    "Ensure all E2E tests pass locally and on staging",
+    "Validate mobile-first UI/UX quality",
+    "Audit Firebase security rules",
+    "Deploy to Vercel staging and validate"
+  ],
+  "qualityGates": {
+    "testCoverage": 95,
+    "mobileFriendly": true,
+    "securityAudit": true,
+    "stagingValidation": true
+  }
+}

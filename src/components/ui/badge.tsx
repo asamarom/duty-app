@@ -15,7 +15,7 @@ const badgeVariants = cva(
         success: "border-success/30 bg-success/20 text-success",
         warning: "border-warning/30 bg-warning/20 text-warning",
         tactical: "border-primary/30 bg-primary/20 text-primary font-mono tracking-wider uppercase",
-        rank: "border-accent/30 bg-accent/10 text-accent font-mono tracking-wider uppercase text-[10px]",
+        rank: "border-accent/30 bg-accent/10 text-accent font-mono tracking-wider uppercase text-xs",
       },
     },
     defaultVariants: {

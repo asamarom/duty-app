@@ -334,8 +334,9 @@ export default function EquipmentDetailPage() {
     return (
       <MainLayout>
         <MobileHeader title="Loading..." />
-        <div className="flex-1 p-4 lg:p-6 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex-1 p-4 lg:p-6 flex flex-col items-center justify-center gap-3">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading equipment details...</p>
         </div>
       </MainLayout>
     );
@@ -508,7 +509,7 @@ export default function EquipmentDetailPage() {
                     {item.serialNumber || item.currentQuantity}
                   </p>
                   {item.quantity && item.quantity > (item.currentQuantity || 0) && (
-                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       of {item.quantity} total in system
                     </p>
                   )}

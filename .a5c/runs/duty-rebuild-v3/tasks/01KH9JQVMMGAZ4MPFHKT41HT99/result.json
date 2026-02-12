@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH9JQVMMGAZ4MPFHKT41HT99",
+  "taskId": "audit-requirements",
+  "invocationKey": "duty-tdd-rebuild:S000001:audit-requirements",
+  "status": "ok",
+  "result": {
+    "coverage": 94.64,
+    "covered": 53,
+    "gaps": [
+      "I18N-3",
+      "ONBOARD-1"
+    ],
+    "partial": 0,
+    "recommendations": [
+      "Excellent coverage at 94.64%"
+    ],
+    "totalRequirements": 56
+  },
+  "startedAt": "2026-02-12T18:45:23.041Z",
+  "finishedAt": "2026-02-12T18:45:23.041Z",
+  "value": {
+    "coverage": 94.64,
+    "covered": 53,
+    "gaps": [
+      "I18N-3",
+      "ONBOARD-1"
+    ],
+    "partial": 0,
+    "recommendations": [
+      "Excellent coverage at 94.64%"
+    ],
+    "totalRequirements": 56
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-12T18:48:57.170Z",
+  "data": {
+    "effectId": "01KH9JYNGW4V97F4M3SKGYYP7P",
+    "invocationKey": "duty-tdd-rebuild:S000004:diagnose-failures",
+    "invocationHash": "35686768372fd9e3133b3731e6b9339dd323a6ea92a9a77f2506dca67dcd467c",
+    "stepId": "S000004",
+    "taskId": "diagnose-failures",
+    "kind": "agent",
+    "label": "Diagnose test failures",
+    "taskDefRef": "tasks/01KH9JYNGW4V97F4M3SKGYYP7P/task.json"
+  },
+  "checksum": "214cdb79405c3ed5fa569d7fd88ff96e556d93ff4756ee7b6ee0435915c951e5"
+}

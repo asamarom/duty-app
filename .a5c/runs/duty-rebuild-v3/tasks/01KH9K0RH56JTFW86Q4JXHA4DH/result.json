@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH9K0RH56JTFW86Q4JXHA4DH",
+  "taskId": "__sdk.breakpoint",
+  "invocationKey": "duty-tdd-rebuild:S000005:__sdk.breakpoint",
+  "status": "ok",
+  "result": {
+    "answer": "Investigate and fix Firestore issue",
+    "approved": true
+  },
+  "startedAt": "2026-02-12T18:50:39.429Z",
+  "finishedAt": "2026-02-12T18:50:39.429Z",
+  "value": {
+    "answer": "Investigate and fix Firestore issue",
+    "approved": true
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH9JN1SZ4M24KABYSS2QKHV5",
+  "taskId": "__sdk.breakpoint",
+  "invocationKey": "duty-tdd-rebuild:S000002:__sdk.breakpoint",
+  "status": "ok",
+  "result": {
+    "answer": "Yes, proceed to E2E tests",
+    "approved": true
+  },
+  "startedAt": "2026-02-12T18:44:25.387Z",
+  "finishedAt": "2026-02-12T18:44:25.387Z",
+  "value": {
+    "answer": "Yes, proceed to E2E tests",
+    "approved": true
+  }
+}

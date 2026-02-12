@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH9K1W2KTWNNSMBHCYKQ2FJ5",
+  "taskId": "execute-fixes",
+  "invocationKey": "duty-tdd-rebuild:S000006:execute-fixes",
+  "status": "ok",
+  "result": {
+    "filesModified": [
+      "e2e/admin-approvals.spec.ts",
+      "src/components/layout/Sidebar.tsx",
+      "10 Firebase hooks"
+    ],
+    "fixesApplied": 3,
+    "summary": "Fixed: 1) Invalid CSS selector, 2) Admin mode visibility, 3) Firestore timeout protection (all queries now timeout after 10s instead of hanging indefinitely)"
+  },
+  "startedAt": "2026-02-12T18:53:57.509Z",
+  "finishedAt": "2026-02-12T18:53:57.509Z",
+  "value": {
+    "filesModified": [
+      "e2e/admin-approvals.spec.ts",
+      "src/components/layout/Sidebar.tsx",
+      "10 Firebase hooks"
+    ],
+    "fixesApplied": 3,
+    "summary": "Fixed: 1) Invalid CSS selector, 2) Admin mode visibility, 3) Firestore timeout protection (all queries now timeout after 10s instead of hanging indefinitely)"
+  }
+}

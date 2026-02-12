@@ -20,7 +20,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       
       {/* Main Content */}
       <main className={cn(
-        "min-h-screen pb-24 lg:pb-0",
+        "min-h-screen pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-0",
         dir === 'rtl' ? 'lg:pr-64' : 'lg:pl-64'
       )}>
         <div className="min-h-screen">{children}</div>

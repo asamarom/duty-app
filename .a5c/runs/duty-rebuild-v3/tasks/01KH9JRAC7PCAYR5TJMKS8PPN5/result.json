@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH9JRAC7PCAYR5TJMKS8PPN5",
+  "taskId": "__sdk.breakpoint",
+  "invocationKey": "duty-tdd-rebuild:S000002:__sdk.breakpoint",
+  "status": "ok",
+  "result": {
+    "approved": true
+  },
+  "startedAt": "2026-02-12T18:45:34.084Z",
+  "finishedAt": "2026-02-12T18:45:34.084Z",
+  "value": {
+    "approved": true
+  }
+}

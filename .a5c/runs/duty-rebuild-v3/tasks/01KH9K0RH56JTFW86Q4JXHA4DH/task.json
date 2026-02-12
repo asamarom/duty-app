@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH9K0RH56JTFW86Q4JXHA4DH",
+  "taskId": "__sdk.breakpoint",
+  "invocationKey": "duty-tdd-rebuild:S000005:__sdk.breakpoint",
+  "stepId": "S000005",
+  "kind": "breakpoint",
+  "title": "breakpoint",
+  "metadata": {
+    "label": "breakpoint",
+    "payload": {
+      "context": {
+        "files": [
+          {
+            "format": "json",
+            "label": "Diagnosis",
+            "path": "tasks/undefined/result.json"
+          }
+        ]
+      },
+      "question": "34 tests failing. Review diagnosis and approve fix plan?",
+      "title": "Test Failure Diagnosis"
+    },
+    "requestedAt": "2026-02-12T18:50:05.732Z"
+  },
+  "inputs": {
+    "label": "breakpoint",
+    "payload": {
+      "context": {
+        "files": [
+          {
+            "format": "json",
+            "label": "Diagnosis",
+            "path": "tasks/undefined/result.json"
+          }
+        ]
+      },
+      "question": "34 tests failing. Review diagnosis and approve fix plan?",
+      "title": "Test Failure Diagnosis"
+    },
+    "requestedAt": "2026-02-12T18:50:05.732Z"
+  }
+}

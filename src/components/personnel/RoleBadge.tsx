@@ -40,7 +40,7 @@ export function RoleBadge({ role, size = 'default', className }: RoleBadgeProps)
       className={cn(
         'font-medium',
         config.className,
-        size === 'sm' && 'text-[10px] px-1.5 py-0',
+        size === 'sm' && 'text-xs px-1.5 py-0',
         className
       )}
     >

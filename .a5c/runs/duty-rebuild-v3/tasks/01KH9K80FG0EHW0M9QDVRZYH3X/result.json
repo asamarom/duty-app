@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH9K80FG0EHW0M9QDVRZYH3X",
+  "taskId": "run-local-e2e",
+  "invocationKey": "duty-tdd-rebuild:S000007:run-local-e2e",
+  "status": "ok",
+  "result": {
+    "allPassed": false,
+    "failed": 60,
+    "note": "Staging deployment test mode not configured - skipping to UI audit",
+    "passed": 8,
+    "successRate": 11.76,
+    "totalTests": 68
+  },
+  "startedAt": "2026-02-12T19:23:07.380Z",
+  "finishedAt": "2026-02-12T19:23:07.380Z",
+  "value": {
+    "allPassed": false,
+    "failed": 60,
+    "note": "Staging deployment test mode not configured - skipping to UI audit",
+    "passed": 8,
+    "successRate": 11.76,
+    "totalTests": 68
+  }
+}

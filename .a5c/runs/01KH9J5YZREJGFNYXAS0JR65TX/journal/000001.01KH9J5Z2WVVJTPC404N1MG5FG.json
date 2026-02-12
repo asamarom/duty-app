@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-02-12T18:35:27.708Z",
+  "data": {
+    "runId": "01KH9J5YZREJGFNYXAS0JR65TX",
+    "processId": "duty-tdd-rebuild",
+    "entrypoint": {
+      "importPath": "../../processes/duty-tdd-rebuild.js",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json"
+  },
+  "checksum": "45621979a3bdc55b202e9bf1d4e16e06620f1b34c19dc193f41aa382b0dec1dc"
+}

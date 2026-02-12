@@ -101,8 +101,9 @@ export default function EquipmentPage() {
   if (loading) {
     return (
       <MainLayout>
-        <div className="min-h-screen flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="min-h-screen flex flex-col items-center justify-center gap-3">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading equipment...</p>
         </div>
       </MainLayout>
     );
@@ -182,7 +183,7 @@ export default function EquipmentPage() {
               <p className="text-xl lg:text-2xl font-bold text-foreground">
                 {new Set(equipment.map(e => e.id.split('--')[0])).size}
               </p>
-              <p className="text-[10px] lg:text-xs text-muted-foreground whitespace-nowrap">{t('equipment.totalItems')}</p>
+              <p className="text-xs lg:text-xs text-muted-foreground whitespace-nowrap">{t('equipment.totalItems')}</p>
             </div>
           </div>
         </div>
@@ -267,7 +268,7 @@ export default function EquipmentPage() {
         )}
 
         {/* Mobile FAB - show Assign button when items selected, otherwise Add */}
-        <div className="lg:hidden fixed bottom-24 end-4 z-40">
+        <div className="lg:hidden fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] end-4 z-40">
           {selectMode && selectedIds.size > 0 ? (
             <Button
               variant="tactical"

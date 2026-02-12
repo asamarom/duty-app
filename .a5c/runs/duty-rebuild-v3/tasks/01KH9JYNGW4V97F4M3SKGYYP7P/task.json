@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KH9JYNGW4V97F4M3SKGYYP7P",
+  "taskId": "diagnose-failures",
+  "invocationKey": "duty-tdd-rebuild:S000004:diagnose-failures",
+  "stepId": "S000004",
+  "kind": "agent",
+  "title": "Diagnose test failures",
+  "io": {
+    "inputJsonPath": "tasks/01KH9JYNGW4V97F4M3SKGYYP7P/input.json",
+    "outputJsonPath": "tasks/01KH9JYNGW4V97F4M3SKGYYP7P/output.json"
+  },
+  "inputs": {
+    "testResults": {
+      "allPassed": false,
+      "failed": 34,
+      "passed": 34,
+      "successRate": 50,
+      "totalTests": 68
+    }
+  }
+}

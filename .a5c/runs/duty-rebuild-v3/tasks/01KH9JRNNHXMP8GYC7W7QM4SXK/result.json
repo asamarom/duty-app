@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KH9JRNNHXMP8GYC7W7QM4SXK",
+  "taskId": "run-local-e2e",
+  "invocationKey": "duty-tdd-rebuild:S000003:run-local-e2e",
+  "status": "ok",
+  "result": {
+    "allPassed": false,
+    "failed": 34,
+    "passed": 34,
+    "successRate": 50,
+    "totalTests": 68
+  },
+  "startedAt": "2026-02-12T18:48:50.889Z",
+  "finishedAt": "2026-02-12T18:48:50.889Z",
+  "value": {
+    "allPassed": false,
+    "failed": 34,
+    "passed": 34,
+    "successRate": 50,
+    "totalTests": 68
+  }
+}

@@ -12,8 +12,8 @@ export function ReadinessGauge({
   size = 'md',
 }: ReadinessGaugeProps) {
   const sizes = {
-    sm: { container: 'h-20 w-20 lg:h-24 lg:w-24', text: 'text-lg lg:text-xl', label: 'text-[9px] lg:text-[10px]' },
-    md: { container: 'h-24 w-24 lg:h-32 lg:w-32', text: 'text-2xl lg:text-3xl', label: 'text-[10px] lg:text-xs' },
+    sm: { container: 'h-20 w-20 lg:h-24 lg:w-24', text: 'text-lg lg:text-xl', label: 'text-[9px] lg:text-xs' },
+    md: { container: 'h-24 w-24 lg:h-32 lg:w-32', text: 'text-2xl lg:text-3xl', label: 'text-xs lg:text-xs' },
     lg: { container: 'h-28 w-28 lg:h-40 lg:w-40', text: 'text-3xl lg:text-4xl', label: 'text-xs lg:text-sm' },
   };
 
