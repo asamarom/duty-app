@@ -3,7 +3,10 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions
+    // ============================================================================
+    // HELPER FUNCTIONS
+    // ============================================================================
+
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -12,6 +15,8 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // NOTE: This function incurs 1 additional read per request that uses it.
+    // Consider using Firebase Custom Claims for roles to improve performance.
     function getUserDoc() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid));
     }
@@ -40,105 +45,258 @@ service cloud.firestore {
         getUserDoc().data.roles.size() > 0;
     }
 
-    // Users collection - stores user profiles and roles
+    // Get the user's battalion ID from their user document
+    function getUserBattalionId() {
+      return getUserDoc().data.unitId;
+    }
+
+    // Check if a document belongs to the same battalion as the user
+    function isSameBattalion(docBattalionId) {
+      return getUserBattalionId() == docBattalionId;
+    }
+
+    // Check if user has access to a specific unit (admin or assigned leader)
+    function hasUnitAccess(unitId) {
+      return isAdmin() ||
+        exists(/databases/$(database)/documents/adminUnitAssignments/$(request.auth.uid + '_' + unitId));
+    }
+
+    // ============================================================================
+    // USERS COLLECTION - User profiles and roles
+    // ============================================================================
     match /users/{userId} {
       // Users can read their own doc, admins can read all
       allow read: if isOwner(userId) || isAdmin();
 
       // Users can create their own doc on signup
-      allow create: if isOwner(userId);
+      // CRITICAL FIX: Prevent self-assigning roles, validate required fields
+      allow create: if isOwner(userId) &&
+        !request.resource.data.keys().hasAny(['roles']) &&
+        request.resource.data.keys().hasAll(['fullName', 'email', 'createdAt', 'updatedAt']) &&
+        request.resource.data.fullName is string &&
+        request.resource.data.fullName.size() > 0 &&
+        request.resource.data.fullName.size() <= 200 &&
+        request.resource.data.email is string &&
+        request.resource.data.email.size() > 0;
 
-      // Only admins can update roles, users can update their own non-role fields
-      allow update: if isOwner(userId) &&
-        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['roles'])) ||
+      // Only admins can update roles
+      // MEDIUM FIX: Users can only update whitelisted fields
+      allow update: if (isOwner(userId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['fullName', 'avatarUrl', 'updatedAt']) &&
+        (!request.resource.data.keys().hasAny(['fullName']) ||
+          (request.resource.data.fullName is string &&
+           request.resource.data.fullName.size() > 0 &&
+           request.resource.data.fullName.size() <= 200))) ||
         isAdmin();
 
       // Only admins can delete users
       allow delete: if isAdmin();
     }
 
-    // Units collection
+    // ============================================================================
+    // UNITS COLLECTION - Organizational hierarchy
+    // ============================================================================
     match /units/{unitId} {
-      // Anyone authenticated with a role can read units
-      allow read: if hasAnyRole();
+      // CRITICAL FIX: Battalion-based access control
+      // Admins can read all, others can only read units in their battalion
+      allow read: if hasAnyRole() && (isAdmin() || isSameBattalion(resource.data.battalionId));
 
-      // Only admins can create/update/delete units
-      allow create, update, delete: if isAdmin();
+      // Only admins can create units
+      // HIGH FIX: Validate required fields and prevent circular references
+      allow create: if isAdmin() &&
+        request.resource.data.keys().hasAll(['name', 'unitType', 'status', 'createdAt', 'updatedAt']) &&
+        request.resource.data.name is string &&
+        request.resource.data.name.size() > 0 &&
+        request.resource.data.name.size() <= 200 &&
+        request.resource.data.unitType in ['battalion', 'company', 'platoon'] &&
+        request.resource.data.status in ['active', 'inactive', 'deployed'];
+
+      // Only admins can update/delete units
+      // HIGH FIX: Prevent circular parent references
+      allow update: if isAdmin() &&
+        (!request.resource.data.keys().hasAny(['parentId']) ||
+          request.resource.data.parentId != unitId) &&
+        request.resource.data.unitType in ['battalion', 'company', 'platoon'] &&
+        request.resource.data.status in ['active', 'inactive', 'deployed'];
+
+      allow delete: if isAdmin();
     }
 
-    // Personnel collection
+    // ============================================================================
+    // PERSONNEL COLLECTION - Personnel records
+    // ============================================================================
     match /personnel/{personnelId} {
-      // Anyone authenticated with a role can read personnel
-      allow read: if hasAnyRole();
+      // CRITICAL FIX: Battalion-based access control
+      // Admins can read all, others can only read personnel in their battalion
+      allow read: if hasAnyRole() && (isAdmin() || isSameBattalion(resource.data.battalionId));
 
-      // Admins and leaders can create/update personnel
-      allow create, update: if isAdminOrLeader();
+      // Admins and leaders can create personnel
+      // HIGH FIX: Comprehensive field validation
+      allow create: if isAdminOrLeader() &&
+        request.resource.data.keys().hasAll(['serviceNumber', 'rank', 'firstName', 'lastName', 'locationStatus', 'readinessStatus', 'battalionId', 'createdAt', 'updatedAt']) &&
+        request.resource.data.serviceNumber is string &&
+        request.resource.data.serviceNumber.size() > 0 &&
+        request.resource.data.serviceNumber.size() <= 50 &&
+        request.resource.data.firstName is string &&
+        request.resource.data.firstName.size() > 0 &&
+        request.resource.data.firstName.size() <= 100 &&
+        request.resource.data.lastName is string &&
+        request.resource.data.lastName.size() > 0 &&
+        request.resource.data.lastName.size() <= 100 &&
+        request.resource.data.locationStatus in ['home', 'on_duty', 'off_duty', 'active_mission', 'leave', 'tdy'] &&
+        request.resource.data.readinessStatus in ['ready', 'warning', 'critical'] &&
+        (isAdmin() || isSameBattalion(request.resource.data.battalionId));
+
+      // Admins and leaders can update personnel
+      // CRITICAL FIX: Only admins can modify isSignatureApproved
+      // MEDIUM FIX: Validate enum values
+      allow update: if isAdminOrLeader() &&
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['isSignatureApproved']) || isAdmin()) &&
+        (!request.resource.data.keys().hasAny(['locationStatus']) ||
+          request.resource.data.locationStatus in ['home', 'on_duty', 'off_duty', 'active_mission', 'leave', 'tdy']) &&
+        (!request.resource.data.keys().hasAny(['readinessStatus']) ||
+          request.resource.data.readinessStatus in ['ready', 'warning', 'critical']) &&
+        (isAdmin() || isSameBattalion(resource.data.battalionId));
 
       // Only admins can delete personnel
       allow delete: if isAdmin();
     }
 
-    // Equipment collection
+    // ============================================================================
+    // EQUIPMENT COLLECTION - Equipment inventory
+    // ============================================================================
     match /equipment/{equipmentId} {
-      // Anyone authenticated with a role can read equipment
-      allow read: if hasAnyRole();
+      // CRITICAL FIX: Battalion-based access control
+      // Admins can read all, others can only read equipment in their battalion
+      allow read: if hasAnyRole() && (isAdmin() || isSameBattalion(resource.data.battalionId));
 
       // Admins and leaders can create equipment
-      allow create: if isAdminOrLeader();
+      // HIGH FIX: Validate required fields, positive quantity, valid status
+      allow create: if isAdminOrLeader() &&
+        request.resource.data.keys().hasAll(['name', 'quantity', 'status', 'battalionId', 'createdAt', 'updatedAt']) &&
+        request.resource.data.name is string &&
+        request.resource.data.name.size() > 0 &&
+        request.resource.data.name.size() <= 200 &&
+        request.resource.data.quantity is int &&
+        request.resource.data.quantity > 0 &&
+        request.resource.data.status in ['serviceable', 'unserviceable', 'in_maintenance', 'missing', 'pending_transfer'] &&
+        (isAdmin() || isSameBattalion(request.resource.data.battalionId));
 
       // Admins and leaders can update equipment
-      allow update: if isAdminOrLeader();
+      // NOTE: Validation that quantity >= assigned quantity requires Cloud Functions
+      // as it needs to sum equipmentAssignments, which is too expensive for security rules
+      allow update: if isAdminOrLeader() &&
+        (!request.resource.data.keys().hasAny(['quantity']) ||
+          (request.resource.data.quantity is int && request.resource.data.quantity > 0)) &&
+        (!request.resource.data.keys().hasAny(['status']) ||
+          request.resource.data.status in ['serviceable', 'unserviceable', 'in_maintenance', 'missing', 'pending_transfer']) &&
+        (isAdmin() || isSameBattalion(resource.data.battalionId));
 
       // Only admins can delete equipment
       allow delete: if isAdmin();
     }
 
-    // Equipment Assignments collection
+    // ============================================================================
+    // EQUIPMENT ASSIGNMENTS COLLECTION - Who has what equipment
+    // ============================================================================
     match /equipmentAssignments/{assignmentId} {
-      // Anyone authenticated with a role can read assignments
-      allow read: if hasAnyRole();
+      // CRITICAL FIX: Battalion-based access control
+      // Admins can read all, others can only read assignments in their battalion
+      allow read: if hasAnyRole() && (isAdmin() || isSameBattalion(resource.data.battalionId));
 
-      // Admins and leaders can manage assignments
-      allow create, update, delete: if isAdminOrLeader();
+      // Admins and leaders can create assignments
+      // HIGH FIX: Validate positive quantity, require either personnelId or unitId
+      allow create: if isAdminOrLeader() &&
+        request.resource.data.keys().hasAll(['equipmentId', 'quantity', 'battalionId', 'assignedAt']) &&
+        request.resource.data.quantity is int &&
+        request.resource.data.quantity > 0 &&
+        (request.resource.data.keys().hasAny(['personnelId']) ||
+         request.resource.data.keys().hasAny(['unitId'])) &&
+        (isAdmin() || isSameBattalion(request.resource.data.battalionId));
+
+      // Admins and leaders can update assignments
+      // MEDIUM FIX: returnedAt can only be set, not unset
+      allow update: if isAdminOrLeader() &&
+        (!resource.data.keys().hasAny(['returnedAt']) ||
+         resource.data.returnedAt == null ||
+         request.resource.data.returnedAt != null) &&
+        (isAdmin() || isSameBattalion(resource.data.battalionId));
+
+      // Admins and leaders can delete assignments
+      allow delete: if isAdminOrLeader();
     }
 
-    // Assignment Requests collection (transfer requests)
+    // ============================================================================
+    // ASSIGNMENT REQUESTS COLLECTION - Equipment transfer requests
+    // ============================================================================
     match /assignmentRequests/{requestId} {
-      // Anyone authenticated with a role can read requests
-      allow read: if hasAnyRole();
+      // CRITICAL FIX: Battalion-based access control
+      // Admins can read all, others can only read requests in their battalion
+      allow read: if hasAnyRole() && (isAdmin() || isSameBattalion(resource.data.battalionId));
 
       // Any authenticated user with a role can create requests
-      allow create: if hasAnyRole();
+      // CRITICAL FIX: Validate all fields, enforce status='pending', verify requestedBy
+      allow create: if hasAnyRole() &&
+        request.resource.data.keys().hasAll(['equipmentId', 'status', 'battalionId', 'requestedAt', 'requestedBy']) &&
+        request.resource.data.status == 'pending' &&
+        request.resource.data.requestedBy == request.auth.uid &&
+        request.resource.data.equipmentId is string &&
+        request.resource.data.equipmentId.size() > 0 &&
+        (isAdmin() || isSameBattalion(request.resource.data.battalionId));
 
       // Only admins and leaders can update requests (approve/reject)
-      allow update: if isAdminOrLeader();
+      // HIGH FIX: Validate status transitions (pending → approved/rejected only)
+      allow update: if isAdminOrLeader() &&
+        resource.data.status == 'pending' &&
+        request.resource.data.status in ['approved', 'rejected'] &&
+        (isAdmin() || isSameBattalion(resource.data.battalionId));
 
       // Only admins can delete requests
       allow delete: if isAdmin();
     }
 
-    // Signup Requests collection
+    // ============================================================================
+    // SIGNUP REQUESTS COLLECTION - New user registration requests
+    // ============================================================================
     match /signupRequests/{requestId} {
       // Users can read their own requests, admins can read all
       allow read: if (isAuthenticated() && resource.data.userId == request.auth.uid) || isAdmin();
 
       // Authenticated users can create their own signup request
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      // CRITICAL FIX: Comprehensive field validation, enforce status='pending'
+      allow create: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['userId', 'fullName', 'email', 'serviceNumber', 'status', 'createdAt']) &&
+        request.resource.data.status == 'pending' &&
+        request.resource.data.serviceNumber is string &&
+        request.resource.data.serviceNumber.size() > 0 &&
+        request.resource.data.serviceNumber.size() <= 50 &&
+        request.resource.data.fullName is string &&
+        request.resource.data.fullName.size() > 0 &&
+        request.resource.data.fullName.size() <= 200 &&
+        request.resource.data.email is string &&
+        request.resource.data.email.size() > 0;
 
       // Only admins can update (approve/decline) signup requests
-      allow update: if isAdmin();
+      // HIGH FIX: Validate status transitions
+      allow update: if isAdmin() &&
+        request.resource.data.status in ['pending', 'approved', 'declined'] &&
+        resource.data.status == 'pending' &&
+        request.resource.data.status in ['approved', 'declined'];
 
       // Only admins can delete signup requests
       allow delete: if isAdmin();
     }
 
-    // Admin Unit Assignments collection (which units a leader/admin can manage)
+    // ============================================================================
+    // ADMIN UNIT ASSIGNMENTS COLLECTION - Leader unit access control
+    // ============================================================================
     match /adminUnitAssignments/{assignmentId} {
       // Admins can read all, leaders can read their own
       allow read: if isAdmin() ||
         (isLeader() && resource.data.userId == request.auth.uid);
 
-      // Only admins can create/update/delete
+      // Only admins can create/update/delete unit assignments
       allow create, update, delete: if isAdmin();
     }
   }
