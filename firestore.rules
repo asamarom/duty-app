@@ -51,7 +51,13 @@ service cloud.firestore {
     }
 
     // Check if a document belongs to the same battalion as the user
+    // MIGRATION: Returns true if battalionId is missing (allows during migration)
     function isSameBattalion(docBattalionId) {
+      return docBattalionId == null || getUserBattalionId() == docBattalionId;
+    }
+
+    // Check battalion for create operations (battalion ID required on create)
+    function isSameBattalionCreate(docBattalionId) {
       return getUserBattalionId() == docBattalionId;
     }
 
@@ -99,10 +105,12 @@ service cloud.firestore {
     match /units/{unitId} {
       // CRITICAL FIX: Battalion-based access control
       // Admins can read all, others can only read units in their battalion
-      allow read: if hasAnyRole() && (isAdmin() || isSameBattalion(resource.data.battalionId));
+      // MIGRATION: battalionId is optional during migration period
+      allow read: if hasAnyRole() && (isAdmin() || !resource.data.keys().hasAny(['battalionId']) || isSameBattalion(resource.data.battalionId));
 
       // Only admins can create units
       // HIGH FIX: Validate required fields and prevent circular references
+      // MIGRATION: battalionId not required during migration
       allow create: if isAdmin() &&
         request.resource.data.keys().hasAll(['name', 'unitType', 'status', 'createdAt', 'updatedAt']) &&
         request.resource.data.name is string &&
@@ -132,8 +140,9 @@ service cloud.firestore {
 
       // Admins and leaders can create personnel
       // HIGH FIX: Comprehensive field validation
+      // MIGRATION: battalionId is optional during migration
       allow create: if isAdminOrLeader() &&
-        request.resource.data.keys().hasAll(['serviceNumber', 'rank', 'firstName', 'lastName', 'locationStatus', 'readinessStatus', 'battalionId', 'createdAt', 'updatedAt']) &&
+        request.resource.data.keys().hasAll(['serviceNumber', 'rank', 'firstName', 'lastName', 'locationStatus', 'readinessStatus', 'createdAt', 'updatedAt']) &&
         request.resource.data.serviceNumber is string &&
         request.resource.data.serviceNumber.size() > 0 &&
         request.resource.data.serviceNumber.size() <= 50 &&
@@ -145,7 +154,7 @@ service cloud.firestore {
         request.resource.data.lastName.size() <= 100 &&
         request.resource.data.locationStatus in ['home', 'on_duty', 'off_duty', 'active_mission', 'leave', 'tdy'] &&
         request.resource.data.readinessStatus in ['ready', 'warning', 'critical'] &&
-        (isAdmin() || isSameBattalion(request.resource.data.battalionId));
+        (isAdmin() || !request.resource.data.keys().hasAny(['battalionId']) || isSameBattalionCreate(request.resource.data.battalionId));
 
       // Admins and leaders can update personnel
       // CRITICAL FIX: Only admins can modify isSignatureApproved
@@ -172,15 +181,16 @@ service cloud.firestore {
 
       // Admins and leaders can create equipment
       // HIGH FIX: Validate required fields, positive quantity, valid status
+      // MIGRATION: battalionId is optional during migration
       allow create: if isAdminOrLeader() &&
-        request.resource.data.keys().hasAll(['name', 'quantity', 'status', 'battalionId', 'createdAt', 'updatedAt']) &&
+        request.resource.data.keys().hasAll(['name', 'quantity', 'status', 'createdAt', 'updatedAt']) &&
         request.resource.data.name is string &&
         request.resource.data.name.size() > 0 &&
         request.resource.data.name.size() <= 200 &&
         request.resource.data.quantity is int &&
         request.resource.data.quantity > 0 &&
         request.resource.data.status in ['serviceable', 'unserviceable', 'in_maintenance', 'missing', 'pending_transfer'] &&
-        (isAdmin() || isSameBattalion(request.resource.data.battalionId));
+        (isAdmin() || !request.resource.data.keys().hasAny(['battalionId']) || isSameBattalionCreate(request.resource.data.battalionId));
 
       // Admins and leaders can update equipment
       // NOTE: Validation that quantity >= assigned quantity requires Cloud Functions
@@ -206,13 +216,14 @@ service cloud.firestore {
 
       // Admins and leaders can create assignments
       // HIGH FIX: Validate positive quantity, require either personnelId or unitId
+      // MIGRATION: battalionId is optional during migration
       allow create: if isAdminOrLeader() &&
-        request.resource.data.keys().hasAll(['equipmentId', 'quantity', 'battalionId', 'assignedAt']) &&
+        request.resource.data.keys().hasAll(['equipmentId', 'quantity', 'assignedAt']) &&
         request.resource.data.quantity is int &&
         request.resource.data.quantity > 0 &&
         (request.resource.data.keys().hasAny(['personnelId']) ||
          request.resource.data.keys().hasAny(['unitId'])) &&
-        (isAdmin() || isSameBattalion(request.resource.data.battalionId));
+        (isAdmin() || !request.resource.data.keys().hasAny(['battalionId']) || isSameBattalionCreate(request.resource.data.battalionId));
 
       // Admins and leaders can update assignments
       // MEDIUM FIX: returnedAt can only be set, not unset
@@ -236,13 +247,14 @@ service cloud.firestore {
 
       // Any authenticated user with a role can create requests
       // CRITICAL FIX: Validate all fields, enforce status='pending', verify requestedBy
+      // MIGRATION: battalionId is optional during migration
       allow create: if hasAnyRole() &&
-        request.resource.data.keys().hasAll(['equipmentId', 'status', 'battalionId', 'requestedAt', 'requestedBy']) &&
+        request.resource.data.keys().hasAll(['equipmentId', 'status', 'requestedAt', 'requestedBy']) &&
         request.resource.data.status == 'pending' &&
         request.resource.data.requestedBy == request.auth.uid &&
         request.resource.data.equipmentId is string &&
         request.resource.data.equipmentId.size() > 0 &&
-        (isAdmin() || isSameBattalion(request.resource.data.battalionId));
+        (isAdmin() || !request.resource.data.keys().hasAny(['battalionId']) || isSameBattalionCreate(request.resource.data.battalionId));
 
       // Only admins and leaders can update requests (approve/reject)
       // HIGH FIX: Validate status transitions (pending → approved/rejected only)
