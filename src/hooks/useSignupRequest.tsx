@@ -82,6 +82,13 @@ export function useSignupRequest(): UseSignupRequestReturn {
 
     try {
       setLoading(true);
+      setError(null);
+
+      // Create a timeout promise
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Firestore query timeout after 10s')), 10000);
+      });
+
       const requestsRef = collection(db, 'signupRequests');
       const q = query(
         requestsRef,
@@ -90,7 +97,7 @@ export function useSignupRequest(): UseSignupRequestReturn {
         limit(1)
       );
 
-      const snapshot = await getDocs(q);
+      const snapshot = await Promise.race([getDocs(q), timeoutPromise]);
 
       if (!snapshot.empty) {
         const doc = snapshot.docs[0];
@@ -103,7 +110,10 @@ export function useSignupRequest(): UseSignupRequestReturn {
         setStatus('none');
       }
     } catch (err) {
+      console.error('useSignupRequest: Firestore error', err);
       setError(err as Error);
+      setRequest(null);
+      setStatus('none');
     } finally {
       setLoading(false);
     }

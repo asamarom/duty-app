@@ -27,8 +27,15 @@ export function useUserBattalion(): UseUserUnitReturn {
 
     try {
       setLoading(true);
+      setError(null);
+
+      // Create a timeout promise
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Firestore query timeout after 10s')), 10000);
+      });
+
       const userDocRef = doc(db, 'users', user.uid);
-      const snapshot = await getDoc(userDocRef);
+      const snapshot = await Promise.race([getDoc(userDocRef), timeoutPromise]);
 
       if (snapshot.exists()) {
         const data = snapshot.data() as UserDoc;
@@ -37,7 +44,9 @@ export function useUserBattalion(): UseUserUnitReturn {
         setUnitId(null);
       }
     } catch (err) {
+      console.error('useUserBattalion: Firestore error', err);
       setError(err as Error);
+      setUnitId(null);
     } finally {
       setLoading(false);
     }

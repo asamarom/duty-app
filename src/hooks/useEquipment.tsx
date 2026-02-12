@@ -63,11 +63,17 @@ export function useEquipment(): UseEquipmentReturn {
   const fetchEquipment = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
+
+      // Create a timeout promise
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Firestore query timeout after 10s')), 10000);
+      });
 
       // Fetch all equipment
       const equipmentRef = collection(db, 'equipment');
       const equipmentQuery = query(equipmentRef, orderBy('name'));
-      const equipmentSnapshot = await getDocs(equipmentQuery);
+      const equipmentSnapshot = await Promise.race([getDocs(equipmentQuery), timeoutPromise]);
 
       const equipmentDocs = equipmentSnapshot.docs.map((docSnap) => ({
         id: docSnap.id,
@@ -197,7 +203,9 @@ export function useEquipment(): UseEquipmentReturn {
 
       setEquipment(mappedEquipment);
     } catch (err) {
+      console.error('useEquipment: Firestore error', err);
       setError(err as Error);
+      setEquipment([]);
     } finally {
       setLoading(false);
     }

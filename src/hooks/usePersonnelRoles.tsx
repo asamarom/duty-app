@@ -27,6 +27,12 @@ export function usePersonnelRoles(personnelIds?: string[]): UsePersonnelRolesRet
   const fetchRoles = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
+
+      // Create a timeout promise
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Firestore query timeout after 10s')), 10000);
+      });
 
       // Fetch personnel with their user_ids
       const personnelRef = collection(db, 'personnel');
@@ -43,7 +49,7 @@ export function usePersonnelRoles(personnelIds?: string[]): UsePersonnelRolesRet
         const allPersonnelData: { id: string; userId: string | null }[] = [];
         for (const batch of batches) {
           const q = query(personnelRef, where(documentId(), 'in', batch));
-          const snapshot = await getDocs(q);
+          const snapshot = await Promise.race([getDocs(q), timeoutPromise]);
           snapshot.docs.forEach((doc) => {
             const data = doc.data() as PersonnelDoc;
             allPersonnelData.push({ id: doc.id, userId: data.userId });
@@ -118,7 +124,9 @@ export function usePersonnelRoles(personnelIds?: string[]): UsePersonnelRolesRet
         setPersonnelRoles(result);
       }
     } catch (err) {
+      console.error('usePersonnelRoles: Firestore error', err);
       setError(err as Error);
+      setPersonnelRoles(new Map());
     } finally {
       setLoading(false);
     }

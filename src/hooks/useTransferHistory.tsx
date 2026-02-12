@@ -102,7 +102,9 @@ export function useTransferHistory(equipmentId: string | undefined): UseTransfer
 
       setHistory(mappedHistory);
     } catch (err) {
+      console.error('useTransferHistory: Firestore error', err);
       setError(err as Error);
+      setHistory([]);
     } finally {
       setLoading(false);
     }

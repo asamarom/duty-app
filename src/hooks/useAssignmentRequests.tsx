@@ -57,10 +57,16 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
   const fetchRequests = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
+
+      // Create a timeout promise
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Firestore query timeout after 10s')), 10000);
+      });
 
       const requestsRef = collection(db, 'assignmentRequests');
       const q = query(requestsRef, orderBy('requestedAt', 'desc'));
-      const snapshot = await getDocs(q);
+      const snapshot = await Promise.race([getDocs(q), timeoutPromise]);
 
       const mappedRequests: AssignmentRequest[] = await Promise.all(
         snapshot.docs.map(async (docSnap) => {
@@ -148,7 +154,10 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
       );
       setIncomingTransfers(incoming);
     } catch (err) {
+      console.error('useAssignmentRequests: Firestore error', err);
       setError(err as Error);
+      setRequests([]);
+      setIncomingTransfers([]);
     } finally {
       setLoading(false);
     }

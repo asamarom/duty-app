@@ -1,4 +1,7 @@
 {
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "permissions": {
     "allow": [
       "Bash(grep:*)",
@@ -23,7 +26,36 @@
       "Bash(npx playwright test:*)",
       "Bash(cross-env TEST_ENV=staging npx playwright test:*)",
       "Bash(npx cross-env TEST_ENV=staging npx playwright test --project=staging --workers=1 e2e/user-lifecycle.spec.ts)",
-      "Bash(git checkout:*)"
-    ]
+      "Bash(git checkout:*)",
+      "Bash(ls \"C:\\\\Users\\\\ilana\\\\OneDrive\\\\מסמכים\\\\code\\\\duty\\\\duty-app\\\\sprints\"\" 2>/dev/null | grep -oP \"sprint_Kd+ \")",
+      "Bash(dir /b \"C:\\\\Users\\\\ilana\\\\OneDrive\\\\מסמכים\\\\code\\\\duty\\\\duty-app\\\\sprints\")",
+      "Bash(cross-env BASE_URL=http://localhost:8080 npm run test:e2e)",
+      "Bash(set BASE_URL=http://localhost:8080)",
+      "Bash(ls -la \"c:\\\\Users\\\\ilana\\\\OneDrive\\\\מסמכים\\\\code\\\\duty\\\\duty-app\\\\.claude\\\\skills\"\" 2>&1 || echo \"Directory may not exist \")",
+      "Bash(npm run:*)",
+      "Bash(more:*)",
+      "Bash(npx cross-env:*)",
+      "Bash(timeout:*)",
+      "Bash(node scripts/seed-test-users.js:*)",
+      "Bash(npm install:*)",
+      "Bash(cmd /c \"taskkill /PID 31772 /F\")",
+      "Bash(firebase apps:sdkconfig:*)",
+      "Bash(firebase projects:list:*)",
+      "Bash(firebase apps:list:*)",
+      "Bash(firebase apps:create:*)",
+      "Bash(ren scriptsstart-emulators.js start-emulators.cjs)",
+      "Bash(ren scriptsseed-emulator-users.js seed-emulator-users.cjs)",
+      "Bash(node scripts/start-emulators.cjs:*)",
+      "Bash(java:*)",
+      "Bash(winget install:*)",
+      "Bash(where:*)",
+      "Bash(cmd /c \"java -version\")",
+      "Bash(cmd /c:*)",
+      "Bash(export JAVA_HOME=\"/c/Program Files/Microsoft/jdk-21.0.10.7-hotspot\")",
+      "Bash(export PATH=\"$JAVA_HOME/bin:$PATH\")",
+      "Bash(dir:*)",
+      "Bash(git status:*)"
+    ],
+    "defaultMode": "bypassPermissions"
   }
 }

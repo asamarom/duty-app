@@ -41,9 +41,18 @@ export function usePersonnel(): UsePersonnelReturn {
   const fetchPersonnel = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
+
+      // Create a timeout promise
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Firestore query timeout after 10s')), 10000);
+      });
+
       const personnelRef = collection(db, 'personnel');
       const q = query(personnelRef, orderBy('lastName'));
-      const snapshot = await getDocs(q);
+
+      // Race between the query and timeout
+      const snapshot = await Promise.race([getDocs(q), timeoutPromise]);
 
       const mappedPersonnel = snapshot.docs.map((doc) =>
         mapDocToPersonnel(doc.id, doc.data() as PersonnelDoc)
@@ -51,7 +60,9 @@ export function usePersonnel(): UsePersonnelReturn {
 
       setPersonnel(mappedPersonnel);
     } catch (err) {
+      console.error('usePersonnel: Firestore error', err);
       setError(err as Error);
+      setPersonnel([]);
     } finally {
       setLoading(false);
     }

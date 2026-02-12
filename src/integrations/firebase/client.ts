@@ -20,11 +20,13 @@ export const functions = getFunctions(app);
 // Connect to emulators when running E2E tests locally
 const authEmulatorHost = import.meta.env.VITE_FIREBASE_AUTH_EMULATOR_HOST;
 if (authEmulatorHost) {
+  console.log('[Firebase] Connecting to Auth emulator:', authEmulatorHost);
   connectAuthEmulator(auth, `http://${authEmulatorHost}`, { disableWarnings: true });
 }
 
 const firestoreEmulatorHost = import.meta.env.VITE_FIRESTORE_EMULATOR_HOST;
 if (firestoreEmulatorHost) {
   const [host, port] = firestoreEmulatorHost.split(':');
+  console.log('[Firebase] Connecting to Firestore emulator:', host, port);
   connectFirestoreEmulator(db, host, parseInt(port, 10));
 }

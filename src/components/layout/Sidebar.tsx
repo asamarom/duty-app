@@ -81,7 +81,7 @@ export function Sidebar() {
         </div>
 
         {/* Admin Mode Toggle - Only for admins */}
-        {isAdmin && (
+        {isActualAdmin && (
           <div className="mx-4 mt-3">
             <Tooltip>
               <TooltipTrigger asChild>

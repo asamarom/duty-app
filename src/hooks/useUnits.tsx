@@ -48,9 +48,16 @@ export function useUnits(): UseUnitsReturn {
   const fetchUnits = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
+
+      // Create a timeout promise
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Firestore query timeout after 10s')), 10000);
+      });
+
       const unitsRef = collection(db, 'units');
       const q = query(unitsRef, orderBy('name'));
-      const snapshot = await getDocs(q);
+      const snapshot = await Promise.race([getDocs(q), timeoutPromise]);
 
       const fetchedUnits: Unit[] = snapshot.docs.map((doc) => {
         const data = doc.data() as UnitDoc;
@@ -77,7 +84,9 @@ export function useUnits(): UseUnitsReturn {
 
       setUnits(fetchedUnits);
     } catch (err) {
+      console.error('useUnits: Firestore error', err);
       setError(err as Error);
+      setUnits([]);
     } finally {
       setLoading(false);
     }

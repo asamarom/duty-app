@@ -9,7 +9,7 @@ test.describe('Admin Approvals [ONBOARD]', () => {
 
   test('[ONBOARD-4] should display pending signup requests on approvals page', async ({ page }) => {
     // Navigate to approvals page
-    const approvalsLink = page.locator('a[href*="approvals"], text=/approvals|אישורים/i').first();
+    const approvalsLink = page.locator('a[href*="approvals"]').or(page.getByText(/approvals|אישורים/i)).first();
 
     if (await approvalsLink.isVisible()) {
       await approvalsLink.click();

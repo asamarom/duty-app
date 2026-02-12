@@ -27,6 +27,7 @@
     "emulator:all": "node scripts/start-emulators.cjs"
   },
   "dependencies": {
+    "@a5c-ai/babysitter-sdk": "^0.0.166",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
@@ -102,5 +103,18 @@
     "typescript-eslint": "^8.38.0",
     "vite": "^5.4.19",
     "vitest": "^4.0.17"
-  }
+  },
+  "description": "**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID",
+  "main": "eslint.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asamarom/duty-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/asamarom/duty-app/issues"
+  },
+  "homepage": "https://github.com/asamarom/duty-app#readme"
 }

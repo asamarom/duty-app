@@ -31,10 +31,20 @@ export function useUserRole(): UseUserRoleReturn {
       return;
     }
 
+    // Set a timeout for loading state
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        console.warn('useUserRole: Firestore query timeout after 10s');
+        setError(new Error('Firestore query timeout'));
+        setLoading(false);
+      }
+    }, 10000);
+
     const userDocRef = doc(db, 'users', user.uid);
     const unsubscribe = onSnapshot(
       userDocRef,
       (snapshot) => {
+        clearTimeout(timeoutId);
         if (snapshot.exists()) {
           const data = snapshot.data() as UserDoc;
           setActualRoles(data.roles || []);
@@ -44,13 +54,18 @@ export function useUserRole(): UseUserRoleReturn {
         setLoading(false);
       },
       (err) => {
+        clearTimeout(timeoutId);
+        console.error('useUserRole: Firestore error', err);
         setError(err);
         setActualRoles([]);
         setLoading(false);
       }
     );
 
-    return () => unsubscribe();
+    return () => {
+      clearTimeout(timeoutId);
+      unsubscribe();
+    };
   }, [user?.uid]);
 
   const fetchRoles = async () => {
