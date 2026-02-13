@@ -201,10 +201,10 @@ test.describe('Admin Mode [AUTH-4]', () => {
     await loginAsTestUser(page, 'admin');
 
     // Check for admin-only menu items (Approvals, Settings)
-    const approvalsLink = page.locator('a[href*="approvals"], text=/approvals|אישורים/i').first();
+    const approvalsLink = page.locator('a[href*="approvals"]').or(page.getByText(/approvals|אישורים/i)).first();
     const hasApprovals = await approvalsLink.isVisible().catch(() => false);
 
-    const settingsLink = page.locator('a[href*="settings"], text=/settings|הגדרות/i').first();
+    const settingsLink = page.locator('a[href*="settings"]').or(page.getByText(/settings|הגדרות/i)).first();
     const hasSettings = await settingsLink.isVisible().catch(() => false);
 
     expect(hasApprovals || hasSettings).toBeTruthy();

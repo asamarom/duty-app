@@ -134,9 +134,12 @@ export default defineConfig({
   webServer: isRemote ? undefined : [
     {
       command: 'node scripts/start-emulators.cjs',
-      url: 'http://localhost:9099/',
+      // Wait for port 9098 (the "seed-ready" gate), NOT 9099 (the auth emulator).
+      // start-emulators.cjs only opens 9098 after seeding is fully complete,
+      // so tests never start before test users exist in the emulator.
+      url: 'http://localhost:9098/',
       reuseExistingServer: !process.env.CI,
-      timeout: 60 * 1000,
+      timeout: 120 * 1000, // extra time: emulator start + seeding
     },
     {
       command: 'npx cross-env VITE_TEST_MODE=true VITE_FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 VITE_FIRESTORE_EMULATOR_HOST=localhost:8085 npm run dev',

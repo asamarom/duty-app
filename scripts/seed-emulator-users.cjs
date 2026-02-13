@@ -198,6 +198,7 @@ async function seedUnits() {
         designation: toStringValue('TEST-BN'),
         leaderId: toStringValue(userUIDs.admin),
         status: toStringValue('active'),
+        battalionId: toStringValue(TEST_UNIT_IDS.battalion), // self-referential
         createdAt: toTimestampValue(),
         updatedAt: toTimestampValue(),
       },
@@ -211,6 +212,7 @@ async function seedUnits() {
         designation: toStringValue('A-CO'),
         leaderId: toStringValue(userUIDs.leader),
         status: toStringValue('active'),
+        battalionId: toStringValue(TEST_UNIT_IDS.battalion),
         createdAt: toTimestampValue(),
         updatedAt: toTimestampValue(),
       },
@@ -224,6 +226,7 @@ async function seedUnits() {
         designation: toStringValue('1-PLT'),
         leaderId: { nullValue: null },
         status: toStringValue('active'),
+        battalionId: toStringValue(TEST_UNIT_IDS.battalion),
         createdAt: toTimestampValue(),
         updatedAt: toTimestampValue(),
       },
@@ -246,6 +249,7 @@ async function seedPersonnel() {
       fields: {
         userId: toStringValue(userUIDs.admin),
         unitId: toStringValue(TEST_UNIT_IDS.battalion),
+        battalionId: toStringValue(TEST_UNIT_IDS.battalion),
         serviceNumber: toStringValue('E2E-ADMIN-001'),
         rank: toStringValue('COL'),
         firstName: toStringValue('Test'),
@@ -269,6 +273,7 @@ async function seedPersonnel() {
       fields: {
         userId: toStringValue(userUIDs.leader),
         unitId: toStringValue(TEST_UNIT_IDS.company),
+        battalionId: toStringValue(TEST_UNIT_IDS.battalion),
         serviceNumber: toStringValue('E2E-LEADER-002'),
         rank: toStringValue('CPT'),
         firstName: toStringValue('Test'),
@@ -292,6 +297,7 @@ async function seedPersonnel() {
       fields: {
         userId: toStringValue(userUIDs.user),
         unitId: toStringValue(TEST_UNIT_IDS.platoon),
+        battalionId: toStringValue(TEST_UNIT_IDS.battalion),
         serviceNumber: toStringValue('E2E-USER-003'),
         rank: toStringValue('SGT'),
         firstName: toStringValue('Test'),
