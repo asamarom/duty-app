@@ -1,73 +1,63 @@
-# Welcome to your Lovable project
+# PMTB - Platoon Management Tool Box
 
-## Project info
+Duty Tactical Management System (DTMS) — a military/security asset management application for small-unit administration.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Tech Stack
 
-## How can I edit this code?
+- **Frontend**: React + TypeScript + Vite + Tailwind CSS + shadcn/ui
+- **Backend**: Firebase (Firestore + Auth)
+- **Hosting**: Vercel
+- **Testing**: Vitest (unit), Playwright (E2E), @firebase/rules-unit-testing (security rules)
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Development
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Install dependencies
+npm install
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start dev server (port 8080)
 npm run dev
+
+# Type check
+npm run typecheck
+
+# Lint
+npm run lint
 ```
 
-**Edit a file directly in GitHub**
+## Testing
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Requires Java (OpenJDK 21+) for Firebase emulators.
 
-**Use GitHub Codespaces**
+```sh
+# Unit tests
+npm test
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Firestore security rules tests
+npm run test:rules
 
-## What technologies are used for this project?
+# E2E tests (starts emulators + dev server automatically)
+npm run test:e2e
+```
 
-This project is built with:
+## Deployment
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Vercel auto-deploys from the `main` branch. The Firebase project `duty-82f42` is used for Firestore and Auth only.
 
-## How can I deploy this project?
+```sh
+npm run build
+```
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+## Project Structure
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+```
+src/
+  components/   # UI components
+  hooks/        # Firebase data hooks
+  pages/        # Route pages
+  i18n/         # English + Hebrew translations
+  types/        # TypeScript types
+e2e/            # Playwright E2E tests
+scripts/        # Emulator + seeding scripts
+firestore.rules # Firestore security rules
+```

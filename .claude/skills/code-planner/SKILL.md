@@ -38,7 +38,7 @@ Create a task breakdown plan for implementing requirement changes from the lates
 
 When analyzing requirements:
 
-- **AUTH/PERS/ONBOARD**: Check `src/hooks/`, `src/components/auth/`, Supabase policies
+- **AUTH/PERS/ONBOARD**: Check `src/hooks/`, `src/components/auth/`, Firebase security rules (`firestore.rules`)
 - **EQUIP**: Check `src/components/equipment/`, `src/hooks/useEquipment*`
 - **XFER**: Check `src/components/transfers/`, `src/hooks/useTransfer*`
 - **UI/I18N**: Check `src/components/ui/`, `src/i18n/translations.ts`

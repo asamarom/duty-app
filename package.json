@@ -117,7 +117,7 @@
       "bash -c 'tsc --noEmit --project tsconfig.app.json'"
     ]
   },
-  "description": "**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID",
+  "description": "Duty Tactical Management System - military asset management built with React, TypeScript, and Firebase",
   "main": "eslint.config.js",
   "repository": {
     "type": "git",

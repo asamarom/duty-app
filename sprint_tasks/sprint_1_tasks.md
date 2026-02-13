@@ -27,7 +27,7 @@ Sprint 1 formalizes existing functionality with requirement IDs. All 56 requirem
 | UNIT | UNIT-1, UNIT-2, UNIT-3 | `src/pages/UnitsPage.tsx`, unit hierarchy in database |
 | PERS | PERS-1 to PERS-4 | `src/pages/PersonnelPage.tsx`, `PersonnelDetailPage.tsx` |
 | EQUIP | EQUIP-1 to EQUIP-7 | `src/pages/EquipmentPage.tsx`, `AddEquipmentPage.tsx` |
-| AUTH | AUTH-1 to AUTH-8 | `src/components/auth/`, `src/hooks/`, Supabase RLS |
+| AUTH | AUTH-1 to AUTH-8 | `src/components/auth/`, `src/hooks/`, Firebase security rules |
 | I18N | I18N-1 to I18N-3 | `src/i18n/translations.ts` |
 | ONBOARD | ONBOARD-1 to ONBOARD-7 | `SignupRequestPage.tsx`, `PendingApprovalPage.tsx`, `AdminApprovalsPage.tsx` |
 | XFER | XFER-1 to XFER-10 | `src/pages/AssignmentRequestsPage.tsx`, transfer logic |
