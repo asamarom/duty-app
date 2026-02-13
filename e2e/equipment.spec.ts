@@ -13,7 +13,7 @@ test.describe('Equipment Management (Authenticated)', () => {
     await expect(page).toHaveURL(/equipment/);
 
     // Wait for page content
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Check for equipment content (table, list, or empty state)
     const hasContent = await page.locator('table, [role="list"], .equipment-list').isVisible();
@@ -24,7 +24,7 @@ test.describe('Equipment Management (Authenticated)', () => {
   test('should have add equipment button', async ({ page }) => {
     await page.getByRole('link', { name: /ציוד|equipment/i }).first().click();
     await expect(page).toHaveURL(/equipment/);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Look for any button/link that might add equipment (could be icon-only)
     const addElement = page.locator('a[href*="/equipment/add"], button:has-text("הוסף"), button:has-text("Add")').first();
@@ -36,7 +36,7 @@ test.describe('Equipment Management (Authenticated)', () => {
   test('should navigate to add equipment page', async ({ page }) => {
     await page.getByRole('link', { name: /ציוד|equipment/i }).first().click();
     await expect(page).toHaveURL(/equipment/);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Try to find and click add link
     const addLink = page.locator('a[href*="/equipment/add"]').first();
@@ -52,9 +52,11 @@ test.describe('Equipment Management (Authenticated)', () => {
   test('should display add equipment form', async ({ page }) => {
     // Go directly to add page
     await page.goto('/equipment/add');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // May redirect back if no permission - check current URL
+    // Wait a moment for React to mount after DOMContentLoaded
+    await page.waitForTimeout(1000);
     const currentUrl = page.url();
     if (currentUrl.includes('/equipment/add')) {
       // Check for form content
@@ -77,14 +79,14 @@ test.describe('Equipment Management (Authenticated)', () => {
 
   test('[EQUIP-1] should display lifecycle status on equipment', async ({ page }) => {
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Navigate to equipment detail
     const equipmentLink = page.locator('a[href^="/equipment/"]').first();
 
     if (await equipmentLink.isVisible()) {
       await equipmentLink.click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Check for lifecycle/status indicator
       const hasStatus = await page.locator('text=/status|active|disposed|מצב/i').isVisible().catch(() => false);
@@ -96,14 +98,14 @@ test.describe('Equipment Management (Authenticated)', () => {
 
   test('[EQUIP-2] should show assignment information on equipment', async ({ page }) => {
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Navigate to equipment detail
     const equipmentLink = page.locator('a[href^="/equipment/"]').first();
 
     if (await equipmentLink.isVisible()) {
       await equipmentLink.click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Check for assignment info
       const hasAssignment = await page.locator('text=/assigned|מוקצה|owner|בעלים/i').isVisible().catch(() => false);
@@ -115,7 +117,7 @@ test.describe('Equipment Management (Authenticated)', () => {
 
   test('[EQUIP-4] should filter equipment and show matching results', async ({ page }) => {
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const searchInput = page.getByPlaceholder(/search|חיפוש/i);
 
@@ -132,7 +134,7 @@ test.describe('Equipment Management (Authenticated)', () => {
 
   test('[EQUIP-5] should navigate to equipment detail page', async ({ page }) => {
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const equipmentLink = page.locator('a[href^="/equipment/"]').first();
 
@@ -151,7 +153,7 @@ test.describe('Equipment Management (Authenticated)', () => {
   test('[EQUIP-7] should enforce serial number assignment rules', async ({ page }) => {
     // Navigate to add equipment page
     await page.goto('/equipment/add');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Check if serial number field exists
     const serialField = page.locator('input[name*="serial"], input[placeholder*="serial"]').first();

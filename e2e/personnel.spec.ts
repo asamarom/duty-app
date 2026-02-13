@@ -20,7 +20,7 @@ test.describe('Personnel Management (Authenticated)', () => {
     // Navigate via sidebar
     await page.getByRole('link', { name: /כוח אדם|personnel/i }).first().click();
     await expect(page).toHaveURL(/personnel/);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Look for any add functionality - may not be present depending on permissions
     const addElement = page.locator('a[href*="add"], button:has-text("הוסף"), button:has-text("Add")').first();
@@ -33,7 +33,7 @@ test.describe('Personnel Management (Authenticated)', () => {
     await page.goto('/personnel');
 
     // Wait for content to load (either table or list view)
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Check for table or list container
     const hasTable = await page.locator('table').isVisible();
@@ -44,7 +44,7 @@ test.describe('Personnel Management (Authenticated)', () => {
 
   test('should navigate to personnel detail when clicking on person', async ({ page }) => {
     await page.goto('/personnel');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Find a personnel link/row and click it
     const personnelLink = page.locator('a[href^="/personnel/"]').first();
@@ -66,14 +66,14 @@ test.describe('Personnel Management (Authenticated)', () => {
 
   test('[PERS-1] should display profile with Service Number, Rank, Duty Position, Contact Info', async ({ page }) => {
     await page.goto('/personnel');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Navigate to a personnel detail page
     const personnelLink = page.locator('a[href^="/personnel/"]').first();
 
     if (await personnelLink.isVisible()) {
       await personnelLink.click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Check for profile fields
       const hasServiceNumber = await page.locator('text=/service number|מספר אישי/i').isVisible().catch(() => false);
@@ -90,7 +90,7 @@ test.describe('Personnel Management (Authenticated)', () => {
 
   test('[PERS-3] should filter personnel and show matching results', async ({ page }) => {
     await page.goto('/personnel');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const searchInput = page.getByPlaceholder(/search|חיפוש/i);
 

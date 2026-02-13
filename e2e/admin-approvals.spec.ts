@@ -13,7 +13,7 @@ test.describe('Admin Approvals [ONBOARD]', () => {
 
     if (await approvalsLink.isVisible()) {
       await approvalsLink.click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Check for pending requests section
       const pendingSection = page.locator('[data-testid="pending-requests"], text=/pending|ממתין/i').first();
@@ -23,7 +23,7 @@ test.describe('Admin Approvals [ONBOARD]', () => {
     } else {
       // Try direct navigation
       await page.goto('/approvals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       expect(true).toBeTruthy();
     }
@@ -31,7 +31,7 @@ test.describe('Admin Approvals [ONBOARD]', () => {
 
   test('[ONBOARD-5] should allow admin to approve signup request', async ({ page }) => {
     await page.goto('/approvals');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Look for approve button on any pending request
     const approveButton = page.locator('button:has-text("approve"), button:has-text("אשר")').first();
@@ -44,7 +44,7 @@ test.describe('Admin Approvals [ONBOARD]', () => {
   test('[ONBOARD-5.1] should create personnel record on approval', async ({ page }) => {
     // This test verifies that after approval, personnel is created
     await page.goto('/approvals');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Approval would trigger personnel creation
     // Verify by checking personnel list after
@@ -53,7 +53,7 @@ test.describe('Admin Approvals [ONBOARD]', () => {
 
   test('[ONBOARD-5.2] should assign role during approval', async ({ page }) => {
     await page.goto('/approvals');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Look for role selection in approval form
     const roleSelector = page.locator('select[name*="role"], [data-testid="role-select"]').first();

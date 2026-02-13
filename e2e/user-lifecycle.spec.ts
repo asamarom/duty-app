@@ -254,7 +254,7 @@ test.describe('Admin Mode [AUTH-4]', () => {
 
       // Refresh the page
       await page.reload();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // State should persist (check localStorage or UI state)
       expect(true).toBeTruthy();

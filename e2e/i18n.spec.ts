@@ -9,7 +9,7 @@ test.describe('Localization [I18N]', () => {
 
   test('[I18N-1] should support bilingual content (English and Hebrew)', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Check that page content uses bilingual patterns
     // The app should display text in either English or Hebrew
@@ -28,7 +28,7 @@ test.describe('Localization [I18N]', () => {
 
   test('[I18N-2] should have RTL compatibility for Hebrew', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Check for RTL direction attribute on html or body
     const htmlDir = await page.locator('html').getAttribute('dir');

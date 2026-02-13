@@ -9,14 +9,14 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
   test('[XFER-1] should allow user to initiate transfer request', async ({ page }) => {
     await loginAsTestUser(page, 'admin');
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Find equipment item and look for transfer button
     const equipmentLink = page.locator('a[href^="/equipment/"]').first();
 
     if (await equipmentLink.isVisible()) {
       await equipmentLink.click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Look for transfer button on detail page
       const transferButton = page.locator('button:has-text("transfer"), button:has-text("העבר")').first();
@@ -35,7 +35,7 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
 
     if (await transfersLink.isVisible()) {
       await transfersLink.click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Check for pending transfers list
       const pendingList = page.locator('[data-testid="pending-transfers"], .transfer-requests').first();
@@ -49,7 +49,7 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
   test('[XFER-3] should update equipment assignment after transfer completion', async ({ page }) => {
     await loginAsTestUser(page, 'admin');
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Look for equipment with assignee information
     const assigneeInfo = page.locator('text=/assigned to|מוקצה ל/i').first();
@@ -61,7 +61,7 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
   test('[XFER-4] should only allow signature_approved users to transfer unit equipment', async ({ page }) => {
     await loginAsTestUser(page, 'user');
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Regular user without signature_approved should not see unit transfer options
     const unitEquipment = page.locator('[data-unit-equipment="true"]').first();
@@ -83,7 +83,7 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
   test('[XFER-5] should only allow assigned personnel to transfer their equipment', async ({ page }) => {
     await loginAsTestUser(page, 'user');
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Test that user can only see transfer option for their own equipment
     expect(true).toBeTruthy();
@@ -94,7 +94,7 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
 
     // Navigate to pending transfers
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Check for incoming transfers section
     const incomingTransfers = page.locator('[data-testid="incoming-transfers"]').first();
@@ -106,7 +106,7 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
   test('[XFER-7] should only allow transfer to lower hierarchy levels', async ({ page }) => {
     await loginAsTestUser(page, 'admin');
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // This test verifies hierarchy restriction in transfer target selection
     expect(true).toBeTruthy();
@@ -115,7 +115,7 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
   test('[XFER-8] should allow transfer between personnel and unit', async ({ page }) => {
     await loginAsTestUser(page, 'admin');
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Verify transfer form allows both personnel and unit as targets
     expect(true).toBeTruthy();
@@ -124,7 +124,7 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
   test('[XFER-9] should show pending transfer status on equipment', async ({ page }) => {
     await loginAsTestUser(page, 'admin');
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Look for pending transfer status indicator
     const pendingStatus = page.locator('text=/pending transfer|העברה ממתינה/i').first();
@@ -139,7 +139,7 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
 
     // Navigate to transfer history or logs
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Check for declined transfers in history
     const historySection = page.locator('[data-testid="transfer-history"]').first();
@@ -154,7 +154,7 @@ test.describe('Transfer Permission Rules [AUTH-2]', () => {
     await clearAuthState(page);
     await loginAsTestUser(page, 'admin');
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Test that signature_approved users can access transfer functions
     expect(true).toBeTruthy();
