@@ -1,4 +1,4 @@
-import { doc, addDoc, setDoc, updateDoc, deleteDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { doc, addDoc, setDoc, updateDoc, deleteDoc, collection, serverTimestamp, type FieldValue } from 'firebase/firestore';
 import { db } from '@/integrations/firebase/client';
 import { useUnits, Unit, UnitType, UnitWithChildren } from './useUnits';
 import { useToast } from '@/hooks/use-toast';
@@ -114,7 +114,7 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
   const updateUnit = async (id: string, data: Partial<UnitUpdate>): Promise<boolean> => {
     try {
       const unitDocRef = doc(db, 'units', id);
-      const updateData: Record<string, unknown> = { updatedAt: serverTimestamp() };
+      const updateData: Record<string, FieldValue | string | boolean | number | null> = { updatedAt: serverTimestamp() };
 
       if (data.name !== undefined) updateData.name = data.name;
       if (data.unit_type !== undefined) updateData.unitType = data.unit_type;

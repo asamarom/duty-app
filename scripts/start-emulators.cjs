@@ -55,9 +55,12 @@ function startReadyServer() {
 async function main() {
   console.log('Starting Firebase Auth + Firestore emulators...');
 
+  // Use a UI-free config in CI to save resources
+  const emulatorConfig = process.env.CI ? 'firebase.emulators.ci.json' : 'firebase.emulators.json';
+
   const emulator = spawn(
     'npx',
-    ['firebase', 'emulators:start', '--only', 'auth,firestore', '--config', 'firebase.emulators.json'],
+    ['firebase', 'emulators:start', '--only', 'auth,firestore', '--config', emulatorConfig],
     {
       cwd: ROOT_DIR,
       stdio: 'inherit',

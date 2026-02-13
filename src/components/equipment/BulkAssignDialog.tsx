@@ -303,7 +303,7 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
   };
 
   const handleSubmit = async () => {
-    let assignment: { personnelId?: string; unitId?: string } = {};
+    const assignment: { personnelId?: string; unitId?: string } = {};
 
     if (assignedType === 'battalion' && selectedBattalionId) {
       assignment.unitId = selectedBattalionId;

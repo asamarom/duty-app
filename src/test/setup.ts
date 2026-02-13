@@ -16,10 +16,10 @@ vi.mock('@/integrations/firebase/client', () => ({
     db: {},
 }));
 
-// Mock Auth context
+// Mock Auth context (use 'uid' to match Firebase Auth property name)
 vi.mock('@/hooks/useAuth', () => ({
     useAuth: vi.fn(() => ({
-        user: { id: 'test-user-id' },
+        user: { uid: 'test-user-id', id: 'test-user-id' },
         loading: false,
     })),
 }));

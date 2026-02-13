@@ -91,4 +91,58 @@ describe('useEquipment Hook', () => {
         const invalidAssignment = { ...equipmentItem, createdBy: 'test-user-id', currentPersonnelId: 'other-pers' };
         expect(result.current.canDeleteEquipment(invalidAssignment, 'pers-1')).toBe(false);
     });
+
+    describe('isWithinSameUnit', () => {
+        it('returns true when item and target are in the same unit', () => {
+            const { result } = renderHook(() => useEquipment());
+
+            const item = {
+                id: 'eq-1--unassigned', name: 'Rifle',
+                currentUnitId: 'unit-alpha',
+                assignmentLevel: 'battalion' as const,
+                quantity: 1,
+            } as any;
+
+            expect(result.current.isWithinSameUnit('battalion', 'battalion', item, { unitId: 'unit-alpha' })).toBe(true);
+        });
+
+        it('returns false when item and target are in different units', () => {
+            const { result } = renderHook(() => useEquipment());
+
+            const item = {
+                id: 'eq-1--unassigned', name: 'Rifle',
+                currentUnitId: 'unit-alpha',
+                assignmentLevel: 'battalion' as const,
+                quantity: 1,
+            } as any;
+
+            expect(result.current.isWithinSameUnit('battalion', 'company', item, { unitId: 'unit-bravo' })).toBe(false);
+        });
+
+        it('returns false when item has no current unit', () => {
+            const { result } = renderHook(() => useEquipment());
+
+            const item = {
+                id: 'eq-1--unassigned', name: 'Rifle',
+                currentUnitId: undefined,
+                assignmentLevel: 'unassigned' as const,
+                quantity: 1,
+            } as any;
+
+            expect(result.current.isWithinSameUnit('unassigned', 'battalion', item, { unitId: 'unit-alpha' })).toBe(false);
+        });
+
+        it('returns false when assignment has no target unit', () => {
+            const { result } = renderHook(() => useEquipment());
+
+            const item = {
+                id: 'eq-1--as-1', name: 'Rifle',
+                currentUnitId: 'unit-alpha',
+                assignmentLevel: 'battalion' as const,
+                quantity: 1,
+            } as any;
+
+            expect(result.current.isWithinSameUnit('battalion', 'individual', item, { personnelId: 'pers-1' })).toBe(false);
+        });
+    });
 });

@@ -198,7 +198,7 @@ export function Sidebar() {
             </div>
             <div className="flex-1 truncate">
               <p className="truncate text-sm font-medium text-sidebar-foreground">
-                {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}
+                {user?.displayName || user?.email?.split('@')[0] || 'User'}
               </p>
               <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
             </div>

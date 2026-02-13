@@ -29,6 +29,14 @@ export interface AssignmentRequest {
   recipient_approved_by?: string;
 }
 
+export interface RequestApproval {
+  id: string;
+  action: 'approved' | 'rejected';
+  action_at: string;
+  action_by_name?: string;
+  notes?: string;
+}
+
 interface UseAssignmentRequestsReturn {
   requests: AssignmentRequest[];
   incomingTransfers: AssignmentRequest[];
@@ -45,6 +53,7 @@ interface UseAssignmentRequestsReturn {
   rejectRequest: (requestId: string, notes?: string) => Promise<void>;
   recipientApprove: (requestId: string, notes?: string) => Promise<void>;
   recipientReject: (requestId: string, notes?: string) => Promise<void>;
+  getApprovalsForRequest: (requestId: string) => RequestApproval[];
 }
 
 export function useAssignmentRequests(): UseAssignmentRequestsReturn {
@@ -214,6 +223,12 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     fetchRequests();
   }, [fetchRequests]);
 
+  const getApprovalsForRequest = useCallback((_requestId: string): RequestApproval[] => {
+    // Approval history is not yet stored per-request in the data model.
+    // Returns empty array until the data model supports it.
+    return [];
+  }, []);
+
   return {
     requests,
     incomingTransfers,
@@ -225,5 +240,6 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     rejectRequest,
     recipientApprove,
     recipientReject,
+    getApprovalsForRequest,
   };
 }

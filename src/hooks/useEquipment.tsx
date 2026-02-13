@@ -37,7 +37,7 @@ export interface EquipmentWithAssignment extends Equipment {
   currentQuantity?: number;
 }
 
-interface AssignmentData {
+export interface AssignmentData {
   personnelId?: string;
   unitId?: string;
 }
@@ -53,6 +53,7 @@ interface UseEquipmentReturn {
   unassignEquipment: (equipmentId: string) => Promise<void>;
   requestAssignment: (equipmentId: string, assignment: AssignmentData, notes?: string, quantity?: number) => Promise<void>;
   canDeleteEquipment: (equipmentItem: EquipmentWithAssignment, currentUserPersonnelId?: string) => boolean;
+  isWithinSameUnit: (currentLevel: AssignmentLevel, targetLevel: AssignmentLevel, item: EquipmentWithAssignment, assignment: AssignmentData) => boolean;
 }
 
 export function useEquipment(): UseEquipmentReturn {
@@ -180,7 +181,7 @@ export function useEquipment(): UseEquipmentReturn {
             assignmentLevel,
             hasPendingTransfer: pendingEquipmentIds.has(row.id) || row.status === 'pending_transfer',
             currentQuantity: assignment.quantity || 1,
-            createdBy: row.createdBy,
+            createdBy: row.createdBy ?? undefined,
           });
         });
 
@@ -198,7 +199,7 @@ export function useEquipment(): UseEquipmentReturn {
             assignmentLevel: 'unassigned',
             hasPendingTransfer: pendingEquipmentIds.has(row.id) || row.status === 'pending_transfer',
             currentQuantity: unassignedQuantity,
-            createdBy: row.createdBy,
+            createdBy: row.createdBy ?? undefined,
           });
         }
       });
@@ -383,6 +384,14 @@ export function useEquipment(): UseEquipmentReturn {
     fetchEquipment();
   }, [fetchEquipment]);
 
+  const isWithinSameUnit = useCallback(
+    (_currentLevel: AssignmentLevel, _targetLevel: AssignmentLevel, item: EquipmentWithAssignment, assignment: AssignmentData): boolean => {
+      if (!item.currentUnitId || !assignment.unitId) return false;
+      return item.currentUnitId === assignment.unitId;
+    },
+    []
+  );
+
   return {
     equipment,
     loading,
@@ -394,5 +403,6 @@ export function useEquipment(): UseEquipmentReturn {
     unassignEquipment,
     requestAssignment,
     canDeleteEquipment,
+    isWithinSameUnit,
   };
 }

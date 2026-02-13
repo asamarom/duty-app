@@ -26,7 +26,7 @@ export default function SignupRequestPage() {
   const navigate = useNavigate();
   const { t } = useLanguage();
 
-  const [fullName, setFullName] = useState(user?.user_metadata?.full_name || '');
+  const [fullName, setFullName] = useState(user?.displayName || '');
   const [serviceNumber, setServiceNumber] = useState('');
   const [cellPhone, setCellPhone] = useState('');
   const [unitSelection, setUnitSelection] = useState<UnitSelection>({

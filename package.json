@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
@@ -24,7 +25,9 @@
     "test:e2e:staging:auth": "cross-env TEST_ENV=staging playwright test --project=staging-auth",
     "emulator:start": "firebase emulators:start --only auth,firestore",
     "emulator:seed": "node scripts/seed-emulator-users.cjs",
-    "emulator:all": "node scripts/start-emulators.cjs"
+    "emulator:all": "node scripts/start-emulators.cjs",
+    "test:rules": "firebase emulators:exec --only firestore --config firebase.emulators.ci.json \"npx vitest run --config vitest.rules.config.ts\"",
+    "prepare": "husky"
   },
   "dependencies": {
     "@a5c-ai/babysitter-sdk": "^0.0.166",
@@ -61,6 +64,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^3.6.0",
+    "dotenv": "^17.3.0",
     "embla-carousel-react": "^8.6.0",
     "firebase": "^12.9.0",
     "input-otp": "^1.4.2",
@@ -80,6 +84,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
+    "@firebase/rules-unit-testing": "^5.0.0",
     "@playwright/test": "^1.57.0",
     "@tailwindcss/typography": "^0.5.16",
     "@testing-library/jest-dom": "^6.9.1",
@@ -96,13 +101,21 @@
     "eslint-plugin-react-refresh": "^0.4.20",
     "firebase-admin": "^13.6.1",
     "globals": "^15.15.0",
+    "husky": "^9.1.7",
     "jsdom": "^27.4.0",
+    "lint-staged": "^16.2.7",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
     "vite": "^5.4.19",
     "vitest": "^4.0.17"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "bash -c 'tsc --noEmit --project tsconfig.app.json'"
+    ]
   },
   "description": "**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID",
   "main": "eslint.config.js",

@@ -40,7 +40,7 @@ export function usePersonnelRoles(personnelIds?: string[]): UsePersonnelRolesRet
 
       if (personnelIds && personnelIds.length > 0) {
         // Firestore 'in' query limited to 30 items at a time
-        const batches = [];
+        const batches: string[][] = [];
         for (let i = 0; i < personnelIds.length; i += 30) {
           const batch = personnelIds.slice(i, i + 30);
           batches.push(batch);
