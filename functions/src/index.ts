@@ -31,6 +31,7 @@ interface UnitDoc {
 interface EquipmentDoc {
   name: string;
   status?: string;
+  battalionId?: string;
 }
 
 interface EquipmentAssignmentDoc {
@@ -57,6 +58,7 @@ interface AssignmentRequestDoc {
   notes?: string;
   processedBy?: string;
   processedAt?: admin.firestore.Timestamp;
+  battalionId?: string;
 }
 
 // Helper function to check if user has a role
@@ -199,6 +201,7 @@ export const initiateTransfer = onCall(async (request) => {
   if (!equipmentDoc.exists) {
     throw new HttpsError('not-found', 'Equipment not found');
   }
+  const equipmentBattalionId = (equipmentDoc.data() as EquipmentDoc).battalionId;
 
   // Get current assignment
   const currentAssignmentSnapshot = await db
@@ -269,6 +272,7 @@ export const initiateTransfer = onCall(async (request) => {
     toUnitType,
     toName,
     notes,
+    ...(equipmentBattalionId ? { battalionId: equipmentBattalionId } : {}),
   };
 
   const docRef = await db.collection('assignmentRequests').add(requestData);
@@ -341,7 +345,7 @@ export const processTransfer = onCall(async (request) => {
       });
     });
 
-    // Create new assignment
+    // Create new assignment (inherit battalionId from the transfer request)
     const newAssignmentRef = db.collection('equipmentAssignments').doc();
     batch.set(newAssignmentRef, {
       equipmentId: requestData.equipmentId,
@@ -350,6 +354,7 @@ export const processTransfer = onCall(async (request) => {
       quantity: 1,
       assignedAt: admin.firestore.FieldValue.serverTimestamp(),
       returnedAt: null,
+      ...(requestData.battalionId ? { battalionId: requestData.battalionId } : {}),
     });
 
     // Update equipment status

@@ -23,6 +23,7 @@ import type {
   UnitDoc,
 } from '@/integrations/firebase/types';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserBattalion } from '@/hooks/useUserBattalion';
 
 export type AssignmentLevel = 'battalion' | 'company' | 'platoon' | 'individual' | 'unassigned';
 
@@ -59,6 +60,7 @@ export function useEquipment(): UseEquipmentReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
+  const { battalionId } = useUserBattalion();
 
   const fetchEquipment = useCallback(async () => {
     try {
@@ -265,6 +267,7 @@ export function useEquipment(): UseEquipmentReturn {
         createdBy: user?.uid || null,
         createdAt: serverTimestamp(),
         status: 'available',
+        ...(battalionId ? { battalionId } : {}),
       });
 
       // Create assignment if provided
@@ -277,6 +280,7 @@ export function useEquipment(): UseEquipmentReturn {
           quantity: item.quantity || 1,
           assignedAt: serverTimestamp(),
           returnedAt: null,
+          ...(battalionId ? { battalionId } : {}),
         });
       }
 

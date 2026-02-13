@@ -40,6 +40,7 @@ import { UnitTreeSelector } from '@/components/personnel/UnitTreeSelector';
 import { RoleManagement } from '@/components/personnel/RoleManagement';
 import { RoleBadges } from '@/components/personnel/RoleBadge';
 import { useCanManageRole } from '@/hooks/useCanManageRole';
+import { useUnits } from '@/hooks/useUnits';
 
 
 export default function PersonnelDetailPage() {
@@ -47,6 +48,7 @@ export default function PersonnelDetailPage() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { toast } = useToast();
+  const { units } = useUnits();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -152,6 +154,15 @@ export default function PersonnelDetailPage() {
     fetchData();
   }, [id, navigate, toast, fetchRoles]);
 
+  // Traverse the units list to find the battalion for a given unit
+  const findBattalionId = (unitId: string | null | undefined): string | null => {
+    if (!unitId) return null;
+    const unit = units.find((u) => u.id === unitId);
+    if (!unit) return null;
+    if (unit.unit_type === 'battalion') return unit.id;
+    return findBattalionId(unit.parent_id);
+  };
+
   const handleSave = async () => {
     if (!id) return;
 
@@ -162,6 +173,8 @@ export default function PersonnelDetailPage() {
       const primaryDutyPosition = formData.duty_positions.length > 0
         ? formData.duty_positions[0]
         : null;
+
+      const battalionId = findBattalionId(formData.unit_id);
 
       await updateDoc(doc(db, 'personnel', id), {
         serviceNumber: formData.service_number,
@@ -174,6 +187,7 @@ export default function PersonnelDetailPage() {
         phone: formData.phone || null,
         email: formData.email || null,
         localAddress: formData.local_address || null,
+        ...(battalionId ? { battalionId } : {}),
       });
 
       toast({

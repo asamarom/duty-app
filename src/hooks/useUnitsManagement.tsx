@@ -1,4 +1,4 @@
-import { doc, addDoc, updateDoc, deleteDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { doc, addDoc, setDoc, updateDoc, deleteDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/integrations/firebase/client';
 import { useUnits, Unit, UnitType, UnitWithChildren } from './useUnits';
 import { useToast } from '@/hooks/use-toast';
@@ -47,6 +47,15 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
   } = useUnits();
   const { toast } = useToast();
 
+  // Traverse the in-memory units list to find the battalion for a given unit
+  const findBattalionId = (unitId: string | undefined): string | null => {
+    if (!unitId) return null;
+    const unit = units.find((u) => u.id === unitId);
+    if (!unit) return null;
+    if (unit.unit_type === 'battalion') return unit.id;
+    return findBattalionId(unit.parent_id ?? undefined);
+  };
+
   const createUnit = async (data: {
     name: string;
     unit_type: UnitType;
@@ -55,7 +64,15 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
   }): Promise<Unit | null> => {
     try {
       const unitsRef = collection(db, 'units');
-      const docRef = await addDoc(unitsRef, {
+
+      // Pre-generate the doc reference so we know the ID before writing.
+      // This lets battalions self-reference their own ID as battalionId.
+      const docRef = doc(unitsRef);
+      const parentBattalionId = data.unit_type !== 'battalion'
+        ? findBattalionId(data.parent_id)
+        : null;
+
+      await setDoc(docRef, {
         name: data.name,
         unitType: data.unit_type,
         parentId: data.parent_id || null,
@@ -64,6 +81,8 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
         status: 'active',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+        // Battalions use their own ID; child units inherit from their parent battalion.
+        battalionId: data.unit_type === 'battalion' ? docRef.id : (parentBattalionId || null),
       });
 
       const typeLabels: Record<UnitType, string> = {

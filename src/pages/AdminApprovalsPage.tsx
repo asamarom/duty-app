@@ -95,6 +95,15 @@ export default function AdminApprovalsPage() {
     return getUnitPathFromHook(request.requestedUnitId) || t('units.noUnit');
   };
 
+  // Traverse unit hierarchy to find the battalion ID for a given unit
+  const getBattalionId = (unitId: string | null | undefined): string | null => {
+    if (!unitId) return null;
+    const unit = units.find((u) => u.id === unitId);
+    if (!unit) return null;
+    if (unit.unit_type === 'battalion') return unit.id;
+    return getBattalionId(unit.parent_id);
+  };
+
   const handleApprove = async (request: SignupRequest) => {
     setProcessingId(request.id);
     try {
@@ -130,6 +139,7 @@ export default function AdminApprovalsPage() {
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
 
+      const battalionId = getBattalionId(request.requestedUnitId);
       const personnelRef = collection(db, 'personnel');
       try {
         await addDoc(personnelRef, {
@@ -145,6 +155,7 @@ export default function AdminApprovalsPage() {
           readinessStatus: 'ready',
           isSignatureApproved: false,
           createdAt: serverTimestamp(),
+          ...(battalionId ? { battalionId } : {}),
         });
       } catch (personnelError) {
         console.error('Failed to create personnel record:', personnelError);
