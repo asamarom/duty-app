@@ -187,7 +187,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     });
 
     await fetchRequests();
-  }, [fetchRequests]);
+  }, [fetchRequests, user]);
 
   const approveRequest = useCallback(async (requestId: string, notes?: string) => {
     const processTransfer = httpsCallable(functions, 'processTransfer');
@@ -198,7 +198,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     });
 
     await fetchRequests();
-  }, [fetchRequests]);
+  }, [fetchRequests, user]);
 
   const rejectRequest = useCallback(async (requestId: string, notes?: string) => {
     const processTransfer = httpsCallable(functions, 'processTransfer');
@@ -209,7 +209,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     });
 
     await fetchRequests();
-  }, [fetchRequests]);
+  }, [fetchRequests, user]);
 
   const recipientApprove = useCallback(async (requestId: string, notes?: string) => {
     await approveRequest(requestId, notes ? `Recipient approved: ${notes}` : 'Recipient approved the transfer');

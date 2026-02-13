@@ -306,11 +306,11 @@ export function useEquipment(): UseEquipmentReturn {
   const getBaseId = (id: string) => id.split('--')[0];
 
   const assignEquipment = useCallback(
-    async (id: string, assignment: AssignmentData) => {
+    async (id: string, assignment: AssignmentData, quantity?: number) => {
       const equipmentId = getBaseId(id);
 
       const initiateTransfer = httpsCallable<
-        { equipmentId: string; toUnitId?: string; toPersonnelId?: string },
+        { equipmentId: string; toUnitId?: string; toPersonnelId?: string; quantity?: number },
         { success: boolean }
       >(functions, 'initiateTransfer');
 
@@ -318,6 +318,7 @@ export function useEquipment(): UseEquipmentReturn {
         equipmentId,
         toUnitId: assignment.unitId || undefined,
         toPersonnelId: assignment.personnelId || undefined,
+        quantity: quantity || undefined,
       });
 
       await fetchEquipment();
@@ -360,7 +361,7 @@ export function useEquipment(): UseEquipmentReturn {
   );
 
   const requestAssignment = useCallback(
-    async (id: string, assignment: AssignmentData, notes?: string) => {
+    async (id: string, assignment: AssignmentData, notes?: string, _quantity?: number) => {
       const equipmentId = getBaseId(id);
 
       const initiateTransfer = httpsCallable<
