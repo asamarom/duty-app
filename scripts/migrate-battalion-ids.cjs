@@ -20,7 +20,21 @@ const admin = require('firebase-admin');
 const path = require('path');
 
 // Initialize Firebase Admin SDK
-const serviceAccountPath = path.join(__dirname, '..', 'duty-82f42-firebase-adminsdk-yyj5g-c27c9b4802.json');
+// Auto-detect service account file in project root
+const fs = require('fs');
+const projectRoot = path.join(__dirname, '..');
+const files = fs.readdirSync(projectRoot);
+const serviceAccountFile = files.find(f => f.includes('firebase-adminsdk') && f.endsWith('.json'));
+
+if (!serviceAccountFile) {
+  console.error('✗ No Firebase service account JSON file found in project root.');
+  console.error('  Download it from: https://console.firebase.google.com/project/duty-82f42/settings/serviceaccounts/adminsdk');
+  console.error('  Click "Generate new private key" and place the downloaded JSON in:', projectRoot);
+  process.exit(1);
+}
+
+const serviceAccountPath = path.join(projectRoot, serviceAccountFile);
+console.log(`✓ Found service account file: ${serviceAccountFile}`);
 
 let serviceAccount;
 try {
@@ -28,7 +42,7 @@ try {
   console.log('✓ Service account file loaded');
 } catch (error) {
   console.error('✗ Failed to load service account file:', serviceAccountPath);
-  console.error('  Please ensure the Firebase service account JSON file exists');
+  console.error('  Error:', error.message);
   process.exit(1);
 }
 
