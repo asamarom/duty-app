@@ -44,3 +44,4 @@ firestore-debug.log
 nul
 # Vercel
 .vercel
+*firebase-adminsdk*.json
