@@ -12,8 +12,7 @@ import {
   serverTimestamp,
   getDoc,
 } from 'firebase/firestore';
-import { httpsCallable } from 'firebase/functions';
-import { db, functions } from '@/integrations/firebase/client';
+import { db } from '@/integrations/firebase/client';
 import type { Equipment } from '@/types/pmtb';
 import type {
   EquipmentDoc,
@@ -311,25 +310,134 @@ export function useEquipment(): UseEquipmentReturn {
 
   const getBaseId = (id: string) => id.split('--')[0];
 
+  /**
+   * Shared helper that replicates the initiateTransfer Cloud Function logic
+   * using direct Firestore operations.
+   *
+   * Creates an assignmentRequest document and sets the equipment status to
+   * pending_transfer. Both assignEquipment and requestAssignment delegate here.
+   */
+  const _initiateTransferLocally = useCallback(
+    async (
+      equipmentId: string,
+      toPersonnelId: string | undefined,
+      toUnitId: string | undefined,
+      notes?: string,
+      quantity?: number,
+    ) => {
+      // a. Get equipment doc to get battalionId
+      const equipDoc = await getDoc(doc(db, 'equipment', equipmentId));
+      const equipBattalionId = equipDoc?.exists() ? (equipDoc.data() as EquipmentDoc & { battalionId?: string }).battalionId : undefined;
+
+      // b. Get current assignment
+      const currentAssignmentSnapshot = await getDocs(
+        query(
+          collection(db, 'equipmentAssignments'),
+          where('equipmentId', '==', equipmentId),
+          where('returnedAt', '==', null),
+        )
+      );
+
+      // c & d. Resolve fromName
+      let fromPersonnelId: string | null = null;
+      let fromUnitId: string | null = null;
+      let fromUnitType: string | null = null;
+      let fromName: string | null = null;
+
+      if (currentAssignmentSnapshot.docs.length > 0) {
+        const assignment = currentAssignmentSnapshot.docs[0].data() as EquipmentAssignmentDoc;
+        fromPersonnelId = assignment.personnelId || null;
+        fromUnitId = assignment.unitId || null;
+
+        if (fromPersonnelId) {
+          const persDoc = await getDoc(doc(db, 'personnel', fromPersonnelId));
+          if (persDoc?.exists()) {
+            const persData = persDoc.data() as PersonnelDoc;
+            fromName = `${persData.firstName} ${persData.lastName}`;
+          }
+        } else if (fromUnitId) {
+          const unitDoc = await getDoc(doc(db, 'units', fromUnitId));
+          if (unitDoc?.exists()) {
+            const unitData = unitDoc.data() as UnitDoc;
+            fromName = unitData.name;
+            fromUnitType = unitData.unitType;
+          }
+        }
+      }
+
+      // d. Resolve toName
+      let toName: string | null = null;
+      let toUnitType: string | null = null;
+
+      if (toPersonnelId) {
+        const persDoc = await getDoc(doc(db, 'personnel', toPersonnelId));
+        if (persDoc?.exists()) {
+          const persData = persDoc.data() as PersonnelDoc;
+          toName = `${persData.firstName} ${persData.lastName}`;
+        }
+      } else if (toUnitId) {
+        const unitDoc = await getDoc(doc(db, 'units', toUnitId));
+        if (unitDoc?.exists()) {
+          const unitData = unitDoc.data() as UnitDoc;
+          toName = unitData.name;
+          toUnitType = unitData.unitType;
+        }
+      }
+
+      // e. addDoc to assignmentRequests
+      const requestData: Record<string, unknown> = {
+        equipmentId,
+        status: 'pending',
+        requestedBy: user!.uid,
+        requestedAt: serverTimestamp(),
+        fromPersonnelId,
+        fromUnitId,
+        fromUnitType,
+        fromName,
+        toPersonnelId: toPersonnelId || null,
+        toUnitId: toUnitId || null,
+        toUnitType,
+        toName,
+      };
+
+      if (notes !== undefined) {
+        requestData.notes = notes;
+      }
+
+      if (quantity !== undefined) {
+        requestData.quantity = quantity;
+      }
+
+      if (equipBattalionId) {
+        requestData.battalionId = equipBattalionId;
+      }
+
+      await addDoc(collection(db, 'assignmentRequests'), requestData);
+
+      // f. Update equipment status to pending_transfer
+      await updateDoc(doc(db, 'equipment', equipmentId), {
+        status: 'pending_transfer',
+        updatedAt: serverTimestamp(),
+      });
+    },
+    [user]
+  );
+
   const assignEquipment = useCallback(
     async (id: string, assignment: AssignmentData, quantity?: number) => {
       const equipmentId = getBaseId(id);
 
-      const initiateTransfer = httpsCallable<
-        { equipmentId: string; toUnitId?: string; toPersonnelId?: string; quantity?: number },
-        { success: boolean }
-      >(functions, 'initiateTransfer');
-
-      await initiateTransfer({
+      await _initiateTransferLocally(
         equipmentId,
-        toUnitId: assignment.unitId || undefined,
-        toPersonnelId: assignment.personnelId || undefined,
-        quantity: quantity || undefined,
-      });
+        assignment.personnelId || undefined,
+        assignment.unitId || undefined,
+        undefined,
+        quantity || undefined,
+      );
 
       await fetchEquipment();
     },
-    [fetchEquipment]
+    [fetchEquipment, _initiateTransferLocally]
   );
 
   const deleteEquipment = useCallback(
@@ -370,22 +478,17 @@ export function useEquipment(): UseEquipmentReturn {
     async (id: string, assignment: AssignmentData, notes?: string, quantity?: number) => {
       const equipmentId = getBaseId(id);
 
-      const initiateTransfer = httpsCallable<
-        { equipmentId: string; toUnitId?: string; toPersonnelId?: string; notes?: string; quantity?: number },
-        { success: boolean }
-      >(functions, 'initiateTransfer');
-
-      await initiateTransfer({
+      await _initiateTransferLocally(
         equipmentId,
-        toUnitId: assignment.unitId || undefined,
-        toPersonnelId: assignment.personnelId || undefined,
-        notes: notes || undefined,
-        quantity: quantity || undefined,
-      });
+        assignment.personnelId || undefined,
+        assignment.unitId || undefined,
+        notes,
+        quantity || undefined,
+      );
 
       await fetchEquipment();
     },
-    [fetchEquipment]
+    [fetchEquipment, _initiateTransferLocally]
   );
 
   useEffect(() => {

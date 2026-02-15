@@ -1,7 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
-import { collection, getDocs, orderBy, query, doc, getDoc } from 'firebase/firestore';
-import { httpsCallable } from 'firebase/functions';
-import { db, functions } from '@/integrations/firebase/client';
+import {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  writeBatch,
+  orderBy,
+  query,
+  where,
+  doc,
+  getDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
+import { db } from '@/integrations/firebase/client';
 import { useAuth } from '@/hooks/useAuth';
 import type { AssignmentRequestDoc, EquipmentDoc, UnitDoc, PersonnelDoc, UserDoc } from '@/integrations/firebase/types';
 
@@ -184,38 +195,187 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     toPersonnelId?: string;
     notes?: string;
   }) => {
-    const initiateTransfer = httpsCallable(functions, 'initiateTransfer');
-    await initiateTransfer({
-      equipmentId: data.equipmentId,
-      toUnitId: data.toUnitId || null,
-      toPersonnelId: data.toPersonnelId || null,
-      notes: data.notes || null,
+    const { equipmentId, toUnitId, toPersonnelId, notes } = data;
+
+    // Get equipment doc to get battalionId
+    const equipDoc = await getDoc(doc(db, 'equipment', equipmentId));
+    const equipBattalionId = equipDoc?.exists()
+      ? (equipDoc.data() as EquipmentDoc & { battalionId?: string }).battalionId
+      : undefined;
+
+    // Get current assignment for "from" details
+    const currentAssignmentSnapshot = await getDocs(
+      query(
+        collection(db, 'equipmentAssignments'),
+        where('equipmentId', '==', equipmentId),
+        where('returnedAt', '==', null),
+      )
+    );
+
+    let fromPersonnelId: string | null = null;
+    let fromUnitId: string | null = null;
+    let fromUnitType: string | null = null;
+    let fromName: string | null = null;
+
+    if (currentAssignmentSnapshot.docs.length > 0) {
+      const assignment = currentAssignmentSnapshot.docs[0].data() as { personnelId?: string | null; unitId?: string | null };
+      fromPersonnelId = assignment.personnelId || null;
+      fromUnitId = assignment.unitId || null;
+
+      if (fromPersonnelId) {
+        const persDoc = await getDoc(doc(db, 'personnel', fromPersonnelId));
+        if (persDoc?.exists()) {
+          const persData = persDoc.data() as PersonnelDoc;
+          fromName = `${persData.firstName} ${persData.lastName}`;
+        }
+      } else if (fromUnitId) {
+        const unitDoc = await getDoc(doc(db, 'units', fromUnitId));
+        if (unitDoc?.exists()) {
+          const unitData = unitDoc.data() as UnitDoc;
+          fromName = unitData.name;
+          fromUnitType = unitData.unitType;
+        }
+      }
+    }
+
+    // Resolve toName
+    let toName: string | null = null;
+    let toUnitType: string | null = null;
+
+    if (toPersonnelId) {
+      const persDoc = await getDoc(doc(db, 'personnel', toPersonnelId));
+      if (persDoc?.exists()) {
+        const persData = persDoc.data() as PersonnelDoc;
+        toName = `${persData.firstName} ${persData.lastName}`;
+      }
+    } else if (toUnitId) {
+      const unitDoc = await getDoc(doc(db, 'units', toUnitId));
+      if (unitDoc?.exists()) {
+        const unitData = unitDoc.data() as UnitDoc;
+        toName = unitData.name;
+        toUnitType = unitData.unitType;
+      }
+    }
+
+    const requestData: Record<string, unknown> = {
+      equipmentId,
+      status: 'pending',
+      requestedBy: user!.uid,
+      requestedAt: serverTimestamp(),
+      fromPersonnelId,
+      fromUnitId,
+      fromUnitType,
+      fromName,
+      toPersonnelId: toPersonnelId || null,
+      toUnitId: toUnitId || null,
+      toUnitType,
+      toName,
+    };
+
+    if (notes) {
+      requestData.notes = notes;
+    }
+
+    if (equipBattalionId) {
+      requestData.battalionId = equipBattalionId;
+    }
+
+    await addDoc(collection(db, 'assignmentRequests'), requestData);
+
+    await updateDoc(doc(db, 'equipment', equipmentId), {
+      status: 'pending_transfer',
+      updatedAt: serverTimestamp(),
     });
 
     await fetchRequests();
   }, [fetchRequests, user]);
 
-  const approveRequest = useCallback(async (requestId: string, notes?: string) => {
-    const processTransfer = httpsCallable(functions, 'processTransfer');
-    await processTransfer({
-      requestId,
-      action: 'approved',
-      notes: notes || null,
+  const approveRequest = useCallback(async (requestId: string, _notes?: string) => {
+    // Find request data from local state
+    const localReq = requests.find(r => r.id === requestId);
+    if (!localReq) {
+      throw new Error(`Assignment request ${requestId} not found`);
+    }
+
+    const batch = writeBatch(db);
+    const requestRef = doc(db, 'assignmentRequests', requestId);
+
+    // d. Update request status to approved
+    batch.update(requestRef, {
+      status: 'approved',
+      processedBy: user!.uid,
+      processedAt: serverTimestamp(),
     });
 
-    await fetchRequests();
-  }, [fetchRequests, user]);
+    // e. Query old active assignments for this equipment
+    const oldAssignmentsSnapshot = await getDocs(
+      query(
+        collection(db, 'equipmentAssignments'),
+        where('equipmentId', '==', localReq.equipment_id),
+        where('returnedAt', '==', null),
+      )
+    );
 
-  const rejectRequest = useCallback(async (requestId: string, notes?: string) => {
-    const processTransfer = httpsCallable(functions, 'processTransfer');
-    await processTransfer({
-      requestId,
-      action: 'rejected',
-      notes: notes || null,
+    // f. Mark each old assignment as returned
+    oldAssignmentsSnapshot.docs.forEach((d) => {
+      batch.update(d.ref, { returnedAt: serverTimestamp() });
     });
 
+    // g. Create new assignment ref
+    const newAssRef = doc(collection(db, 'equipmentAssignments'));
+
+    // h. Set new assignment
+    const newAssignmentData: Record<string, unknown> = {
+      equipmentId: localReq.equipment_id,
+      personnelId: localReq.to_personnel_id || null,
+      unitId: localReq.to_unit_id || null,
+      quantity: localReq.quantity ?? 1,
+      assignedAt: serverTimestamp(),
+      assignedBy: user!.uid,
+      returnedAt: null,
+    };
+
+    batch.set(newAssRef, newAssignmentData);
+
+    // i. Update equipment status to assigned
+    batch.update(doc(db, 'equipment', localReq.equipment_id), {
+      status: 'assigned',
+      updatedAt: serverTimestamp(),
+    });
+
+    // j. Commit batch
+    await batch.commit();
+
     await fetchRequests();
-  }, [fetchRequests, user]);
+  }, [fetchRequests, user, requests]);
+
+  const rejectRequest = useCallback(async (requestId: string, _notes?: string) => {
+    // Find request data from local state
+    const localReq = requests.find(r => r.id === requestId);
+    if (!localReq) {
+      throw new Error(`Assignment request ${requestId} not found`);
+    }
+
+    const batch = writeBatch(db);
+
+    // c. Update request status to rejected
+    batch.update(doc(db, 'assignmentRequests', requestId), {
+      status: 'rejected',
+      processedBy: user!.uid,
+      processedAt: serverTimestamp(),
+    });
+
+    // d. Reset equipment status to serviceable (CRITICAL: not "available")
+    batch.update(doc(db, 'equipment', localReq.equipment_id), {
+      status: 'serviceable',
+      updatedAt: serverTimestamp(),
+    });
+
+    // e. Commit batch
+    await batch.commit();
+
+    await fetchRequests();
+  }, [fetchRequests, user, requests]);
 
   const recipientApprove = useCallback(async (requestId: string, notes?: string) => {
     await approveRequest(requestId, notes ? `Recipient approved: ${notes}` : 'Recipient approved the transfer');

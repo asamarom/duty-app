@@ -4,10 +4,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock Firestore functions
 const mockGetDocs = vi.fn();
-const mockQuery = vi.fn();
-const mockCollection = vi.fn();
+const mockQuery = vi.fn((...args: unknown[]) => args[0]);
+const mockCollection = vi.fn((...args: unknown[]) => ({ id: args[1] as string }));
 const mockOrderBy = vi.fn();
 const mockWhere = vi.fn();
+const mockDocFn = vi.fn((...args: unknown[]) => {
+    const segs = args.slice(1) as string[];
+    return { id: segs[segs.length - 1] ?? 'mock-doc-id', path: segs.join('/') };
+});
 
 vi.mock('firebase/firestore', () => ({
     collection: (...args: unknown[]) => mockCollection(...args),
@@ -18,7 +22,7 @@ vi.mock('firebase/firestore', () => ({
     addDoc: vi.fn(),
     updateDoc: vi.fn(),
     deleteDoc: vi.fn(),
-    doc: vi.fn(),
+    doc: (...args: unknown[]) => mockDocFn(...args),
     getDoc: vi.fn(),
     serverTimestamp: vi.fn(),
 }));
@@ -150,22 +154,139 @@ describe('useEquipment Hook', () => {
         });
     });
 
-    // [XFER-11] For bulk items, transfer quantity is passed to the initiateTransfer Cloud Function
-    it('requestAssignment passes quantity to initiateTransfer Cloud Function', async () => {
-        const mockCallable = vi.fn().mockResolvedValue({ data: { success: true } });
-        mockHttpsCallable.mockReturnValue(mockCallable);
-
+    // [XFER-11] For bulk items, transfer quantity is passed to assignmentRequests Firestore doc
+    it('requestAssignment passes quantity to assignmentRequests Firestore doc', async () => {
         const { result } = renderHook(() => useEquipment());
 
         // Wait for the initial load to settle
         await waitFor(() => expect(result.current.loading).toBe(false));
 
+        const firestoreMock = await import('firebase/firestore');
+        const mockAddDocFn = vi.mocked(firestoreMock.addDoc);
+        mockAddDocFn.mockResolvedValue({ id: 'new-request-id' } as any);
+
         await act(async () => {
             await result.current.requestAssignment('eq-1--unassigned', { unitId: 'u1' }, undefined, 3);
         });
 
-        expect(mockCallable).toHaveBeenCalledWith(
+        expect(mockAddDocFn).toHaveBeenCalledWith(
+            expect.anything(),
             expect.objectContaining({ quantity: 3, toUnitId: 'u1', equipmentId: 'eq-1' })
         );
+    });
+
+    // =========================================================================
+    // TDD RED PHASE: Tests for client-side replacement of initiateTransfer CF
+    // These tests will FAIL until httpsCallable calls are replaced with direct
+    // Firestore operations in useEquipment.tsx
+    // =========================================================================
+
+    describe('requestAssignment — client-side Firestore (TDD red phase)', () => {
+        // Access the module-level vi.fn() mocks declared in vi.mock('firebase/firestore') above.
+        // We retrieve them via the mocked module so TypeScript knows they are mock instances.
+        let mockAddDoc: ReturnType<typeof vi.fn>;
+        let mockUpdateDoc: ReturnType<typeof vi.fn>;
+
+        beforeEach(async () => {
+            const firestoreMock = await import('firebase/firestore');
+            mockAddDoc = vi.mocked(firestoreMock.addDoc);
+            mockUpdateDoc = vi.mocked(firestoreMock.updateDoc);
+            mockAddDoc.mockResolvedValue({ id: 'new-request-id' } as any);
+            mockUpdateDoc.mockResolvedValue(undefined);
+        });
+
+        it('requestAssignment creates assignmentRequest doc in Firestore directly', async () => {
+            const { result } = renderHook(() => useEquipment());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            await act(async () => {
+                await result.current.requestAssignment('eq-1--unassigned', { personnelId: 'pers-42' }, 'some notes', 1);
+            });
+
+            expect(mockAddDoc).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({
+                    equipmentId: 'eq-1',
+                    toPersonnelId: 'pers-42',
+                    status: 'pending',
+                    requestedBy: 'test-user-id',
+                })
+            );
+        });
+
+        it('requestAssignment sets equipment status to pending_transfer', async () => {
+            const { result } = renderHook(() => useEquipment());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            await act(async () => {
+                await result.current.requestAssignment('eq-1--unassigned', { personnelId: 'pers-42' });
+            });
+
+            expect(mockUpdateDoc).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({ status: 'pending_transfer' })
+            );
+        });
+
+        it('requestAssignment passes quantity in request doc', async () => {
+            const { result } = renderHook(() => useEquipment());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            await act(async () => {
+                await result.current.requestAssignment('eq-2--unassigned', { unitId: 'unit-99' }, undefined, 5);
+            });
+
+            expect(mockAddDoc).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({ quantity: 5 })
+            );
+        });
+
+        it('requestAssignment does NOT call httpsCallable', async () => {
+            const { result } = renderHook(() => useEquipment());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            // Reset httpsCallable call count after initial load (which may use it internally)
+            mockHttpsCallable.mockClear();
+
+            await act(async () => {
+                await result.current.requestAssignment('eq-1--unassigned', { unitId: 'unit-1' });
+            });
+
+            expect(mockHttpsCallable).not.toHaveBeenCalled();
+        });
+
+        it('assignEquipment creates assignmentRequest doc in Firestore directly for admin direct assign', async () => {
+            const { result } = renderHook(() => useEquipment());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            await act(async () => {
+                await result.current.assignEquipment('eq-3--unassigned', { personnelId: 'pers-10' }, 2);
+            });
+
+            expect(mockAddDoc).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({
+                    equipmentId: 'eq-3',
+                    toPersonnelId: 'pers-10',
+                    status: 'pending',
+                    requestedBy: 'test-user-id',
+                })
+            );
+        });
+
+        it('assignEquipment does NOT call httpsCallable', async () => {
+            const { result } = renderHook(() => useEquipment());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            // Reset httpsCallable call count after initial load
+            mockHttpsCallable.mockClear();
+
+            await act(async () => {
+                await result.current.assignEquipment('eq-3--unassigned', { unitId: 'unit-5' });
+            });
+
+            expect(mockHttpsCallable).not.toHaveBeenCalled();
+        });
     });
 });
