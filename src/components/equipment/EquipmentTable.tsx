@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { EquipmentWithAssignment } from '@/hooks/useEquipment';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface EquipmentTableProps {
   equipment: EquipmentWithAssignment[];
@@ -17,6 +18,7 @@ export function EquipmentTable({
   onSelectionChange
 }: EquipmentTableProps) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -113,16 +115,16 @@ export function EquipmentTable({
               </th>
             )}
             <th className="text-start text-xs font-semibold uppercase tracking-wider text-muted-foreground p-4">
-              Item
+              {t('equipment.tableItem')}
             </th>
             <th className="text-start text-xs font-semibold uppercase tracking-wider text-muted-foreground p-4 w-[140px]">
-              Serial #
+              {t('equipment.tableSerialNum')}
             </th>
             <th className="text-start text-xs font-semibold uppercase tracking-wider text-muted-foreground p-4 w-[60px]">
-              Qty
+              {t('equipment.tableQty')}
             </th>
             <th className="text-start text-xs font-semibold uppercase tracking-wider text-muted-foreground p-4">
-              Assigned To
+              {t('equipment.assignedTo')}
             </th>
           </tr>
         </thead>
@@ -173,7 +175,7 @@ export function EquipmentTable({
                     {item.assignedTo}
                   </Badge>
                 ) : (
-                  <span className="text-sm text-muted-foreground">Unassigned</span>
+                  <span className="text-sm text-muted-foreground">{t('equipment.unassigned')}</span>
                 )}
               </td>
             </tr>

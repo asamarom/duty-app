@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { usePersonnel } from '@/hooks/usePersonnel';
 import { useUnits } from '@/hooks/useUnits';
 import { EquipmentWithAssignment, AssignmentLevel } from '@/hooks/useEquipment';
@@ -31,6 +32,7 @@ interface BulkAssignDialogProps {
 }
 
 export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }: BulkAssignDialogProps) {
+  const { t } = useLanguage();
   const { personnel, loading: personnelLoading } = usePersonnel();
   const { battalions, companies, platoons, loading: unitsLoading, getCompaniesForBattalion, getPlatoonsForCompany, getUnitById, getUnitAncestors } = useUnits();
 
@@ -367,7 +369,7 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Bulk Assign Equipment</DialogTitle>
+          <DialogTitle>{t('equipment.bulkAssignTitle')}</DialogTitle>
           <DialogDescription>
             Assign {selectedItems.length} selected item{selectedItems.length > 1 ? 's' : ''} to a unit or individual.
           </DialogDescription>
@@ -377,8 +379,8 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
           <div className="py-6 text-center">
             <p className="text-muted-foreground">
               {commonLevel === 'mixed'
-                ? 'Selected items are at different assignment levels. Please select items at the same level for bulk assignment.'
-                : 'Selected items are in different hierarchies. Please select items from the same hierarchy for bulk assignment.'
+                ? t('equipment.mixedLevelsWarning')
+                : t('equipment.differentHierarchyWarning')
               }
             </p>
           </div>
@@ -400,7 +402,7 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
 
             {/* Assignment Type */}
             <div className="space-y-2">
-              <Label>Assign To</Label>
+              <Label>{t('equipment.assignTo')}</Label>
               <div className="flex flex-wrap gap-2">
                 {allowedTypes.map((type) => (
                   <Button
@@ -412,7 +414,10 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
                     className="gap-2"
                   >
                     {getTypeIcon(type)}
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                    {type === 'battalion' ? t('units.battalion')
+                      : type === 'company' ? t('units.company')
+                      : type === 'platoon' ? t('units.platoon')
+                      : t('equipment.individual')}
                   </Button>
                 ))}
               </div>
@@ -421,7 +426,7 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
             {/* Battalion Selection */}
             {(assignedType === 'battalion' || assignedType === 'company' || assignedType === 'platoon' || assignedType === 'individual') && (
               <div className="space-y-2">
-                <Label>Battalion</Label>
+                <Label>{t('units.battalion')}</Label>
                 {availableBattalions.length === 1 ? (
                   <div className="p-2 bg-muted rounded-md text-sm">
                     {availableBattalions[0].name}
@@ -429,7 +434,7 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
                 ) : (
                   <Select value={selectedBattalionId} onValueChange={handleBattalionChange}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select battalion" />
+                      <SelectValue placeholder={t('equipment.selectBattalion')} />
                     </SelectTrigger>
                     <SelectContent>
                       {availableBattalions.map((battalion) => (
@@ -446,19 +451,19 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
             {/* Company Selection */}
             {(assignedType === 'company' || assignedType === 'platoon' || assignedType === 'individual') && selectedBattalionId && (
               <div className="space-y-2">
-                <Label>Company</Label>
+                <Label>{t('units.company')}</Label>
                 {availableCompanies.length === 1 ? (
                   <div className="p-2 bg-muted rounded-md text-sm">
                     {availableCompanies[0].name}
                   </div>
                 ) : availableCompanies.length === 0 ? (
                   <div className="p-2 bg-muted rounded-md text-sm text-muted-foreground">
-                    No companies available
+                    {t('equipment.noCompaniesAvailable')}
                   </div>
                 ) : (
                   <Select value={selectedCompanyId} onValueChange={handleCompanyChange}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select company" />
+                      <SelectValue placeholder={t('equipment.selectCompany')} />
                     </SelectTrigger>
                     <SelectContent>
                       {availableCompanies.map((company) => (
@@ -475,19 +480,19 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
             {/* Platoon Selection */}
             {(assignedType === 'platoon' || assignedType === 'individual') && selectedCompanyId && (
               <div className="space-y-2">
-                <Label>Platoon</Label>
+                <Label>{t('units.platoon')}</Label>
                 {availablePlatoons.length === 1 ? (
                   <div className="p-2 bg-muted rounded-md text-sm">
                     {availablePlatoons[0].name}
                   </div>
                 ) : availablePlatoons.length === 0 ? (
                   <div className="p-2 bg-muted rounded-md text-sm text-muted-foreground">
-                    No platoons available
+                    {t('equipment.noPlatoonsAvailable')}
                   </div>
                 ) : (
                   <Select value={selectedPlatoonId} onValueChange={handlePlatoonChange}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select platoon" />
+                      <SelectValue placeholder={t('equipment.selectPlatoon')} />
                     </SelectTrigger>
                     <SelectContent>
                       {availablePlatoons.map((platoon) => (
@@ -504,15 +509,15 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
             {/* Personnel Selection */}
             {assignedType === 'individual' && (
               <div className="space-y-2">
-                <Label>Individual</Label>
+                <Label>{t('equipment.individual')}</Label>
                 {availablePersonnel.length === 0 ? (
                   <div className="p-2 bg-muted rounded-md text-sm text-muted-foreground">
-                    No personnel available
+                    {t('equipment.noPersonnelAvailable')}
                   </div>
                 ) : (
                   <Select value={selectedPersonnelId} onValueChange={setSelectedPersonnelId}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select person" />
+                      <SelectValue placeholder={t('equipment.selectPerson')} />
                     </SelectTrigger>
                     <SelectContent>
                       {availablePersonnel.map((person) => (
@@ -530,7 +535,7 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           {canBulkAssign && (
             <Button
@@ -538,7 +543,7 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
               disabled={!isValid() || isSubmitting}
             >
               {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Assign
+              {t('common.assign')}
             </Button>
           )}
         </DialogFooter>
