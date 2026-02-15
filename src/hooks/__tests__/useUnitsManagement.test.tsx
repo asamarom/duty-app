@@ -50,6 +50,10 @@ vi.mock('@/hooks/use-toast', () => ({
   useToast: vi.fn(() => ({ toast: vi.fn() })),
 }));
 
+vi.mock('@/contexts/LanguageContext', () => ({
+  useLanguage: vi.fn(() => ({ t: (key: string) => key, dir: 'ltr', language: 'en', setLanguage: vi.fn() })),
+}));
+
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('useUnitsManagement', () => {
