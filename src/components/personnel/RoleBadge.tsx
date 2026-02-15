@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Shield, Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { AppRole } from '@/hooks/useUserRole';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface RoleBadgeProps {
   role: AppRole;
@@ -9,43 +10,44 @@ interface RoleBadgeProps {
   className?: string;
 }
 
-const roleConfig: Record<AppRole, { icon: typeof Shield; label: string; className: string }> = {
-  admin: {
-    icon: Shield,
-    label: 'Admin',
-    className: 'bg-destructive/10 text-destructive border-destructive/30',
-  },
-  leader: {
-    icon: Crown,
-    label: 'Leader',
-    className: 'bg-warning/10 text-warning border-warning/30',
-  },
-  user: {
-    icon: Shield,
-    label: 'User',
-    className: 'bg-muted text-muted-foreground border-border',
-  },
+const roleIcons: Record<AppRole, typeof Shield> = {
+  admin: Shield,
+  leader: Crown,
+  user: Shield,
+};
+
+const roleClassNames: Record<AppRole, string> = {
+  admin: 'bg-destructive/10 text-destructive border-destructive/30',
+  leader: 'bg-warning/10 text-warning border-warning/30',
+  user: 'bg-muted text-muted-foreground border-border',
 };
 
 export function RoleBadge({ role, size = 'default', className }: RoleBadgeProps) {
-  const config = roleConfig[role];
-  const Icon = config.icon;
-  
+  const { t } = useLanguage();
+
+  const roleLabelKeys: Record<AppRole, Parameters<typeof t>[0]> = {
+    admin: 'personnel.roleAdmin',
+    leader: 'personnel.roleLeader',
+    user: 'personnel.roleUser',
+  };
+
+  const Icon = roleIcons[role];
+
   // Don't show badge for regular users
   if (role === 'user') return null;
 
   return (
-    <Badge 
-      variant="outline" 
+    <Badge
+      variant="outline"
       className={cn(
         'font-medium',
-        config.className,
+        roleClassNames[role],
         size === 'sm' && 'text-xs px-1.5 py-0',
         className
       )}
     >
       <Icon className={cn('mr-1', size === 'sm' ? 'h-2.5 w-2.5' : 'h-3 w-3')} />
-      {config.label}
+      {t(roleLabelKeys[role])}
     </Badge>
   );
 }
@@ -59,7 +61,7 @@ interface RoleBadgesProps {
 export function RoleBadges({ roles, size = 'default', className }: RoleBadgesProps) {
   // Filter out 'user' role and show only admin/leader
   const significantRoles = roles.filter(r => r !== 'user');
-  
+
   if (significantRoles.length === 0) return null;
 
   return (

@@ -3,6 +3,7 @@ import { ChevronRight, ChevronDown, Building2, Users, Briefcase, X } from 'lucid
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnits, Unit, UnitWithChildren } from '@/hooks/useUnits';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface UnitAssignment {
   unit_id: string | null;
@@ -21,6 +22,7 @@ const UNIT_ICONS: Record<string, React.ReactNode> = {
 };
 
 export function UnitTreeSelector({ value, onChange, disabled }: UnitTreeSelectorProps) {
+  const { t } = useLanguage();
   const { units, loading, getUnitPath, buildUnitTree, getUnitAncestors } = useUnits();
   const [expandedUnits, setExpandedUnits] = useState<Set<string>>(new Set());
 
@@ -58,9 +60,9 @@ export function UnitTreeSelector({ value, onChange, disabled }: UnitTreeSelector
 
   const getSelectedLabel = (): string => {
     if (value.unit_id) {
-      return getUnitPath(value.unit_id) || 'Unknown';
+      return getUnitPath(value.unit_id) || t('units.unknown');
     }
-    return 'Unassigned';
+    return t('units.unassigned');
   };
 
   const renderUnitNode = (unit: UnitWithChildren, level: number = 0) => {
@@ -112,7 +114,7 @@ export function UnitTreeSelector({ value, onChange, disabled }: UnitTreeSelector
   if (loading) {
     return (
       <div className="border border-border rounded-md p-4 bg-card">
-        <p className="text-muted-foreground text-sm">Loading units...</p>
+        <p className="text-muted-foreground text-sm">{t('units.loadingUnits')}</p>
       </div>
     );
   }
@@ -141,7 +143,7 @@ export function UnitTreeSelector({ value, onChange, disabled }: UnitTreeSelector
       {!disabled && (
         <div className="border border-border rounded-md bg-card max-h-64 overflow-y-auto">
           {unitTree.length === 0 ? (
-            <p className="text-muted-foreground text-sm p-4">No units available</p>
+            <p className="text-muted-foreground text-sm p-4">{t('units.noUnitsAvailable')}</p>
           ) : (
             <div className="p-2 space-y-1">
               {unitTree.map(unit => renderUnitNode(unit))}

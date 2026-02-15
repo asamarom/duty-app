@@ -141,7 +141,7 @@ export function AutocompleteTagInput({
             onClick={() => addValue(inputValue)}
             disabled={!inputValue.trim()}
           >
-            Add
+            {t('common.add')}
           </Button>
         </div>
 

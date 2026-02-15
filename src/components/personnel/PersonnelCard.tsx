@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { Phone, Mail, Award, Car, ChevronRight } from 'lucide-react';
 import { RoleBadges } from './RoleBadge';
 import type { AppRole } from '@/hooks/useUserRole';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PersonnelCardProps {
   person: Personnel;
@@ -12,6 +13,7 @@ interface PersonnelCardProps {
 }
 
 export function PersonnelCard({ person, onClick, roles = [] }: PersonnelCardProps) {
+  const { t } = useLanguage();
   return (
     <div
       className={cn(
@@ -36,7 +38,7 @@ export function PersonnelCard({ person, onClick, roles = [] }: PersonnelCardProp
             <p className="text-sm font-medium text-primary">{person.dutyPosition}</p>
             <div className="mt-1 flex items-center gap-2">
               {person.isSignatureApproved && (
-                <Badge variant="tactical" className="text-xs">Signature Approved</Badge>
+                <Badge variant="tactical" className="text-xs">{t('personnel.signatureApprovedBadge')}</Badge>
               )}
               <span className="font-mono text-xs text-muted-foreground">
                 {person.serviceNumber}
@@ -81,7 +83,7 @@ export function PersonnelCard({ person, onClick, roles = [] }: PersonnelCardProp
 
       {/* View Details */}
       <div className="mt-4 flex items-center justify-end text-sm text-primary opacity-0 transition-opacity group-hover:opacity-100">
-        View Profile
+        {t('personnel.viewProfile')}
         <ChevronRight className="ml-1 h-4 w-4" />
       </div>
     </div>

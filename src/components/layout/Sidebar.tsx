@@ -75,7 +75,7 @@ export function Sidebar() {
           <div>
             <h1 className="text-sm font-bold tracking-tight text-sidebar-foreground">PMTB</h1>
             <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
-              Platoon Management
+              {t('nav.platoonManagement')}
             </p>
           </div>
         </div>

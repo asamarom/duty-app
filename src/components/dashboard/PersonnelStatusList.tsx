@@ -1,29 +1,41 @@
 import { Personnel, LocationStatus } from '@/types/pmtb';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { MapPin, Radio, Clock } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import type { TranslationKey } from '@/i18n/translations';
 
 interface PersonnelStatusListProps {
   personnel: Personnel[];
   limit?: number;
 }
 
-const statusConfig: Record<LocationStatus, { label: string; variant: 'success' | 'warning' | 'destructive' | 'secondary' }> = {
-  on_duty: { label: 'On Duty', variant: 'success' },
-  active_mission: { label: 'Active Mission', variant: 'warning' },
-  home: { label: 'Home', variant: 'secondary' },
-  off_duty: { label: 'Off Duty', variant: 'secondary' },
-  leave: { label: 'Leave', variant: 'secondary' },
-  tdy: { label: 'TDY', variant: 'secondary' },
+const statusVariants: Record<LocationStatus, 'success' | 'warning' | 'destructive' | 'secondary'> = {
+  on_duty: 'success',
+  active_mission: 'warning',
+  home: 'secondary',
+  off_duty: 'secondary',
+  leave: 'secondary',
+  tdy: 'secondary',
+};
+
+const statusLabelKeys: Record<LocationStatus, TranslationKey> = {
+  on_duty: 'status.onDuty',
+  active_mission: 'status.activeMission',
+  home: 'status.home',
+  off_duty: 'status.offDuty',
+  leave: 'status.leave',
+  tdy: 'status.tdy',
 };
 
 export function PersonnelStatusList({ personnel, limit }: PersonnelStatusListProps) {
+  const { t } = useLanguage();
   const displayedPersonnel = limit ? personnel.slice(0, limit) : personnel;
 
   return (
     <div className="space-y-2">
       {displayedPersonnel.map((person, index) => {
-        const status = statusConfig[person.locationStatus];
+        const variant = statusVariants[person.locationStatus];
+        const labelKey = statusLabelKeys[person.locationStatus];
         return (
           <div
             key={person.id}
@@ -47,15 +59,15 @@ export function PersonnelStatusList({ personnel, limit }: PersonnelStatusListPro
 
             {/* Status */}
             <Badge
-              variant={status.variant}
+              variant={variant}
               className={cn(
                 'shrink-0',
-                status.variant === 'success' && 'status-ready',
-                status.variant === 'warning' && 'status-warning',
-                status.variant === 'destructive' && 'status-critical'
+                variant === 'success' && 'status-ready',
+                variant === 'warning' && 'status-warning',
+                variant === 'destructive' && 'status-critical'
               )}
             >
-              {status.label}
+              {t(labelKey)}
             </Badge>
           </div>
         );

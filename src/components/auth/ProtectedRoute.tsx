@@ -3,6 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useSignupRequest } from '@/hooks/useSignupRequest';
 import { Loader2 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -10,6 +11,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requireApproval = true }: ProtectedRouteProps) {
+  const { t } = useLanguage();
   const { user, loading: authLoading } = useAuth();
   const { status, loading: requestLoading } = useSignupRequest();
   const location = useLocation();
@@ -22,7 +24,7 @@ export function ProtectedRoute({ children, requireApproval = true }: ProtectedRo
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">{t('common.loading')}</p>
         </div>
       </div>
     );
