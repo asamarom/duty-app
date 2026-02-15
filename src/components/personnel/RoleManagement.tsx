@@ -11,6 +11,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useUnits } from '@/hooks/useUnits';
 import { RoleBadges } from './RoleBadge';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface RoleManagementProps {
   personnelId: string;
@@ -30,6 +31,7 @@ export function RoleManagement({
   unitId,
 }: RoleManagementProps) {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const { isAdmin: viewerIsAdmin } = useUserRole();
   const { getUnitById } = useUnits();
   const [saving, setSaving] = useState(false);
@@ -41,8 +43,8 @@ export function RoleManagement({
     if (!userId) {
       toast({
         variant: 'destructive',
-        title: 'Cannot assign role',
-        description: 'This personnel is not linked to a user account.',
+        title: t('personnel.cannotAssignRole'),
+        description: t('personnel.notLinkedToAccount'),
       });
       return;
     }
@@ -68,8 +70,8 @@ export function RoleManagement({
         await Promise.all(deletePromises);
 
         toast({
-          title: 'Role removed',
-          description: 'Leader role has been removed.',
+          title: t('personnel.roleRemoved'),
+          description: t('personnel.leaderRoleRemoved'),
         });
       } else {
         // Get unit type from the unit
@@ -95,8 +97,8 @@ export function RoleManagement({
         }
 
         toast({
-          title: 'Role assigned',
-          description: 'Leader role has been assigned.',
+          title: t('personnel.roleAssigned'),
+          description: t('personnel.leaderRoleAssigned'),
         });
       }
 
@@ -105,8 +107,8 @@ export function RoleManagement({
       console.error('Error updating role:', error);
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: error.message || 'Failed to update role.',
+        title: t('common.error'),
+        description: error.message || t('personnel.failedToUpdateRole'),
       });
     } finally {
       setSaving(false);
@@ -117,8 +119,8 @@ export function RoleManagement({
     if (!userId) {
       toast({
         variant: 'destructive',
-        title: 'Cannot assign role',
-        description: 'This personnel is not linked to a user account.',
+        title: t('personnel.cannotAssignRole'),
+        description: t('personnel.notLinkedToAccount'),
       });
       return;
     }
@@ -137,8 +139,8 @@ export function RoleManagement({
         await updateDoc(userDocRef, { roles: newRoles });
 
         toast({
-          title: 'Role removed',
-          description: 'Admin role has been removed.',
+          title: t('personnel.roleRemoved'),
+          description: t('personnel.adminRoleRemoved'),
         });
       } else {
         // Add admin role
@@ -146,8 +148,8 @@ export function RoleManagement({
         await updateDoc(userDocRef, { roles: newRoles });
 
         toast({
-          title: 'Role assigned',
-          description: 'Admin role has been assigned.',
+          title: t('personnel.roleAssigned'),
+          description: t('personnel.adminRoleAssigned'),
         });
       }
 
@@ -156,8 +158,8 @@ export function RoleManagement({
       console.error('Error updating role:', error);
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: error.message || 'Failed to update role.',
+        title: t('common.error'),
+        description: error.message || t('personnel.failedToUpdateRole'),
       });
     } finally {
       setSaving(false);
@@ -174,7 +176,7 @@ export function RoleManagement({
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Shield className="h-4 w-4 text-primary" />
-            System Roles
+            {t('personnel.systemRoles')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -189,14 +191,14 @@ export function RoleManagement({
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <Shield className="h-4 w-4 text-primary" />
-          System Roles
+          {t('personnel.systemRoles')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {!userId && (
           <div className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm text-warning">
             <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-            <span>This personnel is not linked to a user account. Roles cannot be assigned until they sign up.</span>
+            <span>{t('personnel.notLinkedToAccountWarning')}</span>
           </div>
         )}
 
@@ -211,9 +213,9 @@ export function RoleManagement({
               isLeader ? "text-warning" : "text-muted-foreground"
             )} />
             <div>
-              <Label className="font-medium">Leader</Label>
+              <Label className="font-medium">{t('personnel.roleLeader')}</Label>
               <p className="text-xs text-muted-foreground">
-                Can manage personnel and equipment in their unit
+                {t('personnel.roleLeaderDesc')}
               </p>
             </div>
           </div>
@@ -236,9 +238,9 @@ export function RoleManagement({
                 isAdmin ? "text-destructive" : "text-muted-foreground"
               )} />
               <div>
-                <Label className="font-medium">Admin</Label>
+                <Label className="font-medium">{t('personnel.roleAdmin')}</Label>
                 <p className="text-xs text-muted-foreground">
-                  Full system access across all units
+                  {t('personnel.roleAdminDesc')}
                 </p>
               </div>
             </div>
@@ -253,7 +255,7 @@ export function RoleManagement({
         {saving && (
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
-            Saving...
+            {t('common.saving')}
           </div>
         )}
       </CardContent>

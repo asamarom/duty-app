@@ -15,6 +15,7 @@ export const translations = {
     'nav.approvals': 'Approvals',
     'nav.more': 'More',
     'nav.signOut': 'Sign Out',
+    'nav.platoonManagement': 'Platoon Management',
 
     // Auth
     'auth.signUp': 'Sign Up',
@@ -61,6 +62,8 @@ export const translations = {
     'dashboard.loading': 'Loading dashboard...',
 
     // Personnel
+    'personnel.roleUser': 'User',
+    'personnel.viewProfile': 'View Profile',
     'personnel.title': 'Personnel Management',
     'personnel.subtitle': 'Alpha Module - Manpower tracking and profiles',
     'personnel.searchPlaceholder': 'Search by name, position, or ID...',
@@ -102,6 +105,21 @@ export const translations = {
     'personnel.filters': 'Filters',
     'personnel.noPersonnelFound': 'No personnel found',
     'personnel.loadListFailed': 'Failed to load personnel list.',
+    'personnel.cannotAssignRole': 'Cannot assign role', // RoleManagement
+    'personnel.notLinkedToAccount': 'This personnel is not linked to a user account.',
+    'personnel.notLinkedToAccountWarning': 'This personnel is not linked to a user account. Roles cannot be assigned until they sign up.',
+    'personnel.systemRoles': 'System Roles',
+    'personnel.roleLeader': 'Leader',
+    'personnel.roleLeaderDesc': 'Can manage personnel and equipment in their unit',
+    'personnel.roleAdmin': 'Admin',
+    'personnel.roleAdminDesc': 'Full system access across all units',
+    'personnel.roleRemoved': 'Role removed',
+    'personnel.leaderRoleRemoved': 'Leader role has been removed.',
+    'personnel.leaderRoleAssigned': 'Leader role has been assigned.',
+    'personnel.adminRoleRemoved': 'Admin role has been removed.',
+    'personnel.adminRoleAssigned': 'Admin role has been assigned.',
+    'personnel.roleAssigned': 'Role assigned',
+    'personnel.failedToUpdateRole': 'Failed to update role.',
 
     // Equipment
     'equipment.title': 'Equipment Inventory',
@@ -261,6 +279,10 @@ export const translations = {
     // Status
     'status.home': 'Home',
     'status.onDuty': 'On Duty',
+    'status.activeMission': 'Active Mission',
+    'status.offDuty': 'Off Duty',
+    'status.leave': 'Leave',
+    'status.tdy': 'TDY',
     'status.outOfDuty': 'Out of Duty',
     'status.onMission': 'On Mission',
     'status.operational': 'Operational',
@@ -359,6 +381,8 @@ export const translations = {
     'units.unknownPlatoon': 'Unknown Platoon',
     'units.unknownBattalion': 'Unknown Battalion',
     'units.noUnit': 'No unit',
+    'units.unknown': 'Unknown',
+    'units.unassigned': 'Unassigned',
 
     // Units
     'units.title': 'Unit Management',
@@ -454,6 +478,7 @@ export const translations = {
     'common.pageNotFound': 'Oops! Page not found',
     'common.returnHome': 'Return to Home',
     'common.assign': 'Assign',
+    'common.saving': 'Saving...',
 
     // Admin Mode
     'adminMode.title': 'Admin Mode',
@@ -477,6 +502,7 @@ export const translations = {
     'nav.approvals': 'אישורים',
     'nav.more': 'עוד',
     'nav.signOut': 'התנתק',
+    'nav.platoonManagement': 'ניהול מחלקה',
 
     // Auth
     'auth.signUp': 'הרשמה',
@@ -523,6 +549,10 @@ export const translations = {
     'dashboard.loading': 'טוען לוח בקרה...',
 
     // Personnel
+    'personnel.roleAdmin': 'מנהל',
+    'personnel.roleLeader': 'מפקד',
+    'personnel.roleUser': 'משתמש',
+    'personnel.viewProfile': 'צפה בפרופיל',
     'personnel.title': 'ניהול כוח אדם',
     'personnel.subtitle': 'מודול אלפא - מעקב כוח אדם ופרופילים',
     'personnel.searchPlaceholder': 'חיפוש לפי שם, תפקיד או מספר...',
@@ -564,6 +594,19 @@ export const translations = {
     'personnel.filters': 'סינון',
     'personnel.noPersonnelFound': 'לא נמצאו אנשים',
     'personnel.loadListFailed': 'טעינת רשימת כוח האדם נכשלה.',
+    'personnel.cannotAssignRole': 'לא ניתן להקצות תפקיד',
+    'personnel.notLinkedToAccount': 'איש הצוות אינו מקושר לחשבון משתמש.',
+    'personnel.notLinkedToAccountWarning': 'איש הצוות אינו מקושר לחשבון משתמש. לא ניתן להקצות תפקידים עד שיירשם למערכת.',
+    'personnel.systemRoles': 'תפקידי מערכת',
+    'personnel.roleLeaderDesc': 'רשאי לנהל כוח אדם וציוד ביחידתו',
+    'personnel.roleAdminDesc': 'גישה מלאה למערכת בכל היחידות',
+    'personnel.roleRemoved': 'תפקיד הוסר',
+    'personnel.leaderRoleRemoved': 'תפקיד המפקד הוסר.',
+    'personnel.leaderRoleAssigned': 'תפקיד המפקד הוקצה.',
+    'personnel.adminRoleRemoved': 'תפקיד המנהל הוסר.',
+    'personnel.adminRoleAssigned': 'תפקיד המנהל הוקצה.',
+    'personnel.roleAssigned': 'תפקיד הוקצה',
+    'personnel.failedToUpdateRole': 'עדכון התפקיד נכשל.',
 
     // Equipment
     'equipment.title': 'מלאי ציוד',
@@ -723,6 +766,10 @@ export const translations = {
     // Status
     'status.home': 'בבית',
     'status.onDuty': 'בתורנות',
+    'status.activeMission': 'משימה פעילה',
+    'status.offDuty': 'מחוץ לתורנות',
+    'status.leave': 'חופשה',
+    'status.tdy': 'סיור זמני',
     'status.outOfDuty': 'מחוץ לתורנות',
     'status.onMission': 'במשימה',
     'status.operational': 'תקין',
@@ -859,6 +906,8 @@ export const translations = {
     'units.unknownPlatoon': 'מחלקה לא ידועה',
     'units.unknownBattalion': 'גדוד לא ידוע',
     'units.noUnit': 'ללא יחידה',
+    'units.unknown': 'לא ידוע',
+    'units.unassigned': 'לא מוקצה',
     'units.title': 'ניהול יחידות',
     'units.subtitle': 'ניהול גדודים, פלוגות ומחלקות',
     'units.battalions': 'גדודים',
@@ -912,6 +961,7 @@ export const translations = {
     'common.pageNotFound': 'אופס! הדף לא נמצא',
     'common.returnHome': 'חזרה לדף הבית',
     'common.assign': 'הקצה',
+    'common.saving': 'שומר...',
 
     // Admin Mode
     'adminMode.title': 'מצב מנהל',
