@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useUnits, Unit, UnitWithChildren } from '@/hooks/useUnits';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export interface UnitSelection {
   unitId: string;
@@ -23,6 +24,7 @@ const UNIT_ICONS: Record<string, React.ReactNode> = {
 
 export function BattalionUnitSelector({ value, onChange, disabled }: BattalionUnitSelectorProps) {
   const { battalions, loading, getUnitById, getChildUnits, getUnitPath } = useUnits();
+  const { t } = useLanguage();
   const [selectedBattalionId, setSelectedBattalionId] = useState<string>('');
   const [expandedUnits, setExpandedUnits] = useState<Set<string>>(new Set());
 
@@ -77,8 +79,8 @@ export function BattalionUnitSelector({ value, onChange, disabled }: BattalionUn
   }, [value.unitId]);
 
   const getSelectionLabel = (): string => {
-    if (!value.unitId) return 'No unit selected';
-    return getUnitPath(value.unitId) || 'Unknown unit';
+    if (!value.unitId) return t('signup.noUnitSelected');
+    return getUnitPath(value.unitId) || t('signup.noUnitSelected');
   };
 
   const renderUnitNode = (unit: Unit, level: number = 0) => {
@@ -135,7 +137,7 @@ export function BattalionUnitSelector({ value, onChange, disabled }: BattalionUn
     return (
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label>Battalion</Label>
+          <Label>{t('signup.selectBattalion')}</Label>
           <div className="h-10 bg-muted animate-pulse rounded-md" />
         </div>
       </div>
@@ -146,14 +148,14 @@ export function BattalionUnitSelector({ value, onChange, disabled }: BattalionUn
     <div className="space-y-4">
       {/* Battalion Selector */}
       <div className="space-y-2">
-        <Label>Battalion</Label>
+        <Label>{t('signup.selectBattalion')}</Label>
         <Select
           value={selectedBattalionId}
           onValueChange={handleBattalionChange}
           disabled={disabled}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select your battalion" />
+            <SelectValue placeholder={t('signup.selectBattalionPlaceholder')} />
           </SelectTrigger>
           <SelectContent>
             {battalions.map((b) => (
@@ -171,7 +173,7 @@ export function BattalionUnitSelector({ value, onChange, disabled }: BattalionUn
       {/* Unit Tree (only shown after battalion is selected) */}
       {selectedBattalionId && (
         <div className="space-y-2">
-          <Label>Select Your Unit</Label>
+          <Label>{t('signup.selectUnit')}</Label>
 
           {/* Current Selection Display */}
           <div className="p-2 bg-muted/50 rounded-md border border-border">
@@ -183,7 +185,7 @@ export function BattalionUnitSelector({ value, onChange, disabled }: BattalionUn
             <div className="border border-border rounded-md bg-card max-h-64 overflow-y-auto">
               {battalionChildren.length === 0 ? (
                 <p className="text-muted-foreground text-sm p-4">
-                  No sub-units in this battalion. You'll be assigned to the battalion level.
+                  {t('signup.noSubUnits')}
                 </p>
               ) : (
                 <div className="p-2 space-y-1">

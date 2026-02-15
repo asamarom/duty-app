@@ -103,10 +103,9 @@ service cloud.firestore {
     // UNITS COLLECTION - Organizational hierarchy
     // ============================================================================
     match /units/{unitId} {
-      // CRITICAL FIX: Battalion-based access control
-      // Admins can read all, others can only read units in their battalion
-      // MIGRATION: battalionId is optional during migration period
-      allow read: if hasAnyRole() && (isAdmin() || !resource.data.keys().hasAny(['battalionId']) || isSameBattalion(resource.data.battalionId));
+      // Units (org structure) are readable by any authenticated user.
+      // New users need to read battalions on the signup-request page before a role is assigned.
+      allow read: if isAuthenticated();
 
       // Only admins can create units
       // HIGH FIX: Validate required fields and prevent circular references

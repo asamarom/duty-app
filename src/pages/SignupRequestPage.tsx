@@ -12,19 +12,19 @@ import { z } from 'zod';
 import { BattalionUnitSelector, UnitSelection } from '@/components/signup/BattalionUnitSelector';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-const requestSchema = z.object({
-  fullName: z.string().min(2, 'Name must be at least 2 characters'),
-  serviceNumber: z.string().min(1, 'Service number is required'),
-  cellPhone: z.string().min(1, 'Cell phone number is required'),
-  unitId: z.string().min(1, 'Please select your unit'),
-});
-
 export default function SignupRequestPage() {
   const { user, signOut } = useAuth();
   const { request, submitRequest, status, loading: requestLoading, refetch } = useSignupRequest();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { t } = useLanguage();
+
+  const requestSchema = z.object({
+    fullName: z.string().min(2, t('signup.nameMinLength')),
+    serviceNumber: z.string().min(1, t('signup.serviceNumberRequired')),
+    cellPhone: z.string().min(1, t('signup.phoneRequired')),
+    unitId: z.string().min(1, t('signup.unitRequired')),
+  });
 
   const [fullName, setFullName] = useState(user?.displayName || '');
   const [serviceNumber, setServiceNumber] = useState('');
@@ -77,13 +77,13 @@ export default function SignupRequestPage() {
     if (error) {
       toast({
         variant: 'destructive',
-        title: 'Request failed',
+        title: t('signup.requestFailed'),
         description: error.message,
       });
     } else {
       toast({
-        title: 'Request submitted',
-        description: 'Your signup request has been submitted for approval.',
+        title: t('signup.requestSubmitted'),
+        description: t('signup.requestSubmittedDesc'),
       });
       navigate('/pending-approval');
     }
@@ -226,7 +226,7 @@ export default function SignupRequestPage() {
                   <div className="flex items-start gap-3">
                     <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
                     <div>
-                      <p className="text-sm font-medium text-destructive">Reason for Decline</p>
+                      <p className="text-sm font-medium text-destructive">{t('signup.reasonForDecline')}</p>
                       <p className="text-sm text-muted-foreground mt-1">
                         {request.decline_reason}
                       </p>
