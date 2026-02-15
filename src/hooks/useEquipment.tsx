@@ -272,7 +272,8 @@ export function useEquipment(): UseEquipmentReturn {
         quantity: item.quantity,
         createdBy: user?.uid || null,
         createdAt: serverTimestamp(),
-        status: 'available',
+        updatedAt: serverTimestamp(),
+        status: 'serviceable',
         ...(battalionId ? { battalionId } : {}),
       });
 
