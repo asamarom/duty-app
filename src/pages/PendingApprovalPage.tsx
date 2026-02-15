@@ -11,7 +11,7 @@ import { Shield, Clock, XCircle, RefreshCw, Loader2, LogOut, AlertCircle } from 
 export default function PendingApprovalPage() {
   const { signOut } = useAuth();
   const { request, status, loading, refetch } = useSignupRequest();
-  const { getUnitPath } = useUnits();
+  const { getUnitById } = useUnits();
   const { t, dir } = useLanguage();
   const navigate = useNavigate();
 
@@ -40,9 +40,10 @@ export default function PendingApprovalPage() {
     );
   }
 
-  const unitName = request?.requested_unit_id
-    ? getUnitPath(request.requested_unit_id) || request.requested_unit_id
-    : null;
+  const unit = request?.requested_unit_id ? getUnitById(request.requested_unit_id) : undefined;
+  const unitName = unit
+    ? unit.designation ? `${unit.name} (${unit.designation})` : unit.name
+    : request?.requested_unit_id ?? null;
 
   const detailRows = [
     { label: t('auth.fullName'), value: request?.full_name },
