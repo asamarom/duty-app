@@ -67,13 +67,17 @@ function mapDocToSignupRequest(id: string, data: SignupRequestDoc): SignupReques
 }
 
 export function useSignupRequest(): UseSignupRequestReturn {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [request, setRequest] = useState<SignupRequest | null>(null);
   const [status, setStatus] = useState<SignupRequestStatusWithNone>('none');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchRequest = async () => {
+    // Keep loading while auth is still initializing to avoid a brief
+    // status:'none' flash that causes ProtectedRoute to redirect incorrectly
+    if (authLoading) return;
+
     if (!user) {
       setLoading(false);
       setStatus('none');
@@ -121,7 +125,8 @@ export function useSignupRequest(): UseSignupRequestReturn {
 
   useEffect(() => {
     fetchRequest();
-  }, [user?.uid]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid, authLoading]);
 
   const submitRequest = async (data: {
     fullName: string;
