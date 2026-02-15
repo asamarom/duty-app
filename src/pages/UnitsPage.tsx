@@ -57,10 +57,16 @@ const UNIT_ICONS: Record<UnitType, typeof Building2> = {
   platoon: Users,
 };
 
-const UNIT_TYPE_LABELS: Record<UnitType, string> = {
-  battalion: 'Battalion',
-  company: 'Company',
-  platoon: 'Platoon',
+const UNIT_TYPE_KEYS: Record<UnitType, 'units.battalion' | 'units.company' | 'units.platoon'> = {
+  battalion: 'units.battalion',
+  company: 'units.company',
+  platoon: 'units.platoon',
+};
+
+const UNIT_ADD_KEYS: Record<UnitType, 'units.addBattalion' | 'units.addCompany' | 'units.addPlatoon'> = {
+  battalion: 'units.addBattalion',
+  company: 'units.addCompany',
+  platoon: 'units.addPlatoon',
 };
 
 const CHILD_UNIT_TYPE: Record<UnitType, UnitType | null> = {
@@ -223,7 +229,7 @@ export default function UnitsPage() {
                           e.stopPropagation();
                           openCreateDialog(childType, unit.id);
                         }}
-                        title={`Add ${UNIT_TYPE_LABELS[childType]}`}
+                        title={t(UNIT_ADD_KEYS[childType])}
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
@@ -310,7 +316,7 @@ export default function UnitsPage() {
                         e.stopPropagation();
                         openCreateDialog(childType, unit.id);
                       }}
-                      title={`Add ${UNIT_TYPE_LABELS[childType]}`}
+                      title={t(UNIT_ADD_KEYS[childType])}
                     >
                       <Plus className="h-3 w-3" />
                     </Button>
@@ -469,7 +475,7 @@ export default function UnitsPage() {
           <DialogHeader>
             <DialogTitle>
               {dialogMode === 'create' ? t('units.create') : t('common.edit')}{' '}
-              {UNIT_TYPE_LABELS[formData.unitType]}
+              {t(UNIT_TYPE_KEYS[formData.unitType])}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -479,7 +485,7 @@ export default function UnitsPage() {
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                placeholder={`Enter ${UNIT_TYPE_LABELS[formData.unitType].toLowerCase()} name`}
+                placeholder={t('units.namePlaceholder')}
               />
             </div>
             <div className="space-y-2">
@@ -509,13 +515,13 @@ export default function UnitsPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {t('common.delete')} {currentUnit ? UNIT_TYPE_LABELS[currentUnit.unit_type] : 'unit'}?
+              {t('common.delete')} {currentUnit ? t(UNIT_TYPE_KEYS[currentUnit.unit_type]) : t('units.unit')}?
             </AlertDialogTitle>
             <AlertDialogDescription>
               {t('units.confirmDelete')} &ldquo;{currentUnit?.name}&rdquo;?
               {currentUnit && currentUnit.unit_type !== 'platoon' && (
                 <span className="block mt-2 text-destructive">
-                  Warning: This will also delete all sub-units within this {UNIT_TYPE_LABELS[currentUnit.unit_type].toLowerCase()}.
+                  {t('units.deleteSubUnitsWarning')} {t(UNIT_TYPE_KEYS[currentUnit.unit_type]).toLowerCase()}.
                 </span>
               )}
             </AlertDialogDescription>

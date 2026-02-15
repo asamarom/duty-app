@@ -378,6 +378,7 @@ export const translations = {
     'approvals.errorLoading': 'Failed to load signup requests.',
     'approvals.errorApproving': 'Failed to approve request.',
     'approvals.errorDeclining': 'Failed to decline request.',
+    'approvals.emailPlaceholder': 'user@example.com',
 
     // Units
     'units.unknownPlatoon': 'Unknown Platoon',
@@ -419,6 +420,9 @@ export const translations = {
     'units.name': 'Name',
     'units.designation': 'Designation (Optional)',
     'units.designationPlaceholder': 'e.g., Alpha, Bravo, 1st',
+    'units.unit': 'unit',
+    'units.namePlaceholder': 'Enter name',
+    'units.deleteSubUnitsWarning': 'Warning: This will also delete all sub-units within this',
 
     // Transfers - Incoming
     'transfers.incoming': 'Incoming',
@@ -908,6 +912,7 @@ export const translations = {
     'approvals.errorLoading': 'טעינת בקשות ההרשמה נכשלה.',
     'approvals.errorApproving': 'אישור הבקשה נכשל.',
     'approvals.errorDeclining': 'דחיית הבקשה נכשלה.',
+    'approvals.emailPlaceholder': 'user@example.com',
 
     // Units
     'units.unknownPlatoon': 'מחלקה לא ידועה',
@@ -947,6 +952,9 @@ export const translations = {
     'units.name': 'שם',
     'units.designation': 'כינוי (אופציונלי)',
     'units.designationPlaceholder': 'לדוגמה: אלפא, בראבו, ראשון',
+    'units.unit': 'יחידה',
+    'units.namePlaceholder': 'הכנס שם',
+    'units.deleteSubUnitsWarning': 'אזהרה: פעולה זו תמחק גם את כל תת-היחידות בתוך',
 
     // Common
     'common.search': 'חיפוש',

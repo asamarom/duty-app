@@ -269,7 +269,7 @@ export default function AdminApprovalsPage() {
                   <Input
                     value={newUserEmail}
                     onChange={(e) => setNewUserEmail(e.target.value)}
-                    placeholder="user@example.com"
+                    placeholder={t('approvals.emailPlaceholder')}
                   />
                 </div>
                 <div className="space-y-2">
