@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '@/integrations/firebase/client';
 import { useAuth } from './useAuth';
-import { useUserRole } from './useUserRole';
+import { useEffectiveRole } from './useEffectiveRole';
 
 interface UseCanManageRoleReturn {
   canManage: boolean;
@@ -16,7 +16,7 @@ interface UseCanManageRoleReturn {
  */
 export function useCanManageRole(personnelId: string | undefined): UseCanManageRoleReturn {
   const { user } = useAuth();
-  const { isAdmin, isLeader, loading: roleLoading } = useUserRole();
+  const { isAdmin, isLeader, loading: roleLoading } = useEffectiveRole();
   const [canManage, setCanManage] = useState(false);
   const [loading, setLoading] = useState(true);
 

@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminMode } from '@/contexts/AdminModeContext';
 import { useAuth } from '@/hooks/useAuth';
-import { useUserRole } from '@/hooks/useUserRole';
+import { useEffectiveRole } from '@/hooks/useEffectiveRole';
 import { usePendingRequestsCount } from '@/hooks/usePendingRequestsCount';
 import {
   LayoutDashboard,
@@ -33,15 +33,11 @@ interface NavItem {
 export function Sidebar() {
   const { t, dir } = useLanguage();
   const { user, signOut } = useAuth();
-  const { isAdmin, isLeader, isActualAdmin } = useUserRole();
-  const { isAdminMode, toggleAdminMode } = useAdminMode();
+  const { isAdmin, isLeader, isActualAdmin, isAdminMode } = useEffectiveRole();
+  const { toggleAdminMode } = useAdminMode();
   const pendingCount = usePendingRequestsCount();
 
-  // Determine effective admin/leader status based on admin mode
-  // Admin mode only affects admin privileges; leader privileges remain.
-  const effectiveIsAdmin = isActualAdmin && isAdminMode;
-  const effectiveIsLeader = isLeader;
-  const hasAdminAccess = effectiveIsAdmin || effectiveIsLeader;
+  const hasAdminAccess = isAdmin || isLeader;
 
   const navigation: NavItem[] = [
     { name: t('nav.dashboard'), href: '/', icon: LayoutDashboard },

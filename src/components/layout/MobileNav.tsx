@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useUserRole } from '@/hooks/useUserRole';
+import { useEffectiveRole } from '@/hooks/useEffectiveRole';
 import { useAdminMode } from '@/contexts/AdminModeContext';
 import { usePendingRequestsCount } from '@/hooks/usePendingRequestsCount';
 import { useAuth } from '@/hooks/useAuth';
@@ -29,20 +29,18 @@ import { Switch } from '@/components/ui/switch';
 export function MobileNav() {
   const { t } = useLanguage();
   const {
+    isAdmin,
     isLeader,
     isActualAdmin,
+    isAdminMode,
     loading: roleLoading,
-  } = useUserRole();
-  const { isAdminMode, toggleAdminMode } = useAdminMode();
+  } = useEffectiveRole();
+  const { toggleAdminMode } = useAdminMode();
   const { user, signOut } = useAuth();
   const pendingCount = usePendingRequestsCount();
   const navigate = useNavigate();
   const location = useLocation();
-  // Determine effective admin/leader status based on admin mode
-  // Admin mode only affects admin privileges; leader privileges remain.
-  const effectiveIsAdmin = isActualAdmin && isAdminMode;
-  const effectiveIsLeader = isLeader;
-  const hasAdminAccess = effectiveIsAdmin || effectiveIsLeader;
+  const hasAdminAccess = isAdmin || isLeader;
 
   const mainNavigation = [
     { name: t('nav.dashboard'), href: '/', icon: LayoutDashboard },
