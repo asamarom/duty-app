@@ -391,7 +391,7 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
               <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm flex items-start gap-2">
                 <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-medium">Serialized items detected</p>
+                  <p className="font-medium">{t('equipment.serializedDetected')}</p>
                   <p className="text-muted-foreground">
                     {serializedItems.length} item(s) have serial numbers and must be assigned to individuals.
                     They will be skipped for unit assignments.

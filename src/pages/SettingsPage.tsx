@@ -95,21 +95,21 @@ export default function SettingsPage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between rounded-lg border border-border/50 bg-secondary/50 p-3">
                   <div className="flex items-center gap-2">
-                    <Badge variant="rank" className="text-xs">ADMIN</Badge>
+                    <Badge variant="rank" className="text-xs">{t('personnel.roleAdmin')}</Badge>
                     <span className="text-xs lg:text-sm text-foreground">{t('settings.fullAccess')}</span>
                   </div>
                   <ChevronRight className={`h-4 w-4 text-muted-foreground ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                 </div>
                 <div className="flex items-center justify-between rounded-lg border border-border/50 bg-secondary/50 p-3">
                   <div className="flex items-center gap-2">
-                    <Badge variant="tactical" className="text-xs">LEADER</Badge>
+                    <Badge variant="tactical" className="text-xs">{t('personnel.roleLeader')}</Badge>
                     <span className="text-xs lg:text-sm text-foreground">{t('settings.unitManagement')}</span>
                   </div>
                   <ChevronRight className={`h-4 w-4 text-muted-foreground ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                 </div>
                 <div className="flex items-center justify-between rounded-lg border border-border/50 bg-secondary/50 p-3">
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-xs">USER</Badge>
+                    <Badge variant="secondary" className="text-xs">{t('personnel.roleUser')}</Badge>
                     <span className="text-xs lg:text-sm text-foreground">{t('settings.standardAccess')}</span>
                   </div>
                   <ChevronRight className={`h-4 w-4 text-muted-foreground ${dir === 'rtl' ? 'rotate-180' : ''}`} />

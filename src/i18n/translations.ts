@@ -185,6 +185,8 @@ export const translations = {
     'equipment.selectPlatoon': 'Select platoon',
     'equipment.individual': 'Individual',
     'equipment.selectPerson': 'Select person',
+    'equipment.serializedDetected': 'Serialized items detected',
+    'equipment.deleteRestriction': 'Only the creator can delete when item is assigned back to them',
 
     // Add Equipment
     'addEquipment.title': 'Add Item',
@@ -383,6 +385,9 @@ export const translations = {
     'units.noUnit': 'No unit',
     'units.unknown': 'Unknown',
     'units.unassigned': 'Unassigned',
+    'units.createdSuccess': 'created successfully',
+    'units.updatedSuccess': 'Unit updated successfully',
+    'units.deletedSuccess': 'Unit deleted successfully',
 
     // Units
     'units.title': 'Unit Management',
@@ -672,6 +677,8 @@ export const translations = {
     'equipment.selectPlatoon': 'בחר מחלקה',
     'equipment.individual': 'חייל בודד',
     'equipment.selectPerson': 'בחר חייל',
+    'equipment.serializedDetected': 'זוהו פריטים ממוספרים',
+    'equipment.deleteRestriction': 'רק היוצר יכול למחוק כאשר הפריט מוחזר אליו',
 
     // Add Equipment
     'addEquipment.title': 'הוספת פריט',
@@ -908,6 +915,9 @@ export const translations = {
     'units.noUnit': 'ללא יחידה',
     'units.unknown': 'לא ידוע',
     'units.unassigned': 'לא מוקצה',
+    'units.createdSuccess': 'נוצר בהצלחה',
+    'units.updatedSuccess': 'היחידה עודכנה בהצלחה',
+    'units.deletedSuccess': 'היחידה נמחקה בהצלחה',
     'units.title': 'ניהול יחידות',
     'units.subtitle': 'ניהול גדודים, פלוגות ומחלקות',
     'units.battalions': 'גדודים',

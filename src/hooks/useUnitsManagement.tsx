@@ -2,6 +2,7 @@ import { doc, addDoc, setDoc, updateDoc, deleteDoc, collection, serverTimestamp,
 import { db } from '@/integrations/firebase/client';
 import { useUnits, Unit, UnitType, UnitWithChildren } from './useUnits';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface UnitUpdate {
   name?: string;
@@ -46,6 +47,7 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
     buildUnitTree,
   } = useUnits();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   // Traverse the in-memory units list to find the battalion for a given unit
   const findBattalionId = (unitId: string | undefined): string | null => {
@@ -86,12 +88,12 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
       });
 
       const typeLabels: Record<UnitType, string> = {
-        battalion: 'Battalion',
-        company: 'Company',
-        platoon: 'Platoon',
+        battalion: t('units.battalion'),
+        company: t('units.company'),
+        platoon: t('units.platoon'),
       };
 
-      toast({ title: 'Success', description: `${typeLabels[data.unit_type]} created successfully` });
+      toast({ title: t('common.success'), description: `${typeLabels[data.unit_type]} ${t('units.createdSuccess')}` });
       await refetch();
 
       return {
@@ -106,7 +108,7 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
         updated_at: new Date().toISOString(),
       };
     } catch (err) {
-      toast({ title: 'Error', description: (err as Error).message, variant: 'destructive' });
+      toast({ title: t('common.error'), description: (err as Error).message, variant: 'destructive' });
       return null;
     }
   };
@@ -125,11 +127,11 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
 
       await updateDoc(unitDocRef, updateData);
 
-      toast({ title: 'Success', description: 'Unit updated successfully' });
+      toast({ title: t('common.success'), description: t('units.updatedSuccess') });
       await refetch();
       return true;
     } catch (err) {
-      toast({ title: 'Error', description: (err as Error).message, variant: 'destructive' });
+      toast({ title: t('common.error'), description: (err as Error).message, variant: 'destructive' });
       return false;
     }
   };
@@ -139,11 +141,11 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
       const unitDocRef = doc(db, 'units', id);
       await deleteDoc(unitDocRef);
 
-      toast({ title: 'Success', description: 'Unit deleted successfully' });
+      toast({ title: t('common.success'), description: t('units.deletedSuccess') });
       await refetch();
       return true;
     } catch (err) {
-      toast({ title: 'Error', description: (err as Error).message, variant: 'destructive' });
+      toast({ title: t('common.error'), description: (err as Error).message, variant: 'destructive' });
       return false;
     }
   };

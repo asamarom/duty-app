@@ -480,7 +480,7 @@ export default function EquipmentDetailPage() {
                 </AlertDialogContent>
               </AlertDialog>
             ) : (
-              <Button variant="ghost" size="icon" disabled title="Only the creator can delete when item is assigned back to them">
+              <Button variant="ghost" size="icon" disabled title={t('equipment.deleteRestriction')}>
                 <Trash2 className="h-4 w-4 text-muted-foreground" />
               </Button>
             )}
