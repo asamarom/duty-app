@@ -115,8 +115,8 @@ export default function PersonnelPage() {
       } catch {
         toast({
           variant: 'destructive',
-          title: 'Error',
-          description: 'Failed to load personnel list.',
+          title: t('common.error'),
+          description: t('personnel.loadListFailed'),
         });
       } finally {
         if (active) setLoading(false);
@@ -177,7 +177,7 @@ export default function PersonnelPage() {
         {loading ? (
           <div className="flex flex-col items-center justify-center h-64 gap-3">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Loading personnel...</p>
+            <p className="text-sm text-muted-foreground">{t('personnel.loading')}</p>
           </div>
         ) : (
           <>
@@ -208,7 +208,7 @@ export default function PersonnelPage() {
               >
                 <span className="flex items-center gap-2">
                   <Search className="h-4 w-4" />
-                  Filters
+                  {t('personnel.filters')}
                 </span>
                 {filtersExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </Button>
@@ -224,12 +224,12 @@ export default function PersonnelPage() {
                 </div>
                 <Select value={teamFilter} onValueChange={setTeamFilter}>
                   <SelectTrigger className="w-full sm:w-[160px] bg-card border-border">
-                    <SelectValue placeholder="All Units" />
+                    <SelectValue placeholder={t('units.allUnits')} />
                   </SelectTrigger>
                   <SelectContent>
                     {uniqueUnits.map((unitId) => (
                       <SelectItem key={unitId} value={unitId}>
-                        {unitId === 'all' ? 'All Units' : unitId}
+                        {unitId === 'all' ? t('units.allUnits') : unitId}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -254,7 +254,7 @@ export default function PersonnelPage() {
               <div className="flex flex-col items-center justify-center py-12">
                 <Users className="h-12 w-12 text-muted-foreground/50" />
                 <p className="mt-4 text-lg font-medium text-muted-foreground">
-                  No personnel found
+                  {t('personnel.noPersonnelFound')}
                 </p>
               </div>
             )}

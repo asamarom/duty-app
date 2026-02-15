@@ -402,10 +402,10 @@ export default function EquipmentDetailPage() {
 
         navigate('/equipment');
       } else {
-        toast.error('Please select a transfer destination');
+        toast.error(t('equipment.selectDestination'));
       }
     } catch (error) {
-      toast.error('Failed to transfer equipment');
+      toast.error(t('equipment.transferFailed'));
     } finally {
       setSaving(false);
     }
@@ -414,10 +414,10 @@ export default function EquipmentDetailPage() {
   const handleDelete = async () => {
     try {
       await deleteEquipment(id!);
-      toast.success('Equipment deleted');
+      toast.success(t('equipment.deleteSuccess'));
       navigate('/equipment');
     } catch (error) {
-      toast.error('Failed to delete equipment');
+      toast.error(t('equipment.deleteFailed'));
     }
   };
 
@@ -447,12 +447,12 @@ export default function EquipmentDetailPage() {
                 {item.hasPendingTransfer && (
                   <Badge variant="outline" className="text-warning border-warning">
                     <AlertTriangle className="h-3 w-3 mr-1" />
-                    Transfer Pending
+                    {t('equipment.transferPending')}
                   </Badge>
                 )}
               </div>
               <p className="text-sm text-muted-foreground">
-                {item.serialNumber || `Quantity: ${maxQuantity}`}
+                {item.serialNumber || `${t('equipment.quantityLabel')}: ${maxQuantity}`}
               </p>
             </div>
           </div>
@@ -468,13 +468,13 @@ export default function EquipmentDetailPage() {
                   <AlertDialogHeader>
                     <AlertDialogTitle>{t('equipment.deleteTitle')}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Are you sure you want to delete "{item.name}"? This will also remove all transfer history. This action cannot be undone.
+                      {t('equipment.deleteConfirm')}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                     <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                      Delete
+                      {t('common.delete')}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -518,7 +518,7 @@ export default function EquipmentDetailPage() {
 
               {item.description && (
                 <div>
-                  <Label className="text-xs text-muted-foreground">Description</Label>
+                  <Label className="text-xs text-muted-foreground">{t('equipment.description')}</Label>
                   <p className="text-sm">{item.description}</p>
                 </div>
               )}
@@ -540,14 +540,14 @@ export default function EquipmentDetailPage() {
           <div className="card-tactical rounded-xl p-4 lg:p-6 space-y-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <Send className="h-5 w-5 text-primary" />
-              Transfer Equipment
+              {t('equipment.transferEquipment')}
             </h2>
 
             {/* Serialized item warning */}
             {isSerializedItem && (
               <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm flex items-start gap-2">
                 <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
-                <span>Serialized equipment must be assigned to an individual for accountability.</span>
+                <span>{t('addEquipment.serializedMustBeIndividual')}</span>
               </div>
             )}
 
@@ -585,7 +585,7 @@ export default function EquipmentDetailPage() {
                     +
                   </Button>
                   <span className="text-sm text-muted-foreground">
-                    of {maxQuantity} available
+                    {maxQuantity} {t('equipment.available')}
                   </span>
                 </div>
               </div>
@@ -598,6 +598,12 @@ export default function EquipmentDetailPage() {
                 <div className="grid grid-cols-2 gap-2">
                   {(['battalion', 'company', 'platoon', 'individual'] as const).map((aType) => {
                     const isAllowed = allowedTypes.includes(aType);
+                    const aTypeLabels = {
+                      battalion: t('units.battalion'),
+                      company: t('units.company'),
+                      platoon: t('units.platoon'),
+                      individual: t('addEquipment.individual'),
+                    };
                     return (
                       <Button
                         key={aType}
@@ -612,14 +618,14 @@ export default function EquipmentDetailPage() {
                         {aType === 'company' && <Users className="h-4 w-4" />}
                         {aType === 'platoon' && <Users className="h-4 w-4" />}
                         {aType === 'individual' && <User className="h-4 w-4" />}
-                        {aType.charAt(0).toUpperCase() + aType.slice(1)}
+                        {aTypeLabels[aType]}
                       </Button>
                     );
                   })}
                 </div>
                 {currentLevel !== 'unassigned' && !isSerializedItem && (
                   <p className="text-xs text-muted-foreground">
-                    Items can only be transferred one level up or down the hierarchy.
+                    {t('equipment.transferHierarchyNote')}
                   </p>
                 )}
               </div>
@@ -629,10 +635,10 @@ export default function EquipmentDetailPage() {
                 {/* Battalion */}
                 {selectedBattalionId && (assignedType === 'battalion' || currentLevel === 'unassigned') && allowedTypes.includes('battalion') && (
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Battalion</Label>
+                    <Label className="text-xs text-muted-foreground">{t('units.battalion')}</Label>
                     <div className="flex items-center gap-2 h-10 px-3 rounded-md border border-input bg-muted/50">
                       <Building2 className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{battalions.find(b => b.id === selectedBattalionId)?.name || 'Unknown'}</span>
+                      <span className="text-sm">{battalions.find(b => b.id === selectedBattalionId)?.name || t('transfers.unknown')}</span>
                     </div>
                   </div>
                 )}
@@ -650,7 +656,7 @@ export default function EquipmentDetailPage() {
                     {availableCompanies.length === 0 ? (
                       <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm flex items-start gap-2">
                         <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
-                        <span>No companies available in this battalion.</span>
+                        <span>{t('equipment.noCompaniesInBattalion')}</span>
                       </div>
                     ) : availableCompanies.length === 1 ? (
                       <div className="flex items-center gap-2 h-10 px-3 rounded-md border border-input bg-muted/50">
@@ -684,7 +690,7 @@ export default function EquipmentDetailPage() {
                     {availablePlatoons.length === 0 ? (
                       <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm flex items-start gap-2">
                         <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
-                        <span>No platoons available in this company.</span>
+                        <span>{t('equipment.noPlatoonsInCompany')}</span>
                       </div>
                     ) : availablePlatoons.length === 1 ? (
                       <div className="flex items-center gap-2 h-10 px-3 rounded-md border border-input bg-muted/50">
@@ -714,11 +720,11 @@ export default function EquipmentDetailPage() {
                 {/* Individual Selection */}
                 {assignedType === 'individual' && (
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Person</Label>
+                    <Label className="text-xs text-muted-foreground">{t('addEquipment.person')}</Label>
                     {availablePersonnel.length === 0 ? (
                       <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm flex items-start gap-2">
                         <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
-                        <span>No personnel available. {selectedPlatoonId ? 'This platoon has no assigned personnel.' : 'Select a platoon first.'}</span>
+                        <span>{t('equipment.noPersonnelAvailable')}</span>
                       </div>
                     ) : (
                       <Select value={selectedPersonnelId} onValueChange={setSelectedPersonnelId}>
@@ -751,7 +757,7 @@ export default function EquipmentDetailPage() {
                 ) : (
                   <Send className="h-4 w-4" />
                 )}
-                {item.hasPendingTransfer ? 'Transfer Pending' : 'Transfer Equipment'}
+                {item.hasPendingTransfer ? t('equipment.transferPending') : t('equipment.transferEquipment')}
               </Button>
             </div>
           </div>
@@ -760,7 +766,7 @@ export default function EquipmentDetailPage() {
           <div className="card-tactical rounded-xl p-4 lg:p-6 space-y-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <History className="h-5 w-5 text-primary" />
-              Transfer History
+              {t('equipment.transferHistory')}
             </h2>
 
             {historyLoading ? (
@@ -769,7 +775,7 @@ export default function EquipmentDetailPage() {
               </div>
             ) : history.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-4">
-                No transfer history yet
+                {t('equipment.noTransferHistory')}
               </p>
             ) : (
               <div className="space-y-3">
@@ -788,7 +794,7 @@ export default function EquipmentDetailPage() {
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {format(new Date(record.transferredAt), 'MMM d, yyyy HH:mm')}
-                        {record.transferredByName && ` • by ${record.transferredByName}`}
+                        {record.transferredByName && ` • ${t('equipment.transferredBy')} ${record.transferredByName}`}
                       </div>
                       {record.notes && (
                         <p className="text-xs text-muted-foreground italic">{record.notes}</p>
