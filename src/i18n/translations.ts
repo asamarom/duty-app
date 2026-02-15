@@ -21,6 +21,13 @@ export const translations = {
     'auth.fullName': 'Full Name',
     'auth.confirmPassword': 'Confirm Password',
     'auth.namePlaceholder': 'John Doe',
+    'auth.googleSignInFailed': 'Google sign-in failed',
+    'auth.systemName': 'PMTB System',
+    'auth.systemTagline': 'Personnel & Material Tracking',
+    'auth.welcome': 'Welcome',
+    'auth.signInDesc': 'Sign in with your Google account to access your dashboard',
+    'auth.signingIn': 'Signing in...',
+    'auth.continueWithGoogle': 'Continue with Google',
 
     // Dashboard
     'dashboard.title': 'Platoon Dashboard',
@@ -211,6 +218,7 @@ export const translations = {
     'settings.fullAccess': 'Full system access',
     'settings.unitManagement': 'Unit management',
     'settings.standardAccess': 'Standard access',
+    'settings.adminAccess': 'Admin Access',
 
     // Status
     'status.home': 'Home',
@@ -393,6 +401,8 @@ export const translations = {
     'common.noneListed': 'None listed',
     'common.previous': 'Previous',
     'common.next': 'Next',
+    'common.pageNotFound': 'Oops! Page not found',
+    'common.returnHome': 'Return to Home',
 
     // Admin Mode
     'adminMode.title': 'Admin Mode',
@@ -422,6 +432,13 @@ export const translations = {
     'auth.fullName': 'שם מלא',
     'auth.confirmPassword': 'אימות סיסמה',
     'auth.namePlaceholder': 'ישראל ישראלי',
+    'auth.googleSignInFailed': 'כניסה עם Google נכשלה',
+    'auth.systemName': 'מערכת PMTB',
+    'auth.systemTagline': 'מעקב כוח אדם וציוד',
+    'auth.welcome': 'ברוך הבא',
+    'auth.signInDesc': 'היכנס עם חשבון Google שלך לגישה ללוח הבקרה',
+    'auth.signingIn': 'נכנס...',
+    'auth.continueWithGoogle': 'המשך עם Google',
 
     // Dashboard
     'dashboard.title': 'לוח בקרה מחלקתי',
@@ -612,6 +629,7 @@ export const translations = {
     'settings.fullAccess': 'גישה מלאה למערכת',
     'settings.unitManagement': 'ניהול יחידה',
     'settings.standardAccess': 'גישה רגילה',
+    'settings.adminAccess': 'גישת מנהל',
 
     // Status
     'status.home': 'בבית',
@@ -793,6 +811,8 @@ export const translations = {
     'common.noneListed': 'לא צוין',
     'common.previous': 'הקודם',
     'common.next': 'הבא',
+    'common.pageNotFound': 'אופס! הדף לא נמצא',
+    'common.returnHome': 'חזרה לדף הבית',
 
     // Admin Mode
     'adminMode.title': 'מצב מנהל',

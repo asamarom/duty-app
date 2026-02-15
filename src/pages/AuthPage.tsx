@@ -7,10 +7,12 @@ import { useToast } from '@/hooks/use-toast';
 import { Shield, Loader2 } from 'lucide-react';
 import { TestLoginForm } from '@/components/auth/TestLoginForm';
 import { isTestModeEnabled } from '@/lib/testAuth';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function AuthPage() {
   const { user, loading, signInWithGoogle, signInWithPassword } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Redirect if already logged in
@@ -27,7 +29,7 @@ export default function AuthPage() {
       setIsSubmitting(false);
       toast({
         variant: 'destructive',
-        title: 'Google sign-in failed',
+        title: t('auth.googleSignInFailed'),
         description: error.message,
       });
     }
@@ -37,7 +39,7 @@ export default function AuthPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-3">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">Loading...</p>
+        <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
       </div>
     );
   }
@@ -50,14 +52,14 @@ export default function AuthPage() {
           <div className="h-16 w-16 rounded-xl bg-primary/20 flex items-center justify-center mb-4 glow-tactical">
             <Shield className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">PMTB System</h1>
-          <p className="text-muted-foreground text-sm">Personnel & Material Tracking</p>
+          <h1 className="text-2xl font-bold text-foreground">{t('auth.systemName')}</h1>
+          <p className="text-muted-foreground text-sm">{t('auth.systemTagline')}</p>
         </div>
 
         <Card className="card-tactical">
           <CardHeader className="text-center pb-4">
-            <CardTitle>Welcome</CardTitle>
-            <CardDescription>Sign in with your Google account to access your dashboard</CardDescription>
+            <CardTitle>{t('auth.welcome')}</CardTitle>
+            <CardDescription>{t('auth.signInDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button
@@ -69,7 +71,7 @@ export default function AuthPage() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="me-2 h-5 w-5 animate-spin" />
-                  Signing in...
+                  {t('auth.signingIn')}
                 </>
               ) : (
                 <>
@@ -91,7 +93,7 @@ export default function AuthPage() {
                       fill="#EA4335"
                     />
                   </svg>
-                  Continue with Google
+                  {t('auth.continueWithGoogle')}
                 </>
               )}
             </Button>

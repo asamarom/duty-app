@@ -44,7 +44,7 @@ export default function SettingsPage() {
             </div>
             <Badge variant="tactical" className="px-3 py-1">
               <Lock className="me-1 h-3 w-3" />
-              Admin Access
+              {t('settings.adminAccess')}
             </Badge>
           </div>
         </header>
