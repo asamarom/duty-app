@@ -386,22 +386,32 @@ export default function AddEquipmentPage() {
 
             {/* Hierarchical Selection */}
             <div className="space-y-3">
-              {/* Battalion - auto-set from user profile, shown as read-only */}
-              {selectedBattalionId && (
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">{t('units.battalion')}</Label>
+              {/* Battalion - auto-set from user profile or selectable */}
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">{t('units.battalion')}</Label>
+                {userBattalionId ? (
                   <div className="flex items-center gap-2 h-12 px-3 rounded-md border border-input bg-muted/50">
                     <Building2 className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">{battalions.find(b => b.id === selectedBattalionId)?.name || t('transfers.unknown')}</span>
                   </div>
-                </div>
-              )}
-              {!selectedBattalionId && !battalionLoading && (
-                <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm flex items-start gap-2">
-                  <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
-                  <span>{t('addEquipment.noBattalionWarning')}</span>
-                </div>
-              )}
+                ) : (
+                  <Select value={selectedBattalionId} onValueChange={(val) => { setSelectedBattalionId(val); setSelectedCompanyId(''); setSelectedPlatoonId(''); }}>
+                    <SelectTrigger className="h-12 bg-secondary border-border">
+                      <SelectValue placeholder={t('units.selectBattalion')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {battalions.map((b) => (
+                        <SelectItem key={b.id} value={b.id}>
+                          <div className="flex items-center gap-2">
+                            <Building2 className="h-4 w-4" />
+                            {b.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
 
               {/* Company Selection - show for company, platoon, individual */}
               {assignedType !== 'battalion' && selectedBattalionId && (

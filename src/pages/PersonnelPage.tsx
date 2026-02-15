@@ -260,7 +260,7 @@ export default function PersonnelPage() {
             )}
 
             {/* Mobile FAB */}
-            <div className="lg:hidden fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] end-4 z-40">
+            <div className="lg:hidden fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] end-4 z-40">
               <Button variant="tactical" size="lg" className="h-14 w-14 rounded-full shadow-lg">
                 <Plus className="h-6 w-6" />
               </Button>
