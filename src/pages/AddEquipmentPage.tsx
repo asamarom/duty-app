@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useUserBattalion } from '@/hooks/useUserBattalion';
+import { useEffectiveRole } from '@/hooks/useEffectiveRole';
 import {
   Select,
   SelectContent,
@@ -44,6 +45,7 @@ export default function AddEquipmentPage() {
   const { equipment, loading: equipmentLoading, addEquipment } = useEquipment();
   const { battalions, companies, platoons, loading: unitsLoading, getCompaniesForBattalion, getPlatoonsForCompany } = useUnits();
   const { battalionId: userBattalionId, loading: battalionLoading } = useUserBattalion();
+  const { isAdmin } = useEffectiveRole();
 
   const [name, setName] = useState('');
   const [nameOpen, setNameOpen] = useState(false);
@@ -386,15 +388,19 @@ export default function AddEquipmentPage() {
 
             {/* Hierarchical Selection */}
             <div className="space-y-3">
-              {/* Battalion - auto-set from user profile or selectable */}
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">{t('units.battalion')}</Label>
-                {userBattalionId ? (
+              {/* Battalion - auto-set from user profile; admins with admin mode on can pick */}
+              {selectedBattalionId && (
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">{t('units.battalion')}</Label>
                   <div className="flex items-center gap-2 h-12 px-3 rounded-md border border-input bg-muted/50">
                     <Building2 className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">{battalions.find(b => b.id === selectedBattalionId)?.name || t('transfers.unknown')}</span>
                   </div>
-                ) : (
+                </div>
+              )}
+              {!selectedBattalionId && !battalionLoading && isAdmin && (
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">{t('units.battalion')}</Label>
                   <Select value={selectedBattalionId} onValueChange={(val) => { setSelectedBattalionId(val); setSelectedCompanyId(''); setSelectedPlatoonId(''); }}>
                     <SelectTrigger className="h-12 bg-secondary border-border">
                       <SelectValue placeholder={t('units.selectBattalion')} />
@@ -410,8 +416,14 @@ export default function AddEquipmentPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                )}
-              </div>
+                </div>
+              )}
+              {!selectedBattalionId && !battalionLoading && !isAdmin && (
+                <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm flex items-start gap-2">
+                  <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+                  <span>{t('addEquipment.noBattalionWarning')}</span>
+                </div>
+              )}
 
               {/* Company Selection - show for company, platoon, individual */}
               {assignedType !== 'battalion' && selectedBattalionId && (
