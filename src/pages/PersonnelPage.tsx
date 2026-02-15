@@ -19,6 +19,7 @@ import {
 import { Search, Plus, Users, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
+import { useEffectiveRole } from '@/hooks/useEffectiveRole';
 import type { Personnel } from '@/types/pmtb';
 
 interface PersonnelWithRoles extends Personnel {
@@ -52,6 +53,7 @@ export default function PersonnelPage() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { toast } = useToast();
+  const { isAdmin, isLeader } = useEffectiveRole();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [teamFilter, setTeamFilter] = useState('all');
@@ -167,10 +169,12 @@ export default function PersonnelPage() {
                 {t('personnel.subtitle')}
               </p>
             </div>
-            <Button variant="tactical">
-              <Plus className="me-2 h-4 w-4" />
-              {t('common.add')} {t('nav.personnel')}
-            </Button>
+            {(isAdmin || isLeader) && (
+              <Button variant="tactical" onClick={() => navigate('/personnel/add')}>
+                <Plus className="me-2 h-4 w-4" />
+                {t('personnel.add')}
+              </Button>
+            )}
           </div>
         </header>
 
@@ -260,11 +264,18 @@ export default function PersonnelPage() {
             )}
 
             {/* Mobile FAB */}
-            <div className="lg:hidden fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] end-4 z-40">
-              <Button variant="tactical" size="lg" className="h-14 w-14 rounded-full shadow-lg">
-                <Plus className="h-6 w-6" />
-              </Button>
-            </div>
+            {(isAdmin || isLeader) && (
+              <div className="lg:hidden fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] end-4 z-40">
+                <Button
+                  variant="tactical"
+                  size="lg"
+                  className="h-14 w-14 rounded-full shadow-lg"
+                  onClick={() => navigate('/personnel/add')}
+                >
+                  <Plus className="h-6 w-6" />
+                </Button>
+              </div>
+            )}
           </>
         )}
       </div>
