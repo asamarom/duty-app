@@ -369,6 +369,9 @@ export const translations = {
     'signup.selectUnit': 'Select Your Unit',
     'signup.noUnitSelected': 'No unit selected',
     'signup.noSubUnits': "No sub-units in this battalion. You'll be assigned to the battalion level.",
+    'signup.checkStatus': 'Check Status',
+    'signup.submitNewRequest': 'Submit New Request',
+    'signup.signOut': 'Sign Out',
 
     // Common
     'common.search': 'Search',
@@ -698,6 +701,9 @@ export const translations = {
     'signup.selectUnit': 'בחר יחידה',
     'signup.noUnitSelected': 'לא נבחרה יחידה',
     'signup.noSubUnits': 'אין תת-יחידות בגדוד זה. תוקצה לרמת הגדוד.',
+    'signup.checkStatus': 'בדוק סטטוס',
+    'signup.submitNewRequest': 'שלח בקשה חדשה',
+    'signup.signOut': 'התנתק',
 
     // Signup Approvals
     'approvals.title': 'אישורי הרשמה',
