@@ -40,7 +40,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useUnitsManagement } from '@/hooks/useUnitsManagement';
-import { useUserRole } from '@/hooks/useUserRole';
+import { useEffectiveRole } from '@/hooks/useEffectiveRole';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Unit, UnitType } from '@/hooks/useUnits';
 
@@ -77,7 +77,7 @@ const CHILD_UNIT_TYPE: Record<UnitType, UnitType | null> = {
 
 export default function UnitsPage() {
   const { t, dir } = useLanguage();
-  const { isAdmin, isLeader } = useUserRole();
+  const { isAdmin, isLeader } = useEffectiveRole();
   const {
     battalions,
     loading,

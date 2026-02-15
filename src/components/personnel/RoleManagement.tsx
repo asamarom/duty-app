@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Crown, Shield, Loader2, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useUserRole } from '@/hooks/useUserRole';
+import { useEffectiveRole } from '@/hooks/useEffectiveRole';
 import { useUnits } from '@/hooks/useUnits';
 import { RoleBadges } from './RoleBadge';
 import { cn } from '@/lib/utils';
@@ -32,7 +32,7 @@ export function RoleManagement({
 }: RoleManagementProps) {
   const { toast } = useToast();
   const { t } = useLanguage();
-  const { isAdmin: viewerIsAdmin } = useUserRole();
+  const { isAdmin: viewerIsAdmin } = useEffectiveRole();
   const { getUnitById } = useUnits();
   const [saving, setSaving] = useState(false);
 

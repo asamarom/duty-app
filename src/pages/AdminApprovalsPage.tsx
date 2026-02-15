@@ -13,8 +13,7 @@ import {
 import { db } from '@/integrations/firebase/client';
 import type { SignupRequestDoc, UserDoc, AppRole } from '@/integrations/firebase/types';
 import { useAuth } from '@/hooks/useAuth';
-import { useUserRole } from '@/hooks/useUserRole';
-import { useAdminMode } from '@/contexts/AdminModeContext';
+import { useEffectiveRole } from '@/hooks/useEffectiveRole';
 import { useUnits } from '@/hooks/useUnits';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -36,16 +35,11 @@ interface SignupRequest extends SignupRequestDoc {
 
 export default function AdminApprovalsPage() {
   const { user } = useAuth();
-  const { isAdmin, isLeader, isActualAdmin, loading: rolesLoading } = useUserRole();
-  const { isAdminMode } = useAdminMode();
+  const { isAdmin: effectiveIsAdmin, isLeader: effectiveIsLeader, isActualAdmin, loading: rolesLoading } = useEffectiveRole();
   const { units, getUnitPath: getUnitPathFromHook, loading: unitsLoading } = useUnits();
   const { toast } = useToast();
   const { t } = useLanguage();
 
-  // Determine effective admin/leader status based on admin mode
-  // Admin mode only affects admin privileges; leader privileges remain.
-  const effectiveIsAdmin = isActualAdmin && isAdminMode;
-  const effectiveIsLeader = isLeader;
   const hasAdminAccess = effectiveIsAdmin || effectiveIsLeader;
 
   const [requests, setRequests] = useState<SignupRequest[]>([]);
