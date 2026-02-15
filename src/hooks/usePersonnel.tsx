@@ -4,6 +4,10 @@ import { db } from '@/integrations/firebase/client';
 import type { PersonnelDoc } from '@/integrations/firebase/types';
 import type { Personnel } from '@/types/pmtb';
 
+// Module-level cache — persists across component mounts so navigating back shows
+// previously loaded data immediately while a background refresh runs silently.
+let _personnelCache: Personnel[] | null = null;
+
 interface UsePersonnelReturn {
   personnel: Personnel[];
   loading: boolean;
@@ -34,13 +38,13 @@ function mapDocToPersonnel(id: string, data: PersonnelDoc): Personnel {
 }
 
 export function usePersonnel(): UsePersonnelReturn {
-  const [personnel, setPersonnel] = useState<Personnel[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [personnel, setPersonnel] = useState<Personnel[]>(_personnelCache ?? []);
+  const [loading, setLoading] = useState(_personnelCache === null);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchPersonnel = useCallback(async () => {
     try {
-      setLoading(true);
+      if (_personnelCache === null) setLoading(true);
       setError(null);
 
       // Create a timeout promise
@@ -58,6 +62,7 @@ export function usePersonnel(): UsePersonnelReturn {
         mapDocToPersonnel(doc.id, doc.data() as PersonnelDoc)
       );
 
+      _personnelCache = mappedPersonnel;
       setPersonnel(mappedPersonnel);
     } catch (err) {
       console.error('usePersonnel: Firestore error', err);

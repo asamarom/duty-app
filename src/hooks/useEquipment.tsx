@@ -27,6 +27,10 @@ import { useUserBattalion } from '@/hooks/useUserBattalion';
 
 export type AssignmentLevel = 'battalion' | 'company' | 'platoon' | 'individual' | 'unassigned';
 
+// Module-level cache — persists across component mounts so navigating back to a page
+// doesn't trigger a full loading state. Only the first load shows a spinner.
+let _equipmentCache: EquipmentWithAssignment[] | null = null;
+
 export interface EquipmentWithAssignment extends Equipment {
   assigneeName?: string;
   currentAssignmentId?: string;
@@ -57,15 +61,15 @@ interface UseEquipmentReturn {
 }
 
 export function useEquipment(): UseEquipmentReturn {
-  const [equipment, setEquipment] = useState<EquipmentWithAssignment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [equipment, setEquipment] = useState<EquipmentWithAssignment[]>(_equipmentCache ?? []);
+  const [loading, setLoading] = useState(_equipmentCache === null);
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
   const { battalionId } = useUserBattalion();
 
   const fetchEquipment = useCallback(async () => {
     try {
-      setLoading(true);
+      if (_equipmentCache === null) setLoading(true);
       setError(null);
 
       // Create a timeout promise
@@ -204,6 +208,7 @@ export function useEquipment(): UseEquipmentReturn {
         }
       });
 
+      _equipmentCache = mappedEquipment;
       setEquipment(mappedEquipment);
     } catch (err) {
       console.error('useEquipment: Firestore error', err);
@@ -361,11 +366,11 @@ export function useEquipment(): UseEquipmentReturn {
   );
 
   const requestAssignment = useCallback(
-    async (id: string, assignment: AssignmentData, notes?: string, _quantity?: number) => {
+    async (id: string, assignment: AssignmentData, notes?: string, quantity?: number) => {
       const equipmentId = getBaseId(id);
 
       const initiateTransfer = httpsCallable<
-        { equipmentId: string; toUnitId?: string; toPersonnelId?: string; notes?: string },
+        { equipmentId: string; toUnitId?: string; toPersonnelId?: string; notes?: string; quantity?: number },
         { success: boolean }
       >(functions, 'initiateTransfer');
 
@@ -374,6 +379,7 @@ export function useEquipment(): UseEquipmentReturn {
         toUnitId: assignment.unitId || undefined,
         toPersonnelId: assignment.personnelId || undefined,
         notes: notes || undefined,
+        quantity: quantity || undefined,
       });
 
       await fetchEquipment();

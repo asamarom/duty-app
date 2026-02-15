@@ -254,6 +254,8 @@ service cloud.firestore {
         request.resource.data.requestedBy == request.auth.uid &&
         request.resource.data.equipmentId is string &&
         request.resource.data.equipmentId.size() > 0 &&
+        // quantity is optional; when present it must be a positive integer (bulk transfer quantity)
+        (!request.resource.data.keys().hasAny(['quantity']) || (request.resource.data.quantity is int && request.resource.data.quantity > 0)) &&
         (isAdmin() || !request.resource.data.keys().hasAny(['battalionId']) || isSameBattalionCreate(request.resource.data.battalionId));
 
       // Only admins and leaders can update requests (approve/reject)

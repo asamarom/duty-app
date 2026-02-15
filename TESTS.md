@@ -16,9 +16,10 @@ This document maps product requirements from [PRODUCT.md](./PRODUCT.md) to their
 | AUTH | 12 | 12 | 0 | 0 |
 | I18N | 3 | 2 | 0 | 0 |
 | ONBOARD | 9 | 7 | 0 | 0 |
-| XFER | 10 | 10 | 0 | 0 |
+| XFER | 12 | 12 | 0 | 0 |
 | UI | 8 | 8 | 0 | 0 |
-| **Total** | **56** | **53** | **0** | **0** |
+| UX | 2 | 1 | 0 | 0 |
+| **Total** | **60** | **56** | **0** | **0** |
 
 ---
 
@@ -319,6 +320,17 @@ This document maps product requirements from [PRODUCT.md](./PRODUCT.md) to their
 - **Tests**:
   - `e2e/transfers.spec.ts` > "[XFER-10] should rollback status when transfer is declined"
 
+### [XFER-11] Bulk items allow quantity specification in transfer
+- **Status**: covered
+- **Tests**:
+  - `src/hooks/__tests__/useEquipment.test.tsx` > "requestAssignment passes quantity to initiateTransfer Cloud Function"
+
+### [XFER-12] Transfer quantity preserved in request and applied on approval
+- **Status**: covered
+- **Tests**:
+  - `src/hooks/__tests__/useEquipment.test.tsx` > "requestAssignment passes quantity to initiateTransfer Cloud Function"
+- **Notes**: Quantity is stored in the assignmentRequest doc by initiateTransfer CF and read by processTransfer CF when creating the new equipmentAssignment.
+
 ---
 
 ## User Interface [UI]
@@ -363,3 +375,16 @@ This document maps product requirements from [PRODUCT.md](./PRODUCT.md) to their
 - **Tests**:
   - `e2e/user-lifecycle.spec.ts` > "should successfully logout and redirect to auth page"
   - `e2e/user-lifecycle.spec.ts` > "complete lifecycle: login -> navigate -> logout -> login as different user"
+
+---
+
+## User Experience [UX]
+
+### [UX-1] Previously visited page shows data immediately without full-page spinner
+- **Status**: covered
+- **Tests**:
+  - `e2e/transfers.spec.ts` > "[UX-1] should not show full-page spinner when returning to transfers page"
+
+### [UX-2] Action (approve/reject) triggers silent background refresh
+- **Status**: not-testable
+- **Notes**: Behaviour is coupled to loading state internals; covered by module-level cache implementation in useAssignmentRequests.

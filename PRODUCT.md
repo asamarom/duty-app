@@ -105,6 +105,8 @@ The application follows a standard military organizational structure, allowing f
 - [XFER-8] Equipment can be transferred from a personnel to a unit and vice versa, following the rules above.
 - [XFER-9] Equipment that was requested to be transferred but wasn't accepted yet - will still be assigned to the source user/unit and its status will be "pending transfer".
 - [XFER-10] Equipment that was requested to be transferred but was declined - will still be assigned to the source user/unit and its status will roll back to the original assignment status. The transfer failure will be logged in the `equipment_transfer_history`.
+- [XFER-11] For bulk items (no serial number), the user can specify the quantity to transfer (1 to available).
+- [XFER-12] Transfer quantity is preserved in the transfer request and applied when the transfer is approved.
 
 ---
 
@@ -126,3 +128,10 @@ The application follows a standard military organizational structure, allowing f
 ### Logout
 
 - [UI-8] Users can logout and are redirected to auth page.
+
+---
+
+## User Experience
+
+- [UX-1] Navigating to a previously visited page must not reset it to a full loading state. Previously loaded data is shown immediately while a background refresh runs.
+- [UX-2] After performing an action (approve/reject), data refreshes silently without a full loading spinner.

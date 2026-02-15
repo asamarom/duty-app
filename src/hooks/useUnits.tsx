@@ -6,6 +6,10 @@ import type { UnitDoc, UnitType } from '@/integrations/firebase/types';
 // Re-export types for backwards compatibility
 export type { UnitType };
 
+// Module-level cache — persists across component mounts so navigating back shows
+// previously loaded data immediately while a background refresh runs silently.
+let _unitsCache: Unit[] | null = null;
+
 // Unit type matching the existing interface
 export interface Unit {
   id: string;
@@ -41,13 +45,13 @@ interface UseUnitsReturn {
 }
 
 export function useUnits(): UseUnitsReturn {
-  const [units, setUnits] = useState<Unit[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [units, setUnits] = useState<Unit[]>(_unitsCache ?? []);
+  const [loading, setLoading] = useState(_unitsCache === null);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchUnits = useCallback(async () => {
     try {
-      setLoading(true);
+      if (_unitsCache === null) setLoading(true);
       setError(null);
 
       // Create a timeout promise
@@ -82,6 +86,7 @@ export function useUnits(): UseUnitsReturn {
         return a.name.localeCompare(b.name);
       });
 
+      _unitsCache = fetchedUnits;
       setUnits(fetchedUnits);
     } catch (err) {
       console.error('useUnits: Firestore error', err);

@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { useEquipment } from '../useEquipment';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
@@ -23,8 +23,10 @@ vi.mock('firebase/firestore', () => ({
     serverTimestamp: vi.fn(),
 }));
 
+const mockHttpsCallable = vi.fn();
+
 vi.mock('firebase/functions', () => ({
-    httpsCallable: vi.fn(),
+    httpsCallable: (...args: unknown[]) => mockHttpsCallable(...args),
 }));
 
 describe('useEquipment Hook', () => {
@@ -32,6 +34,8 @@ describe('useEquipment Hook', () => {
         vi.clearAllMocks();
         // Default: return empty results for all queries
         mockGetDocs.mockResolvedValue({ docs: [] });
+        // Default: httpsCallable returns a no-op callable
+        mockHttpsCallable.mockReturnValue(vi.fn().mockResolvedValue({ data: { success: true } }));
     });
 
     it('fetches equipment data on mount', async () => {
@@ -144,5 +148,24 @@ describe('useEquipment Hook', () => {
 
             expect(result.current.isWithinSameUnit('battalion', 'individual', item, { personnelId: 'pers-1' })).toBe(false);
         });
+    });
+
+    // [XFER-11] For bulk items, transfer quantity is passed to the initiateTransfer Cloud Function
+    it('requestAssignment passes quantity to initiateTransfer Cloud Function', async () => {
+        const mockCallable = vi.fn().mockResolvedValue({ data: { success: true } });
+        mockHttpsCallable.mockReturnValue(mockCallable);
+
+        const { result } = renderHook(() => useEquipment());
+
+        // Wait for the initial load to settle
+        await waitFor(() => expect(result.current.loading).toBe(false));
+
+        await act(async () => {
+            await result.current.requestAssignment('eq-1--unassigned', { unitId: 'u1' }, undefined, 3);
+        });
+
+        expect(mockCallable).toHaveBeenCalledWith(
+            expect.objectContaining({ quantity: 3, toUnitId: 'u1', equipmentId: 'eq-1' })
+        );
     });
 });

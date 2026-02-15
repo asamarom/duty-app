@@ -92,6 +92,7 @@ export interface AssignmentRequestDoc {
   recipientApproved: boolean;
   recipientApprovedAt: Timestamp | null;
   recipientApprovedBy: string | null;
+  quantity?: number;
   // Denormalized display names
   equipmentName?: string;
   fromName?: string;

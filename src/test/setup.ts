@@ -14,6 +14,7 @@ vi.mock('@/integrations/firebase/client', () => ({
         onAuthStateChanged: vi.fn(),
     },
     db: {},
+    functions: {},
 }));
 
 // Mock Auth context (use 'uid' to match Firebase Auth property name)

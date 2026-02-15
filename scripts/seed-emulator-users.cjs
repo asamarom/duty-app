@@ -28,6 +28,16 @@ const TEST_PERSONNEL_IDS = {
   user: '00000000-0000-0000-0000-200000000003',
 };
 
+const TEST_EQUIPMENT_IDS = {
+  bulk: '00000000-0000-0000-0000-300000000001',
+  serialized: '00000000-0000-0000-0000-300000000002',
+};
+
+const TEST_ASSIGNMENT_IDS = {
+  bulkToBattalion: '00000000-0000-0000-0000-400000000001',
+  serializedToUser: '00000000-0000-0000-0000-400000000002',
+};
+
 const authUsers = [
   { key: 'admin', email: 'test-admin@e2e.local', displayName: 'Test Admin' },
   { key: 'leader', email: 'test-leader@e2e.local', displayName: 'Test Leader' },
@@ -422,6 +432,70 @@ async function seedSignupRequests() {
   }
 }
 
+async function seedEquipment() {
+  console.log('7. Seeding equipment and assignments...');
+  await clearFirestoreCollection('equipment');
+  await clearFirestoreCollection('equipmentAssignments');
+
+  // Bulk item (no serial number) — 5 units assigned to the test battalion
+  await createFirestoreDoc('equipment', TEST_EQUIPMENT_IDS.bulk, {
+    name: toStringValue('Radio Set'),
+    serialNumber: { nullValue: null },
+    description: toStringValue('Bulk radio sets for E2E testing'),
+    quantity: toIntegerValue(5),
+    status: toStringValue('serviceable'),
+    createdBy: { nullValue: null },
+    battalionId: toStringValue(TEST_UNIT_IDS.battalion),
+    createdAt: toTimestampValue(),
+    updatedAt: toTimestampValue(),
+  });
+  console.log('   Created bulk equipment: Radio Set (qty: 5)');
+
+  // Serialized item assigned to test-user personnel
+  await createFirestoreDoc('equipment', TEST_EQUIPMENT_IDS.serialized, {
+    name: toStringValue('M4 Carbine'),
+    serialNumber: toStringValue('E2E-SN-001'),
+    description: toStringValue('Serialized rifle for E2E testing'),
+    quantity: toIntegerValue(1),
+    status: toStringValue('serviceable'),
+    createdBy: { nullValue: null },
+    battalionId: toStringValue(TEST_UNIT_IDS.battalion),
+    createdAt: toTimestampValue(),
+    updatedAt: toTimestampValue(),
+  });
+  console.log('   Created serialized equipment: M4 Carbine (SN: E2E-SN-001)');
+
+  // Bulk assignment: Radio Set → Test Battalion (all 5 units)
+  await createFirestoreDoc('equipmentAssignments', TEST_ASSIGNMENT_IDS.bulkToBattalion, {
+    equipmentId: toStringValue(TEST_EQUIPMENT_IDS.bulk),
+    personnelId: { nullValue: null },
+    unitId: toStringValue(TEST_UNIT_IDS.battalion),
+    quantity: toIntegerValue(5),
+    assignedBy: { nullValue: null },
+    assignedAt: toTimestampValue(),
+    returnedAt: { nullValue: null },
+    notes: { nullValue: null },
+    battalionId: toStringValue(TEST_UNIT_IDS.battalion),
+    createdAt: toTimestampValue(),
+  });
+  console.log('   Created assignment: Radio Set (5) → Test Battalion');
+
+  // Serialized assignment: M4 Carbine → test-user personnel
+  await createFirestoreDoc('equipmentAssignments', TEST_ASSIGNMENT_IDS.serializedToUser, {
+    equipmentId: toStringValue(TEST_EQUIPMENT_IDS.serialized),
+    personnelId: toStringValue(TEST_PERSONNEL_IDS.user),
+    unitId: { nullValue: null },
+    quantity: toIntegerValue(1),
+    assignedBy: { nullValue: null },
+    assignedAt: toTimestampValue(),
+    returnedAt: { nullValue: null },
+    notes: { nullValue: null },
+    battalionId: toStringValue(TEST_UNIT_IDS.battalion),
+    createdAt: toTimestampValue(),
+  });
+  console.log('   Created assignment: M4 Carbine → Test User');
+}
+
 async function seedAdminUnitAssignments() {
   console.log('6. Seeding adminUnitAssignments collection...');
   await clearFirestoreCollection('adminUnitAssignments');
@@ -469,6 +543,8 @@ async function main() {
   await seedSignupRequests();
   console.log('');
   await seedAdminUnitAssignments();
+  console.log('');
+  await seedEquipment();
 
   console.log('\nAll test data seeded successfully!');
   console.log(`\nPassword for all users: ${TEST_PASSWORD}`);

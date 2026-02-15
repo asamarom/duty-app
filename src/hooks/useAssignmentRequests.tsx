@@ -7,6 +7,10 @@ import type { AssignmentRequestDoc, EquipmentDoc, UnitDoc, PersonnelDoc, UserDoc
 
 export type AssignmentRequestStatus = 'pending' | 'approved' | 'rejected';
 
+// Module-level cache — persists across component mounts so navigating back shows
+// previously loaded data immediately while a background refresh runs silently.
+let _requestsCache: { requests: AssignmentRequest[]; incoming: AssignmentRequest[] } | null = null;
+
 export interface AssignmentRequest {
   id: string;
   equipment_id: string;
@@ -24,6 +28,7 @@ export interface AssignmentRequest {
   requested_by_name?: string;
   requested_at: string;
   notes?: string;
+  quantity?: number;
   recipient_approved: boolean;
   recipient_approved_at?: string;
   recipient_approved_by?: string;
@@ -57,15 +62,15 @@ interface UseAssignmentRequestsReturn {
 }
 
 export function useAssignmentRequests(): UseAssignmentRequestsReturn {
-  const [requests, setRequests] = useState<AssignmentRequest[]>([]);
-  const [incomingTransfers, setIncomingTransfers] = useState<AssignmentRequest[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [requests, setRequests] = useState<AssignmentRequest[]>(_requestsCache?.requests ?? []);
+  const [incomingTransfers, setIncomingTransfers] = useState<AssignmentRequest[]>(_requestsCache?.incoming ?? []);
+  const [loading, setLoading] = useState(_requestsCache === null);
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
 
   const fetchRequests = useCallback(async () => {
     try {
-      setLoading(true);
+      if (_requestsCache === null) setLoading(true);
       setError(null);
 
       // Create a timeout promise
@@ -149,6 +154,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
             requested_by_name: requestedByName,
             requested_at: data.requestedAt?.toDate().toISOString() || new Date().toISOString(),
             notes: data.notes || undefined,
+            quantity: data.quantity,
             recipient_approved: data.recipientApproved || false,
             recipient_approved_at: data.recipientApprovedAt?.toDate().toISOString(),
             recipient_approved_by: data.recipientApprovedBy || undefined,
@@ -156,11 +162,11 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
         })
       );
 
-      setRequests(mappedRequests);
-
       const incoming = mappedRequests.filter(r =>
         r.status === 'pending' && !r.recipient_approved
       );
+      _requestsCache = { requests: mappedRequests, incoming };
+      setRequests(mappedRequests);
       setIncomingTransfers(incoming);
     } catch (err) {
       console.error('useAssignmentRequests: Firestore error', err);

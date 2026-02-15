@@ -56,6 +56,7 @@ interface AssignmentRequestDoc {
   toUnitType?: string;
   toName?: string;
   notes?: string;
+  quantity?: number;
   processedBy?: string;
   processedAt?: admin.firestore.Timestamp;
   battalionId?: string;
@@ -170,11 +171,12 @@ export const canManageUnit = onCall(async (request) => {
  * initiateTransfer - Create a transfer request for equipment
  */
 export const initiateTransfer = onCall(async (request) => {
-  const { equipmentId, toUnitId, toPersonnelId, notes } = request.data as {
+  const { equipmentId, toUnitId, toPersonnelId, notes, quantity } = request.data as {
     equipmentId: string;
     toUnitId?: string;
     toPersonnelId?: string;
     notes?: string;
+    quantity?: number;
   };
 
   const uid = request.auth?.uid;
@@ -272,6 +274,7 @@ export const initiateTransfer = onCall(async (request) => {
     toUnitType,
     toName,
     notes,
+    ...(quantity !== undefined ? { quantity } : {}),
     ...(equipmentBattalionId ? { battalionId: equipmentBattalionId } : {}),
   };
 
@@ -351,7 +354,7 @@ export const processTransfer = onCall(async (request) => {
       equipmentId: requestData.equipmentId,
       personnelId: requestData.toPersonnelId || null,
       unitId: requestData.toUnitId || null,
-      quantity: 1,
+      quantity: requestData.quantity ?? 1,
       assignedAt: admin.firestore.FieldValue.serverTimestamp(),
       returnedAt: null,
       ...(requestData.battalionId ? { battalionId: requestData.battalionId } : {}),
