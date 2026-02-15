@@ -82,6 +82,14 @@ export const translations = {
     'personnel.signatureDesc': 'Can initiate and accept unit equipment transfers',
     'personnel.signatureApprovedBadge': 'Signature Approved',
     'personnel.noPosition': 'No position assigned',
+    'personnel.total': 'Total',
+    'personnel.phonePlaceholder': 'Enter phone number',
+    'personnel.emailPlaceholder': 'Enter email address',
+    'personnel.signatureNotApproved': 'Not Approved',
+    'personnel.notFound': 'Personnel not found.',
+    'personnel.loadFailed': 'Failed to load personnel details.',
+    'personnel.updateSuccess': 'Personnel details updated successfully.',
+    'personnel.updateFailed': 'Failed to update personnel details.',
 
     // Equipment
     'equipment.title': 'Equipment Inventory',
@@ -102,6 +110,20 @@ export const translations = {
     'equipment.currentAssignment': 'Current Assignment',
     'equipment.transferQuantity': 'Transfer Quantity',
     'equipment.transferTo': 'Transfer To',
+    'equipment.selectItems': 'Select Items',
+    'equipment.cancelSelection': 'Cancel Selection',
+    'equipment.assignSelected': 'Assign Selected',
+    'equipment.clearSelection': 'Clear',
+    'equipment.notFound': 'Equipment Not Found',
+    'equipment.notFoundDesc': 'The requested equipment could not be found.',
+    'equipment.loadingDetails': 'Loading equipment details...',
+    'equipment.noEquipmentFound': 'No equipment found',
+    'equipment.loadingEquipment': 'Loading equipment...',
+    'equipment.failedProcess': 'Failed to process some items',
+    'equipment.itemDetails': 'Item Details',
+    'equipment.currentQty': 'Current Quantity',
+    'equipment.totalInSystem': 'total in system',
+    'equipment.assignSuccess': 'Items processed successfully',
 
     // Add Equipment
     'addEquipment.title': 'Add Item',
@@ -127,6 +149,8 @@ export const translations = {
     'addEquipment.serialRequired': 'Serial number is required',
     'addEquipment.newItem': 'New item (press enter to add)',
     'addEquipment.typeToSearch': 'Start typing to search...',
+    'addEquipment.noBattalionWarning': 'No battalion assigned. Please set up your unit structure first.',
+    'addEquipment.person': 'Person',
 
     // Reports
     'reports.title': 'Reports & Documentation',
@@ -240,6 +264,12 @@ export const translations = {
     'transfers.requestWasRejected': 'The assignment request was rejected.',
     'transfers.approvalHistory': 'Approval History',
     'transfers.unknown': 'Unknown',
+    'transfers.transferAccepted': 'Transfer Accepted',
+    'transfers.transferAcceptedDesc': 'You have accepted the incoming transfer.',
+    'transfers.transferRejected': 'Transfer Rejected',
+    'transfers.transferRejectedDesc': 'You have rejected the incoming transfer.',
+    'transfers.awaitingRecipient': 'Awaiting Recipient',
+    'transfers.failedToProcess': 'Failed to process request.',
 
     // Signup Approvals
     'approvals.title': 'Signup Approvals',
@@ -309,6 +339,23 @@ export const translations = {
     'units.selectPlatoon': 'Select Platoon',
     'units.selectPerson': 'Select Person',
     'units.allUnits': 'All Units',
+
+    // Signup Request Page
+    'signup.requestPending': 'Request Pending',
+    'signup.requestDeclined': 'Request Declined',
+    'signup.pendingDesc': 'Your signup request is awaiting approval from an administrator',
+    'signup.declinedDesc': 'Your signup request was not approved',
+    'signup.awaitingReview': 'Awaiting Review',
+    'signup.awaitingReviewDesc': "An administrator will review your request and you'll be notified once a decision is made.",
+    'signup.signOutDifferent': 'Sign out and use a different account',
+    'signup.completeRegistration': 'Complete Your Registration',
+    'signup.submitDetails': 'Submit your details for approval to access the system',
+    'signup.statusPending': 'Request Status: Pending',
+    'signup.statusDeclined': 'Request Status: Declined',
+    'signup.submittedOn': 'Submitted on',
+    'signup.reviewedOn': 'Reviewed on',
+    'signup.contactAdmin': 'If you believe this was a mistake, please contact your unit administrator.',
+    'signup.submitRequest': 'Submit Request',
 
     // Common
     'common.search': 'Search',
@@ -420,6 +467,14 @@ export const translations = {
     'personnel.signatureDesc': 'רשאי ליזום ולקבל העברות ציוד יחידתי',
     'personnel.signatureApprovedBadge': 'מאושר חתימה',
     'personnel.noPosition': 'אין תפקיד מוקצה',
+    'personnel.total': 'סה"כ',
+    'personnel.phonePlaceholder': 'הזן מספר טלפון',
+    'personnel.emailPlaceholder': 'הזן כתובת אימייל',
+    'personnel.signatureNotApproved': 'לא מאושר',
+    'personnel.notFound': 'לא נמצא איש צוות.',
+    'personnel.loadFailed': 'טעינת פרטי איש הצוות נכשלה.',
+    'personnel.updateSuccess': 'פרטי איש הצוות עודכנו בהצלחה.',
+    'personnel.updateFailed': 'עדכון פרטי איש הצוות נכשל.',
 
     // Equipment
     'equipment.title': 'מלאי ציוד',
@@ -440,6 +495,20 @@ export const translations = {
     'equipment.currentAssignment': 'הקצאה נוכחית',
     'equipment.transferQuantity': 'כמות להעברה',
     'equipment.transferTo': 'העברה ל',
+    'equipment.selectItems': 'בחר פריטים',
+    'equipment.cancelSelection': 'בטל בחירה',
+    'equipment.assignSelected': 'הקצה נבחרים',
+    'equipment.clearSelection': 'נקה',
+    'equipment.notFound': 'הציוד לא נמצא',
+    'equipment.notFoundDesc': 'הציוד המבוקש לא נמצא.',
+    'equipment.loadingDetails': 'טוען פרטי ציוד...',
+    'equipment.noEquipmentFound': 'לא נמצא ציוד',
+    'equipment.loadingEquipment': 'טוען ציוד...',
+    'equipment.failedProcess': 'עיבוד חלק מהפריטים נכשל',
+    'equipment.itemDetails': 'פרטי פריט',
+    'equipment.currentQty': 'כמות נוכחית',
+    'equipment.totalInSystem': 'סה"כ במערכת',
+    'equipment.assignSuccess': 'הפריטים עובדו בהצלחה',
 
     // Add Equipment
     'addEquipment.title': 'הוספת פריט',
@@ -465,6 +534,8 @@ export const translations = {
     'addEquipment.serialRequired': 'מספר סידורי נדרש',
     'addEquipment.newItem': 'פריט חדש (לחץ Enter להוספה)',
     'addEquipment.typeToSearch': 'התחל להקליד לחיפוש...',
+    'addEquipment.noBattalionWarning': 'אין גדוד מוקצה. אנא הגדר תחילה את המבנה הארגוני.',
+    'addEquipment.person': 'חייל',
 
     // Reports
     'reports.title': 'דוחות ותיעוד',
@@ -578,6 +649,29 @@ export const translations = {
     'transfers.requestWasRejected': 'בקשת ההקצאה נדחתה.',
     'transfers.approvalHistory': 'היסטוריית אישורים',
     'transfers.unknown': 'לא ידוע',
+    'transfers.transferAccepted': 'ההעברה התקבלה',
+    'transfers.transferAcceptedDesc': 'קיבלת את ההעברה הנכנסת.',
+    'transfers.transferRejected': 'ההעברה נדחתה',
+    'transfers.transferRejectedDesc': 'דחית את ההעברה הנכנסת.',
+    'transfers.awaitingRecipient': 'ממתין לנמען',
+    'transfers.failedToProcess': 'עיבוד הבקשה נכשל.',
+
+    // Signup Request Page
+    'signup.requestPending': 'בקשה ממתינה',
+    'signup.requestDeclined': 'בקשה נדחתה',
+    'signup.pendingDesc': 'בקשת ההרשמה שלך ממתינה לאישור מנהל',
+    'signup.declinedDesc': 'בקשת ההרשמה שלך לא אושרה',
+    'signup.awaitingReview': 'ממתין לבדיקה',
+    'signup.awaitingReviewDesc': 'מנהל יבדוק את בקשתך ותקבל הודעה עם קבלת החלטה.',
+    'signup.signOutDifferent': 'התנתק והשתמש בחשבון אחר',
+    'signup.completeRegistration': 'השלם את ההרשמה שלך',
+    'signup.submitDetails': 'שלח את פרטיך לאישור לגישה למערכת',
+    'signup.statusPending': 'סטטוס בקשה: ממתין',
+    'signup.statusDeclined': 'סטטוס בקשה: נדחה',
+    'signup.submittedOn': 'הוגשה ב',
+    'signup.reviewedOn': 'נבדקה ב',
+    'signup.contactAdmin': 'אם אתה סבור שנפלה טעות, אנא פנה למנהל היחידה שלך.',
+    'signup.submitRequest': 'שלח בקשה',
 
     // Signup Approvals
     'approvals.title': 'אישורי הרשמה',

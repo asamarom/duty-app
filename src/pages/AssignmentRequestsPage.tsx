@@ -75,18 +75,18 @@ export default function AssignmentRequestsPage() {
           break;
         case 'recipient_approve':
           await recipientApprove(selectedRequest.id, notes);
-          toast({ title: 'Transfer Accepted', description: 'You have accepted the incoming transfer.' });
+          toast({ title: t('transfers.transferAccepted'), description: t('transfers.transferAcceptedDesc') });
           break;
         case 'recipient_reject':
           await recipientReject(selectedRequest.id, notes);
-          toast({ title: 'Transfer Rejected', description: 'You have rejected the incoming transfer.' });
+          toast({ title: t('transfers.transferRejected'), description: t('transfers.transferRejectedDesc') });
           break;
       }
       setSelectedRequest(null);
       setActionType(null);
       setNotes('');
     } catch (error) {
-      toast({ title: t('common.error'), description: 'Failed to process request.', variant: 'destructive' });
+      toast({ title: t('common.error'), description: t('transfers.failedToProcess'), variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }
@@ -95,7 +95,7 @@ export default function AssignmentRequestsPage() {
   const getStatusBadge = (request: AssignmentRequest) => {
     if (request.status === 'pending') {
       // Pending means awaiting recipient approval
-      return <Badge variant="outline" className="text-warning border-warning"><Clock className="h-3 w-3 mr-1" /> Awaiting Recipient</Badge>;
+      return <Badge variant="outline" className="text-warning border-warning"><Clock className="h-3 w-3 mr-1" /> {t('transfers.awaitingRecipient')}</Badge>;
     }
     if (request.status === 'approved') {
       return <Badge className="bg-success text-success-foreground"><Check className="h-3 w-3 mr-1" /> {t('status.approved')}</Badge>;

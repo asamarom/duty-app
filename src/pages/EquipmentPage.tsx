@@ -82,19 +82,15 @@ export default function EquipmentPage() {
         }
       }
 
-      if (directCount > 0 && requestCount > 0) {
-        toast.success(`Assigned ${directCount} item${directCount > 1 ? 's' : ''} directly. Created ${requestCount} transfer request${requestCount > 1 ? 's' : ''} pending approval.`);
-      } else if (directCount > 0) {
-        toast.success(`Successfully assigned ${directCount} item${directCount > 1 ? 's' : ''}`);
-      } else if (requestCount > 0) {
-        toast.success(`Created ${requestCount} transfer request${requestCount > 1 ? 's' : ''} pending approval.`);
+      if (directCount > 0 || requestCount > 0) {
+        toast.success(t('equipment.assignSuccess'));
       }
 
       setSelectedIds(new Set());
       setSelectMode(false);
       await refetch();
     } catch (error) {
-      toast.error('Failed to process some items');
+      toast.error(t('equipment.failedProcess'));
     }
   };
 
@@ -103,7 +99,7 @@ export default function EquipmentPage() {
       <MainLayout>
         <div className="min-h-screen flex flex-col items-center justify-center gap-3">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading equipment...</p>
+          <p className="text-sm text-muted-foreground">{t('equipment.loadingEquipment')}</p>
         </div>
       </MainLayout>
     );
@@ -137,7 +133,7 @@ export default function EquipmentPage() {
                 onClick={handleToggleSelectMode}
               >
                 <CheckSquare className="me-2 h-4 w-4" />
-                {selectMode ? 'Cancel Selection' : 'Select Items'}
+                {selectMode ? t('equipment.cancelSelection') : t('equipment.selectItems')}
               </Button>
               <Button variant="outline">
                 <Package className="me-2 h-4 w-4" />
@@ -156,7 +152,7 @@ export default function EquipmentPage() {
           <div className="mb-4 p-4 card-tactical rounded-lg flex items-center justify-between gap-4 animate-fade-in">
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium">
-                {selectedIds.size} item{selectedIds.size > 1 ? 's' : ''} selected
+                {selectedIds.size} {t('equipment.selectItems')}
               </span>
               <Button
                 variant="ghost"
@@ -164,12 +160,12 @@ export default function EquipmentPage() {
                 onClick={() => setSelectedIds(new Set())}
               >
                 <X className="h-4 w-4 me-1" />
-                Clear
+                {t('equipment.clearSelection')}
               </Button>
             </div>
             <div className="flex gap-2">
               <Button onClick={() => setBulkAssignOpen(true)}>
-                Assign Selected
+                {t('equipment.assignSelected')}
               </Button>
             </div>
           </div>
@@ -206,7 +202,7 @@ export default function EquipmentPage() {
             <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 bg-popover border-border" align="start">
               <Command>
                 <CommandList>
-                  <CommandEmpty>No equipment found.</CommandEmpty>
+                  <CommandEmpty>{t('equipment.noEquipmentFound')}</CommandEmpty>
                   <CommandGroup>
                     {equipment
                       .filter((item) =>
@@ -244,7 +240,7 @@ export default function EquipmentPage() {
             className="w-full"
           >
             <CheckSquare className="me-2 h-4 w-4" />
-            {selectMode ? 'Cancel Selection' : 'Select Items'}
+            {selectMode ? t('equipment.cancelSelection') : t('equipment.selectItems')}
           </Button>
         </div>
 
@@ -262,7 +258,7 @@ export default function EquipmentPage() {
           <div className="flex flex-col items-center justify-center py-12">
             <Package className="h-12 w-12 text-muted-foreground/50" />
             <p className="mt-4 text-lg font-medium text-muted-foreground">
-              No equipment found
+              {t('equipment.noEquipmentFound')}
             </p>
           </div>
         )}
@@ -276,7 +272,7 @@ export default function EquipmentPage() {
               className="h-14 px-6 rounded-full shadow-lg"
               onClick={() => setBulkAssignOpen(true)}
             >
-              Assign ({selectedIds.size})
+              {t('equipment.assignSelected')} ({selectedIds.size})
             </Button>
           ) : (
             <Button

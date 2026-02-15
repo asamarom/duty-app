@@ -111,9 +111,9 @@ export default function SignupRequestPage() {
             <div className="h-16 w-16 rounded-xl bg-amber-500/20 flex items-center justify-center mb-4">
               <Clock className="h-8 w-8 text-amber-500" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Request Pending</h1>
+            <h1 className="text-2xl font-bold text-foreground">{t('signup.requestPending')}</h1>
             <p className="text-muted-foreground text-sm text-center mt-2">
-              Your signup request is awaiting approval from an administrator
+              {t('signup.pendingDesc')}
             </p>
           </div>
 
@@ -121,34 +121,34 @@ export default function SignupRequestPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-amber-500" />
-                Request Status: Pending
+                {t('signup.statusPending')}
               </CardTitle>
               <CardDescription>
-                Submitted on {new Date(request.created_at).toLocaleDateString()}
+                {t('signup.submittedOn')} {new Date(request.created_at).toLocaleDateString()}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-3">
                 <div className="flex justify-between py-2 border-b border-border">
-                  <span className="text-muted-foreground">Full Name</span>
+                  <span className="text-muted-foreground">{t('auth.fullName')}</span>
                   <span className="font-medium">{request.full_name}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-border">
-                  <span className="text-muted-foreground">Email</span>
+                  <span className="text-muted-foreground">{t('personnel.email')}</span>
                   <span className="font-medium">{request.email}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-border">
-                  <span className="text-muted-foreground">Service Number</span>
+                  <span className="text-muted-foreground">{t('personnel.serviceNumber')}</span>
                   <span className="font-medium">{request.service_number}</span>
                 </div>
                 {request.phone && (
                   <div className="flex justify-between py-2 border-b border-border">
-                    <span className="text-muted-foreground">Phone</span>
+                    <span className="text-muted-foreground">{t('personnel.phone')}</span>
                     <span className="font-medium">{request.phone}</span>
                   </div>
                 )}
                 <div className="flex justify-between py-2 border-b border-border">
-                  <span className="text-muted-foreground">Unit Type</span>
+                  <span className="text-muted-foreground">{t('approvals.unitType')}</span>
                   <span className="font-medium capitalize">{request.requested_unit_id}</span>
                 </div>
               </div>
@@ -157,9 +157,9 @@ export default function SignupRequestPage() {
                 <div className="flex items-start gap-3">
                   <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium text-amber-500">Awaiting Review</p>
+                    <p className="text-sm font-medium text-amber-500">{t('signup.awaitingReview')}</p>
                     <p className="text-sm text-muted-foreground mt-1">
-                      An administrator will review your request and you'll be notified once a decision is made.
+                      {t('signup.awaitingReviewDesc')}
                     </p>
                   </div>
                 </div>
@@ -171,7 +171,7 @@ export default function SignupRequestPage() {
                 className="w-full mt-4"
                 onClick={handleSignOut}
               >
-                Sign out and use a different account
+                {t('signup.signOutDifferent')}
               </Button>
             </CardContent>
           </Card>
@@ -189,9 +189,9 @@ export default function SignupRequestPage() {
             <div className="h-16 w-16 rounded-xl bg-destructive/20 flex items-center justify-center mb-4">
               <XCircle className="h-8 w-8 text-destructive" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Request Declined</h1>
+            <h1 className="text-2xl font-bold text-foreground">{t('signup.requestDeclined')}</h1>
             <p className="text-muted-foreground text-sm text-center mt-2">
-              Your signup request was not approved
+              {t('signup.declinedDesc')}
             </p>
           </div>
 
@@ -199,24 +199,24 @@ export default function SignupRequestPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <XCircle className="h-5 w-5 text-destructive" />
-                Request Status: Declined
+                {t('signup.statusDeclined')}
               </CardTitle>
               <CardDescription>
-                Reviewed on {request.reviewed_at ? new Date(request.reviewed_at).toLocaleDateString() : 'N/A'}
+                {t('signup.reviewedOn')} {request.reviewed_at ? new Date(request.reviewed_at).toLocaleDateString() : t('common.na')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-3">
                 <div className="flex justify-between py-2 border-b border-border">
-                  <span className="text-muted-foreground">Full Name</span>
+                  <span className="text-muted-foreground">{t('auth.fullName')}</span>
                   <span className="font-medium">{request.full_name}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-border">
-                  <span className="text-muted-foreground">Email</span>
+                  <span className="text-muted-foreground">{t('personnel.email')}</span>
                   <span className="font-medium">{request.email}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-border">
-                  <span className="text-muted-foreground">Service Number</span>
+                  <span className="text-muted-foreground">{t('personnel.serviceNumber')}</span>
                   <span className="font-medium">{request.service_number}</span>
                 </div>
               </div>
@@ -236,7 +236,7 @@ export default function SignupRequestPage() {
               )}
 
               <p className="text-sm text-muted-foreground text-center mt-4">
-                If you believe this was a mistake, please contact your unit administrator.
+                {t('signup.contactAdmin')}
               </p>
 
               <Button
@@ -245,7 +245,7 @@ export default function SignupRequestPage() {
                 className="w-full mt-4"
                 onClick={handleSignOut}
               >
-                Sign out and use a different account
+                {t('signup.signOutDifferent')}
               </Button>
             </CardContent>
           </Card>
@@ -263,9 +263,9 @@ export default function SignupRequestPage() {
           <div className="h-16 w-16 rounded-xl bg-primary/20 flex items-center justify-center mb-4 glow-tactical">
             <Shield className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Complete Your Registration</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('signup.completeRegistration')}</h1>
           <p className="text-muted-foreground text-sm text-center mt-2">
-            Submit your details for approval to access the system
+            {t('signup.submitDetails')}
           </p>
         </div>
 
@@ -273,10 +273,10 @@ export default function SignupRequestPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <UserCheck className="h-5 w-5" />
-              Signup Request
+              {t('approvals.title')}
             </CardTitle>
             <CardDescription>
-              Fill in your details and select your unit. An admin will review your request.
+              {t('signup.submitDetails')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -287,14 +287,14 @@ export default function SignupRequestPage() {
                   id="fullName"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Enter your full name"
+                  placeholder={t('auth.namePlaceholder')}
                   disabled={isSubmitting}
                 />
                 {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('personnel.email')}</Label>
                 <Input
                   id="email"
                   value={user?.email || ''}
@@ -309,19 +309,19 @@ export default function SignupRequestPage() {
                   id="serviceNumber"
                   value={serviceNumber}
                   onChange={(e) => setServiceNumber(e.target.value)}
-                  placeholder="Enter your service number"
+                  placeholder={t('personnel.serviceNumber')}
                   disabled={isSubmitting}
                 />
                 {errors.serviceNumber && <p className="text-sm text-destructive">{errors.serviceNumber}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="cellPhone">Cell Phone Number</Label>
+                <Label htmlFor="cellPhone">{t('personnel.phone')}</Label>
                 <Input
                   id="cellPhone"
                   value={cellPhone}
                   onChange={(e) => setCellPhone(e.target.value)}
-                  placeholder="Enter your cell phone number"
+                  placeholder={t('personnel.phonePlaceholder')}
                   disabled={isSubmitting}
                 />
                 {errors.cellPhone && <p className="text-sm text-destructive">{errors.cellPhone}</p>}
@@ -339,10 +339,10 @@ export default function SignupRequestPage() {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Submitting...
+                    {t('common.loading')}
                   </>
                 ) : (
-                  'Submit Request'
+                  t('signup.submitRequest')
                 )}
               </Button>
 
@@ -352,7 +352,7 @@ export default function SignupRequestPage() {
                 className="w-full"
                 onClick={handleSignOut}
               >
-                Sign out and use a different account
+                {t('signup.signOutDifferent')}
               </Button>
             </form>
           </CardContent>

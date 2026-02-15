@@ -333,10 +333,10 @@ export default function EquipmentDetailPage() {
   if (loading) {
     return (
       <MainLayout>
-        <MobileHeader title="Loading..." />
+        <MobileHeader title={t('common.loading')} />
         <div className="flex-1 p-4 lg:p-6 flex flex-col items-center justify-center gap-3">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading equipment details...</p>
+          <p className="text-sm text-muted-foreground">{t('equipment.loadingDetails')}</p>
         </div>
       </MainLayout>
     );
@@ -345,15 +345,15 @@ export default function EquipmentDetailPage() {
   if (!item) {
     return (
       <MainLayout>
-        <MobileHeader title="Equipment Not Found" />
+        <MobileHeader title={t('equipment.notFound')} />
         <div className="flex-1 p-4 lg:p-6 flex items-center justify-center">
           <div className="text-center">
             <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-            <h2 className="text-xl font-semibold mb-2">Equipment Not Found</h2>
-            <p className="text-muted-foreground mb-4">The requested equipment could not be found.</p>
+            <h2 className="text-xl font-semibold mb-2">{t('equipment.notFound')}</h2>
+            <p className="text-muted-foreground mb-4">{t('equipment.notFoundDesc')}</p>
             <Button onClick={() => navigate('/equipment')}>
               <ArrowRight className="me-2 h-4 w-4 rotate-180" />
-              Back to Equipment
+              {t('common.back')}
             </Button>
           </div>
         </div>
@@ -394,10 +394,10 @@ export default function EquipmentDetailPage() {
 
         if (isDirect) {
           await assignEquipment(id!, assignment, transferQuantity);
-          toast.success('Equipment transferred successfully');
+          toast.success(t('equipment.assignSuccess'));
         } else {
           await requestAssignment(id!, assignment, undefined, transferQuantity);
-          toast.success('Transfer request created pending approval.');
+          toast.success(t('transfers.requestApproved'));
         }
 
         navigate('/equipment');
@@ -492,25 +492,25 @@ export default function EquipmentDetailPage() {
           <div className="card-tactical rounded-xl p-4 lg:p-6 space-y-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <Package className="h-5 w-5 text-primary" />
-              Item Details
+              {t('equipment.itemDetails')}
             </h2>
 
             <div className="grid gap-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-xs text-muted-foreground">Name</Label>
+                  <Label className="text-xs text-muted-foreground">{t('equipment.name')}</Label>
                   <p className="font-medium">{item.name}</p>
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground">
-                    {item.serialNumber ? 'Serial Number' : 'Current assignment Quantity'}
+                    {item.serialNumber ? t('addEquipment.serialNumber') : t('equipment.currentQty')}
                   </Label>
                   <p className="font-medium font-mono">
                     {item.serialNumber || item.currentQuantity}
                   </p>
                   {item.quantity && item.quantity > (item.currentQuantity || 0) && (
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      of {item.quantity} total in system
+                      {item.quantity} {t('equipment.totalInSystem')}
                     </p>
                   )}
                 </div>
@@ -529,7 +529,7 @@ export default function EquipmentDetailPage() {
                   {currentLevel === 'individual' && <User className="h-4 w-4 text-muted-foreground" />}
                   {(currentLevel === 'platoon' || currentLevel === 'company') && <Users className="h-4 w-4 text-muted-foreground" />}
                   {currentLevel === 'battalion' && <Building2 className="h-4 w-4 text-muted-foreground" />}
-                  <span className="font-medium">{item.assigneeName || 'Unassigned'}</span>
+                  <span className="font-medium">{item.assigneeName || t('equipment.unassigned')}</span>
                   <Badge variant="outline" className="text-xs">{currentLevel}</Badge>
                 </div>
               </div>
@@ -639,14 +639,14 @@ export default function EquipmentDetailPage() {
                 {!selectedBattalionId && currentLevel === 'unassigned' && !battalionLoading && (
                   <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm flex items-start gap-2">
                     <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
-                    <span>No battalion assigned to your profile. Contact an admin to set your battalion.</span>
+                    <span>{t('addEquipment.noBattalionWarning')}</span>
                   </div>
                 )}
 
                 {/* Company Selection */}
                 {(assignedType === 'company' || assignedType === 'platoon' || assignedType === 'individual') && (
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Company</Label>
+                    <Label className="text-xs text-muted-foreground">{t('units.company')}</Label>
                     {availableCompanies.length === 0 ? (
                       <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm flex items-start gap-2">
                         <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
@@ -680,7 +680,7 @@ export default function EquipmentDetailPage() {
                 {/* Platoon Selection */}
                 {(assignedType === 'platoon' || assignedType === 'individual') && selectedCompanyId && (
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Platoon</Label>
+                    <Label className="text-xs text-muted-foreground">{t('units.platoon')}</Label>
                     {availablePlatoons.length === 0 ? (
                       <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm flex items-start gap-2">
                         <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />

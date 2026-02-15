@@ -104,8 +104,8 @@ export default function PersonnelDetailPage() {
         if (!personSnap.exists()) {
           toast({
             variant: 'destructive',
-            title: 'Error',
-            description: 'Personnel not found.',
+            title: t('common.error'),
+            description: t('personnel.notFound'),
           });
           navigate('/personnel');
           return;
@@ -142,8 +142,8 @@ export default function PersonnelDetailPage() {
         console.error('Error fetching personnel:', error);
         toast({
           variant: 'destructive',
-          title: 'Error',
-          description: 'Failed to load personnel details.',
+          title: t('common.error'),
+          description: t('personnel.loadFailed'),
         });
         navigate('/personnel');
       } finally {
@@ -152,7 +152,7 @@ export default function PersonnelDetailPage() {
     };
 
     fetchData();
-  }, [id, navigate, toast, fetchRoles]);
+  }, [id, navigate, toast, fetchRoles, t]);
 
   // Traverse the units list to find the battalion for a given unit
   const findBattalionId = (unitId: string | null | undefined): string | null => {
@@ -191,16 +191,16 @@ export default function PersonnelDetailPage() {
       });
 
       toast({
-        title: 'Success',
-        description: 'Personnel details updated successfully.',
+        title: t('common.success'),
+        description: t('personnel.updateSuccess'),
       });
       setIsEditing(false);
     } catch (error) {
       console.error('Error updating personnel:', error);
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to update personnel details.',
+        title: t('common.error'),
+        description: t('personnel.updateFailed'),
       });
     } finally {
       setSaving(false);
@@ -300,7 +300,7 @@ export default function PersonnelDetailPage() {
           ) : (
             <Button variant="tactical" size="sm" onClick={() => setIsEditing(true)}>
               <Edit className="me-2 h-4 w-4" />
-              Edit
+              {t('common.edit')}
             </Button>
           )}
         </div>
@@ -406,7 +406,7 @@ export default function PersonnelDetailPage() {
                       <Input
                         value={formData.phone}
                         onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                        placeholder="Enter phone number"
+                        placeholder={t('personnel.phonePlaceholder')}
                       />
                     ) : (
                       <p className="text-foreground flex items-center gap-2">
@@ -422,7 +422,7 @@ export default function PersonnelDetailPage() {
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                        placeholder="Enter email address"
+                        placeholder={t('personnel.emailPlaceholder')}
                       />
                     ) : (
                       <p className="text-foreground flex items-center gap-2">
@@ -485,12 +485,10 @@ export default function PersonnelDetailPage() {
                       )} />
                     </label>
                   </div>
-                  {formData.is_signature_approved && (
-                    <Badge variant="secondary" className="mt-3">
-                      <Briefcase className="mr-1 h-3 w-3" />
-                      {t('personnel.signatureApprovedBadge')}
-                    </Badge>
-                  )}
+                  <Badge variant={formData.is_signature_approved ? 'secondary' : 'outline'} className="mt-3">
+                    <Briefcase className="mr-1 h-3 w-3" />
+                    {t(formData.is_signature_approved ? 'personnel.signatureApprovedBadge' : 'personnel.signatureNotApproved')}
+                  </Badge>
                 </CardContent>
               </Card>
             )}

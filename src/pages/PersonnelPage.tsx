@@ -184,7 +184,7 @@ export default function PersonnelPage() {
             {/* Mobile Stats */}
             <div className="lg:hidden mb-4 flex items-center gap-2 overflow-x-auto pb-2">
               <Badge variant="secondary" className="px-3 py-1.5 whitespace-nowrap">
-                {personnel.length} Total
+                {personnel.length} {t('personnel.total')}
               </Badge>
             </div>
 

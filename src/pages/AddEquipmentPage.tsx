@@ -393,17 +393,17 @@ export default function AddEquipmentPage() {
               {!selectedBattalionId && !battalionLoading && (
                 <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 text-sm flex items-start gap-2">
                   <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
-                  <span>No battalion assigned to your profile. Contact an admin to set your battalion.</span>
+                  <span>{t('addEquipment.noBattalionWarning')}</span>
                 </div>
               )}
 
               {/* Company Selection - show for company, platoon, individual */}
               {assignedType !== 'battalion' && selectedBattalionId && (
                 <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Company</Label>
+                  <Label className="text-xs text-muted-foreground">{t('units.company')}</Label>
                   <Select value={selectedCompanyId} onValueChange={handleCompanyChange}>
                     <SelectTrigger className="h-12 bg-secondary border-border">
-                      <SelectValue placeholder="Select Company" />
+                      <SelectValue placeholder={t('units.selectCompany')} />
                     </SelectTrigger>
                     <SelectContent>
                       {availableCompanies.map((c) => (
@@ -422,10 +422,10 @@ export default function AddEquipmentPage() {
               {/* Platoon Selection - show for platoon, individual */}
               {(assignedType === 'platoon' || assignedType === 'individual') && selectedCompanyId && (
                 <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Platoon</Label>
+                  <Label className="text-xs text-muted-foreground">{t('units.platoon')}</Label>
                   <Select value={selectedPlatoonId} onValueChange={handlePlatoonChange}>
                     <SelectTrigger className="h-12 bg-secondary border-border">
-                      <SelectValue placeholder="Select Platoon" />
+                      <SelectValue placeholder={t('units.selectPlatoon')} />
                     </SelectTrigger>
                     <SelectContent>
                       {availablePlatoons.map((p) => (
@@ -444,10 +444,10 @@ export default function AddEquipmentPage() {
               {/* Individual Selection */}
               {assignedType === 'individual' && (
                 <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Person {hasSerial && '*'}</Label>
+                  <Label className="text-xs text-muted-foreground">{t('addEquipment.person')}{hasSerial && ' *'}</Label>
                   <Select value={selectedPersonnelId} onValueChange={setSelectedPersonnelId}>
                     <SelectTrigger className="h-12 bg-secondary border-border">
-                      <SelectValue placeholder="Select Person" />
+                      <SelectValue placeholder={t('units.selectPerson')} />
                     </SelectTrigger>
                     <SelectContent>
                       {availablePersonnel.map((p) => (
