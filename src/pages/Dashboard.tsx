@@ -23,7 +23,7 @@ export default function Dashboard() {
       <MainLayout>
         <div className="min-h-screen flex flex-col items-center justify-center gap-3">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading dashboard...</p>
+          <p className="text-sm text-muted-foreground">{t('dashboard.loading')}</p>
         </div>
       </MainLayout>
     );

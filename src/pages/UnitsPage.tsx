@@ -257,7 +257,7 @@ export default function UnitsPage() {
             <CollapsibleContent>
               <CardContent className="pt-0 pb-4 px-4">
                 {children.length === 0 ? (
-                  <p className="text-sm text-muted-foreground ps-12">No sub-units</p>
+                  <p className="text-sm text-muted-foreground ps-12">{t('units.noSubUnits')}</p>
                 ) : (
                   <div className="space-y-3 ps-6 border-s border-border ms-5">
                     {children.map((child) => renderUnit(child, level + 1))}
@@ -418,13 +418,13 @@ export default function UnitsPage() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">{t('units.title')}</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Manage battalions, companies, and platoons
+              {t('units.subtitle')}
             </p>
           </div>
           {canManage && (
             <Button onClick={() => openCreateDialog('battalion')}>
               <Plus className="me-2 h-4 w-4" />
-              Add Battalion
+              {t('units.addBattalion')}
             </Button>
           )}
         </header>
@@ -434,7 +434,7 @@ export default function UnitsPage() {
           <div className="lg:hidden mb-4">
             <Button className="w-full" onClick={() => openCreateDialog('battalion')}>
               <Plus className="me-2 h-4 w-4" />
-              Add Battalion
+              {t('units.addBattalion')}
             </Button>
           </div>
         )}
@@ -447,12 +447,12 @@ export default function UnitsPage() {
                 <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
                 <h3 className="text-lg font-medium text-foreground">{t('units.noBattalions')}</h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Create your first battalion to get started
+                  {t('units.createFirst')}
                 </p>
                 {canManage && (
                   <Button className="mt-4" onClick={() => openCreateDialog('battalion')}>
                     <Plus className="me-2 h-4 w-4" />
-                    Add Battalion
+                    {t('units.addBattalion')}
                   </Button>
                 )}
               </CardContent>
@@ -468,13 +468,13 @@ export default function UnitsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {dialogMode === 'create' ? 'Create' : 'Edit'}{' '}
+              {dialogMode === 'create' ? t('units.create') : t('common.edit')}{' '}
               {UNIT_TYPE_LABELS[formData.unitType]}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{t('units.name')}</Label>
               <Input
                 id="name"
                 value={formData.name}
@@ -483,22 +483,22 @@ export default function UnitsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="designation">Designation (Optional)</Label>
+              <Label htmlFor="designation">{t('units.designation')}</Label>
               <Input
                 id="designation"
                 value={formData.designation}
                 onChange={(e) => setFormData((prev) => ({ ...prev, designation: e.target.value }))}
-                placeholder="e.g., Alpha, Bravo, 1st"
+                placeholder={t('units.designationPlaceholder')}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={saving}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleSave} disabled={saving || !formData.name.trim()}>
               {saving && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-              {dialogMode === 'create' ? 'Create' : 'Save'}
+              {dialogMode === 'create' ? t('units.create') : t('common.save')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -509,10 +509,10 @@ export default function UnitsPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Delete {currentUnit ? UNIT_TYPE_LABELS[currentUnit.unit_type] : 'unit'}?
+              {t('common.delete')} {currentUnit ? UNIT_TYPE_LABELS[currentUnit.unit_type] : 'unit'}?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{currentUnit?.name}"? This action cannot be undone.
+              {t('units.confirmDelete')} &ldquo;{currentUnit?.name}&rdquo;?
               {currentUnit && currentUnit.unit_type !== 'platoon' && (
                 <span className="block mt-2 text-destructive">
                   Warning: This will also delete all sub-units within this {UNIT_TYPE_LABELS[currentUnit.unit_type].toLowerCase()}.
@@ -521,14 +521,14 @@ export default function UnitsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={saving}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={saving}>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={saving}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {saving && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-              Delete
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

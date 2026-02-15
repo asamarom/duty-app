@@ -208,7 +208,7 @@ export default function AssignmentRequestsPage() {
           <TabsList>
             <TabsTrigger value="incoming" className="gap-2">
               <Inbox className="h-4 w-4" />
-              Incoming ({incomingTransfers.length})
+              {t('transfers.incoming')} ({incomingTransfers.length})
             </TabsTrigger>
             <TabsTrigger value="pending" className="gap-2">
               <Clock className="h-4 w-4" />
@@ -225,13 +225,13 @@ export default function AssignmentRequestsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Inbox className="h-5 w-5" />
-                  Incoming Transfers
+                  {t('transfers.incomingTransfers')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {incomingTransfers.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    No incoming transfers awaiting your approval.
+                    {t('transfers.noIncoming')}
                   </div>
                 ) : (
                   <Table>
@@ -340,8 +340,8 @@ export default function AssignmentRequestsPage() {
               <DialogTitle>
                 {actionType === 'approve' && t('transfers.approveRequest')}
                 {actionType === 'reject' && t('transfers.rejectRequest')}
-                {actionType === 'recipient_approve' && 'Accept Incoming Transfer'}
-                {actionType === 'recipient_reject' && 'Reject Incoming Transfer'}
+                {actionType === 'recipient_approve' && t('transfers.acceptIncoming')}
+                {actionType === 'recipient_reject' && t('transfers.rejectIncoming')}
               </DialogTitle>
               <DialogDescription>
                 {selectedRequest && (

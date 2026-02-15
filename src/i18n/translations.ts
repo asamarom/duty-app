@@ -58,6 +58,7 @@ export const translations = {
     'dashboard.personnelOverview': 'Personnel Overview',
     'dashboard.noPersonnel': 'No personnel registered yet.',
     'dashboard.registered': 'Registered',
+    'dashboard.loading': 'Loading dashboard...',
 
     // Personnel
     'personnel.title': 'Personnel Management',
@@ -347,6 +348,18 @@ export const translations = {
     'units.selectPlatoon': 'Select Platoon',
     'units.selectPerson': 'Select Person',
     'units.allUnits': 'All Units',
+    'units.noSubUnits': 'No sub-units',
+    'units.create': 'Create',
+    'units.name': 'Name',
+    'units.designation': 'Designation (Optional)',
+    'units.designationPlaceholder': 'e.g., Alpha, Bravo, 1st',
+
+    // Transfers - Incoming
+    'transfers.incoming': 'Incoming',
+    'transfers.incomingTransfers': 'Incoming Transfers',
+    'transfers.noIncoming': 'No incoming transfers awaiting your approval.',
+    'transfers.acceptIncoming': 'Accept Incoming Transfer',
+    'transfers.rejectIncoming': 'Reject Incoming Transfer',
 
     // Signup Request Page
     'signup.requestPending': 'Request Pending',
@@ -469,6 +482,7 @@ export const translations = {
     'dashboard.personnelOverview': 'סקירת כוח אדם',
     'dashboard.noPersonnel': 'אין אנשים רשומים עדיין.',
     'dashboard.registered': 'רשומים',
+    'dashboard.loading': 'טוען לוח בקרה...',
 
     // Personnel
     'personnel.title': 'ניהול כוח אדם',
@@ -689,6 +703,11 @@ export const translations = {
     'transfers.transferRejectedDesc': 'דחית את ההעברה הנכנסת.',
     'transfers.awaitingRecipient': 'ממתין לנמען',
     'transfers.failedToProcess': 'עיבוד הבקשה נכשל.',
+    'transfers.incoming': 'נכנסות',
+    'transfers.incomingTransfers': 'העברות נכנסות',
+    'transfers.noIncoming': 'אין העברות נכנסות הממתינות לאישורך.',
+    'transfers.acceptIncoming': 'קבל העברה נכנסת',
+    'transfers.rejectIncoming': 'דחה העברה נכנסת',
 
     // Signup Request Page
     'signup.requestPending': 'בקשה ממתינה',
@@ -789,7 +808,11 @@ export const translations = {
     'units.selectPlatoon': 'בחר מחלקה',
     'units.selectPerson': 'בחר חייל',
     'units.allUnits': 'כל היחידות',
-
+    'units.noSubUnits': 'אין תת-יחידות',
+    'units.create': 'צור',
+    'units.name': 'שם',
+    'units.designation': 'כינוי (אופציונלי)',
+    'units.designationPlaceholder': 'לדוגמה: אלפא, בראבו, ראשון',
 
     // Common
     'common.search': 'חיפוש',
