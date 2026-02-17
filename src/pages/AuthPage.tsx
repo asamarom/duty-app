@@ -63,6 +63,7 @@ export default function AuthPage() {
           </CardHeader>
           <CardContent>
             <Button
+              data-testid="google-sign-in-btn"
               variant="outline"
               className="w-full h-14 text-base"
               onClick={() => void handleGoogleSignIn()}

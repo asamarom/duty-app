@@ -13,7 +13,7 @@ test.describe('Authentication Page', () => {
     await expect(page.getByTestId('auth-sign-in-desc')).toBeVisible();
 
     // Check Google sign-in button
-    await expect(page.getByRole('button', { name: /Continue with Google/i })).toBeVisible();
+    await expect(page.getByTestId('google-sign-in-btn')).toBeVisible();
   });
 
   test('should redirect to auth page when accessing protected route without login', async ({ page }) => {
