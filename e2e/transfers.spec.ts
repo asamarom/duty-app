@@ -245,9 +245,7 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
     await incomingTab.click();
 
     // Look for a reject (X) button in the incoming table
-    const rejectButton = page.locator(
-      'button[class*="destructive"] svg, button:has(svg[class*="lucide-x"]), td button:last-child'
-    ).first();
+    const rejectButton = page.getByTestId('reject-btn').first();
     const hasRejectButton = await rejectButton.isVisible().catch(() => false);
 
     if (hasRejectButton) {

@@ -52,7 +52,7 @@ export default function AuthPage() {
           <div className="h-16 w-16 rounded-xl bg-primary/20 flex items-center justify-center mb-4 glow-tactical">
             <Shield className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">{t('auth.systemName')}</h1>
+          <h1 data-testid="system-name" className="text-2xl font-bold text-foreground">{t('auth.systemName')}</h1>
           <p className="text-muted-foreground text-sm">{t('auth.systemTagline')}</p>
         </div>
 

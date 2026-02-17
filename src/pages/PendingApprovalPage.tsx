@@ -76,7 +76,7 @@ export default function PendingApprovalPage() {
               <div className="mx-auto h-16 w-16 rounded-full bg-amber-500/20 flex items-center justify-center mb-4">
                 <Clock className="h-8 w-8 text-amber-500" />
               </div>
-              <CardTitle>{t('signup.requestPending')}</CardTitle>
+              <CardTitle data-testid="pending-heading">{t('signup.requestPending')}</CardTitle>
               <CardDescription>{t('signup.pendingDesc')}</CardDescription>
             </CardHeader>
 
@@ -117,7 +117,7 @@ export default function PendingApprovalPage() {
               <div className="mx-auto h-16 w-16 rounded-full bg-destructive/20 flex items-center justify-center mb-4">
                 <XCircle className="h-8 w-8 text-destructive" />
               </div>
-              <CardTitle>{t('signup.requestDeclined')}</CardTitle>
+              <CardTitle data-testid="declined-heading">{t('signup.requestDeclined')}</CardTitle>
               <CardDescription>{t('signup.declinedDesc')}</CardDescription>
             </CardHeader>
 

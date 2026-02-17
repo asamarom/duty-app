@@ -79,7 +79,7 @@ test.describe('User Lifecycle E2E Tests', () => {
       await expect(page).toHaveURL(/pending-approval/);
 
       // Should see pending message heading
-      await expect(page.getByRole('heading', { name: /pending|ממתין|waiting/i }).first()).toBeVisible();
+      await expect(page.getByTestId('pending-heading')).toBeVisible();
     });
 
     test('declined user should see decline reason', async ({ page }) => {
@@ -89,7 +89,7 @@ test.describe('User Lifecycle E2E Tests', () => {
       await expect(page).toHaveURL(/pending-approval/);
 
       // Should see declined message heading
-      await expect(page.getByRole('heading', { name: /declined|נדחה|denied/i }).first()).toBeVisible();
+      await expect(page.getByTestId('declined-heading')).toBeVisible();
     });
   });
 

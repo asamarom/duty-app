@@ -5,7 +5,7 @@ test.describe('Authentication Page', () => {
     await page.goto('/auth');
 
     // Check page title and branding
-    await expect(page.getByText('PMTB System')).toBeVisible();
+    await expect(page.getByTestId('system-name')).toBeVisible();
     await expect(page.getByText('Personnel & Material Tracking')).toBeVisible();
 
     // Check welcome card

@@ -157,6 +157,7 @@ export default function AssignmentRequestsPage() {
                 <Button
                   size="sm"
                   variant="outline"
+                  data-testid="reject-btn"
                   className="text-destructive border-destructive hover:bg-destructive/10"
                   onClick={() => {
                     setSelectedRequest(request);
