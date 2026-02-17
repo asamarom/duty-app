@@ -22,6 +22,9 @@ export type AssignmentRequestStatus = 'pending' | 'approved' | 'rejected';
 // previously loaded data immediately while a background refresh runs silently.
 let _requestsCache: { requests: AssignmentRequest[]; incoming: AssignmentRequest[] } | null = null;
 
+/** Exposed only for unit tests — resets the module-level cache between test runs. */
+export function _resetCacheForTesting() { _requestsCache = null; }
+
 export interface AssignmentRequest {
   id: string;
   equipment_id: string;
