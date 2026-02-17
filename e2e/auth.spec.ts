@@ -6,11 +6,11 @@ test.describe('Authentication Page', () => {
 
     // Check page title and branding
     await expect(page.getByTestId('system-name')).toBeVisible();
-    await expect(page.getByText('Personnel & Material Tracking')).toBeVisible();
+    await expect(page.getByTestId('system-tagline')).toBeVisible();
 
     // Check welcome card
-    await expect(page.getByText('Welcome')).toBeVisible();
-    await expect(page.getByText('Sign in with your Google account')).toBeVisible();
+    await expect(page.getByTestId('auth-welcome')).toBeVisible();
+    await expect(page.getByTestId('auth-sign-in-desc')).toBeVisible();
 
     // Check Google sign-in button
     await expect(page.getByRole('button', { name: /Continue with Google/i })).toBeVisible();

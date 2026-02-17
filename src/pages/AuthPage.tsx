@@ -53,13 +53,13 @@ export default function AuthPage() {
             <Shield className="h-8 w-8 text-primary" />
           </div>
           <h1 data-testid="system-name" className="text-2xl font-bold text-foreground">{t('auth.systemName')}</h1>
-          <p className="text-muted-foreground text-sm">{t('auth.systemTagline')}</p>
+          <p data-testid="system-tagline" className="text-muted-foreground text-sm">{t('auth.systemTagline')}</p>
         </div>
 
         <Card className="card-tactical">
           <CardHeader className="text-center pb-4">
-            <CardTitle>{t('auth.welcome')}</CardTitle>
-            <CardDescription>{t('auth.signInDesc')}</CardDescription>
+            <CardTitle data-testid="auth-welcome">{t('auth.welcome')}</CardTitle>
+            <CardDescription data-testid="auth-sign-in-desc">{t('auth.signInDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button
