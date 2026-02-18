@@ -474,9 +474,9 @@ export function useEquipment(): UseEquipmentReturn {
     const assignQuery = query(collection(db, 'equipmentAssignments'), where('returnedAt', '==', null));
     const pendingQuery = query(collection(db, 'assignmentRequests'), where('status', '==', 'pending'));
 
-    const u1 = onSnapshot(equipQuery, snap => { equipmentDocsRef.current = snap.docs; rebuild(); }, err => console.error('[useEquipment] equipment error', err));
-    const u2 = onSnapshot(assignQuery, snap => { assignmentDocsRef.current = snap.docs; rebuild(); }, err => console.error('[useEquipment] assignments error', err));
-    const u3 = onSnapshot(pendingQuery, snap => { pendingDocsRef.current = snap.docs; rebuild(); }, err => console.error('[useEquipment] pending error', err));
+    const u1 = onSnapshot(equipQuery, snap => { equipmentDocsRef.current = snap.docs; rebuild(); }, err => { console.error('[useEquipment] equipment error', err); setLoading(false); });
+    const u2 = onSnapshot(assignQuery, snap => { assignmentDocsRef.current = snap.docs; rebuild(); }, err => { console.error('[useEquipment] assignments error', err); setLoading(false); });
+    const u3 = onSnapshot(pendingQuery, snap => { pendingDocsRef.current = snap.docs; rebuild(); }, err => { console.error('[useEquipment] pending error', err); setLoading(false); });
 
     return () => { u1(); u2(); u3(); };
   }, [rebuild]);
