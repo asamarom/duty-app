@@ -208,6 +208,30 @@ describe('useEquipment Hook', () => {
         );
     });
 
+    it('sets loading to false when an onSnapshot listener errors', async () => {
+        // First listener (equipment) triggers the error handler immediately
+        mockOnSnapshot
+            .mockImplementationOnce((_q: unknown, _cb: unknown, onError?: (err: Error) => void) => {
+                if (onError) onError(new Error('Permission denied'));
+                return () => {};
+            })
+            .mockImplementationOnce((_q: unknown, cb: (snap: { docs: unknown[] }) => void) => {
+                cb({ docs: [] });
+                return () => {};
+            })
+            .mockImplementationOnce((_q: unknown, cb: (snap: { docs: unknown[] }) => void) => {
+                cb({ docs: [] });
+                return () => {};
+            });
+
+        const { result } = renderHook(() => useEquipment());
+
+        await waitFor(() => {
+            expect(result.current.loading).toBe(false);
+        });
+        expect(result.current.equipment).toHaveLength(0);
+    });
+
     // =========================================================================
     // TDD RED PHASE: Tests for client-side replacement of initiateTransfer CF
     // These tests will FAIL until httpsCallable calls are replaced with direct

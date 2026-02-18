@@ -24,6 +24,23 @@ test.describe('Admin/Leader — full transfers page', () => {
     // Should NOT be redirected away — URL must still contain /assignment-requests
     await expect(page).toHaveURL(/\/assignment-requests/, { timeout: 15000 });
   });
+
+  test('admin sees Incoming, All Pending, and History tabs', async ({ page }) => {
+    test.setTimeout(60000);
+    await loginAsTestUser(page, 'admin');
+    await page.goto('/assignment-requests');
+    await page.waitForLoadState('domcontentloaded');
+
+    await expect(
+      page.locator('[role="tab"]:has-text("Incoming"), [role="tab"]:has-text("נכנסות")').first()
+    ).toBeVisible({ timeout: 15000 });
+    await expect(
+      page.locator('[role="tab"]:has-text("All Pending"), [role="tab"]:has-text("כל הממתינות")').first()
+    ).toBeVisible({ timeout: 5000 });
+    await expect(
+      page.locator('[role="tab"]:has-text("History"), [role="tab"]:has-text("היסטוריה")').first()
+    ).toBeVisible({ timeout: 5000 });
+  });
 });
 
 test.describe('Regular user — no standalone transfers page', () => {
@@ -54,6 +71,14 @@ test.describe('Regular user — no standalone transfers page', () => {
     const hasAccessDenied = await accessDeniedText.isVisible({ timeout: 4000 }).catch(() => false);
 
     expect(isRedirected || hasAccessDenied).toBeTruthy();
+  });
+
+  test('user redirected from /assignment-requests lands on /equipment', async ({ page }) => {
+    await loginAsTestUser(page, 'user');
+    await page.goto('/assignment-requests');
+    await page.waitForLoadState('domcontentloaded');
+
+    await expect(page).toHaveURL(/\/equipment/, { timeout: 8000 });
   });
 });
 
