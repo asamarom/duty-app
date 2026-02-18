@@ -73,12 +73,15 @@ test.describe('Regular user — no standalone transfers page', () => {
     expect(isRedirected || hasAccessDenied).toBeTruthy();
   });
 
-  test('user redirected from /assignment-requests lands on /equipment', async ({ page }) => {
+  test('user blocked from /assignment-requests sees access-denied message', async ({ page }) => {
     await loginAsTestUser(page, 'user');
     await page.goto('/assignment-requests');
     await page.waitForLoadState('domcontentloaded');
 
-    await expect(page).toHaveURL(/\/equipment/, { timeout: 8000 });
+    // ProtectedRoute renders "אין גישה — Access denied" in-place (URL stays)
+    await expect(
+      page.locator('text=/אין גישה|Access denied/i').first()
+    ).toBeVisible({ timeout: 8000 });
   });
 });
 
