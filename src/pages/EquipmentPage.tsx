@@ -1,14 +1,21 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { MobileHeader } from '@/components/layout/MobileHeader';
 import { EquipmentTable } from '@/components/equipment/EquipmentTable';
 import { BulkAssignDialog } from '@/components/equipment/BulkAssignDialog';
 import { useEquipment, EquipmentWithAssignment, AssignmentLevel } from '@/hooks/useEquipment';
+import { useAssignmentRequests } from '@/hooks/useAssignmentRequests';
+import { useAuth } from '@/hooks/useAuth';
+import { useEffectiveRole } from '@/hooks/useEffectiveRole';
 import { Button } from '@/components/ui/button';
-import { Search, Plus, Package, Loader2, CheckSquare, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
+import { Search, Plus, Package, Loader2, CheckSquare, X, ChevronDown, ChevronUp, ArrowRight, Clock } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 import {
   Command,
   CommandEmpty,
@@ -26,11 +33,27 @@ export default function EquipmentPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { equipment, loading, assignEquipment, requestAssignment, isWithinSameUnit, refetch } = useEquipment();
+  const { requests } = useAssignmentRequests();
+  const { user } = useAuth();
+  const { isAdmin, isLeader } = useEffectiveRole();
   const [searchQuery, setSearchQuery] = useState('');
   const [open, setOpen] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkAssignOpen, setBulkAssignOpen] = useState(false);
+  const [myRequestsOpen, setMyRequestsOpen] = useState(true);
+
+  const hasAdminAccess = isAdmin || isLeader;
+
+  const myPendingRequests = requests.filter(
+    r => r.requested_by === user?.uid && r.status === 'pending'
+  );
+
+  useEffect(() => {
+    if (myPendingRequests.length > 0) {
+      setMyRequestsOpen(true);
+    }
+  }, [myPendingRequests.length]);
 
   const filteredEquipment = equipment.filter((item) => {
     const matchesSearch =
@@ -260,6 +283,78 @@ export default function EquipmentPage() {
             <p className="mt-4 text-lg font-medium text-muted-foreground">
               {t('equipment.noEquipmentFound')}
             </p>
+          </div>
+        )}
+
+        {/* My Transfer Requests - shown only for regular users */}
+        {!hasAdminAccess && (
+          <div data-testid="my-requests-section" className="mt-6">
+            <Collapsible open={myRequestsOpen} onOpenChange={setMyRequestsOpen}>
+              <CollapsibleTrigger asChild>
+                <button className="flex w-full items-center justify-between rounded-lg border border-border bg-card px-4 py-3 text-sm font-medium hover:bg-accent/50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <Package className="h-4 w-4 text-muted-foreground" />
+                    <span>{t('myRequests.sectionTitle')}</span>
+                    {myPendingRequests.length > 0 && (
+                      <Badge variant="secondary" className="text-xs">
+                        {myPendingRequests.length}
+                      </Badge>
+                    )}
+                  </div>
+                  {myRequestsOpen ? (
+                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <Card className="mt-2">
+                  <CardContent className="p-0">
+                    {myPendingRequests.length === 0 ? (
+                      <div
+                        data-testid="my-requests-empty"
+                        className="flex flex-col items-center justify-center py-8 text-muted-foreground text-sm"
+                      >
+                        <Clock className="h-8 w-8 mb-2 opacity-50" />
+                        {t('myRequests.noRequests')}
+                      </div>
+                    ) : (
+                      <ul className="divide-y divide-border">
+                        {myPendingRequests.map(request => (
+                          <li
+                            key={request.id}
+                            data-testid="my-requests-row"
+                            className="flex items-center gap-3 px-4 py-3"
+                          >
+                            <Package className="h-4 w-4 text-muted-foreground shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">
+                                {request.equipment_name}
+                              </p>
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+                                <span>{t('myRequests.toUnit')}</span>
+                                <ArrowRight className="h-3 w-3" />
+                                <span className="truncate">{request.to_unit_name}</span>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-1 shrink-0">
+                              <Badge variant="outline" className="text-xs text-warning border-warning">
+                                <Clock className="h-3 w-3 me-1" />
+                                {request.status}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {t('myRequests.submittedOn')} {format(new Date(request.requested_at), 'MMM d')}
+                              </span>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </CardContent>
+                </Card>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
         )}
 

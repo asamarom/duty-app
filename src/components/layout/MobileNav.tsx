@@ -9,7 +9,6 @@ import {
   LayoutDashboard,
   Users,
   Package,
-  ArrowLeftRight,
   MoreHorizontal,
   ShieldCheck,
   User,
@@ -42,16 +41,16 @@ export function MobileNav() {
   const location = useLocation();
   const hasAdminAccess = isAdmin || isLeader;
 
-  const mainNavigation = [
+  const mainNavigation: { name: string; href: string; icon: typeof LayoutDashboard; adminOnly?: boolean; showBadge?: boolean }[] = [
     { name: t('nav.dashboard'), href: '/', icon: LayoutDashboard },
     { name: t('nav.personnel'), href: '/personnel', icon: Users },
     { name: t('nav.equipment'), href: '/equipment', icon: Package },
-    { name: t('nav.transfers'), href: '/assignment-requests', icon: ArrowLeftRight, adminOnly: true, showBadge: true },
   ];
 
-  const moreItems = [
+  const moreItems: { name: string; href: string; adminOnly?: boolean }[] = [
     { name: t('nav.units'), href: '/units' },
     { name: t('nav.approvals'), href: '/approvals', adminOnly: true },
+    { name: t('nav.transfers'), href: '/assignment-requests', adminOnly: true },
     { name: t('nav.reports'), href: '/reports' },
     { name: t('nav.settings'), href: '/settings' },
   ];

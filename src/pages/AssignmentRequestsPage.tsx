@@ -213,7 +213,7 @@ export default function AssignmentRequestsPage() {
             </TabsTrigger>
             <TabsTrigger value="pending" className="gap-2">
               <Clock className="h-4 w-4" />
-              {t('transfers.pending')} ({pendingRequests.length})
+              {t('transfers.allPending')} ({pendingRequests.length})
             </TabsTrigger>
             <TabsTrigger value="processed" className="gap-2">
               <History className="h-4 w-4" />
@@ -262,7 +262,8 @@ export default function AssignmentRequestsPage() {
           <TabsContent value="pending">
             <Card>
               <CardHeader>
-                <CardTitle>{t('transfers.pendingRequests')}</CardTitle>
+                <CardTitle>{t('transfers.allPendingRequests')}</CardTitle>
+                <p className="text-sm text-muted-foreground">{t('transfers.allPendingRequests')}</p>
               </CardHeader>
               <CardContent>
                 {pendingRequests.length === 0 ? (

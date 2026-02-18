@@ -502,6 +502,17 @@ export const translations = {
     'adminMode.userView': 'User View',
     'adminMode.enabled': 'Full access enabled',
     'adminMode.disabled': 'Viewing as assigned user',
+
+    // My Requests
+    'myRequests.sectionTitle': 'My Transfer Requests',
+    'myRequests.noRequests': 'No pending transfer requests',
+    'myRequests.pendingCount': 'My Requests',
+    'myRequests.toUnit': 'To',
+    'myRequests.submittedOn': 'Submitted',
+
+    // Transfers - All Pending
+    'transfers.allPending': 'All Pending',
+    'transfers.allPendingRequests': 'All Pending Requests (System-wide)',
   },
   he: {
     // Navigation
@@ -1000,6 +1011,17 @@ export const translations = {
     'adminMode.userView': 'תצוגת משתמש',
     'adminMode.enabled': 'גישה מלאה מופעלת',
     'adminMode.disabled': 'צפייה כמשתמש מוקצה',
+
+    // My Requests
+    'myRequests.sectionTitle': 'בקשות ההעברה שלי',
+    'myRequests.noRequests': 'אין בקשות העברה ממתינות',
+    'myRequests.pendingCount': 'הבקשות שלי',
+    'myRequests.toUnit': 'ל',
+    'myRequests.submittedOn': 'הוגשה',
+
+    // Transfers - All Pending
+    'transfers.allPending': 'כל הממתינות',
+    'transfers.allPendingRequests': 'כל הבקשות הממתינות (כלל המערכת)',
   },
 } as const;
 

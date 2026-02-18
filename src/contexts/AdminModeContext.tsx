@@ -13,6 +13,8 @@ const ADMIN_MODE_KEY = 'pmtb_admin_mode';
 export function AdminModeProvider({ children }: { children: ReactNode }) {
   const [isAdminMode, setIsAdminMode] = useState<boolean>(() => {
     const stored = localStorage.getItem(ADMIN_MODE_KEY);
+    // Default to true (admin mode on) when no value has been stored yet
+    if (stored === null) return true;
     return stored === 'true';
   });
 
