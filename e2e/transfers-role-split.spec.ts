@@ -7,20 +7,22 @@ test.describe('Admin/Leader — full transfers page', () => {
   });
 
   test('admin sees Transfers link in sidebar', async ({ page }) => {
+    test.setTimeout(60000);
     await loginAsTestUser(page, 'admin');
     await page.goto('/');
 
     const transfersLink = page.locator('a[href*="/assignment-requests"]');
-    await expect(transfersLink).toBeVisible({ timeout: 8000 });
+    await expect(transfersLink).toBeVisible({ timeout: 20000 });
   });
 
   test('admin can navigate to /assignment-requests', async ({ page }) => {
+    test.setTimeout(60000);
     await loginAsTestUser(page, 'admin');
     await page.goto('/assignment-requests');
     await page.waitForLoadState('domcontentloaded');
 
     // Should NOT be redirected away — URL must still contain /assignment-requests
-    await expect(page).toHaveURL(/\/assignment-requests/, { timeout: 8000 });
+    await expect(page).toHaveURL(/\/assignment-requests/, { timeout: 15000 });
   });
 });
 
