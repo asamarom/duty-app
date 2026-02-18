@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   collection,
   getDocs,
@@ -11,7 +11,9 @@ import {
   orderBy,
   serverTimestamp,
   getDoc,
+  onSnapshot,
 } from 'firebase/firestore';
+import type { QueryDocumentSnapshot } from 'firebase/firestore';
 import { db } from '@/integrations/firebase/client';
 import type { Equipment } from '@/types/pmtb';
 import type {
@@ -26,9 +28,6 @@ import { useUserBattalion } from '@/hooks/useUserBattalion';
 
 export type AssignmentLevel = 'battalion' | 'company' | 'platoon' | 'individual' | 'unassigned';
 
-// Module-level cache — persists across component mounts so navigating back to a page
-// doesn't trigger a full loading state. Only the first load shows a spinner.
-let _equipmentCache: EquipmentWithAssignment[] | null = null;
 
 export interface EquipmentWithAssignment extends Equipment {
   assigneeName?: string;
@@ -60,39 +59,57 @@ interface UseEquipmentReturn {
 }
 
 export function useEquipment(): UseEquipmentReturn {
-  const [equipment, setEquipment] = useState<EquipmentWithAssignment[]>(_equipmentCache ?? []);
-  const [loading, setLoading] = useState(_equipmentCache === null);
+  const [equipment, setEquipment] = useState<EquipmentWithAssignment[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
   const { battalionId } = useUserBattalion();
 
-  const fetchEquipment = useCallback(async () => {
-    try {
-      if (_equipmentCache === null) setLoading(true);
-      setError(null);
+  const equipmentDocsRef = useRef<QueryDocumentSnapshot[]>([]);
+  const assignmentDocsRef = useRef<QueryDocumentSnapshot[]>([]);
+  const pendingDocsRef = useRef<QueryDocumentSnapshot[]>([]);
+  const rebuildingRef = useRef(false);
 
-      // Create a timeout promise
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Firestore query timeout after 10s')), 10000);
+  const rebuild = useCallback(async () => {
+    if (rebuildingRef.current) return;
+    rebuildingRef.current = true;
+    try {
+      // Collect unique personnelIds and unitIds from assignment docs
+      const uniquePersonnelIds = new Set<string>();
+      const uniqueUnitIds = new Set<string>();
+
+      assignmentDocsRef.current.forEach((docSnap) => {
+        const data = docSnap.data() as EquipmentAssignmentDoc;
+        if (data.personnelId) uniquePersonnelIds.add(data.personnelId);
+        if (data.unitId) uniqueUnitIds.add(data.unitId);
       });
 
-      // Fetch all equipment
-      const equipmentRef = collection(db, 'equipment');
-      const equipmentQuery = query(equipmentRef, orderBy('name'));
-      const equipmentSnapshot = await Promise.race([getDocs(equipmentQuery), timeoutPromise]);
+      // Batch-fetch personnel and units in parallel
+      const [personnelDocs, unitDocs] = await Promise.all([
+        Promise.all([...uniquePersonnelIds].map(id => getDoc(doc(db, 'personnel', id)))),
+        Promise.all([...uniqueUnitIds].map(id => getDoc(doc(db, 'units', id)))),
+      ]);
 
-      const equipmentDocs = equipmentSnapshot.docs.map((docSnap) => ({
-        id: docSnap.id,
-        ...docSnap.data() as EquipmentDoc,
-      }));
+      // Build lookup maps
+      const personnelNames = new Map<string, string>();
+      personnelDocs.forEach((pDoc) => {
+        if (pDoc.exists()) {
+          const pData = pDoc.data() as PersonnelDoc;
+          personnelNames.set(pDoc.id, `${pData.firstName} ${pData.lastName}`);
+        }
+      });
 
-      // Fetch all active assignments
-      const assignmentsRef = collection(db, 'equipmentAssignments');
-      const activeAssignmentsQuery = query(assignmentsRef, where('returnedAt', '==', null));
-      const assignmentsSnapshot = await getDocs(activeAssignmentsQuery);
+      const unitData = new Map<string, { name: string; unitType: string }>();
+      unitDocs.forEach((uDoc) => {
+        if (uDoc.exists()) {
+          const uData = uDoc.data() as UnitDoc;
+          unitData.set(uDoc.id, { name: uData.name, unitType: uData.unitType });
+        }
+      });
 
+      // Build assignmentsByEquipment map
       const assignmentsByEquipment = new Map<string, Array<{ id: string } & EquipmentAssignmentDoc>>();
-      assignmentsSnapshot.docs.forEach((docSnap) => {
+      assignmentDocsRef.current.forEach((docSnap) => {
         const data = docSnap.data() as EquipmentAssignmentDoc;
         const equipId = data.equipmentId;
         if (!assignmentsByEquipment.has(equipId)) {
@@ -101,48 +118,16 @@ export function useEquipment(): UseEquipmentReturn {
         assignmentsByEquipment.get(equipId)!.push({ id: docSnap.id, ...data });
       });
 
-      // Fetch pending transfer requests
-      const requestsRef = collection(db, 'assignmentRequests');
-      const pendingQuery = query(requestsRef, where('status', '==', 'pending'));
-      const pendingSnapshot = await getDocs(pendingQuery);
+      // Build pending equipment IDs set
       const pendingEquipmentIds = new Set(
-        pendingSnapshot.docs.map((d) => (d.data() as AssignmentRequestDoc).equipmentId)
+        pendingDocsRef.current.map((d) => (d.data() as AssignmentRequestDoc).equipmentId)
       );
-
-      // Collect personnel and unit IDs we need to fetch
-      const personnelIds = new Set<string>();
-      const unitIds = new Set<string>();
-
-      assignmentsSnapshot.docs.forEach((docSnap) => {
-        const data = docSnap.data() as EquipmentAssignmentDoc;
-        if (data.personnelId) personnelIds.add(data.personnelId);
-        if (data.unitId) unitIds.add(data.unitId);
-      });
-
-      // Fetch personnel names
-      const personnelNames = new Map<string, string>();
-      for (const pId of personnelIds) {
-        const pDoc = await getDoc(doc(db, 'personnel', pId));
-        if (pDoc.exists()) {
-          const pData = pDoc.data() as PersonnelDoc;
-          personnelNames.set(pId, `${pData.firstName} ${pData.lastName}`);
-        }
-      }
-
-      // Fetch unit names
-      const unitData = new Map<string, { name: string; unitType: string }>();
-      for (const uId of unitIds) {
-        const uDoc = await getDoc(doc(db, 'units', uId));
-        if (uDoc.exists()) {
-          const uData = uDoc.data() as UnitDoc;
-          unitData.set(uId, { name: uData.name, unitType: uData.unitType });
-        }
-      }
 
       // Build mapped equipment
       const mappedEquipment: EquipmentWithAssignment[] = [];
 
-      equipmentDocs.forEach((row) => {
+      equipmentDocsRef.current.forEach((docSnap) => {
+        const row = { id: docSnap.id, ...docSnap.data() as EquipmentDoc };
         const assignments = assignmentsByEquipment.get(row.id) || [];
 
         // Calculate total assigned quantity
@@ -207,14 +192,15 @@ export function useEquipment(): UseEquipmentReturn {
         }
       });
 
-      _equipmentCache = mappedEquipment;
       setEquipment(mappedEquipment);
+      setLoading(false);
     } catch (err) {
-      console.error('useEquipment: Firestore error', err);
+      console.error('useEquipment: rebuild error', err);
       setError(err as Error);
       setEquipment([]);
-    } finally {
       setLoading(false);
+    } finally {
+      rebuildingRef.current = false;
     }
   }, []);
 
@@ -256,7 +242,6 @@ export function useEquipment(): UseEquipmentReturn {
               quantity: existingItem.quantity + (item.quantity || 1),
             });
 
-            await fetchEquipment();
             return;
           }
         }
@@ -289,10 +274,8 @@ export function useEquipment(): UseEquipmentReturn {
           ...(battalionId ? { battalionId } : {}),
         });
       }
-
-      await fetchEquipment();
     },
-    [fetchEquipment, equipment, user?.uid]
+    [equipment, user?.uid, battalionId]
   );
 
   const canDeleteEquipment = useCallback(
@@ -434,19 +417,16 @@ export function useEquipment(): UseEquipmentReturn {
         undefined,
         quantity || undefined,
       );
-
-      await fetchEquipment();
     },
-    [fetchEquipment, _initiateTransferLocally]
+    [_initiateTransferLocally]
   );
 
   const deleteEquipment = useCallback(
     async (id: string) => {
       const equipmentId = getBaseId(id);
       await deleteDoc(doc(db, 'equipment', equipmentId));
-      await fetchEquipment();
     },
-    [fetchEquipment]
+    []
   );
 
   const unassignEquipment = useCallback(
@@ -469,9 +449,8 @@ export function useEquipment(): UseEquipmentReturn {
       );
 
       await Promise.all(updates);
-      await fetchEquipment();
     },
-    [fetchEquipment]
+    []
   );
 
   const requestAssignment = useCallback(
@@ -485,15 +464,22 @@ export function useEquipment(): UseEquipmentReturn {
         notes,
         quantity || undefined,
       );
-
-      await fetchEquipment();
     },
-    [fetchEquipment, _initiateTransferLocally]
+    [_initiateTransferLocally]
   );
 
   useEffect(() => {
-    fetchEquipment();
-  }, [fetchEquipment]);
+    setLoading(true);
+    const equipQuery = query(collection(db, 'equipment'), orderBy('name'));
+    const assignQuery = query(collection(db, 'equipmentAssignments'), where('returnedAt', '==', null));
+    const pendingQuery = query(collection(db, 'assignmentRequests'), where('status', '==', 'pending'));
+
+    const u1 = onSnapshot(equipQuery, snap => { equipmentDocsRef.current = snap.docs; rebuild(); }, err => console.error('[useEquipment] equipment error', err));
+    const u2 = onSnapshot(assignQuery, snap => { assignmentDocsRef.current = snap.docs; rebuild(); }, err => console.error('[useEquipment] assignments error', err));
+    const u3 = onSnapshot(pendingQuery, snap => { pendingDocsRef.current = snap.docs; rebuild(); }, err => console.error('[useEquipment] pending error', err));
+
+    return () => { u1(); u2(); u3(); };
+  }, [rebuild]);
 
   const isWithinSameUnit = useCallback(
     (_currentLevel: AssignmentLevel, _targetLevel: AssignmentLevel, item: EquipmentWithAssignment, assignment: AssignmentData): boolean => {
@@ -507,7 +493,7 @@ export function useEquipment(): UseEquipmentReturn {
     equipment,
     loading,
     error,
-    refetch: fetchEquipment,
+    refetch: rebuild,
     addEquipment,
     deleteEquipment,
     assignEquipment,

@@ -5,7 +5,7 @@ import {
   where,
   orderBy,
   limit,
-  getDocs,
+  onSnapshot,
   addDoc,
   serverTimestamp,
   Timestamp,
@@ -45,7 +45,7 @@ interface UseSignupRequestReturn {
     serviceNumber: string;
     unitId: string;
   }) => Promise<{ error: Error | null }>;
-  refetch: () => Promise<void>;
+  refetch: () => void;
 }
 
 function mapDocToSignupRequest(id: string, data: SignupRequestDoc): SignupRequest {
@@ -73,59 +73,53 @@ export function useSignupRequest(): UseSignupRequestReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchRequest = async () => {
+  useEffect(() => {
     // Keep loading while auth is still initializing to avoid a brief
     // status:'none' flash that causes ProtectedRoute to redirect incorrectly
     if (authLoading) return;
 
-    if (!user) {
-      setLoading(false);
+    if (!user?.uid) {
       setStatus('none');
+      setLoading(false);
       return;
     }
 
-    try {
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    const timeoutId = setTimeout(() => setLoading(false), 10_000);
 
-      // Create a timeout promise
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Firestore query timeout after 10s')), 10000);
-      });
-
-      const requestsRef = collection(db, 'signupRequests');
-      const q = query(
-        requestsRef,
+    const unsubscribe = onSnapshot(
+      query(
+        collection(db, 'signupRequests'),
         where('userId', '==', user.uid),
         orderBy('createdAt', 'desc'),
         limit(1)
-      );
-
-      const snapshot = await Promise.race([getDocs(q), timeoutPromise]);
-
-      if (!snapshot.empty) {
-        const doc = snapshot.docs[0];
-        const data = doc.data() as SignupRequestDoc;
-        const mappedRequest = mapDocToSignupRequest(doc.id, data);
-        setRequest(mappedRequest);
-        setStatus(mappedRequest.status);
-      } else {
+      ),
+      (snapshot) => {
+        clearTimeout(timeoutId);
+        if (!snapshot.empty) {
+          const doc = snapshot.docs[0];
+          const data = doc.data() as SignupRequestDoc;
+          const mappedRequest = mapDocToSignupRequest(doc.id, data);
+          setRequest(mappedRequest);
+          setStatus(mappedRequest.status);
+        } else {
+          setRequest(null);
+          setStatus('none');
+        }
+        setError(null);
+        setLoading(false);
+      },
+      (err) => {
+        clearTimeout(timeoutId);
+        console.error('[useSignupRequest] listener error', err);
+        setError(err as Error);
         setRequest(null);
         setStatus('none');
+        setLoading(false);
       }
-    } catch (err) {
-      console.error('useSignupRequest: Firestore error', err);
-      setError(err as Error);
-      setRequest(null);
-      setStatus('none');
-    } finally {
-      setLoading(false);
-    }
-  };
+    );
 
-  useEffect(() => {
-    fetchRequest();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => { clearTimeout(timeoutId); unsubscribe(); };
   }, [user?.uid, authLoading]);
 
   const submitRequest = async (data: {
@@ -156,7 +150,6 @@ export function useSignupRequest(): UseSignupRequestReturn {
         updatedAt: serverTimestamp(),
       } as Omit<SignupRequestDoc, 'createdAt' | 'updatedAt'> & { createdAt: ReturnType<typeof serverTimestamp>; updatedAt: ReturnType<typeof serverTimestamp> });
 
-      await fetchRequest();
       return { error: null };
     } catch (err) {
       return { error: err as Error };
@@ -169,6 +162,6 @@ export function useSignupRequest(): UseSignupRequestReturn {
     loading,
     error,
     submitRequest,
-    refetch: fetchRequest,
+    refetch: () => {},
   };
 }

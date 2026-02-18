@@ -11,6 +11,7 @@ import {
   doc,
   getDoc,
   serverTimestamp,
+  onSnapshot,
 } from 'firebase/firestore';
 import { db } from '@/integrations/firebase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -82,114 +83,121 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
 
-  const fetchRequests = useCallback(async () => {
-    try {
-      if (_requestsCache === null) setLoading(true);
-      setError(null);
+  const mapSnapshot = useCallback(async (snapshot: { docs: Array<{ id: string; data: () => unknown; ref?: unknown }> }): Promise<AssignmentRequest[]> => {
+    return Promise.all(
+      snapshot.docs.map(async (docSnap) => {
+        const data = docSnap.data() as AssignmentRequestDoc;
 
-      // Create a timeout promise
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Firestore query timeout after 10s')), 10000);
-      });
+        // Use denormalized names if available, otherwise fetch
+        let equipmentName = data.equipmentName;
+        let fromUnitName = data.fromName || 'Unassigned';
+        let toUnitName = data.toName || 'Unassigned';
+        let requestedByName = data.requestedByName;
 
-      const requestsRef = collection(db, 'assignmentRequests');
-      const q = query(requestsRef, orderBy('requestedAt', 'desc'));
-      const snapshot = await Promise.race([getDocs(q), timeoutPromise]);
+        // If names not denormalized, fetch them
+        if (!equipmentName && data.equipmentId) {
+          const equipDoc = await getDoc(doc(db, 'equipment', data.equipmentId));
+          if (equipDoc.exists()) {
+            equipmentName = (equipDoc.data() as EquipmentDoc).name;
+          }
+        }
 
-      const mappedRequests: AssignmentRequest[] = await Promise.all(
-        snapshot.docs.map(async (docSnap) => {
-          const data = docSnap.data() as AssignmentRequestDoc;
-
-          // Use denormalized names if available, otherwise fetch
-          let equipmentName = data.equipmentName;
-          let fromUnitName = data.fromName || 'Unassigned';
-          let toUnitName = data.toName || 'Unassigned';
-          let requestedByName = data.requestedByName;
-
-          // If names not denormalized, fetch them
-          if (!equipmentName && data.equipmentId) {
-            const equipDoc = await getDoc(doc(db, 'equipment', data.equipmentId));
-            if (equipDoc.exists()) {
-              equipmentName = (equipDoc.data() as EquipmentDoc).name;
+        if (!data.fromName) {
+          if (data.fromPersonnelId) {
+            const persDoc = await getDoc(doc(db, 'personnel', data.fromPersonnelId));
+            if (persDoc.exists()) {
+              const pers = persDoc.data() as PersonnelDoc;
+              fromUnitName = `${pers.firstName} ${pers.lastName}`;
+            }
+          } else if (data.fromUnitId) {
+            const unitDoc = await getDoc(doc(db, 'units', data.fromUnitId));
+            if (unitDoc.exists()) {
+              fromUnitName = (unitDoc.data() as UnitDoc).name;
             }
           }
+        }
 
-          if (!data.fromName) {
-            if (data.fromPersonnelId) {
-              const persDoc = await getDoc(doc(db, 'personnel', data.fromPersonnelId));
-              if (persDoc.exists()) {
-                const pers = persDoc.data() as PersonnelDoc;
-                fromUnitName = `${pers.firstName} ${pers.lastName}`;
-              }
-            } else if (data.fromUnitId) {
-              const unitDoc = await getDoc(doc(db, 'units', data.fromUnitId));
-              if (unitDoc.exists()) {
-                fromUnitName = (unitDoc.data() as UnitDoc).name;
-              }
+        if (!data.toName) {
+          if (data.toPersonnelId) {
+            const persDoc = await getDoc(doc(db, 'personnel', data.toPersonnelId));
+            if (persDoc.exists()) {
+              const pers = persDoc.data() as PersonnelDoc;
+              toUnitName = `${pers.firstName} ${pers.lastName}`;
+            }
+          } else if (data.toUnitId) {
+            const unitDoc = await getDoc(doc(db, 'units', data.toUnitId));
+            if (unitDoc.exists()) {
+              toUnitName = (unitDoc.data() as UnitDoc).name;
             }
           }
+        }
 
-          if (!data.toName) {
-            if (data.toPersonnelId) {
-              const persDoc = await getDoc(doc(db, 'personnel', data.toPersonnelId));
-              if (persDoc.exists()) {
-                const pers = persDoc.data() as PersonnelDoc;
-                toUnitName = `${pers.firstName} ${pers.lastName}`;
-              }
-            } else if (data.toUnitId) {
-              const unitDoc = await getDoc(doc(db, 'units', data.toUnitId));
-              if (unitDoc.exists()) {
-                toUnitName = (unitDoc.data() as UnitDoc).name;
-              }
-            }
+        if (!requestedByName && data.requestedBy) {
+          const userDoc = await getDoc(doc(db, 'users', data.requestedBy));
+          if (userDoc.exists()) {
+            requestedByName = (userDoc.data() as UserDoc).fullName || undefined;
           }
+        }
 
-          if (!requestedByName && data.requestedBy) {
-            const userDoc = await getDoc(doc(db, 'users', data.requestedBy));
-            if (userDoc.exists()) {
-              requestedByName = (userDoc.data() as UserDoc).fullName || undefined;
-            }
-          }
+        return {
+          id: docSnap.id,
+          equipment_id: data.equipmentId,
+          equipment_name: equipmentName,
+          from_unit_type: data.fromUnitType,
+          from_unit_id: data.fromUnitId || undefined,
+          from_personnel_id: data.fromPersonnelId || undefined,
+          from_unit_name: fromUnitName,
+          to_unit_type: data.toUnitType,
+          to_unit_id: data.toUnitId || undefined,
+          to_personnel_id: data.toPersonnelId || undefined,
+          to_unit_name: toUnitName,
+          status: data.status,
+          requested_by: data.requestedBy || undefined,
+          requested_by_name: requestedByName,
+          requested_at: data.requestedAt?.toDate().toISOString() || new Date().toISOString(),
+          notes: data.notes || undefined,
+          quantity: data.quantity,
+          recipient_approved: data.recipientApproved || false,
+          recipient_approved_at: data.recipientApprovedAt?.toDate().toISOString(),
+          recipient_approved_by: data.recipientApprovedBy || undefined,
+        };
+      })
+    );
+  }, []);
 
-          return {
-            id: docSnap.id,
-            equipment_id: data.equipmentId,
-            equipment_name: equipmentName,
-            from_unit_type: data.fromUnitType,
-            from_unit_id: data.fromUnitId || undefined,
-            from_personnel_id: data.fromPersonnelId || undefined,
-            from_unit_name: fromUnitName,
-            to_unit_type: data.toUnitType,
-            to_unit_id: data.toUnitId || undefined,
-            to_personnel_id: data.toPersonnelId || undefined,
-            to_unit_name: toUnitName,
-            status: data.status,
-            requested_by: data.requestedBy || undefined,
-            requested_by_name: requestedByName,
-            requested_at: data.requestedAt?.toDate().toISOString() || new Date().toISOString(),
-            notes: data.notes || undefined,
-            quantity: data.quantity,
-            recipient_approved: data.recipientApproved || false,
-            recipient_approved_at: data.recipientApprovedAt?.toDate().toISOString(),
-            recipient_approved_by: data.recipientApprovedBy || undefined,
-          };
-        })
-      );
+  useEffect(() => {
+    const requestsRef = collection(db, 'assignmentRequests');
+    const q = query(requestsRef, orderBy('requestedAt', 'desc'));
 
-      const incoming = mappedRequests.filter(r =>
-        r.status === 'pending' && !r.recipient_approved
-      );
-      _requestsCache = { requests: mappedRequests, incoming };
-      setRequests(mappedRequests);
-      setIncomingTransfers(incoming);
-    } catch (err) {
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+      try {
+        setError(null);
+        const mappedRequests = await mapSnapshot(snapshot);
+        const incoming = mappedRequests.filter(r =>
+          r.status === 'pending' && !r.recipient_approved
+        );
+        _requestsCache = { requests: mappedRequests, incoming };
+        setRequests(mappedRequests);
+        setIncomingTransfers(incoming);
+      } catch (err) {
+        console.error('useAssignmentRequests: Firestore error', err);
+        setError(err as Error);
+        setRequests([]);
+        setIncomingTransfers([]);
+      } finally {
+        setLoading(false);
+      }
+    }, (err) => {
       console.error('useAssignmentRequests: Firestore error', err);
       setError(err as Error);
-      setRequests([]);
-      setIncomingTransfers([]);
-    } finally {
       setLoading(false);
-    }
+    });
+
+    return unsubscribe;
+  }, [mapSnapshot]);
+
+  const refetch = useCallback(async () => {
+    // With onSnapshot, data is kept live — nothing to do manually
   }, []);
 
   const createRequest = useCallback(async (data: {
@@ -289,9 +297,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
       status: 'pending_transfer',
       updatedAt: serverTimestamp(),
     });
-
-    await fetchRequests();
-  }, [fetchRequests, user]);
+  }, [user]);
 
   const approveRequest = useCallback(async (requestId: string, _notes?: string) => {
     // Find request data from local state
@@ -348,9 +354,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
 
     // j. Commit batch
     await batch.commit();
-
-    await fetchRequests();
-  }, [fetchRequests, user, requests]);
+  }, [user, requests]);
 
   const rejectRequest = useCallback(async (requestId: string, _notes?: string) => {
     // Find request data from local state
@@ -376,9 +380,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
 
     // e. Commit batch
     await batch.commit();
-
-    await fetchRequests();
-  }, [fetchRequests, user, requests]);
+  }, [user, requests]);
 
   const recipientApprove = useCallback(async (requestId: string, notes?: string) => {
     await approveRequest(requestId, notes ? `Recipient approved: ${notes}` : 'Recipient approved the transfer');
@@ -387,10 +389,6 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
   const recipientReject = useCallback(async (requestId: string, notes?: string) => {
     await rejectRequest(requestId, notes ? `Recipient rejected: ${notes}` : 'Recipient rejected the transfer');
   }, [rejectRequest]);
-
-  useEffect(() => {
-    fetchRequests();
-  }, [fetchRequests]);
 
   const getApprovalsForRequest = useCallback((_requestId: string): RequestApproval[] => {
     // Approval history is not yet stored per-request in the data model.
@@ -403,7 +401,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     incomingTransfers,
     loading,
     error,
-    refetch: fetchRequests,
+    refetch,
     createRequest,
     approveRequest,
     rejectRequest,

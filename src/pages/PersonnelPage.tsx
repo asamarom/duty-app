@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
+import { usePersonnel } from '@/hooks/usePersonnel';
 import { useNavigate } from 'react-router-dom';
-import { collection, getDocs, query, orderBy, where, documentId } from 'firebase/firestore';
+import { collection, getDocs, query, where, documentId } from 'firebase/firestore';
 import { db } from '@/integrations/firebase/client';
-import type { PersonnelDoc, UserDoc, AppRole } from '@/integrations/firebase/types';
+import type { UserDoc, AppRole } from '@/integrations/firebase/types';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { MobileHeader } from '@/components/layout/MobileHeader';
 import { PersonnelCard } from '@/components/personnel/PersonnelCard';
@@ -26,28 +27,6 @@ interface PersonnelWithRoles extends Personnel {
   userRoles: AppRole[];
 }
 
-function mapPersonnelDocToUI(id: string, doc: PersonnelDoc): PersonnelWithRoles {
-  return {
-    id,
-    serviceNumber: doc.serviceNumber,
-    rank: doc.rank,
-    firstName: doc.firstName,
-    lastName: doc.lastName,
-    dutyPosition: (doc.dutyPosition ?? 'Unassigned') as Personnel['dutyPosition'],
-    unitId: doc.unitId ?? undefined,
-    role: 'user',
-    phone: doc.phone ?? '',
-    email: doc.email ?? '',
-    localAddress: doc.localAddress ?? '',
-    locationStatus: doc.locationStatus ?? 'home',
-    skills: doc.skills ?? [],
-    driverLicenses: doc.driverLicenses ?? [],
-    profileImage: doc.profileImage ?? undefined,
-    readinessStatus: doc.readinessStatus ?? 'ready',
-    isSignatureApproved: doc.isSignatureApproved ?? false,
-    userRoles: [],
-  };
-}
 
 export default function PersonnelPage() {
   const navigate = useNavigate();
@@ -58,34 +37,31 @@ export default function PersonnelPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [teamFilter, setTeamFilter] = useState('all');
   const [personnel, setPersonnel] = useState<PersonnelWithRoles[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [rolesLoading, setRolesLoading] = useState(false);
   const [filtersExpanded, setFiltersExpanded] = useState(true);
 
+  const { personnel: basePersonnel, loading: personnelHookLoading } = usePersonnel();
+
+  const loading = personnelHookLoading || rolesLoading;
+
   useEffect(() => {
+    if (personnelHookLoading || basePersonnel.length === 0) return;
+
     let active = true;
 
-    const fetchPersonnel = async () => {
+    const fetchRoles = async () => {
       try {
-        setLoading(true);
-        const personnelRef = collection(db, 'personnel');
-        const q = query(personnelRef, orderBy('lastName'));
-        const snapshot = await getDocs(q);
+        setRolesLoading(true);
 
-        if (!active) return;
-
-        const personnelDocs = snapshot.docs.map((docSnap) => ({
-          id: docSnap.id,
-          data: docSnap.data() as PersonnelDoc,
+        const mappedPersonnel: PersonnelWithRoles[] = basePersonnel.map((p) => ({
+          ...p,
+          userRoles: [],
         }));
 
-        const mappedPersonnel = personnelDocs.map((p) =>
-          mapPersonnelDocToUI(p.id, p.data)
-        );
-
         // Get user_ids that are not null
-        const userIds = personnelDocs
-          .filter((p) => p.data.userId)
-          .map((p) => p.data.userId!);
+        const userIds = basePersonnel
+          .filter((p) => (p as PersonnelWithRoles & { userId?: string }).userId)
+          .map((p) => (p as PersonnelWithRoles & { userId?: string }).userId!);
 
         // Fetch roles for these users
         if (userIds.length > 0) {
@@ -106,14 +82,14 @@ export default function PersonnelPage() {
 
           // Attach roles to personnel
           mappedPersonnel.forEach((p, index) => {
-            const userId = personnelDocs[index]?.data.userId;
+            const userId = (basePersonnel[index] as PersonnelWithRoles & { userId?: string })?.userId;
             if (userId) {
               p.userRoles = userRolesMap.get(userId) || [];
             }
           });
         }
 
-        setPersonnel(mappedPersonnel);
+        if (active) setPersonnel(mappedPersonnel);
       } catch {
         toast({
           variant: 'destructive',
@@ -121,15 +97,15 @@ export default function PersonnelPage() {
           description: t('personnel.loadListFailed'),
         });
       } finally {
-        if (active) setLoading(false);
+        if (active) setRolesLoading(false);
       }
     };
 
-    fetchPersonnel();
+    fetchRoles();
     return () => {
       active = false;
     };
-  }, [toast]);
+  }, [basePersonnel, personnelHookLoading, toast]);
 
   // Filter by unit
   const uniqueUnits = useMemo(() => {

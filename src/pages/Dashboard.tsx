@@ -3,7 +3,7 @@ import { MobileHeader } from '@/components/layout/MobileHeader';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { usePersonnel } from '@/hooks/usePersonnel';
 import { useEquipment } from '@/hooks/useEquipment';
-import { Users, Package, Loader2 } from 'lucide-react';
+import { Users, Package } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Dashboard() {
@@ -11,23 +11,10 @@ export default function Dashboard() {
   const { personnel, loading: personnelLoading } = usePersonnel();
   const { equipment, loading: equipmentLoading } = useEquipment();
 
-  const loading = personnelLoading || equipmentLoading;
-
   // Calculate stats from real data
   const totalPersonnel = personnel.length;
   const uniqueEquipmentIds = new Set(equipment.map(e => e.id.split('--')[0]));
   const totalEquipment = uniqueEquipmentIds.size;
-
-  if (loading) {
-    return (
-      <MainLayout>
-        <div className="min-h-screen flex flex-col items-center justify-center gap-3">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">{t('dashboard.loading')}</p>
-        </div>
-      </MainLayout>
-    );
-  }
 
   return (
     <MainLayout>
@@ -56,20 +43,28 @@ export default function Dashboard() {
 
         {/* Stats Grid */}
         <section className="mb-4 lg:mb-8 grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4">
-          <StatCard
-            title={t('dashboard.totalPersonnel')}
-            value={totalPersonnel}
-            subtitle={t('dashboard.registered')}
-            icon={Users}
-            status="ready"
-          />
-          <StatCard
-            title={t('dashboard.equipmentItems')}
-            value={totalEquipment}
-            subtitle={t('dashboard.tracked')}
-            icon={Package}
-            status="ready"
-          />
+          {personnelLoading ? (
+            <div className="h-24 rounded-xl bg-muted/50 animate-pulse" />
+          ) : (
+            <StatCard
+              title={t('dashboard.totalPersonnel')}
+              value={totalPersonnel}
+              subtitle={t('dashboard.registered')}
+              icon={Users}
+              status="ready"
+            />
+          )}
+          {equipmentLoading ? (
+            <div className="h-24 rounded-xl bg-muted/50 animate-pulse" />
+          ) : (
+            <StatCard
+              title={t('dashboard.equipmentItems')}
+              value={totalEquipment}
+              subtitle={t('dashboard.tracked')}
+              icon={Package}
+              status="ready"
+            />
+          )}
         </section>
 
         {/* Personnel Overview */}
@@ -78,7 +73,9 @@ export default function Dashboard() {
             <div className="mb-4 flex items-center justify-between">
               <h3 className="font-semibold text-foreground">{t('dashboard.personnelOverview')}</h3>
             </div>
-            {personnel.length === 0 ? (
+            {personnelLoading ? (
+              <div className="space-y-2">{[...Array(3)].map((_, i) => <div key={i} className="h-14 rounded-lg bg-muted/50 animate-pulse" />)}</div>
+            ) : personnel.length === 0 ? (
               <p className="text-sm text-muted-foreground">{t('dashboard.noPersonnel')}</p>
             ) : (
               <div className="space-y-2">

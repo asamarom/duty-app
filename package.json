@@ -17,6 +17,7 @@
     "test:e2e:setup": "playwright test --project=setup",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report",
+    "test:perf": "playwright test e2e/performance.spec.ts --project=chromium-auth",
     "test:e2e:prod": "cross-env TEST_ENV=production playwright test --project=production",
     "test:e2e:prod:setup": "cross-env TEST_ENV=production playwright test --project=setup",
     "test:e2e:prod:auth": "cross-env TEST_ENV=production playwright test --project=production-auth",
@@ -30,7 +31,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@a5c-ai/babysitter-sdk": "^0.0.166",
+    "@a5c-ai/babysitter-sdk": "^0.0.168",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",

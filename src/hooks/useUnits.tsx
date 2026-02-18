@@ -1,14 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { db } from '@/integrations/firebase/client';
 import type { UnitDoc, UnitType } from '@/integrations/firebase/types';
 
 // Re-export types for backwards compatibility
 export type { UnitType };
-
-// Module-level cache — persists across component mounts so navigating back shows
-// previously loaded data immediately while a background refresh runs silently.
-let _unitsCache: Unit[] | null = null;
 
 // Unit type matching the existing interface
 export interface Unit {
@@ -34,7 +30,7 @@ interface UseUnitsReturn {
   platoons: Unit[];
   loading: boolean;
   error: Error | null;
-  refetch: () => Promise<void>;
+  refetch: () => void;
   getUnitById: (id: string) => Unit | undefined;
   getChildUnits: (parentId: string) => Unit[];
   getUnitAncestors: (unitId: string) => Unit[];
@@ -45,61 +41,56 @@ interface UseUnitsReturn {
 }
 
 export function useUnits(): UseUnitsReturn {
-  const [units, setUnits] = useState<Unit[]>(_unitsCache ?? []);
-  const [loading, setLoading] = useState(_unitsCache === null);
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchUnits = useCallback(async () => {
-    try {
-      if (_unitsCache === null) setLoading(true);
-      setError(null);
-
-      // Create a timeout promise
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Firestore query timeout after 10s')), 10000);
-      });
-
-      const unitsRef = collection(db, 'units');
-      const q = query(unitsRef, orderBy('name'));
-      const snapshot = await Promise.race([getDocs(q), timeoutPromise]);
-
-      const fetchedUnits: Unit[] = snapshot.docs.map((doc) => {
-        const data = doc.data() as UnitDoc;
-        return {
-          id: doc.id,
-          name: data.name,
-          unit_type: data.unitType,
-          parent_id: data.parentId,
-          designation: data.designation,
-          leader_id: data.leaderId,
-          status: data.status,
-          created_at: data.createdAt?.toDate().toISOString() || new Date().toISOString(),
-          updated_at: data.updatedAt?.toDate().toISOString() || new Date().toISOString(),
-        };
-      });
-
-      // Sort by unit_type then name
-      fetchedUnits.sort((a, b) => {
-        const typeOrder = { battalion: 0, company: 1, platoon: 2 };
-        const typeCompare = typeOrder[a.unit_type] - typeOrder[b.unit_type];
-        if (typeCompare !== 0) return typeCompare;
-        return a.name.localeCompare(b.name);
-      });
-
-      _unitsCache = fetchedUnits;
-      setUnits(fetchedUnits);
-    } catch (err) {
-      console.error('useUnits: Firestore error', err);
-      setError(err as Error);
-      setUnits([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    fetchUnits();
-  }, [fetchUnits]);
+    setLoading(true);
+    const timeoutId = setTimeout(() => setLoading(false), 10_000);
+
+    const unsubscribe = onSnapshot(
+      query(collection(db, 'units'), orderBy('name')),
+      (snapshot) => {
+        clearTimeout(timeoutId);
+
+        const fetchedUnits: Unit[] = snapshot.docs.map((doc) => {
+          const data = doc.data() as UnitDoc;
+          return {
+            id: doc.id,
+            name: data.name,
+            unit_type: data.unitType,
+            parent_id: data.parentId,
+            designation: data.designation,
+            leader_id: data.leaderId,
+            status: data.status,
+            created_at: data.createdAt?.toDate().toISOString() || new Date().toISOString(),
+            updated_at: data.updatedAt?.toDate().toISOString() || new Date().toISOString(),
+          };
+        });
+
+        // Sort by unit_type then name
+        fetchedUnits.sort((a, b) => {
+          const typeOrder = { battalion: 0, company: 1, platoon: 2 };
+          const typeCompare = typeOrder[a.unit_type] - typeOrder[b.unit_type];
+          if (typeCompare !== 0) return typeCompare;
+          return a.name.localeCompare(b.name);
+        });
+
+        setUnits(fetchedUnits);
+        setError(null);
+        setLoading(false);
+      },
+      (err) => {
+        clearTimeout(timeoutId);
+        console.error('[useUnits] listener error', err);
+        setError(err as Error);
+        setLoading(false);
+      }
+    );
+
+    return () => { clearTimeout(timeoutId); unsubscribe(); };
+  }, []);
 
   const battalions = useMemo(() =>
     units.filter(u => u.unit_type === 'battalion'), [units]);
@@ -182,7 +173,7 @@ export function useUnits(): UseUnitsReturn {
     platoons,
     loading,
     error,
-    refetch: fetchUnits,
+    refetch: () => {},
     getUnitById,
     getChildUnits,
     getUnitAncestors,

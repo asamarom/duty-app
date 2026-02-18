@@ -13,6 +13,18 @@ const mockDocFn = vi.fn((...args: unknown[]) => {
     return { id: segs[segs.length - 1] ?? 'mock-doc-id', path: segs.join('/') };
 });
 
+// onSnapshot mock: immediately calls the callback with the provided snapshot,
+// returns a no-op unsubscribe. Defaults to empty docs; individual tests can
+// override by calling mockOnSnapshot.mockImplementationOnce(...).
+const mockOnSnapshot = vi.fn((
+    _query: unknown,
+    callback: (snap: { docs: unknown[] }) => void,
+    _onError?: (err: Error) => void,
+) => {
+    callback({ docs: [] });
+    return () => {};
+});
+
 vi.mock('firebase/firestore', () => ({
     collection: (...args: unknown[]) => mockCollection(...args),
     getDocs: (...args: unknown[]) => mockGetDocs(...args),
@@ -25,6 +37,7 @@ vi.mock('firebase/firestore', () => ({
     doc: (...args: unknown[]) => mockDocFn(...args),
     getDoc: vi.fn(),
     serverTimestamp: vi.fn(),
+    onSnapshot: (...args: unknown[]) => mockOnSnapshot(...(args as Parameters<typeof mockOnSnapshot>)),
 }));
 
 const mockHttpsCallable = vi.fn();
@@ -40,6 +53,15 @@ describe('useEquipment Hook', () => {
         mockGetDocs.mockResolvedValue({ docs: [] });
         // Default: httpsCallable returns a no-op callable
         mockHttpsCallable.mockReturnValue(vi.fn().mockResolvedValue({ data: { success: true } }));
+        // Restore default onSnapshot implementation after vi.clearAllMocks() wipes it
+        mockOnSnapshot.mockImplementation((
+            _query: unknown,
+            callback: (snap: { docs: unknown[] }) => void,
+            _onError?: (err: Error) => void,
+        ) => {
+            callback({ docs: [] });
+            return () => {};
+        });
     });
 
     it('fetches equipment data on mount', async () => {
@@ -57,11 +79,22 @@ describe('useEquipment Hook', () => {
             },
         ];
 
-        // First getDocs call = equipment, second = assignments, third = pending requests
-        mockGetDocs
-            .mockResolvedValueOnce({ docs: mockEquipmentDocs })
-            .mockResolvedValueOnce({ docs: [] })
-            .mockResolvedValueOnce({ docs: [] });
+        // The hook registers 3 onSnapshot listeners: equipment, assignments, pending.
+        // Override so the first call (equipment) fires with mockEquipmentDocs,
+        // the second and third (assignments, pending) fire with empty docs.
+        mockOnSnapshot
+            .mockImplementationOnce((_q: unknown, cb: (snap: { docs: unknown[] }) => void) => {
+                cb({ docs: mockEquipmentDocs });
+                return () => {};
+            })
+            .mockImplementationOnce((_q: unknown, cb: (snap: { docs: unknown[] }) => void) => {
+                cb({ docs: [] });
+                return () => {};
+            })
+            .mockImplementationOnce((_q: unknown, cb: (snap: { docs: unknown[] }) => void) => {
+                cb({ docs: [] });
+                return () => {};
+            });
 
         const { result } = renderHook(() => useEquipment());
 

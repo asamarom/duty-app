@@ -7,22 +7,25 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AdminModeProvider } from "@/contexts/AdminModeContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
-import SignupRequestPage from "./pages/SignupRequestPage";
-import PendingApprovalPage from "./pages/PendingApprovalPage";
-import AdminApprovalsPage from "./pages/AdminApprovalsPage";
-import AssignmentRequestsPage from "./pages/AssignmentRequestsPage";
-import PersonnelPage from "./pages/PersonnelPage";
-import PersonnelDetailPage from "./pages/PersonnelDetailPage";
-import AddPersonnelPage from "./pages/AddPersonnelPage";
-import EquipmentPage from "./pages/EquipmentPage";
-import AddEquipmentPage from "./pages/AddEquipmentPage";
-import EquipmentDetailPage from "./pages/EquipmentDetailPage";
-import ReportsPage from "./pages/ReportsPage";
-import SettingsPage from "./pages/SettingsPage";
-import UnitsPage from "./pages/UnitsPage";
-import NotFound from "./pages/NotFound";
+import { lazy, Suspense } from "react";
+import { Loader2 } from "lucide-react";
+import { DataPrefetchProvider } from "@/contexts/DataPrefetchContext";
+const Index = lazy(() => import("./pages/Index"));
+const SignupRequestPage = lazy(() => import("./pages/SignupRequestPage"));
+const PendingApprovalPage = lazy(() => import("./pages/PendingApprovalPage"));
+const AdminApprovalsPage = lazy(() => import("./pages/AdminApprovalsPage"));
+const AssignmentRequestsPage = lazy(() => import("./pages/AssignmentRequestsPage"));
+const PersonnelPage = lazy(() => import("./pages/PersonnelPage"));
+const PersonnelDetailPage = lazy(() => import("./pages/PersonnelDetailPage"));
+const AddPersonnelPage = lazy(() => import("./pages/AddPersonnelPage"));
+const EquipmentPage = lazy(() => import("./pages/EquipmentPage"));
+const AddEquipmentPage = lazy(() => import("./pages/AddEquipmentPage"));
+const EquipmentDetailPage = lazy(() => import("./pages/EquipmentDetailPage"));
+const ReportsPage = lazy(() => import("./pages/ReportsPage"));
+const SettingsPage = lazy(() => import("./pages/SettingsPage"));
+const UnitsPage = lazy(() => import("./pages/UnitsPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
@@ -34,7 +37,8 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
+            <DataPrefetchProvider><BrowserRouter>
+              <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
               <Routes>
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/signup-request" element={
@@ -60,8 +64,8 @@ const App = () => (
                 <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
                 <Route path="/units" element={<ProtectedRoute><UnitsPage /></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
+              </Routes></Suspense>
+            </BrowserRouter></DataPrefetchProvider>
           </TooltipProvider>
         </LanguageProvider>
       </AdminModeProvider>
