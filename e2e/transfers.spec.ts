@@ -38,9 +38,9 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
   });
 
   test('[XFER-2] should show pending transfers for recipient to accept', async ({ page }) => {
-    await loginAsTestUser(page, 'user');
+    await loginAsTestUser(page, 'admin');
 
-    // Navigate directly to assignment-requests page
+    // Navigate directly to assignment-requests page (admin/leader only)
     await page.goto('/assignment-requests');
     await page.waitForLoadState('domcontentloaded');
 
@@ -131,9 +131,9 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
   });
 
   test('[XFER-6] should only allow intended recipient to accept personal equipment', async ({ page }) => {
-    await loginAsTestUser(page, 'user');
+    await loginAsTestUser(page, 'admin');
 
-    // Navigate to the assignment-requests page where incoming transfers appear
+    // Navigate to the assignment-requests page (admin/leader only)
     await page.goto('/assignment-requests');
     await page.waitForLoadState('domcontentloaded');
 
