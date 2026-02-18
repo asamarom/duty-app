@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Role Switcher — duty-app dev tool</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 32px;
+      width: 100%;
+      max-width: 520px;
+    }
+    h1 { font-size: 18px; font-weight: 600; color: #94a3b8; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 24px; }
+    label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px; }
+    input {
+      width: 100%; padding: 10px 14px; background: #0f172a; border: 1px solid #334155;
+      border-radius: 8px; color: #e2e8f0; font-size: 14px; outline: none;
+    }
+    input:focus { border-color: #6366f1; }
+    .field { margin-bottom: 16px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 9px 18px; border-radius: 8px; font-size: 14px; font-weight: 500;
+      cursor: pointer; border: 1px solid transparent; transition: all 0.15s;
+      line-height: 1;
+    }
+    .btn-primary { background: #6366f1; color: #fff; width: 100%; padding: 12px; }
+    .btn-primary:hover { background: #4f46e5; }
+    .btn-role {
+      background: #1e293b; color: #94a3b8; border-color: #334155;
+      min-width: 90px;
+    }
+    .btn-role:hover { border-color: #6366f1; color: #e2e8f0; }
+    .btn-role.active { background: #312e81; color: #a5b4fc; border-color: #6366f1; }
+    .btn-unit {
+      background: #1e293b; color: #94a3b8; border-color: #334155;
+      text-align: left; justify-content: flex-start; gap: 8px;
+    }
+    .btn-unit:hover { border-color: #6366f1; color: #e2e8f0; }
+    .btn-unit.active { background: #0c4a6e; color: #7dd3fc; border-color: #0ea5e9; }
+    .section-label {
+      font-size: 11px; font-weight: 600; color: #475569;
+      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;
+    }
+    .group { margin-bottom: 24px; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .btn-col { display: flex; flex-direction: column; gap: 8px; }
+    .status-bar {
+      padding: 12px 16px; border-radius: 8px; font-size: 14px; font-weight: 500;
+      margin-bottom: 20px; display: none;
+    }
+    .status-bar.success { background: #052e16; color: #4ade80; border: 1px solid #166534; display: block; }
+    .status-bar.error   { background: #1c0606; color: #f87171; border: 1px solid #7f1d1d; display: block; }
+    .user-info {
+      background: #0f172a; border: 1px solid #1e293b; border-radius: 8px;
+      padding: 14px 16px; margin-bottom: 24px;
+    }
+    .user-info .name { font-size: 16px; font-weight: 600; color: #e2e8f0; }
+    .user-info .meta { font-size: 13px; color: #64748b; margin-top: 4px; }
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .badge-admin  { background: #312e81; color: #a5b4fc; }
+    .badge-leader { background: #0c4a6e; color: #7dd3fc; }
+    .badge-user   { background: #1c1917; color: #a8a29e; }
+    .badge-battalion { background: #1c1917; color: #d6d3d1; }
+    .badge-company   { background: #0c1a2e; color: #93c5fd; }
+    .badge-platoon   { background: #0a2518; color: #86efac; }
+    #login-section { display: block; }
+    #main-section  { display: none; }
+    .spinner {
+      display: inline-block; width: 14px; height: 14px; border: 2px solid #334155;
+      border-top-color: #6366f1; border-radius: 50%; animation: spin 0.6s linear infinite;
+      vertical-align: middle; margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { color: #64748b; font-size: 14px; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>Role Switcher</h1>
+
+  <!-- Login -->
+  <div id="login-section">
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" type="email" value="test-admin@e2e.local" autocomplete="username">
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" type="password" value="TestPassword123!" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary" id="login-btn" onclick="signIn()">Sign In</button>
+    <div id="login-error" style="color:#f87171;font-size:13px;margin-top:12px;"></div>
+  </div>
+
+  <!-- Main controls -->
+  <div id="main-section">
+    <div id="status" class="status-bar"></div>
+
+    <div class="user-info">
+      <div class="name" id="user-name">—</div>
+      <div class="meta">
+        Role: <span id="user-role">—</span> &nbsp;·&nbsp;
+        Unit: <span id="user-unit">—</span>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="section-label">Role</div>
+      <div class="btn-row" id="role-buttons"></div>
+    </div>
+
+    <div class="group">
+      <div class="section-label">Unit</div>
+      <div class="btn-col" id="unit-buttons">
+        <span class="loading-text"><span class="spinner"></span>Loading units…</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Config ───────────────────────────────────────────────────────────────────
+  // Auto-detect host so the page works whether opened from localhost or a remote machine.
+  const HOST         = window.location.hostname || 'localhost';
+  const PROJECT_ID   = 'duty-82f42';
+  const API_KEY      = 'AIzaSyCNJWjzqPqg0oZuJ62WMq7cZG737k0hPKY';
+  const AUTH_BASE    = `http://${HOST}:9099`;
+  const FS_BASE      = `http://${HOST}:8085/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+
+  const ROLES = ['admin', 'leader', 'user'];
+
+  let currentUid  = null;
+  let currentRole = null;
+  let currentUnitId = null;
+  let allUnits = [];
+
+  // ── Helpers ──────────────────────────────────────────────────────────────────
+  function showStatus(msg, ok) {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.className = 'status-bar ' + (ok ? 'success' : 'error');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.className = 'status-bar'; }, 4000);
+  }
+
+  function fsValue(fieldValue) {
+    // Extract plain JS value from Firestore REST value object
+    if (!fieldValue) return null;
+    if (fieldValue.stringValue !== undefined) return fieldValue.stringValue;
+    if (fieldValue.arrayValue) return (fieldValue.arrayValue.values || []).map(fsValue);
+    if (fieldValue.nullValue !== undefined) return null;
+    if (fieldValue.booleanValue !== undefined) return fieldValue.booleanValue;
+    if (fieldValue.integerValue !== undefined) return parseInt(fieldValue.integerValue, 10);
+    return null;
+  }
+
+  function toFsDoc(fields) {
+    // Convert plain object to Firestore REST doc format
+    const out = { fields: {} };
+    for (const [k, v] of Object.entries(fields)) {
+      if (Array.isArray(v)) {
+        out.fields[k] = { arrayValue: { values: v.map(s => ({ stringValue: s })) } };
+      } else if (v === null) {
+        out.fields[k] = { nullValue: null };
+      } else if (typeof v === 'string') {
+        out.fields[k] = { stringValue: v };
+      }
+    }
+    return out;
+  }
+
+  // ── Auth ─────────────────────────────────────────────────────────────────────
+  async function signIn() {
+    const email = document.getElementById('email').value.trim();
+    const pwd   = document.getElementById('password').value;
+    document.getElementById('login-error').textContent = '';
+    document.getElementById('login-btn').innerHTML = '<span class="spinner"></span>Signing in…';
+
+    try {
+      const res = await fetch(
+        `${AUTH_BASE}/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password: pwd, returnSecureToken: true }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error?.message || 'Login failed');
+
+      currentUid = data.localId;
+      await loadUserAndUnits();
+
+      document.getElementById('login-section').style.display = 'none';
+      document.getElementById('main-section').style.display  = 'block';
+    } catch (err) {
+      document.getElementById('login-error').textContent = err.message;
+      document.getElementById('login-btn').textContent = 'Sign In';
+    }
+  }
+
+  // Allow Enter key in login form
+  document.getElementById('password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') signIn();
+  });
+
+  // ── Load data ─────────────────────────────────────────────────────────────────
+  async function loadUserAndUnits() {
+    // Fetch user doc
+    const userRes = await fetch(`${FS_BASE}/users/${currentUid}`);
+    const userDoc = await userRes.json();
+    const fields  = userDoc.fields || {};
+
+    currentRole   = (fsValue(fields.roles) || [])[0] || 'user';
+    currentUnitId = fsValue(fields.unitId);
+    const name    = fsValue(fields.fullName) || 'Unknown';
+
+    document.getElementById('user-name').textContent  = name;
+    document.getElementById('user-role').innerHTML    = `<span class="badge badge-${currentRole}">${currentRole}</span>`;
+
+    // Fetch all units
+    const unitsRes  = await fetch(`${FS_BASE}/units?pageSize=50`);
+    const unitsData = await unitsRes.json();
+    allUnits = (unitsData.documents || []).map(doc => {
+      const id = doc.name.split('/').pop();
+      return {
+        id,
+        name:     fsValue(doc.fields.name)     || id,
+        unitType: fsValue(doc.fields.unitType) || '',
+      };
+    });
+
+    const currentUnit = allUnits.find(u => u.id === currentUnitId);
+    document.getElementById('user-unit').textContent = currentUnit
+      ? `${currentUnit.name} (${currentUnit.unitType})`
+      : (currentUnitId || 'none');
+
+    renderRoleButtons();
+    renderUnitButtons();
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────────
+  function renderRoleButtons() {
+    const container = document.getElementById('role-buttons');
+    container.innerHTML = '';
+    for (const role of ROLES) {
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-role' + (role === currentRole ? ' active' : '');
+      btn.textContent = role;
+      btn.onclick = () => setRole(role);
+      container.appendChild(btn);
+    }
+  }
+
+  function renderUnitButtons() {
+    const container = document.getElementById('unit-buttons');
+    container.innerHTML = '';
+    // Sort: battalion → company → platoon
+    const order = { battalion: 0, company: 1, platoon: 2 };
+    const sorted = [...allUnits].sort((a, b) =>
+      (order[a.unitType] ?? 9) - (order[b.unitType] ?? 9)
+    );
+    for (const unit of sorted) {
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-unit' + (unit.id === currentUnitId ? ' active' : '');
+      btn.innerHTML = `<span class="badge badge-${unit.unitType}">${unit.unitType}</span>${unit.name}`;
+      btn.onclick = () => setUnit(unit.id, unit.name);
+      container.appendChild(btn);
+    }
+  }
+
+  // ── Mutations ─────────────────────────────────────────────────────────────────
+  async function patchUser(fields, mask) {
+    const params = mask.map(f => `updateMask.fieldPaths=${encodeURIComponent(f)}`).join('&');
+    const res = await fetch(`${FS_BASE}/users/${currentUid}?${params}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(toFsDoc(fields)),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error?.message || 'Write failed');
+    }
+  }
+
+  async function setRole(role) {
+    try {
+      await patchUser({ roles: [role] }, ['roles']);
+      currentRole = role;
+      document.getElementById('user-role').innerHTML = `<span class="badge badge-${role}">${role}</span>`;
+      renderRoleButtons();
+      showStatus(`✓ Role changed to ${role}`, true);
+    } catch (err) {
+      showStatus(`✗ ${err.message}`, false);
+    }
+  }
+
+  async function setUnit(unitId, unitName) {
+    try {
+      await patchUser({ unitId }, ['unitId']);
+      currentUnitId = unitId;
+      document.getElementById('user-unit').textContent = `${unitName} (${allUnits.find(u=>u.id===unitId)?.unitType||''})`;
+      renderUnitButtons();
+      showStatus(`✓ Unit changed to ${unitName}`, true);
+    } catch (err) {
+      showStatus(`✗ ${err.message}`, false);
+    }
+  }
+</script>
+</body>
+</html>
