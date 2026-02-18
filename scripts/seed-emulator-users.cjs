@@ -39,12 +39,12 @@ const TEST_ASSIGNMENT_IDS = {
 };
 
 const authUsers = [
-  { key: 'admin', email: 'test-admin@e2e.local', displayName: 'Test Admin' },
-  { key: 'leader', email: 'test-leader@e2e.local', displayName: 'Test Leader' },
-  { key: 'user', email: 'test-user@e2e.local', displayName: 'Test User' },
-  { key: 'new', email: 'test-new@e2e.local', displayName: 'Test New User' },
-  { key: 'pending', email: 'test-pending@e2e.local', displayName: 'Test Pending User' },
-  { key: 'declined', email: 'test-declined@e2e.local', displayName: 'Test Declined User' },
+  { key: 'admin', email: 'test-admin@e2e.local', displayName: 'Test Admin', role: 'admin' },
+  { key: 'leader', email: 'test-leader@e2e.local', displayName: 'Test Leader', role: 'leader' },
+  { key: 'user', email: 'test-user@e2e.local', displayName: 'Test User', role: 'user' },
+  { key: 'new', email: 'test-new@e2e.local', displayName: 'Test New User', role: null },
+  { key: 'pending', email: 'test-pending@e2e.local', displayName: 'Test Pending User', role: null },
+  { key: 'declined', email: 'test-declined@e2e.local', displayName: 'Test Declined User', role: null },
 ];
 
 // ── Auth Emulator API ──────────────────────────────────────────────
@@ -77,6 +77,29 @@ async function createAuthUser(user) {
 
   const data = await res.json();
   return data.localId; // Auto-generated UID
+}
+
+/**
+ * Set Firebase Auth custom claims for a user via the emulator admin API.
+ * Claims are embedded in the JWT so they are available immediately without
+ * a Firestore round-trip, which makes role-gated UI appear faster in tests.
+ */
+async function setCustomClaims(uid, role) {
+  if (!role) return; // no claims to set
+  const claims = JSON.stringify({ role });
+  const url = `http://${AUTH_HOST}/identitytoolkit.googleapis.com/v1/projects/${PROJECT_ID}/accounts:update`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer owner',
+    },
+    body: JSON.stringify({ localId: uid, customAttributes: claims }),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    console.warn(`  Warning: could not set custom claims for ${uid}: ${body}`);
+  }
 }
 
 // ── Firestore Emulator API ─────────────────────────────────────────
@@ -144,7 +167,12 @@ async function seedAuthUsers() {
   for (const user of authUsers) {
     const uid = await createAuthUser(user);
     userUIDs[user.key] = uid;
-    console.log(`   Created: ${user.email} (uid: ${uid})`);
+    if (user.role) {
+      await setCustomClaims(uid, user.role);
+      console.log(`   Created: ${user.email} (uid: ${uid}, role: ${user.role})`);
+    } else {
+      console.log(`   Created: ${user.email} (uid: ${uid})`);
+    }
   }
 }
 

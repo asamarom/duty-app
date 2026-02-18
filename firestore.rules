@@ -52,7 +52,7 @@ service cloud.firestore {
     function getUserBattalionId() {
       let userUnitId = getUserDoc().data.unitId;
       let unitDoc = get(/databases/$(database)/documents/units/$(userUnitId));
-      return (unitDoc.data != null && unitDoc.data.battalionId != null)
+      return (unitDoc != null && unitDoc.data != null && 'battalionId' in unitDoc.data && unitDoc.data.battalionId != null)
         ? unitDoc.data.battalionId
         : userUnitId;
     }
