@@ -36,6 +36,7 @@ export interface UnitDoc {
 export interface PersonnelDoc {
   userId: string | null;
   unitId: string | null;
+  battalionId: string | null;
   serviceNumber: string;
   rank: string;
   firstName: string;

@@ -1,5 +1,6 @@
-import { doc, addDoc, setDoc, updateDoc, deleteDoc, collection, serverTimestamp, type FieldValue } from 'firebase/firestore';
+import { doc, addDoc, setDoc, updateDoc, deleteDoc, collection, serverTimestamp, getDoc, getDocs, query, where, type FieldValue } from 'firebase/firestore';
 import { db } from '@/integrations/firebase/client';
+import type { UserDoc } from '@/integrations/firebase/types';
 import { useUnits, Unit, UnitType, UnitWithChildren } from './useUnits';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -126,6 +127,59 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
       if (data.status !== undefined) updateData.status = data.status;
 
       await updateDoc(unitDocRef, updateData);
+
+      // When a commander (leader) is assigned to a unit, ensure they have a
+      // personnel record so they appear in the personnel list.
+      if (data.leader_id) {
+        const leaderId = data.leader_id;
+        try {
+          // Check if a personnel record already exists for this user.
+          const existingSnapshot = await getDocs(
+            query(collection(db, 'personnel'), where('userId', '==', leaderId))
+          );
+
+          if (existingSnapshot.empty) {
+            // Fetch the user's profile to populate the personnel record.
+            const userSnap = await getDoc(doc(db, 'users', leaderId));
+            const userData = userSnap.exists() ? (userSnap.data() as UserDoc) : null;
+
+            const fullName = userData?.fullName || '';
+            const nameParts = fullName.split(' ');
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
+
+            // Determine the battalionId for this unit.
+            const battalionId = findBattalionId(id);
+
+            const personnelData: Record<string, unknown> = {
+              userId: leaderId,
+              firstName,
+              lastName,
+              email: null,
+              phone: null,
+              serviceNumber: leaderId,
+              unitId: id,
+              rank: 'מ"פ', // Default commander rank
+              dutyPosition: 'Commander',
+              locationStatus: 'on_duty',
+              readinessStatus: 'ready',
+              isSignatureApproved: false,
+              skills: [],
+              driverLicenses: [],
+              localAddress: null,
+              profileImage: null,
+              createdAt: serverTimestamp(),
+            };
+            if (battalionId) {
+              personnelData.battalionId = battalionId;
+            }
+            await addDoc(collection(db, 'personnel'), personnelData);
+          }
+        } catch (personnelErr) {
+          // Personnel record creation is best-effort; don't fail the unit update.
+          console.error('[useUnitsManagement] Failed to ensure personnel record for leader', personnelErr);
+        }
+      }
 
       toast({ title: t('common.success'), description: t('units.updatedSuccess') });
       refetch();

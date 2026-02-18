@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   collection,
   getDocs,
@@ -83,6 +83,11 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
 
+  // Keep a ref that always points at the latest requests array so that
+  // approveRequest/rejectRequest can find requests even when the state
+  // hasn't propagated yet (e.g. module-level cache was stale on mount).
+  const latestRequestsRef = useRef<AssignmentRequest[]>(requests);
+
   const mapSnapshot = useCallback(async (snapshot: { docs: Array<{ id: string; data: () => unknown; ref?: unknown }> }): Promise<AssignmentRequest[]> => {
     return Promise.all(
       snapshot.docs.map(async (docSnap) => {
@@ -165,6 +170,32 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     );
   }, []);
 
+  // Fetch the current user's personnel record so we can scope incoming transfers.
+  // We store just the two IDs we need for filtering.
+  const [currentPersonnelId, setCurrentPersonnelId] = useState<string | null>(null);
+  const [currentUnitId, setCurrentUnitId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    const personnelRef = collection(db, 'personnel');
+    const q = query(personnelRef, where('userId', '==', user.uid));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (snapshot.docs.length > 0) {
+        const persDoc = snapshot.docs[0];
+        setCurrentPersonnelId(persDoc.id);
+        const data = persDoc.data() as PersonnelDoc;
+        setCurrentUnitId(data.unitId || null);
+      } else {
+        setCurrentPersonnelId(null);
+        setCurrentUnitId(null);
+      }
+    });
+
+    return unsubscribe;
+  }, [user?.uid]);
+
   useEffect(() => {
     const requestsRef = collection(db, 'assignmentRequests');
     const q = query(requestsRef, orderBy('requestedAt', 'desc'));
@@ -173,10 +204,18 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
       try {
         setError(null);
         const mappedRequests = await mapSnapshot(snapshot);
+        // Only show incoming transfers that target the current user's unit or
+        // their own personnel record — not every pending transfer system-wide.
         const incoming = mappedRequests.filter(r =>
-          r.status === 'pending' && !r.recipient_approved
+          r.status === 'pending' &&
+          !r.recipient_approved &&
+          (
+            (r.to_unit_id != null && r.to_unit_id === currentUnitId) ||
+            (r.to_personnel_id != null && r.to_personnel_id === currentPersonnelId)
+          )
         );
         _requestsCache = { requests: mappedRequests, incoming };
+        latestRequestsRef.current = mappedRequests;
         setRequests(mappedRequests);
         setIncomingTransfers(incoming);
       } catch (err) {
@@ -194,7 +233,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     });
 
     return unsubscribe;
-  }, [mapSnapshot]);
+  }, [mapSnapshot, currentPersonnelId, currentUnitId]);
 
   const refetch = useCallback(async () => {
     // With onSnapshot, data is kept live — nothing to do manually
@@ -300,8 +339,9 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
   }, [user]);
 
   const approveRequest = useCallback(async (requestId: string, _notes?: string) => {
-    // Find request data from local state
-    const localReq = requests.find(r => r.id === requestId);
+    // Always read from the ref so we get the latest data regardless of whether
+    // the React state update from the onSnapshot has flushed yet.
+    const localReq = latestRequestsRef.current.find(r => r.id === requestId);
     if (!localReq) {
       throw new Error(`Assignment request ${requestId} not found`);
     }
@@ -354,11 +394,12 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
 
     // j. Commit batch
     await batch.commit();
-  }, [user, requests]);
+  }, [user]);
 
   const rejectRequest = useCallback(async (requestId: string, _notes?: string) => {
-    // Find request data from local state
-    const localReq = requests.find(r => r.id === requestId);
+    // Always read from the ref so we get the latest data regardless of whether
+    // the React state update from the onSnapshot has flushed yet.
+    const localReq = latestRequestsRef.current.find(r => r.id === requestId);
     if (!localReq) {
       throw new Error(`Assignment request ${requestId} not found`);
     }
@@ -380,7 +421,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
 
     // e. Commit batch
     await batch.commit();
-  }, [user, requests]);
+  }, [user]);
 
   const recipientApprove = useCallback(async (requestId: string, notes?: string) => {
     await approveRequest(requestId, notes ? `Recipient approved: ${notes}` : 'Recipient approved the transfer');

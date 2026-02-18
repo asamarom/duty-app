@@ -27,7 +27,7 @@ export default function AddPersonnelPage() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { isAdmin } = useEffectiveRole();
-  const { battalionId: userBattalionId } = useUserBattalion();
+  const { unitId: userUnitId, battalionId: userBattalionId } = useUserBattalion();
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -51,7 +51,7 @@ export default function AddPersonnelPage() {
         phone: phone.trim() || null,
         email: email.trim() || null,
         userId: null,
-        unitId: userBattalionId || null,
+        unitId: userUnitId || null,
         battalionId: userBattalionId || null,
         dutyPosition: null,
         localAddress: null,

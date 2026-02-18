@@ -1,5 +1,5 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
-import { useAssignmentRequests } from '../useAssignmentRequests';
+import { useAssignmentRequests, _resetCacheForTesting } from '../useAssignmentRequests';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ─── Firestore mocks ──────────────────────────────────────────────────────────
@@ -95,6 +95,9 @@ function makeRequestDoc(overrides: Record<string, unknown> = {}) {
 describe('useAssignmentRequests Hook', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        // Reset the module-level cache so each test starts with a clean slate
+        // and the hook always starts with loading:true (not pre-populated state).
+        _resetCacheForTesting();
         // Default: onSnapshot immediately fires with an empty snapshot
         mockOnSnapshot.mockImplementation((_query: unknown, onNext: (snap: unknown) => void) => {
             onNext({ docs: [] });

@@ -46,6 +46,7 @@ export function usePersonnel(): UsePersonnelReturn {
       query(collection(db, 'personnel'), orderBy('lastName')),
       (snapshot) => {
         clearTimeout(timeoutId);
+        console.log('[usePersonnel] snapshot received, docs:', snapshot.size, 'empty:', snapshot.empty);
         const mappedPersonnel = snapshot.docs.map((doc) =>
           mapDocToPersonnel(doc.id, doc.data() as PersonnelDoc)
         );
