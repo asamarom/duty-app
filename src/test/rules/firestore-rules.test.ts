@@ -26,6 +26,7 @@ const FIRESTORE_PORT = 8085;
 const UIDs = {
   admin: 'uid-admin-001',
   leader: 'uid-leader-001',
+  leaderCompany: 'uid-leader-company-001', // leader assigned to a company (realistic setup)
   user: 'uid-user-001',
   userB: 'uid-user-battalion-b',
   newUser: 'uid-new-user',
@@ -33,6 +34,7 @@ const UIDs = {
 
 const BATTALION_A = 'battalion-001';
 const BATTALION_B = 'battalion-002';
+const COMPANY_A = 'company-a-001'; // child unit of BATTALION_A
 
 // ── Test Environment ──────────────────────────────────────────────────────────
 
@@ -112,9 +114,28 @@ beforeEach(async () => {
     });
 
     // Units
-    await setDoc(doc(db, 'units', 'unit-a-001'), {
+    // battalion-001: the root battalion (self-referential battalionId so getUserBattalionId()
+    // works correctly for users whose unitId IS the battalion ID directly).
+    await setDoc(doc(db, 'units', BATTALION_A), {
       name: 'Alpha Battalion', unitType: 'battalion', status: 'active',
       battalionId: BATTALION_A, parentId: null,
+      createdAt: '2024-01-01', updatedAt: '2024-01-01',
+    });
+    // company-a-001: a company inside BATTALION_A (realistic: leaders assigned here)
+    await setDoc(doc(db, 'units', COMPANY_A), {
+      name: 'Alpha Company', unitType: 'company', status: 'active',
+      battalionId: BATTALION_A, parentId: BATTALION_A,
+      createdAt: '2024-01-01', updatedAt: '2024-01-01',
+    });
+    await setDoc(doc(db, 'units', 'unit-a-001'), {
+      name: 'Alpha Battalion alias', unitType: 'battalion', status: 'active',
+      battalionId: BATTALION_A, parentId: null,
+      createdAt: '2024-01-01', updatedAt: '2024-01-01',
+    });
+    // Leader assigned to a company (realistic production setup)
+    await setDoc(doc(db, 'users', UIDs.leaderCompany), {
+      fullName: 'Company Leader', email: 'company-leader@test.com',
+      unitId: COMPANY_A, roles: ['leader'],
       createdAt: '2024-01-01', updatedAt: '2024-01-01',
     });
 
@@ -1006,6 +1027,81 @@ describe('Admin Unit Assignments', () => {
     const ctx = testEnv.authenticatedContext(UIDs.leader);
     await assertFails(
       deleteDoc(doc(ctx.firestore(), 'adminUnitAssignments', UIDs.leader + '_unit-a-001'))
+    );
+  });
+});
+
+// ── Regression: Battalion-Based Access for Company/Platoon-Level Leaders ──────
+//
+// Root cause: getUserBattalionId() used to return user.unitId directly.
+// Leaders are assigned to companies (user.unitId = company_id), but documents
+// store battalionId = battalion_id.  The comparison company_id == battalion_id
+// always fails → permission denied for all battalion-scoped reads.
+//
+// Fix: getUserBattalionId() now looks up units/{user.unitId}.battalionId.
+
+describe('Battalion-Based Access — Company/Platoon Unit Leaders (regression)', () => {
+  // UIDs.leaderCompany has unitId: COMPANY_A (company-a-001)
+  // COMPANY_A has battalionId: BATTALION_A
+  // So getUserBattalionId() should resolve to BATTALION_A
+
+  it('[REGRESSION] company-level leader can read personnel in their battalion', async () => {
+    const ctx = testEnv.authenticatedContext(UIDs.leaderCompany);
+    await assertSucceeds(
+      getDoc(doc(ctx.firestore(), 'personnel', 'personnel-a-001'))
+    );
+  });
+
+  it('[REGRESSION] company-level leader can read equipment in their battalion', async () => {
+    const ctx = testEnv.authenticatedContext(UIDs.leaderCompany);
+    await assertSucceeds(
+      getDoc(doc(ctx.firestore(), 'equipment', 'equip-a-001'))
+    );
+  });
+
+  it('[REGRESSION] company-level leader can read assignment requests in their battalion', async () => {
+    const ctx = testEnv.authenticatedContext(UIDs.leaderCompany);
+    await assertSucceeds(
+      getDoc(doc(ctx.firestore(), 'assignmentRequests', 'areq-a-001'))
+    );
+  });
+
+  it('[REGRESSION] company-level leader can read equipment assignments in their battalion', async () => {
+    const ctx = testEnv.authenticatedContext(UIDs.leaderCompany);
+    await assertSucceeds(
+      getDoc(doc(ctx.firestore(), 'equipmentAssignments', 'assign-a-001'))
+    );
+  });
+
+  it('[REGRESSION] company-level leader CANNOT read personnel in a different battalion', async () => {
+    const ctx = testEnv.authenticatedContext(UIDs.leaderCompany);
+    await assertFails(
+      getDoc(doc(ctx.firestore(), 'personnel', 'personnel-b-001'))
+    );
+  });
+
+  it('[REGRESSION] company-level leader CANNOT read equipment in a different battalion', async () => {
+    const ctx = testEnv.authenticatedContext(UIDs.leaderCompany);
+    await assertFails(
+      getDoc(doc(ctx.firestore(), 'equipment', 'equip-b-001'))
+    );
+  });
+
+  it('[REGRESSION] company-level leader can approve a pending request in their battalion', async () => {
+    const ctx = testEnv.authenticatedContext(UIDs.leaderCompany);
+    await assertSucceeds(
+      updateDoc(doc(ctx.firestore(), 'assignmentRequests', 'areq-a-001'), {
+        status: 'approved',
+      })
+    );
+  });
+
+  it('[REGRESSION] company-level leader cannot approve a request in a different battalion', async () => {
+    const ctx = testEnv.authenticatedContext(UIDs.leaderCompany);
+    await assertFails(
+      updateDoc(doc(ctx.firestore(), 'assignmentRequests', 'areq-b-001'), {
+        status: 'approved',
+      })
     );
   });
 });

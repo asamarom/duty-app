@@ -45,9 +45,16 @@ service cloud.firestore {
         getUserDoc().data.roles.size() > 0;
     }
 
-    // Get the user's battalion ID from their user document
+    // Get the user's battalion ID by resolving through the units hierarchy.
+    // Users are assigned to any unit level (battalion/company/platoon).
+    // All unit documents store a battalionId field pointing to their root battalion.
+    // We look up the user's unit document to get the correct battalion ID.
     function getUserBattalionId() {
-      return getUserDoc().data.unitId;
+      let userUnitId = getUserDoc().data.unitId;
+      let unitDoc = get(/databases/$(database)/documents/units/$(userUnitId));
+      return (unitDoc.data != null && unitDoc.data.battalionId != null)
+        ? unitDoc.data.battalionId
+        : userUnitId;
     }
 
     // Check if a document belongs to the same battalion as the user
