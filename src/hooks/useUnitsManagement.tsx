@@ -20,7 +20,7 @@ interface UseUnitsManagementReturn {
   platoons: Unit[];
   loading: boolean;
   error: Error | null;
-  refetch: () => Promise<void>;
+  refetch: () => void;
   getUnitById: (id: string) => Unit | undefined;
   getChildUnits: (parentId: string) => Unit[];
   getUnitAncestors: (unitId: string) => Unit[];
@@ -94,7 +94,7 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
       };
 
       toast({ title: t('common.success'), description: `${typeLabels[data.unit_type]} ${t('units.createdSuccess')}` });
-      await refetch();
+      refetch();
 
       return {
         id: docRef.id,
@@ -128,7 +128,7 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
       await updateDoc(unitDocRef, updateData);
 
       toast({ title: t('common.success'), description: t('units.updatedSuccess') });
-      await refetch();
+      refetch();
       return true;
     } catch (err) {
       toast({ title: t('common.error'), description: (err as Error).message, variant: 'destructive' });
@@ -142,7 +142,7 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
       await deleteDoc(unitDocRef);
 
       toast({ title: t('common.success'), description: t('units.deletedSuccess') });
-      await refetch();
+      refetch();
       return true;
     } catch (err) {
       toast({ title: t('common.error'), description: (err as Error).message, variant: 'destructive' });

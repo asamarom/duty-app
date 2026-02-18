@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser } from './utils/test-auth';
 
 test.describe('Performance', () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAsTestUser(page, 'admin');
+  });
+
   test('Dashboard first load under 3s', async ({ page }) => {
     const start = Date.now();
     await page.goto('/');
@@ -44,15 +49,15 @@ test.describe('Performance', () => {
     // Navigate to Personnel — data should be present from listener
     await page.goto('/personnel');
     await page.waitForLoadState('networkidle');
-    // Personnel table/list should have content from the onSnapshot listener
-    const personnelContent = page.locator('table tbody tr, [data-testid="personnel-row"], .personnel-list-item').first();
+    // Personnel items render as .card-tactical divs (PersonnelCard component)
+    const personnelContent = page.locator('.card-tactical').first();
     await expect(personnelContent).toBeVisible({ timeout: 5000 });
 
     // Navigate to Equipment — data should be present from listener
     await page.goto('/equipment');
     await page.waitForLoadState('networkidle');
-    // Equipment list should have content
-    const equipmentContent = page.locator('table tbody tr, [data-testid="equipment-row"], .equipment-list-item').first();
+    // Equipment renders a table on desktop (EquipmentTable component, hidden lg:table)
+    const equipmentContent = page.locator('table tbody tr').first();
     await expect(equipmentContent).toBeVisible({ timeout: 5000 });
   });
 });
