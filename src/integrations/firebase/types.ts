@@ -25,6 +25,7 @@ export interface UnitDoc {
   name: string;
   unitType: UnitType;
   parentId: string | null;
+  battalionId: string | null;
   designation: string | null;
   leaderId: string | null;
   status: UnitStatus;
