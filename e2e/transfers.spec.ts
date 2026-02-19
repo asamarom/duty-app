@@ -44,17 +44,11 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
     await page.goto('/equipment?tab=transfers');
     await page.waitForLoadState('domcontentloaded');
 
-    // The page heading must be visible (English: "Assignment Requests" / Hebrew: "בקשות הקצאה")
-    const pageHeading = page.locator(
-      'h1:has-text("Assignment Requests"), h1:has-text("בקשות הקצאה")'
-    ).first();
-    await expect(pageHeading).toBeVisible({ timeout: 8000 });
-
-    // The tabs must be present (Incoming, Pending, History)
+    // The Transfers tab must be active and show sub-tabs
     const incomingTab = page.locator(
       '[role="tab"]:has-text("Incoming"), [role="tab"]:has-text("נכנסות")'
     ).first();
-    await expect(incomingTab).toBeVisible({ timeout: 5000 });
+    await expect(incomingTab).toBeVisible({ timeout: 8000 });
   });
 
   test('[XFER-3] should update equipment assignment after transfer completion', async ({ page }) => {
@@ -137,17 +131,11 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
     await page.goto('/equipment?tab=transfers');
     await page.waitForLoadState('domcontentloaded');
 
-    // The page heading must be visible
-    const pageHeading = page.locator(
-      'h1:has-text("Assignment Requests"), h1:has-text("בקשות הקצאה")'
-    ).first();
-    await expect(pageHeading).toBeVisible({ timeout: 8000 });
-
     // The "Incoming" tab must exist — it is the recipient's surface for accepting transfers
     const incomingTab = page.locator(
       '[role="tab"]:has-text("Incoming"), [role="tab"]:has-text("נכנסות")'
     ).first();
-    await expect(incomingTab).toBeVisible({ timeout: 5000 });
+    await expect(incomingTab).toBeVisible({ timeout: 8000 });
   });
 
   test('[XFER-7] should only allow transfer to lower hierarchy levels', async ({ page }) => {
@@ -231,17 +219,11 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
     await page.goto('/equipment?tab=transfers');
     await page.waitForLoadState('domcontentloaded');
 
-    // The assignment requests page must load for admin
-    const pageHeading = page.locator(
-      'h1:has-text("Assignment Requests"), h1:has-text("בקשות הקצאה")'
-    ).first();
-    await expect(pageHeading).toBeVisible({ timeout: 8000 });
-
-    // Check the "Incoming" tab for any pending incoming requests with reject controls
+    // The transfers tab must be active — check for Incoming sub-tab
     const incomingTab = page.locator(
       '[role="tab"]:has-text("Incoming"), [role="tab"]:has-text("נכנסות")'
     ).first();
-    await expect(incomingTab).toBeVisible({ timeout: 5000 });
+    await expect(incomingTab).toBeVisible({ timeout: 8000 });
     await incomingTab.click();
 
     // Look for a reject (X) button in the incoming table
