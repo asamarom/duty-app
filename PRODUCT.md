@@ -107,6 +107,13 @@ The application follows a standard military organizational structure, allowing f
 - [XFER-10] Equipment that was requested to be transferred but was declined - will still be assigned to the source user/unit and its status will roll back to the original assignment status. The transfer failure will be logged in the `equipment_transfer_history`.
 - [XFER-11] For bulk items (no serial number), the user can specify the quantity to transfer (1 to available).
 - [XFER-12] Transfer quantity is preserved in the transfer request and applied when the transfer is approved.
+- [XFER-13] Transfers tab shows role-based sub-tabs: Incoming + History for users/leaders; Incoming + All Pending + History for admins.
+- [XFER-14] Transfer cards display quantity for bulk items (no serial number).
+- [XFER-15] Transfer cards display serial number for serialized items.
+- [XFER-16] Transfers integrated into Equipment page as a second tab; `/assignment-requests` redirects there.
+- [XFER-17] Accepting a serialized transfer requires a signature.
+  - [XFER-17.1] First-time: user draws SVG signature on canvas; saved to personnel record in Firestore.
+  - [XFER-17.2] Returning user: checkbox confirmation uses saved signature silently.
 
 ---
 
