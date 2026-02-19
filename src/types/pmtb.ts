@@ -22,6 +22,7 @@ export interface Personnel {
   profileImage?: string;
   readinessStatus: ReadinessStatus;
   isSignatureApproved?: boolean;
+  signature?: string;
 }
 
 export interface Equipment {

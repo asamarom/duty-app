@@ -51,6 +51,7 @@ export interface PersonnelDoc {
   skills: string[];
   driverLicenses: string[];
   isSignatureApproved: boolean;
+  signature?: string | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

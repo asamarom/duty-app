@@ -30,6 +30,7 @@ function mapDocToPersonnel(id: string, data: PersonnelDoc): Personnel {
     profileImage: data.profileImage || undefined,
     readinessStatus: data.readinessStatus,
     isSignatureApproved: data.isSignatureApproved,
+    signature: data.signature || undefined,
   };
 }
 
