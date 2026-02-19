@@ -345,6 +345,7 @@ export const translations = {
     'transfers.transferRejectedDesc': 'You have rejected the incoming transfer.',
     'transfers.awaitingRecipient': 'Awaiting Recipient',
     'transfers.failedToProcess': 'Failed to process request.',
+    'transfers.qty': 'Qty',
 
     // Signup Approvals
     'approvals.title': 'Signup Approvals',
@@ -866,6 +867,7 @@ export const translations = {
     'transfers.transferRejectedDesc': 'דחית את ההעברה הנכנסת.',
     'transfers.awaitingRecipient': 'ממתין לנמען',
     'transfers.failedToProcess': 'עיבוד הבקשה נכשל.',
+    'transfers.qty': 'כמות',
     'transfers.incoming': 'נכנסות',
     'transfers.incomingTransfers': 'העברות נכנסות',
     'transfers.noIncoming': 'אין העברות נכנסות הממתינות לאישורך.',
