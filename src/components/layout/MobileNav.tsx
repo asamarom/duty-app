@@ -50,7 +50,6 @@ export function MobileNav() {
   const moreItems: { name: string; href: string; adminOnly?: boolean }[] = [
     { name: t('nav.units'), href: '/units' },
     { name: t('nav.approvals'), href: '/approvals', adminOnly: true },
-    { name: t('nav.transfers'), href: '/assignment-requests', adminOnly: true },
     { name: t('nav.reports'), href: '/reports' },
     { name: t('nav.settings'), href: '/settings' },
   ];

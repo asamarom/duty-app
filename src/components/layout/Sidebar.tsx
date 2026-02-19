@@ -15,7 +15,6 @@ import {
   LogOut,
   UserCheck,
   Building2,
-  ArrowLeftRight,
   ShieldCheck,
   User,
 } from 'lucide-react';
@@ -42,7 +41,7 @@ export function Sidebar() {
   const navigation: NavItem[] = [
     { name: t('nav.dashboard'), href: '/', icon: LayoutDashboard },
     { name: t('nav.personnel'), href: '/personnel', icon: Users },
-    { name: t('nav.equipment'), href: '/equipment', icon: Package },
+    { name: t('nav.equipment'), href: '/equipment', icon: Package, showBadge: true },
     { name: t('nav.units'), href: '/units', icon: Building2 },
     { name: t('nav.reports'), href: '/reports', icon: ClipboardList },
   ];
@@ -50,7 +49,7 @@ export function Sidebar() {
   // Add approvals link for admins and leaders (respecting admin mode)
   if (hasAdminAccess) {
     navigation.push({ name: t('nav.approvals'), href: '/approvals', icon: UserCheck });
-    navigation.push({ name: t('nav.transfers'), href: '/assignment-requests', icon: ArrowLeftRight, showBadge: true });
+
   }
 
   const bottomNavigation = [
