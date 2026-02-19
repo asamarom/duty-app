@@ -286,8 +286,8 @@ export default function EquipmentPage() {
           </div>
         )}
 
-        {/* My Transfer Requests - shown only for regular users */}
-        {!hasAdminAccess && (
+        {/* My Transfer Requests - shown for regular users and leaders */}
+        {!isAdmin && (
           <div data-testid="my-requests-section" className="mt-6">
             <Collapsible open={myRequestsOpen} onOpenChange={setMyRequestsOpen}>
               <CollapsibleTrigger asChild>
