@@ -248,7 +248,7 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
       }
     } else {
       // No incoming transfers to reject in seed data — page loaded correctly, which is sufficient
-      const tabContent = page.locator('[role="tabpanel"]').first();
+      const tabContent = page.locator('[role="tabpanel"][data-state="active"]').first();
       await expect(tabContent).toBeVisible({ timeout: 5000 });
     }
   });
