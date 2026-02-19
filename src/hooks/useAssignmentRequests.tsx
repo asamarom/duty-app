@@ -30,6 +30,7 @@ export interface AssignmentRequest {
   id: string;
   equipment_id: string;
   equipment_name?: string;
+  equipment_serial?: string;
   from_unit_type: string;
   from_unit_id?: string;
   from_personnel_id?: string;
@@ -148,6 +149,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
           id: docSnap.id,
           equipment_id: data.equipmentId,
           equipment_name: equipmentName,
+          equipment_serial: data.equipmentSerialNumber ?? undefined,
           from_unit_type: data.fromUnitType,
           from_unit_id: data.fromUnitId || undefined,
           from_personnel_id: data.fromPersonnelId || undefined,
@@ -252,6 +254,9 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     const equipBattalionId = equipDoc?.exists()
       ? (equipDoc.data() as EquipmentDoc & { battalionId?: string }).battalionId
       : undefined;
+    const equipSerial = equipDoc?.exists()
+      ? (equipDoc.data() as EquipmentDoc).serialNumber ?? null
+      : null;
 
     // Get current assignment for "from" details
     const currentAssignmentSnapshot = await getDocs(
@@ -320,6 +325,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
       toUnitId: toUnitId || null,
       toUnitType,
       toName,
+      equipmentSerialNumber: equipSerial,
     };
 
     if (notes) {

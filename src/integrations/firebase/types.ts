@@ -98,6 +98,7 @@ export interface AssignmentRequestDoc {
   quantity?: number;
   // Denormalized display names
   equipmentName?: string;
+  equipmentSerialNumber?: string | null;
   fromName?: string;
   toName?: string;
   requestedByName?: string;
