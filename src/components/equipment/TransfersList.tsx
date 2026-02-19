@@ -3,7 +3,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Package, ArrowRight, Check, X, Clock, History, Inbox, Loader2 } from 'lucide-react';
+import { Package, ArrowRight, ArrowLeft, Check, X, Clock, History, Inbox, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAssignmentRequests, AssignmentRequest } from '@/hooks/useAssignmentRequests';
@@ -18,7 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
 export function TransfersList() {
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
   const { isAdmin } = useEffectiveRole();
   const { requests, incomingTransfers, loading, recipientApprove, recipientReject } = useAssignmentRequests();
   const { currentPersonnel, saveSignature } = useCurrentPersonnel();
@@ -91,7 +91,7 @@ export function TransfersList() {
               </p>
               <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1 flex-wrap">
                 <span>{request.from_unit_name}</span>
-                <ArrowRight className="h-3 w-3 shrink-0" />
+                {dir === 'rtl' ? <ArrowLeft className="h-3 w-3 shrink-0" /> : <ArrowRight className="h-3 w-3 shrink-0" />}
                 <span>{request.to_unit_name}</span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
