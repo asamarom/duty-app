@@ -121,7 +121,7 @@ export default function EquipmentPage() {
     <MainLayout>
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         {/* Tab bar */}
-        <div className="px-4 lg:px-6 pt-4 lg:pt-6 border-b border-border">
+        <div className="flex px-4 lg:px-6 pt-4 lg:pt-6 border-b border-border">
           <TabsList>
             <TabsTrigger value="equipment" className="gap-2">
               <Package className="h-4 w-4" />

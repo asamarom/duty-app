@@ -147,7 +147,8 @@ export function TransfersList() {
   return (
     <>
       <Tabs defaultValue="incoming">
-        <TabsList className="mb-4">
+        <div className="flex mb-4">
+        <TabsList>
           <TabsTrigger value="incoming" className="gap-2">
             <Inbox className="h-4 w-4" />
             {t('transfers.incoming')}
@@ -166,6 +167,7 @@ export function TransfersList() {
             {t('transfers.history')}
           </TabsTrigger>
         </TabsList>
+        </div>
 
         <TabsContent value="incoming">
           {incomingTransfers.length === 0
