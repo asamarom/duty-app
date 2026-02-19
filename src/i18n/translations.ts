@@ -513,6 +513,14 @@ export const translations = {
     // Transfers - All Pending
     'transfers.allPending': 'All Pending',
     'transfers.allPendingRequests': 'All Pending Requests (System-wide)',
+
+    // Signature Dialog
+    'signature.title': 'Sign to Accept Transfer',
+    'signature.desc': 'Your signature is required to accept',
+    'signature.drawPrompt': 'Draw your signature below using your finger or stylus',
+    'signature.confirmCheckbox': 'I confirm my saved signature applies to this transfer',
+    'signature.clear': 'Clear',
+    'signature.saveAndAccept': 'Save & Accept',
   },
   he: {
     // Navigation
@@ -1022,6 +1030,14 @@ export const translations = {
     // Transfers - All Pending
     'transfers.allPending': 'כל הממתינות',
     'transfers.allPendingRequests': 'כל הבקשות הממתינות (כלל המערכת)',
+
+    // Signature Dialog
+    'signature.title': 'חתימה לאישור העברה',
+    'signature.desc': 'נדרשת חתימתך לאישור',
+    'signature.drawPrompt': 'צייר את חתימתך למטה באמצעות האצבע או העט',
+    'signature.confirmCheckbox': 'אני מאשר שחתימתי השמורה חלה על העברה זו',
+    'signature.clear': 'נקה',
+    'signature.saveAndAccept': 'שמור וקבל',
   },
 } as const;
 
