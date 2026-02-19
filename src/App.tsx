@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AdminModeProvider } from "@/contexts/AdminModeContext";
 import { AuthProvider } from "@/hooks/useAuth";
@@ -15,7 +15,6 @@ const Index = lazy(() => import("./pages/Index"));
 const SignupRequestPage = lazy(() => import("./pages/SignupRequestPage"));
 const PendingApprovalPage = lazy(() => import("./pages/PendingApprovalPage"));
 const AdminApprovalsPage = lazy(() => import("./pages/AdminApprovalsPage"));
-const AssignmentRequestsPage = lazy(() => import("./pages/AssignmentRequestsPage"));
 const PersonnelPage = lazy(() => import("./pages/PersonnelPage"));
 const PersonnelDetailPage = lazy(() => import("./pages/PersonnelDetailPage"));
 const AddPersonnelPage = lazy(() => import("./pages/AddPersonnelPage"));
@@ -53,7 +52,7 @@ const App = () => (
                 } />
                 <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
                 <Route path="/approvals" element={<ProtectedRoute><AdminApprovalsPage /></ProtectedRoute>} />
-                <Route path="/assignment-requests" element={<ProtectedRoute allowedRoles={['admin', 'leader']}><AssignmentRequestsPage /></ProtectedRoute>} />
+                <Route path="/assignment-requests" element={<Navigate to="/equipment?tab=transfers" replace />} />
                 <Route path="/personnel" element={<ProtectedRoute><PersonnelPage /></ProtectedRoute>} />
                 <Route path="/personnel/add" element={<ProtectedRoute><AddPersonnelPage /></ProtectedRoute>} />
                 <Route path="/personnel/:id" element={<ProtectedRoute><PersonnelDetailPage /></ProtectedRoute>} />
