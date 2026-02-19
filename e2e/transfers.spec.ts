@@ -40,8 +40,8 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
   test('[XFER-2] should show pending transfers for recipient to accept', async ({ page }) => {
     await loginAsTestUser(page, 'admin');
 
-    // Navigate directly to assignment-requests page (admin/leader only)
-    await page.goto('/assignment-requests');
+    // Navigate directly to equipment transfers tab
+    await page.goto('/equipment?tab=transfers');
     await page.waitForLoadState('domcontentloaded');
 
     // The page heading must be visible (English: "Assignment Requests" / Hebrew: "בקשות הקצאה")
@@ -133,8 +133,8 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
   test('[XFER-6] should only allow intended recipient to accept personal equipment', async ({ page }) => {
     await loginAsTestUser(page, 'admin');
 
-    // Navigate to the assignment-requests page (admin/leader only)
-    await page.goto('/assignment-requests');
+    // Navigate to the equipment transfers tab
+    await page.goto('/equipment?tab=transfers');
     await page.waitForLoadState('domcontentloaded');
 
     // The page heading must be visible
@@ -228,7 +228,7 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
 
   test('[XFER-10] should rollback status when transfer is declined', async ({ page }) => {
     await loginAsTestUser(page, 'admin');
-    await page.goto('/assignment-requests');
+    await page.goto('/equipment?tab=transfers');
     await page.waitForLoadState('domcontentloaded');
 
     // The assignment requests page must load for admin

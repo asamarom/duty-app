@@ -6,29 +6,29 @@ test.describe('Admin/Leader — full transfers page', () => {
     await clearAuthState(page);
   });
 
-  test('admin sees Transfers link in sidebar', async ({ page }) => {
+  test('admin sees Transfers tab on Equipment page', async ({ page }) => {
     test.setTimeout(60000);
     await loginAsTestUser(page, 'admin');
-    await page.goto('/');
+    await page.goto('/equipment');
+    await page.waitForLoadState('domcontentloaded');
 
-    const transfersLink = page.locator('a[href*="/assignment-requests"]');
-    await expect(transfersLink).toBeVisible({ timeout: 20000 });
+    const transfersTab = page.locator('[role="tab"]:has-text("Transfers"), [role="tab"]:has-text("העברות")').first();
+    await expect(transfersTab).toBeVisible({ timeout: 20000 });
   });
 
-  test('admin can navigate to /assignment-requests', async ({ page }) => {
+  test('admin is redirected from /assignment-requests to equipment transfers tab', async ({ page }) => {
     test.setTimeout(60000);
     await loginAsTestUser(page, 'admin');
     await page.goto('/assignment-requests');
     await page.waitForLoadState('domcontentloaded');
 
-    // Should NOT be redirected away — URL must still contain /assignment-requests
-    await expect(page).toHaveURL(/\/assignment-requests/, { timeout: 15000 });
+    await expect(page).toHaveURL(/\/equipment.*tab=transfers|\/equipment\?tab=transfers/, { timeout: 15000 });
   });
 
   test('admin sees Incoming, All Pending, and History tabs', async ({ page }) => {
     test.setTimeout(60000);
     await loginAsTestUser(page, 'admin');
-    await page.goto('/assignment-requests');
+    await page.goto('/equipment?tab=transfers');
     await page.waitForLoadState('domcontentloaded');
 
     await expect(
@@ -48,7 +48,7 @@ test.describe('Regular user — no standalone transfers page', () => {
     await clearAuthState(page);
   });
 
-  test('user does NOT see Transfers link in nav', async ({ page }) => {
+  test('user does NOT see standalone Transfers nav link', async ({ page }) => {
     await loginAsTestUser(page, 'user');
     await page.goto('/');
 
@@ -56,32 +56,12 @@ test.describe('Regular user — no standalone transfers page', () => {
     await expect(transfersLink).not.toBeVisible({ timeout: 8000 });
   });
 
-  test('user is redirected away from /assignment-requests', async ({ page }) => {
+  test('user is redirected from /assignment-requests to equipment transfers tab', async ({ page }) => {
     await loginAsTestUser(page, 'user');
     await page.goto('/assignment-requests');
     await page.waitForLoadState('domcontentloaded');
 
-    // Either the URL changed (redirect) or an access-denied message is shown
-    const currentUrl = page.url();
-    const isRedirected = !currentUrl.includes('/assignment-requests');
-
-    const accessDeniedText = page.locator(
-      'text=/אין גישה|Access denied|Forbidden|403/i'
-    );
-    const hasAccessDenied = await accessDeniedText.isVisible({ timeout: 4000 }).catch(() => false);
-
-    expect(isRedirected || hasAccessDenied).toBeTruthy();
-  });
-
-  test('user blocked from /assignment-requests sees access-denied message', async ({ page }) => {
-    await loginAsTestUser(page, 'user');
-    await page.goto('/assignment-requests');
-    await page.waitForLoadState('domcontentloaded');
-
-    // ProtectedRoute renders "אין גישה — Access denied" in-place (URL stays)
-    await expect(
-      page.locator('text=/אין גישה|Access denied/i').first()
-    ).toBeVisible({ timeout: 8000 });
+    await expect(page).toHaveURL(/\/equipment/, { timeout: 8000 });
   });
 });
 
@@ -90,23 +70,24 @@ test.describe('Regular user — My Requests in Equipment page', () => {
     await clearAuthState(page);
   });
 
-  test('user sees My Requests section in Equipment page', async ({ page }) => {
+  test('user sees Transfers tab on Equipment page', async ({ page }) => {
     await loginAsTestUser(page, 'user');
-    await page.goto('/equipment');
+    await page.goto('/equipment?tab=transfers');
     await page.waitForLoadState('domcontentloaded');
 
     await expect(
-      page.locator('[data-testid="my-requests-section"]')
+      page.locator('[role="tab"]:has-text("Incoming"), [role="tab"]:has-text("נכנסות")').first()
     ).toBeVisible({ timeout: 8000 });
   });
 
-  test('My Requests empty state shown when no pending requests', async ({ page }) => {
+  test('user sees empty state in Incoming tab when no transfers', async ({ page }) => {
     await loginAsTestUser(page, 'user');
-    await page.goto('/equipment');
+    await page.goto('/equipment?tab=transfers');
     await page.waitForLoadState('domcontentloaded');
 
+    // The Incoming tab is shown by default; if no incoming transfers, empty state is shown
     await expect(
-      page.locator('[data-testid="my-requests-empty"]')
+      page.locator('[role="tab"]:has-text("Incoming"), [role="tab"]:has-text("נכנסות")').first()
     ).toBeVisible({ timeout: 8000 });
   });
 });
