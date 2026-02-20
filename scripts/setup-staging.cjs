@@ -221,6 +221,25 @@ async function seedUsers(db) {
     await db.collection('user_roles').doc(roleData.uid).set(roleData);
     console.log(`  ✓ Assigned role ${roleData.role} to ${roleData.uid.split('-')[1]}`);
   }
+
+  // Create approved signup requests for test users
+  for (const user of users) {
+    await db.collection('signupRequests').add({
+      userId: user.uid,
+      fullName: `${user.firstName} ${user.lastName}`,
+      email: user.email,
+      phone: user.cellPhone,
+      serviceNumber: user.serviceNumber,
+      requestedUnitId: user.battalion,
+      status: 'approved',
+      declineReason: null,
+      reviewedBy: 'system',
+      reviewedAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+    console.log(`  ✓ Created approved signup request for ${user.email}`);
+  }
 }
 
 async function seedEquipment(db) {
