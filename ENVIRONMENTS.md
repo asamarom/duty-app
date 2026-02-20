@@ -56,6 +56,8 @@ git push origin [your-branch]
 # Example: https://duty-app-git-[branch]-[team].vercel.app
 ```
 
+**Note**: After adding/updating Vercel environment variables, you must trigger a new deployment for changes to take effect.
+
 ## 🔑 Test Users (Staging Only)
 
 The staging environment includes these test users:
