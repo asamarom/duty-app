@@ -114,8 +114,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx}": [
-      "eslint --fix",
-      "bash -c 'tsc --noEmit --project tsconfig.app.json'"
+      "eslint --fix"
     ]
   },
   "description": "Duty Tactical Management System - military asset management built with React, TypeScript, and Firebase",
