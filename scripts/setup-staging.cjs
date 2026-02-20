@@ -29,9 +29,23 @@ async function main() {
 
     // Check if we're already initialized
     if (!admin.apps.length) {
-      admin.initializeApp({
-        projectId: STAGING_PROJECT_ID,
-      });
+      // Try to use service account key if it exists
+      const serviceAccountPath = path.join(__dirname, '..', 'service-account-staging.json');
+
+      if (fs.existsSync(serviceAccountPath)) {
+        console.log('   Using service account key...');
+        const serviceAccount = require(serviceAccountPath);
+        admin.initializeApp({
+          credential: admin.credential.cert(serviceAccount),
+          projectId: STAGING_PROJECT_ID,
+        });
+      } else {
+        console.log('   Using application default credentials...');
+        console.log('   (Run "gcloud auth application-default login" if this fails)');
+        admin.initializeApp({
+          projectId: STAGING_PROJECT_ID,
+        });
+      }
     }
 
     const db = admin.firestore();
@@ -122,6 +136,8 @@ async function seedUnits(db) {
 }
 
 async function seedUsers(db) {
+  const TEST_PASSWORD = 'TestPassword123!';
+
   const users = [
     {
       uid: 'test-admin-uid',
@@ -172,6 +188,26 @@ async function seedUsers(db) {
     { uid: 'test-leader-uid', role: 'leader' },
     { uid: 'test-user-uid', role: 'user' }
   ];
+
+  // Create Firebase Auth users
+  for (const user of users) {
+    try {
+      await admin.auth().createUser({
+        uid: user.uid,
+        email: user.email,
+        password: TEST_PASSWORD,
+        displayName: `${user.firstName} ${user.lastName}`,
+        emailVerified: true
+      });
+      console.log(`  ✓ Created auth user: ${user.email}`);
+    } catch (error) {
+      if (error.code === 'auth/uid-already-exists') {
+        console.log(`  ℹ️  Auth user already exists: ${user.email}`);
+      } else {
+        throw error;
+      }
+    }
+  }
 
   // Create personnel records
   for (const user of users) {
