@@ -1,0 +1,163 @@
+name: Deploy & Test Pipeline
+
+# This workflow complements ci.yml by testing on REAL deployed environments.
+# ci.yml runs: typecheck, lint, unit tests, rules tests, E2E with emulators
+# This workflow runs: deploy to staging → E2E on real staging → deploy to prod
+#
+# Flow:
+# 1. CI workflow runs all tests with emulators
+# 2. This workflow deploys to Vercel staging and tests the real deployment
+# 3. If staging tests pass, deploys to production
+# 4. Runs smoke tests on production
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  # Trigger on CI workflow completion
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches: [main]
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  # Step 1: Deploy to Staging (only after CI passes)
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    # Only run if CI workflow completed successfully, or if triggered directly
+    if: |
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
+    outputs:
+      preview-url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Staging
+        id: deploy
+        run: |
+          URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "Preview URL: $URL"
+
+  # Step 2: Run E2E Tests on Real Staging Deployment
+  test-staging:
+    name: E2E Tests on Staging Deployment
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E Tests Against Staging
+        env:
+          STAGING_URL: ${{ needs.deploy-staging.outputs.preview-url }}
+        run: npm run test:e2e:staging
+
+      - name: Upload Staging Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-e2e-report
+          path: playwright-report/
+          retention-days: 30
+
+  # Step 3: Deploy to Production (only on main branch, after tests pass)
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, test-staging]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Production
+        run: |
+          URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "Production URL: $URL"
+
+      - name: Notify Deployment Success
+        run: |
+          echo "✅ Production deployment successful!"
+          echo "All E2E tests passed on staging before production deployment"
+
+  # Step 4: Smoke Test Production (optional but recommended)
+  smoke-test-production:
+    name: Smoke Test Production
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Critical Path Tests on Production
+        run: npm run test:e2e:prod || echo "⚠️ Production smoke tests failed, but deployment already completed"
+        continue-on-error: true
+
+      - name: Upload Production Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-smoke-test-report
+          path: playwright-report/
+          retention-days: 30
