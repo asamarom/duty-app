@@ -15,39 +15,42 @@ echo ""
 
 # Check if vercel is installed
 if ! command -v vercel &> /dev/null; then
-    echo "❌ Vercel CLI not found. Installing..."
-    npm install -g vercel
+    echo "⚠️  Vercel CLI not found. Installing locally..."
+    npm install --save-dev vercel
+    VERCEL_CMD="npx vercel"
+else
+    VERCEL_CMD="vercel"
 fi
 
 echo "📝 Setting environment variables for preview deployments..."
 echo ""
 
 # Set staging Firebase config for preview deployments
-vercel env add VITE_TEST_MODE preview <<EOF
+$VERCEL_CMD env add VITE_TEST_MODE preview <<EOF
 true
 EOF
 
-vercel env add VITE_FIREBASE_API_KEY preview <<EOF
+$VERCEL_CMD env add VITE_FIREBASE_API_KEY preview <<EOF
 AIzaSyBCEsDWXYAP-2I6JnbO5rgmdUCCx_7qEd4
 EOF
 
-vercel env add VITE_FIREBASE_AUTH_DOMAIN preview <<EOF
+$VERCEL_CMD env add VITE_FIREBASE_AUTH_DOMAIN preview <<EOF
 duty-staging.firebaseapp.com
 EOF
 
-vercel env add VITE_FIREBASE_PROJECT_ID preview <<EOF
+$VERCEL_CMD env add VITE_FIREBASE_PROJECT_ID preview <<EOF
 duty-staging
 EOF
 
-vercel env add VITE_FIREBASE_STORAGE_BUCKET preview <<EOF
+$VERCEL_CMD env add VITE_FIREBASE_STORAGE_BUCKET preview <<EOF
 duty-staging.firebasestorage.app
 EOF
 
-vercel env add VITE_FIREBASE_MESSAGING_SENDER_ID preview <<EOF
+$VERCEL_CMD env add VITE_FIREBASE_MESSAGING_SENDER_ID preview <<EOF
 37921740435
 EOF
 
-vercel env add VITE_FIREBASE_APP_ID preview <<EOF
+$VERCEL_CMD env add VITE_FIREBASE_APP_ID preview <<EOF
 1:37921740435:web:f89ab09d3541cc47dcdf66
 EOF
 

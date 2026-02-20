@@ -138,9 +138,10 @@ async function seedUnits(db) {
 async function seedUsers(db) {
   const TEST_PASSWORD = 'TestPassword123!';
 
+  // UIDs must match those in src/lib/testAuth.ts
   const users = [
     {
-      uid: 'test-admin-uid',
+      uid: '00000000-0000-0000-0000-000000000001',
       email: 'test-admin@e2e.local',
       serviceNumber: 'ADM-001',
       firstName: 'Test',
@@ -154,7 +155,7 @@ async function seedUsers(db) {
       signatureApproved: true
     },
     {
-      uid: 'test-leader-uid',
+      uid: '00000000-0000-0000-0000-000000000002',
       email: 'test-leader@e2e.local',
       serviceNumber: 'LDR-001',
       firstName: 'Test',
@@ -168,7 +169,7 @@ async function seedUsers(db) {
       signatureApproved: true
     },
     {
-      uid: 'test-user-uid',
+      uid: '00000000-0000-0000-0000-000000000003',
       email: 'test-user@e2e.local',
       serviceNumber: 'USR-001',
       firstName: 'Test',
@@ -184,9 +185,9 @@ async function seedUsers(db) {
   ];
 
   const roles = [
-    { uid: 'test-admin-uid', role: 'admin' },
-    { uid: 'test-leader-uid', role: 'leader' },
-    { uid: 'test-user-uid', role: 'user' }
+    { uid: '00000000-0000-0000-0000-000000000001', role: 'admin' },
+    { uid: '00000000-0000-0000-0000-000000000002', role: 'leader' },
+    { uid: '00000000-0000-0000-0000-000000000003', role: 'user' }
   ];
 
   // Create Firebase Auth users
