@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-20T06:55:08.415Z",
+  "data": {
+    "effectId": "01KHWX9CGPR65S9YNXMDV94727",
+    "invocationKey": "rtl-alignment-fix:S000007:update-product-md",
+    "invocationHash": "8a7056978631732ca2915fcb3d098791a90e5c8bed4501cbdfdfba741a964ed0",
+    "stepId": "S000007",
+    "taskId": "update-product-md",
+    "kind": "agent",
+    "label": "Update PRODUCT.md with RTL requirement",
+    "taskDefRef": "tasks/01KHWX9CGPR65S9YNXMDV94727/task.json"
+  },
+  "checksum": "15ca67e9b7440d18558cb56fe9cdf2c8ea73ab3629e61e1cfa4a4abd4515b624"
+}

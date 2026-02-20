@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHWWD5FKJZBGC4WR5RV83W8S",
+  "taskId": "write-rtl-test",
+  "invocationKey": "rtl-alignment-fix:S000001:write-rtl-test",
+  "stepId": "S000001",
+  "kind": "agent",
+  "title": "Write E2E test for RTL alignment",
+  "description": "Create Playwright E2E test to verify RTL text-align for all pages",
+  "io": {
+    "inputJsonPath": "tasks/01KHWWD5FKJZBGC4WR5RV83W8S/input.json",
+    "outputJsonPath": "tasks/01KHWWD5FKJZBGC4WR5RV83W8S/result.json"
+  },
+  "inputs": {
+    "pages": [
+      "all"
+    ],
+    "requirementId": "I18N-4"
+  }
+}

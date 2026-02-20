@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-20T06:54:36.010Z",
+  "data": {
+    "effectId": "01KHWX8CW1TTHNQ1JX62PAR42P",
+    "invocationKey": "rtl-alignment-fix:S000006:run-e2e-test",
+    "invocationHash": "9ec9b4cfcd67e309d5d00cca8f7e066c2c378c553d3ac1f22da6ce4169d08fb8",
+    "stepId": "S000006",
+    "taskId": "run-e2e-test",
+    "kind": "agent",
+    "label": "Run E2E test",
+    "taskDefRef": "tasks/01KHWX8CW1TTHNQ1JX62PAR42P/task.json"
+  },
+  "checksum": "e81017c22cfc8aa4d9f9079308bd71d5bfe11356dd845f1b04e89ad2dc0f2fb9"
+}

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHWX9CGPR65S9YNXMDV94727",
+  "taskId": "update-product-md",
+  "invocationKey": "rtl-alignment-fix:S000007:update-product-md",
+  "stepId": "S000007",
+  "kind": "agent",
+  "title": "Update PRODUCT.md with RTL requirement",
+  "description": "Add new I18N requirement to PRODUCT.md",
+  "io": {
+    "inputJsonPath": "tasks/01KHWX9CGPR65S9YNXMDV94727/input.json",
+    "outputJsonPath": "tasks/01KHWX9CGPR65S9YNXMDV94727/result.json"
+  },
+  "inputs": {
+    "description": "RTL alignment for all pages in Hebrew mode",
+    "requirementId": "I18N-4",
+    "testFile": "e2e/i18n.spec.ts"
+  }
+}

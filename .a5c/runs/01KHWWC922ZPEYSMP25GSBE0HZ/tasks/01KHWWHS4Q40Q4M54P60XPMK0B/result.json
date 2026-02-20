@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHWWHS4Q40Q4M54P60XPMK0B",
+  "taskId": "run-e2e-test",
+  "invocationKey": "rtl-alignment-fix:S000002:run-e2e-test",
+  "status": "ok",
+  "result": {
+    "failedCount": 2,
+    "failures": [
+      {
+        "file": "e2e/i18n.spec.ts",
+        "line": 10,
+        "message": "Test timeout of 30000ms exceeded while running beforeEach hook. Login failed - environment issue, not RTL related.",
+        "test": "[I18N-1] should support bilingual content (English and Hebrew)"
+      },
+      {
+        "file": "e2e/i18n.spec.ts",
+        "line": 55,
+        "message": "Test timeout of 30000ms exceeded. Could not find combobox for language selection on settings page.",
+        "test": "[I18N-4] should have correct text-align (text-start) for all page content in Hebrew RTL mode"
+      }
+    ],
+    "passed": false,
+    "passedCount": 1,
+    "totalCount": 3
+  },
+  "startedAt": "2026-02-20T06:49:07.813Z",
+  "finishedAt": "2026-02-20T06:49:07.813Z",
+  "value": {
+    "failedCount": 2,
+    "failures": [
+      {
+        "file": "e2e/i18n.spec.ts",
+        "line": 10,
+        "message": "Test timeout of 30000ms exceeded while running beforeEach hook. Login failed - environment issue, not RTL related.",
+        "test": "[I18N-1] should support bilingual content (English and Hebrew)"
+      },
+      {
+        "file": "e2e/i18n.spec.ts",
+        "line": 55,
+        "message": "Test timeout of 30000ms exceeded. Could not find combobox for language selection on settings page.",
+        "test": "[I18N-4] should have correct text-align (text-start) for all page content in Hebrew RTL mode"
+      }
+    ],
+    "passed": false,
+    "passedCount": 1,
+    "totalCount": 3
+  }
+}

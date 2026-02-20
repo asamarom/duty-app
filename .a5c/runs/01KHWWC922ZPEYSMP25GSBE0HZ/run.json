@@ -1,0 +1,13 @@
+{
+  "runId": "01KHWWC922ZPEYSMP25GSBE0HZ",
+  "request": "rtl-alignment-fix",
+  "processId": "rtl-alignment-fix",
+  "entrypoint": {
+    "importPath": "../../processes/rtl-alignment-fix.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/rtl-alignment-fix.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-02-20T06:39:14.508Z",
+  "completionSecret": "4a7e3955492f7b5d0294778ce6ad6da9"
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHWX8CW1TTHNQ1JX62PAR42P",
+  "taskId": "run-e2e-test",
+  "invocationKey": "rtl-alignment-fix:S000006:run-e2e-test",
+  "stepId": "S000006",
+  "kind": "agent",
+  "title": "Run E2E test",
+  "description": "Execute Playwright E2E test for RTL alignment",
+  "io": {
+    "inputJsonPath": "tasks/01KHWX8CW1TTHNQ1JX62PAR42P/input.json",
+    "outputJsonPath": "tasks/01KHWX8CW1TTHNQ1JX62PAR42P/result.json"
+  },
+  "inputs": {
+    "expectFailure": false,
+    "testFile": "e2e/i18n.spec.ts"
+  }
+}

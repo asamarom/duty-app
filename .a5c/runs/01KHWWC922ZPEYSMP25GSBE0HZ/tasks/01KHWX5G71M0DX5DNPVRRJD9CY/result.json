@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHWX5G71M0DX5DNPVRRJD9CY",
+  "taskId": "__sdk.breakpoint",
+  "invocationKey": "rtl-alignment-fix:S000004:__sdk.breakpoint",
+  "status": "ok",
+  "result": {
+    "approved": true,
+    "response": "Approved - proceed with fixes"
+  },
+  "startedAt": "2026-02-20T06:53:48.705Z",
+  "finishedAt": "2026-02-20T06:53:48.705Z",
+  "value": {
+    "approved": true,
+    "response": "Approved - proceed with fixes"
+  }
+}

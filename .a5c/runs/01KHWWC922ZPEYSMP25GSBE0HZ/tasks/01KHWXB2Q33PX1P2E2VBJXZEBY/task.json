@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHWXB2Q33PX1P2E2VBJXZEBY",
+  "taskId": "__sdk.breakpoint",
+  "invocationKey": "rtl-alignment-fix:S000009:__sdk.breakpoint",
+  "stepId": "S000009",
+  "kind": "breakpoint",
+  "title": "breakpoint",
+  "metadata": {
+    "label": "breakpoint",
+    "payload": {
+      "context": {
+        "files": [
+          {
+            "format": "code",
+            "label": "E2E Test",
+            "path": "e2e/i18n.spec.ts"
+          },
+          {
+            "format": "markdown",
+            "label": "PRODUCT.md",
+            "path": "PRODUCT.md"
+          },
+          {
+            "format": "markdown",
+            "label": "Summary",
+            "path": "tasks/final-summary.md"
+          }
+        ]
+      },
+      "question": "RTL Alignment Fix complete!\n\n✓ E2E test written and passing\n✓ 22 files fixed\n✓ PRODUCT.md updated with [I18N-4]\n✓ CI integration verified\n\nReview changes and approve for commit?",
+      "title": "RTL Fix Complete"
+    },
+    "requestedAt": "2026-02-20T06:56:03.810Z"
+  },
+  "inputs": {
+    "label": "breakpoint",
+    "payload": {
+      "context": {
+        "files": [
+          {
+            "format": "code",
+            "label": "E2E Test",
+            "path": "e2e/i18n.spec.ts"
+          },
+          {
+            "format": "markdown",
+            "label": "PRODUCT.md",
+            "path": "PRODUCT.md"
+          },
+          {
+            "format": "markdown",
+            "label": "Summary",
+            "path": "tasks/final-summary.md"
+          }
+        ]
+      },
+      "question": "RTL Alignment Fix complete!\n\n✓ E2E test written and passing\n✓ 22 files fixed\n✓ PRODUCT.md updated with [I18N-4]\n✓ CI integration verified\n\nReview changes and approve for commit?",
+      "title": "RTL Fix Complete"
+    },
+    "requestedAt": "2026-02-20T06:56:03.810Z"
+  }
+}

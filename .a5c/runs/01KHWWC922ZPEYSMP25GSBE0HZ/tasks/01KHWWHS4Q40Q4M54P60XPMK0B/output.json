@@ -1,0 +1,20 @@
+{
+  "passed": false,
+  "totalCount": 3,
+  "passedCount": 1,
+  "failedCount": 2,
+  "failures": [
+    {
+      "test": "[I18N-1] should support bilingual content (English and Hebrew)",
+      "message": "Test timeout of 30000ms exceeded while running beforeEach hook. Login failed - environment issue, not RTL related.",
+      "file": "e2e/i18n.spec.ts",
+      "line": 10
+    },
+    {
+      "test": "[I18N-4] should have correct text-align (text-start) for all page content in Hebrew RTL mode",
+      "message": "Test timeout of 30000ms exceeded. Could not find combobox for language selection on settings page.",
+      "file": "e2e/i18n.spec.ts",
+      "line": 55
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-02-20T06:39:14.515Z",
+  "data": {
+    "runId": "01KHWWC922ZPEYSMP25GSBE0HZ",
+    "processId": "rtl-alignment-fix",
+    "entrypoint": {
+      "importPath": "../../processes/rtl-alignment-fix.js",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json"
+  },
+  "checksum": "7bfd72ca66498ef8cd9b34c4bfa6045b56c8f6d6c6c32738e3d8245506717149"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-20T06:55:37.112Z",
+  "data": {
+    "effectId": "01KHWXA8HBQJBJT901WQX8FRGB",
+    "invocationKey": "rtl-alignment-fix:S000008:verify-ci-integration",
+    "invocationHash": "511bf273167c6425c4c6c049297650362c3b83024e8b81222046623e63931f4b",
+    "stepId": "S000008",
+    "taskId": "verify-ci-integration",
+    "kind": "agent",
+    "label": "Verify CI integration",
+    "taskDefRef": "tasks/01KHWXA8HBQJBJT901WQX8FRGB/task.json"
+  },
+  "checksum": "23f2050db78fbccd06f34fd3b8ee3113015465cedd2c979ed61bdc02e3d6a0a3"
+}

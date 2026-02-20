@@ -1,0 +1,147 @@
+{
+  "alignmentIssues": [
+    {
+      "name": "Tabs Container",
+      "text": "ציודהעברות",
+      "position": 24,
+      "isOnRight": false,
+      "isRightAligned": false,
+      "styles": {
+        "textAlign": "start",
+        "direction": "ltr",
+        "justifyContent": "center",
+        "float": "none",
+        "marginLeft": "0px",
+        "marginRight": "0px",
+        "paddingLeft": "4px",
+        "paddingRight": "4px"
+      },
+      "hasIssue": true
+    },
+    {
+      "name": "Individual Tab",
+      "text": "ציוד",
+      "position": 28,
+      "isOnRight": false,
+      "isRightAligned": false,
+      "styles": {
+        "textAlign": "center",
+        "direction": "ltr",
+        "justifyContent": "center",
+        "float": "none",
+        "marginLeft": "0px",
+        "marginRight": "0px",
+        "paddingLeft": "12px",
+        "paddingRight": "12px"
+      },
+      "hasIssue": true
+    },
+    {
+      "name": "Search Input",
+      "text": "",
+      "position": 24,
+      "isOnRight": false,
+      "isRightAligned": false,
+      "styles": {
+        "textAlign": "start",
+        "direction": "ltr",
+        "justifyContent": "normal",
+        "float": "none",
+        "marginLeft": "0px",
+        "marginRight": "0px",
+        "paddingLeft": "40px",
+        "paddingRight": "12px"
+      },
+      "hasIssue": true
+    },
+    {
+      "name": "Card Container",
+      "text": "0סה\"כ פריטים",
+      "position": 24,
+      "isOnRight": false,
+      "isRightAligned": false,
+      "styles": {
+        "textAlign": "start",
+        "direction": "ltr",
+        "justifyContent": "normal",
+        "float": "none",
+        "marginLeft": "0px",
+        "marginRight": "0px",
+        "paddingLeft": "16px",
+        "paddingRight": "16px"
+      },
+      "hasIssue": true
+    },
+    {
+      "name": "Table",
+      "text": "פריטמס' סידוריכמותמוקצה ל",
+      "position": 25,
+      "isOnRight": false,
+      "isRightAligned": false,
+      "styles": {
+        "textAlign": "start",
+        "direction": "ltr",
+        "justifyContent": "normal",
+        "float": "none",
+        "marginLeft": "0px",
+        "marginRight": "0px",
+        "paddingLeft": "0px",
+        "paddingRight": "0px"
+      },
+      "hasIssue": true
+    },
+    {
+      "name": "Table Header",
+      "text": "פריט",
+      "position": 25,
+      "isOnRight": false,
+      "isRightAligned": false,
+      "styles": {
+        "textAlign": "start",
+        "direction": "ltr",
+        "justifyContent": "normal",
+        "float": "none",
+        "marginLeft": "0px",
+        "marginRight": "0px",
+        "paddingLeft": "16px",
+        "paddingRight": "16px"
+      },
+      "hasIssue": true
+    },
+    {
+      "name": "Flex Container (space-between)",
+      "text": "מלאי ציודספר רכוש - מעקב וניהול כל ציוד המחלקהבחר ",
+      "position": 24,
+      "isOnRight": false,
+      "isRightAligned": false,
+      "styles": {
+        "textAlign": "start",
+        "direction": "ltr",
+        "justifyContent": "space-between",
+        "float": "none",
+        "marginLeft": "0px",
+        "marginRight": "0px",
+        "paddingLeft": "0px",
+        "paddingRight": "0px"
+      },
+      "hasIssue": true
+    }
+  ],
+  "classIssues": [
+    {
+      "tag": "aside",
+      "classes": " right-0",
+      "text": "PMTBניהול מחלקהלוח בקרהכוח אדם"
+    },
+    {
+      "tag": "div",
+      "classes": " mr-auto",
+      "text": ""
+    },
+    {
+      "tag": "nav",
+      "classes": " left-0,  right-0",
+      "text": "לוח בקרהכוח אדםציודעוד"
+    }
+  ]
+}

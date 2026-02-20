@@ -1,0 +1,323 @@
+{
+  "issues": [
+    {
+      "file": "src/components/auth/TestLoginForm.tsx",
+      "line": 92,
+      "currentClass": "mr-2",
+      "suggestedFix": "me-2",
+      "context": "Loader2 icon with spinner animation"
+    },
+    {
+      "file": "src/components/auth/TestLoginForm.tsx",
+      "line": 97,
+      "currentClass": "mr-2",
+      "suggestedFix": "me-2",
+      "context": "FlaskConical icon"
+    },
+    {
+      "file": "src/components/personnel/AutocompleteTagInput.tsx",
+      "line": 113,
+      "currentClass": "ml-1",
+      "suggestedFix": "ms-1",
+      "context": "Hover element with destructive text"
+    },
+    {
+      "file": "src/components/personnel/RoleBadge.tsx",
+      "line": 49,
+      "currentClass": "mr-1",
+      "suggestedFix": "me-1",
+      "context": "Icon with conditional size classes"
+    },
+    {
+      "file": "src/components/personnel/PersonnelCard.tsx",
+      "line": 87,
+      "currentClass": "ml-1",
+      "suggestedFix": "ms-1",
+      "context": "ChevronRight icon"
+    },
+    {
+      "file": "src/components/equipment/BulkAssignDialog.tsx",
+      "line": 545,
+      "currentClass": "mr-2",
+      "suggestedFix": "me-2",
+      "context": "Loader2 icon with spinner animation"
+    },
+    {
+      "file": "src/components/ui/navigation-menu.tsx",
+      "line": 52,
+      "currentClass": "ml-1",
+      "suggestedFix": "ms-1",
+      "context": "Navigation icon with rotation transition"
+    },
+    {
+      "file": "src/components/ui/pagination.tsx",
+      "line": 53,
+      "currentClass": "pl-2.5",
+      "suggestedFix": "ps-2.5",
+      "context": "Previous page link"
+    },
+    {
+      "file": "src/components/ui/pagination.tsx",
+      "line": 64,
+      "currentClass": "pr-2.5",
+      "suggestedFix": "pe-2.5",
+      "context": "Next page link"
+    },
+    {
+      "file": "src/components/ui/dropdown-menu.tsx",
+      "line": 35,
+      "currentClass": "ml-auto",
+      "suggestedFix": "ms-auto",
+      "context": "ChevronRight icon"
+    },
+    {
+      "file": "src/components/ui/dropdown-menu.tsx",
+      "line": 144,
+      "currentClass": "pl-8",
+      "suggestedFix": "ps-8",
+      "context": "Dropdown label"
+    },
+    {
+      "file": "src/components/ui/dropdown-menu.tsx",
+      "line": 159,
+      "currentClass": "ml-auto",
+      "suggestedFix": "ms-auto",
+      "context": "Shortcut text"
+    },
+    {
+      "file": "src/components/ui/carousel.tsx",
+      "line": 143,
+      "currentClass": "-ml-4",
+      "suggestedFix": "-ms-4",
+      "context": "Carousel container negative margin"
+    },
+    {
+      "file": "src/components/ui/carousel.tsx",
+      "line": 161,
+      "currentClass": "pl-4",
+      "suggestedFix": "ps-4",
+      "context": "Carousel item padding"
+    },
+    {
+      "file": "src/components/ui/select.tsx",
+      "line": 97,
+      "currentClass": "pl-8 pr-2",
+      "suggestedFix": "ps-8 pe-2",
+      "context": "Select label padding"
+    },
+    {
+      "file": "src/components/ui/command.tsx",
+      "line": 43,
+      "currentClass": "mr-2",
+      "suggestedFix": "me-2",
+      "context": "Search icon"
+    },
+    {
+      "file": "src/components/ui/command.tsx",
+      "line": 118,
+      "currentClass": "ml-auto",
+      "suggestedFix": "ms-auto",
+      "context": "Command shortcut text"
+    },
+    {
+      "file": "src/components/ui/sheet.tsx",
+      "line": 71,
+      "currentClass": "text-left",
+      "suggestedFix": "text-start",
+      "context": "Sheet header text alignment"
+    },
+    {
+      "file": "src/components/ui/alert-dialog.tsx",
+      "line": 47,
+      "currentClass": "text-left",
+      "suggestedFix": "text-start",
+      "context": "Alert dialog header"
+    },
+    {
+      "file": "src/components/ui/menubar.tsx",
+      "line": 60,
+      "currentClass": "ml-auto",
+      "suggestedFix": "ms-auto",
+      "context": "ChevronRight icon"
+    },
+    {
+      "file": "src/components/ui/menubar.tsx",
+      "line": 171,
+      "currentClass": "pl-8",
+      "suggestedFix": "ps-8",
+      "context": "Menubar label"
+    },
+    {
+      "file": "src/components/ui/menubar.tsx",
+      "line": 186,
+      "currentClass": "ml-auto",
+      "suggestedFix": "ms-auto",
+      "context": "Menubar shortcut"
+    },
+    {
+      "file": "src/components/ui/table.tsx",
+      "line": 60,
+      "currentClass": "pr-0",
+      "suggestedFix": "pe-0",
+      "context": "Table cell padding"
+    },
+    {
+      "file": "src/components/ui/drawer.tsx",
+      "line": 47,
+      "currentClass": "text-left",
+      "suggestedFix": "text-start",
+      "context": "Drawer header"
+    },
+    {
+      "file": "src/components/ui/context-menu.tsx",
+      "line": 35,
+      "currentClass": "ml-auto",
+      "suggestedFix": "ms-auto",
+      "context": "ChevronRight icon"
+    },
+    {
+      "file": "src/components/ui/context-menu.tsx",
+      "line": 143,
+      "currentClass": "pl-8",
+      "suggestedFix": "ps-8",
+      "context": "Context menu label"
+    },
+    {
+      "file": "src/components/ui/context-menu.tsx",
+      "line": 158,
+      "currentClass": "ml-auto",
+      "suggestedFix": "ms-auto",
+      "context": "Context menu shortcut"
+    },
+    {
+      "file": "src/pages/AdminApprovalsPage.tsx",
+      "line": 249,
+      "currentClass": "mr-2",
+      "suggestedFix": "me-2",
+      "context": "UserPlus icon"
+    },
+    {
+      "file": "src/pages/AdminApprovalsPage.tsx",
+      "line": 308,
+      "currentClass": "ml-1",
+      "suggestedFix": "ms-1",
+      "context": "Badge"
+    },
+    {
+      "file": "src/pages/AdminApprovalsPage.tsx",
+      "line": 369,
+      "currentClass": "mr-2",
+      "suggestedFix": "me-2",
+      "context": "Loader2 icon"
+    },
+    {
+      "file": "src/pages/AdminApprovalsPage.tsx",
+      "line": 371,
+      "currentClass": "mr-2",
+      "suggestedFix": "me-2",
+      "context": "CheckCircle icon"
+    },
+    {
+      "file": "src/pages/AdminApprovalsPage.tsx",
+      "line": 381,
+      "currentClass": "mr-2",
+      "suggestedFix": "me-2",
+      "context": "XCircle icon"
+    },
+    {
+      "file": "src/pages/AdminApprovalsPage.tsx",
+      "line": 486,
+      "currentClass": "mr-2",
+      "suggestedFix": "me-2",
+      "context": "Loader2 icon"
+    },
+    {
+      "file": "src/pages/AdminApprovalsPage.tsx",
+      "line": 488,
+      "currentClass": "mr-2",
+      "suggestedFix": "me-2",
+      "context": "XCircle icon"
+    },
+    {
+      "file": "src/pages/EquipmentDetailPage.tsx",
+      "line": 449,
+      "currentClass": "mr-1",
+      "suggestedFix": "me-1",
+      "context": "AlertTriangle icon"
+    },
+    {
+      "file": "src/pages/EquipmentDetailPage.tsx",
+      "line": 783,
+      "currentClass": "border-l-2 pl-3",
+      "suggestedFix": "border-s-2 ps-3",
+      "context": "History record border and padding"
+    },
+    {
+      "file": "src/pages/PendingApprovalPage.tsx",
+      "line": 101,
+      "currentClass": "mr-2",
+      "suggestedFix": "me-2",
+      "context": "RefreshCw icon"
+    },
+    {
+      "file": "src/pages/PendingApprovalPage.tsx",
+      "line": 106,
+      "currentClass": "mr-2",
+      "suggestedFix": "me-2",
+      "context": "LogOut icon"
+    },
+    {
+      "file": "src/pages/PendingApprovalPage.tsx",
+      "line": 149,
+      "currentClass": "mr-2",
+      "suggestedFix": "me-2",
+      "context": "RefreshCw icon"
+    },
+    {
+      "file": "src/pages/PendingApprovalPage.tsx",
+      "line": 154,
+      "currentClass": "mr-2",
+      "suggestedFix": "me-2",
+      "context": "LogOut icon"
+    },
+    {
+      "file": "src/pages/SignupRequestPage.tsx",
+      "line": 341,
+      "currentClass": "mr-2",
+      "suggestedFix": "me-2",
+      "context": "Loader2 icon"
+    },
+    {
+      "file": "src/pages/PersonnelDetailPage.tsx",
+      "line": 489,
+      "currentClass": "mr-1",
+      "suggestedFix": "me-1",
+      "context": "Briefcase icon"
+    }
+  ],
+  "issueFiles": [
+    "src/components/auth/TestLoginForm.tsx",
+    "src/components/personnel/AutocompleteTagInput.tsx",
+    "src/components/personnel/RoleBadge.tsx",
+    "src/components/personnel/PersonnelCard.tsx",
+    "src/components/equipment/BulkAssignDialog.tsx",
+    "src/components/ui/navigation-menu.tsx",
+    "src/components/ui/pagination.tsx",
+    "src/components/ui/dropdown-menu.tsx",
+    "src/components/ui/carousel.tsx",
+    "src/components/ui/select.tsx",
+    "src/components/ui/command.tsx",
+    "src/components/ui/sheet.tsx",
+    "src/components/ui/alert-dialog.tsx",
+    "src/components/ui/menubar.tsx",
+    "src/components/ui/table.tsx",
+    "src/components/ui/drawer.tsx",
+    "src/components/ui/context-menu.tsx",
+    "src/pages/AdminApprovalsPage.tsx",
+    "src/pages/EquipmentDetailPage.tsx",
+    "src/pages/PendingApprovalPage.tsx",
+    "src/pages/SignupRequestPage.tsx",
+    "src/pages/PersonnelDetailPage.tsx"
+  ],
+  "totalIssues": 43
+}

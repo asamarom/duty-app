@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-20T06:49:21.419Z",
+  "data": {
+    "effectId": "01KHWWYSQSRBK65REPS5PGZFAN",
+    "invocationKey": "rtl-alignment-fix:S000003:audit-rtl-issues",
+    "invocationHash": "837084dc3a4b9936489e2bd07e76b34430da96b0461fb7090d80b31651fb6640",
+    "stepId": "S000003",
+    "taskId": "audit-rtl-issues",
+    "kind": "agent",
+    "label": "Audit codebase for RTL issues",
+    "taskDefRef": "tasks/01KHWWYSQSRBK65REPS5PGZFAN/task.json"
+  },
+  "checksum": "5fac03154b7396fd33ebbf4e42f34914ac212c4a613b12b0e4584e95a4606564"
+}

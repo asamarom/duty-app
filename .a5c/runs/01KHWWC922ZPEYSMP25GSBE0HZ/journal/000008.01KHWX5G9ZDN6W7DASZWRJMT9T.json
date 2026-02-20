@@ -1,0 +1,18 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-20T06:53:01.119Z",
+  "data": {
+    "effectId": "01KHWX5G71M0DX5DNPVRRJD9CY",
+    "invocationKey": "rtl-alignment-fix:S000004:__sdk.breakpoint",
+    "invocationHash": "c2272018d094b923d7297ea1dd705bc57ecf9feb24f1c0c761da8912d42a14df",
+    "stepId": "S000004",
+    "taskId": "__sdk.breakpoint",
+    "kind": "breakpoint",
+    "label": "breakpoint",
+    "taskDefRef": "tasks/01KHWX5G71M0DX5DNPVRRJD9CY/task.json",
+    "labels": [
+      "breakpoint"
+    ]
+  },
+  "checksum": "7ece53d6eb9e3bc20a4eb677866e2b7178dff69b8e1669c87be10e341d01cede"
+}

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHWX9CGPR65S9YNXMDV94727",
+  "taskId": "update-product-md",
+  "invocationKey": "rtl-alignment-fix:S000007:update-product-md",
+  "status": "ok",
+  "result": {
+    "lineNumber": 64,
+    "requirementText": "- [I18N-4] **RTL Text Alignment**: All page content uses RTL-aware CSS classes (`text-start/text-end` instead of `text-left/text-right`, `ms-/me-` instead of `ml-/mr-`, `ps-/pe-` instead of `pl-/pr-`) to ensure proper alignment in Hebrew RTL mode.\n  - [I18N-4.1] Main content containers use RTL-aware margin/padding classes.\n  - [I18N-4.2] Text alignment respects document direction (dir attribute).\n  - [I18N-4.3] E2E test verifies RTL text alignment across all pages in Hebrew mode (see `e2e/i18n.spec.ts`).",
+    "updated": true
+  },
+  "startedAt": "2026-02-20T06:55:27.511Z",
+  "finishedAt": "2026-02-20T06:55:27.511Z",
+  "value": {
+    "lineNumber": 64,
+    "requirementText": "- [I18N-4] **RTL Text Alignment**: All page content uses RTL-aware CSS classes (`text-start/text-end` instead of `text-left/text-right`, `ms-/me-` instead of `ml-/mr-`, `ps-/pe-` instead of `pl-/pr-`) to ensure proper alignment in Hebrew RTL mode.\n  - [I18N-4.1] Main content containers use RTL-aware margin/padding classes.\n  - [I18N-4.2] Text alignment respects document direction (dir attribute).\n  - [I18N-4.3] E2E test verifies RTL text alignment across all pages in Hebrew mode (see `e2e/i18n.spec.ts`).",
+    "updated": true
+  }
+}

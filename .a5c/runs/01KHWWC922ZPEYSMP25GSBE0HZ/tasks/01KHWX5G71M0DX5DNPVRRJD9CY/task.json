@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KHWX5G71M0DX5DNPVRRJD9CY",
+  "taskId": "__sdk.breakpoint",
+  "invocationKey": "rtl-alignment-fix:S000004:__sdk.breakpoint",
+  "stepId": "S000004",
+  "kind": "breakpoint",
+  "title": "breakpoint",
+  "metadata": {
+    "label": "breakpoint",
+    "payload": {
+      "context": {
+        "files": [
+          {
+            "format": "markdown",
+            "label": "Audit Report",
+            "path": "tasks/audit-rtl/audit-report.md"
+          },
+          {
+            "format": "json",
+            "label": "Issues List",
+            "path": "tasks/audit-rtl/issues.json"
+          }
+        ]
+      },
+      "question": "RTL audit complete. Found 43 issues across 22 files. Review the findings and approve fixes?",
+      "title": "RTL Audit Results"
+    },
+    "requestedAt": "2026-02-20T06:53:01.025Z"
+  },
+  "inputs": {
+    "label": "breakpoint",
+    "payload": {
+      "context": {
+        "files": [
+          {
+            "format": "markdown",
+            "label": "Audit Report",
+            "path": "tasks/audit-rtl/audit-report.md"
+          },
+          {
+            "format": "json",
+            "label": "Issues List",
+            "path": "tasks/audit-rtl/issues.json"
+          }
+        ]
+      },
+      "question": "RTL audit complete. Found 43 issues across 22 files. Review the findings and approve fixes?",
+      "title": "RTL Audit Results"
+    },
+    "requestedAt": "2026-02-20T06:53:01.025Z"
+  }
+}

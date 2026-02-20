@@ -1,0 +1,243 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHWX78QNXZAWXRKZ5QS05DAN",
+  "taskId": "fix-rtl-issues",
+  "invocationKey": "rtl-alignment-fix:S000005:fix-rtl-issues",
+  "status": "ok",
+  "result": {
+    "changesByFile": [
+      {
+        "changes": 2,
+        "file": "src/components/auth/TestLoginForm.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/components/personnel/AutocompleteTagInput.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/components/personnel/RoleBadge.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/components/personnel/PersonnelCard.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/components/equipment/BulkAssignDialog.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/components/ui/navigation-menu.tsx"
+      },
+      {
+        "changes": 2,
+        "file": "src/components/ui/pagination.tsx"
+      },
+      {
+        "changes": 3,
+        "file": "src/components/ui/dropdown-menu.tsx"
+      },
+      {
+        "changes": 2,
+        "file": "src/components/ui/carousel.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/components/ui/select.tsx"
+      },
+      {
+        "changes": 2,
+        "file": "src/components/ui/command.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/components/ui/sheet.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/components/ui/alert-dialog.tsx"
+      },
+      {
+        "changes": 3,
+        "file": "src/components/ui/menubar.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/components/ui/table.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/components/ui/drawer.tsx"
+      },
+      {
+        "changes": 3,
+        "file": "src/components/ui/context-menu.tsx"
+      },
+      {
+        "changes": 6,
+        "file": "src/pages/AdminApprovalsPage.tsx"
+      },
+      {
+        "changes": 2,
+        "file": "src/pages/EquipmentDetailPage.tsx"
+      },
+      {
+        "changes": 4,
+        "file": "src/pages/PendingApprovalPage.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/pages/SignupRequestPage.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/pages/PersonnelDetailPage.tsx"
+      }
+    ],
+    "filesFixed": [
+      "src/components/auth/TestLoginForm.tsx",
+      "src/components/personnel/AutocompleteTagInput.tsx",
+      "src/components/personnel/RoleBadge.tsx",
+      "src/components/personnel/PersonnelCard.tsx",
+      "src/components/equipment/BulkAssignDialog.tsx",
+      "src/components/ui/navigation-menu.tsx",
+      "src/components/ui/pagination.tsx",
+      "src/components/ui/dropdown-menu.tsx",
+      "src/components/ui/carousel.tsx",
+      "src/components/ui/select.tsx",
+      "src/components/ui/command.tsx",
+      "src/components/ui/sheet.tsx",
+      "src/components/ui/alert-dialog.tsx",
+      "src/components/ui/menubar.tsx",
+      "src/components/ui/table.tsx",
+      "src/components/ui/drawer.tsx",
+      "src/components/ui/context-menu.tsx",
+      "src/pages/AdminApprovalsPage.tsx",
+      "src/pages/EquipmentDetailPage.tsx",
+      "src/pages/PendingApprovalPage.tsx",
+      "src/pages/SignupRequestPage.tsx",
+      "src/pages/PersonnelDetailPage.tsx"
+    ],
+    "totalChanges": 26
+  },
+  "startedAt": "2026-02-20T06:54:24.425Z",
+  "finishedAt": "2026-02-20T06:54:24.425Z",
+  "value": {
+    "changesByFile": [
+      {
+        "changes": 2,
+        "file": "src/components/auth/TestLoginForm.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/components/personnel/AutocompleteTagInput.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/components/personnel/RoleBadge.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/components/personnel/PersonnelCard.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/components/equipment/BulkAssignDialog.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/components/ui/navigation-menu.tsx"
+      },
+      {
+        "changes": 2,
+        "file": "src/components/ui/pagination.tsx"
+      },
+      {
+        "changes": 3,
+        "file": "src/components/ui/dropdown-menu.tsx"
+      },
+      {
+        "changes": 2,
+        "file": "src/components/ui/carousel.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/components/ui/select.tsx"
+      },
+      {
+        "changes": 2,
+        "file": "src/components/ui/command.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/components/ui/sheet.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/components/ui/alert-dialog.tsx"
+      },
+      {
+        "changes": 3,
+        "file": "src/components/ui/menubar.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/components/ui/table.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/components/ui/drawer.tsx"
+      },
+      {
+        "changes": 3,
+        "file": "src/components/ui/context-menu.tsx"
+      },
+      {
+        "changes": 6,
+        "file": "src/pages/AdminApprovalsPage.tsx"
+      },
+      {
+        "changes": 2,
+        "file": "src/pages/EquipmentDetailPage.tsx"
+      },
+      {
+        "changes": 4,
+        "file": "src/pages/PendingApprovalPage.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/pages/SignupRequestPage.tsx"
+      },
+      {
+        "changes": 1,
+        "file": "src/pages/PersonnelDetailPage.tsx"
+      }
+    ],
+    "filesFixed": [
+      "src/components/auth/TestLoginForm.tsx",
+      "src/components/personnel/AutocompleteTagInput.tsx",
+      "src/components/personnel/RoleBadge.tsx",
+      "src/components/personnel/PersonnelCard.tsx",
+      "src/components/equipment/BulkAssignDialog.tsx",
+      "src/components/ui/navigation-menu.tsx",
+      "src/components/ui/pagination.tsx",
+      "src/components/ui/dropdown-menu.tsx",
+      "src/components/ui/carousel.tsx",
+      "src/components/ui/select.tsx",
+      "src/components/ui/command.tsx",
+      "src/components/ui/sheet.tsx",
+      "src/components/ui/alert-dialog.tsx",
+      "src/components/ui/menubar.tsx",
+      "src/components/ui/table.tsx",
+      "src/components/ui/drawer.tsx",
+      "src/components/ui/context-menu.tsx",
+      "src/pages/AdminApprovalsPage.tsx",
+      "src/pages/EquipmentDetailPage.tsx",
+      "src/pages/PendingApprovalPage.tsx",
+      "src/pages/SignupRequestPage.tsx",
+      "src/pages/PersonnelDetailPage.tsx"
+    ],
+    "totalChanges": 26
+  }
+}

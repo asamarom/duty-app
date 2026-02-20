@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-20T06:39:43.697Z",
+  "data": {
+    "effectId": "01KHWWD5FKJZBGC4WR5RV83W8S",
+    "invocationKey": "rtl-alignment-fix:S000001:write-rtl-test",
+    "invocationHash": "f6543d7e2896bbfa59aa77be7b575a58950f540b4fc5c275ad0633be10e2144b",
+    "stepId": "S000001",
+    "taskId": "write-rtl-test",
+    "kind": "agent",
+    "label": "Write E2E test for RTL alignment",
+    "taskDefRef": "tasks/01KHWWD5FKJZBGC4WR5RV83W8S/task.json"
+  },
+  "checksum": "79b8b3ea5207e5b9b82fa1fa28fddba1379c12ff9b5e9e2063cb41f459e39717"
+}

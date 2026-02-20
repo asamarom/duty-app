@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-20T06:53:59.015Z",
+  "data": {
+    "effectId": "01KHWX78QNXZAWXRKZ5QS05DAN",
+    "invocationKey": "rtl-alignment-fix:S000005:fix-rtl-issues",
+    "invocationHash": "995b163eef7d8eed383264a3ca38cad96e59139a803884207feac64335ff442f",
+    "stepId": "S000005",
+    "taskId": "fix-rtl-issues",
+    "kind": "agent",
+    "label": "Fix RTL issues",
+    "taskDefRef": "tasks/01KHWX78QNXZAWXRKZ5QS05DAN/task.json"
+  },
+  "checksum": "102cfb6cc2b6e3547a6cb5860a7865f08f1a72b25fb9a7ae833771e620868ea2"
+}

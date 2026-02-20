@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KHWXA8HBQJBJT901WQX8FRGB",
+  "taskId": "verify-ci-integration",
+  "invocationKey": "rtl-alignment-fix:S000008:verify-ci-integration",
+  "status": "ok",
+  "result": {
+    "ciCommand": "npm run test:e2e",
+    "integrated": true,
+    "issues": [],
+    "willRunInCi": true
+  },
+  "startedAt": "2026-02-20T06:55:53.008Z",
+  "finishedAt": "2026-02-20T06:55:53.008Z",
+  "value": {
+    "ciCommand": "npm run test:e2e",
+    "integrated": true,
+    "issues": [],
+    "willRunInCi": true
+  }
+}

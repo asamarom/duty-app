@@ -1,0 +1,6 @@
+{
+  "integrated": true,
+  "willRunInCi": true,
+  "ciCommand": "npm run test:e2e",
+  "issues": []
+}

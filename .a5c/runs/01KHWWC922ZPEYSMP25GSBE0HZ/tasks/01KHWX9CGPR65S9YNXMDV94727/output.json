@@ -1,0 +1,5 @@
+{
+  "updated": true,
+  "requirementText": "- [I18N-4] **RTL Text Alignment**: All page content uses RTL-aware CSS classes (`text-start/text-end` instead of `text-left/text-right`, `ms-/me-` instead of `ml-/mr-`, `ps-/pe-` instead of `pl-/pr-`) to ensure proper alignment in Hebrew RTL mode.\n  - [I18N-4.1] Main content containers use RTL-aware margin/padding classes.\n  - [I18N-4.2] Text alignment respects document direction (dir attribute).\n  - [I18N-4.3] E2E test verifies RTL text alignment across all pages in Hebrew mode (see `e2e/i18n.spec.ts`).",
+  "lineNumber": 64
+}
