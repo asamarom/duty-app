@@ -149,7 +149,7 @@ export default function EquipmentPage() {
           <div className="tactical-grid min-h-screen p-4 lg:p-6" dir={dir}>
             {/* Desktop Header */}
             <header className="mb-6 hidden lg:block">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between" dir={dir}>
                 <div>
                   <h1 className="text-2xl font-bold tracking-tight text-foreground">
                     {t('equipment.title')}
@@ -180,7 +180,7 @@ export default function EquipmentPage() {
 
             {/* Bulk Action Bar */}
             {selectMode && selectedIds.size > 0 && (
-              <div className="mb-4 p-4 card-tactical rounded-lg flex items-center justify-between gap-4 animate-fade-in">
+              <div className="mb-4 p-4 card-tactical rounded-lg flex items-center justify-between gap-4 animate-fade-in" dir={dir}>
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-medium">
                     {selectedIds.size} {t('equipment.selectItems')}
