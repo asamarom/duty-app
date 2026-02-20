@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/popover';
 
 export default function EquipmentPage() {
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
   const navigate = useNavigate();
   const { equipment, loading, assignEquipment, requestAssignment, isWithinSameUnit, refetch } = useEquipment();
   const [searchQuery, setSearchQuery] = useState('');
@@ -121,8 +121,8 @@ export default function EquipmentPage() {
     <MainLayout>
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         {/* Tab bar */}
-        <div className="flex px-4 lg:px-6 pt-4 lg:pt-6 border-b border-border" dir="inherit">
-          <TabsList>
+        <div className="flex px-4 lg:px-6 pt-4 lg:pt-6 border-b border-border" dir={dir}>
+          <TabsList dir={dir}>
             <TabsTrigger value="equipment" className="gap-2">
               <Package className="h-4 w-4" />
               {t('nav.equipment')}
@@ -146,7 +146,7 @@ export default function EquipmentPage() {
             />
           </div>
 
-          <div className="tactical-grid min-h-screen p-4 lg:p-6" dir="inherit">
+          <div className="tactical-grid min-h-screen p-4 lg:p-6" dir={dir}>
             {/* Desktop Header */}
             <header className="mb-6 hidden lg:block">
               <div className="flex items-center justify-between">
@@ -204,7 +204,7 @@ export default function EquipmentPage() {
 
             {/* Stats */}
             <div className="mb-4 lg:mb-6">
-              <div className="card-tactical flex items-center gap-3 rounded-lg px-4 py-3 w-fit" dir="inherit">
+              <div className="card-tactical flex items-center gap-3 rounded-lg px-4 py-3 w-fit" dir={dir}>
                 <Package className="h-6 w-6 lg:h-8 lg:w-8 text-primary" />
                 <div>
                   <p className="text-xl lg:text-2xl font-bold text-foreground">
@@ -217,9 +217,9 @@ export default function EquipmentPage() {
 
             {/* Search Filter with Autocomplete */}
             <div className="mb-4 lg:mb-6">
-              <Popover open={open} onOpenChange={setOpen} dir="inherit">
+              <Popover open={open} onOpenChange={setOpen} dir={dir}>
                 <PopoverTrigger asChild>
-                  <div className="relative max-w-md cursor-pointer" dir="inherit">
+                  <div className="relative max-w-md cursor-pointer" dir={dir}>
                     <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
                     <input
                       placeholder={t('equipment.searchPlaceholder')}

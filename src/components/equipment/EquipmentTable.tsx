@@ -18,7 +18,7 @@ export function EquipmentTable({
   onSelectionChange
 }: EquipmentTableProps) {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {

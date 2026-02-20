@@ -1,0 +1,13 @@
+--- src/pages/EquipmentPage.tsx
++++ src/pages/EquipmentPage.tsx
+@@ -218,9 +218,9 @@ export default function EquipmentPage() {
+ 
+             {/* Search Filter with Autocomplete */}
+             <div className="mb-4 lg:mb-6">
+               <Popover open={open} onOpenChange={setOpen}>
+                 <PopoverTrigger asChild>
+-                  <div className="relative max-w-md cursor-pointer" dir="inherit">
++                  <div className="relative max-w-md cursor-pointer" dir={dir}>
+                     <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
+                     <input
+                       placeholder={t('equipment.searchPlaceholder')}
