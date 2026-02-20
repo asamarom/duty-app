@@ -28,6 +28,9 @@
     "emulator:seed": "node scripts/seed-emulator-users.cjs",
     "emulator:all": "node scripts/start-emulators.cjs",
     "test:rules": "firebase emulators:exec --only firestore --config firebase.emulators.ci.json \"npx vitest run --config vitest.rules.config.ts\"",
+    "setup:staging": "node scripts/setup-staging.cjs",
+    "deploy:rules:staging": "firebase deploy --only firestore:rules --project staging",
+    "deploy:rules:production": "firebase deploy --only firestore:rules --project production",
     "prepare": "husky"
   },
   "dependencies": {

@@ -1,6 +1,8 @@
 {
   "projects": {
-    "default": "duty-82f42"
+    "default": "duty-82f42",
+    "production": "duty-82f42",
+    "staging": "duty-staging"
   },
   "targets": {
     "duty-82f42": {
@@ -10,6 +12,13 @@
         ],
         "test": [
           "duty-82f42-test"
+        ]
+      }
+    },
+    "duty-staging": {
+      "hosting": {
+        "staging": [
+          "duty-staging"
         ]
       }
     }
