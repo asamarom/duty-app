@@ -46,7 +46,7 @@ export function RoleBadge({ role, size = 'default', className }: RoleBadgeProps)
         className
       )}
     >
-      <Icon className={cn('mr-1', size === 'sm' ? 'h-2.5 w-2.5' : 'h-3 w-3')} />
+      <Icon className={cn('me-1', size === 'sm' ? 'h-2.5 w-2.5' : 'h-3 w-3')} />
       {t(roleLabelKeys[role])}
     </Badge>
   );

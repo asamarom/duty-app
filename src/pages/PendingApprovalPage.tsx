@@ -98,12 +98,12 @@ export default function PendingApprovalPage() {
               </div>
 
               <Button variant="outline" className="w-full" onClick={refetch}>
-                <RefreshCw className="mr-2 h-4 w-4" />
+                <RefreshCw className="me-2 h-4 w-4" />
                 {t('signup.checkStatus')}
               </Button>
 
               <Button variant="ghost" className="w-full" onClick={handleSignOut}>
-                <LogOut className="mr-2 h-4 w-4" />
+                <LogOut className="me-2 h-4 w-4" />
                 {t('signup.signOut')}
               </Button>
             </CardContent>
@@ -146,12 +146,12 @@ export default function PendingApprovalPage() {
               <p className="text-sm text-muted-foreground text-center">{t('signup.contactAdmin')}</p>
 
               <Button className="w-full" onClick={handleNewRequest}>
-                <RefreshCw className="mr-2 h-4 w-4" />
+                <RefreshCw className="me-2 h-4 w-4" />
                 {t('signup.submitNewRequest')}
               </Button>
 
               <Button variant="ghost" className="w-full" onClick={handleSignOut}>
-                <LogOut className="mr-2 h-4 w-4" />
+                <LogOut className="me-2 h-4 w-4" />
                 {t('signup.signOut')}
               </Button>
             </CardContent>

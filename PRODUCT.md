@@ -61,6 +61,7 @@ The application follows a standard military organizational structure, allowing f
 - [I18N-1] **Bilingual Support**: Full support for **English** and **Hebrew**.
 - [I18N-2] **RTL Compatibility**: Optimized UI for Hebrew speakers.
 - [I18N-3] **Custom Translation Engine**: Centralized management of tactical terminology.
+- [I18N-4] **RTL-Aware CSS Classes**: All UI components use logical CSS properties (`ms-/me-` for margins, `ps-/pe-` for padding, `text-start/text-end` for alignment, `border-s-/border-e-` for borders) to ensure proper rendering in both LTR and RTL layouts.
 
 ---
 

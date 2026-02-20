@@ -84,7 +84,7 @@ export function PersonnelCard({ person, onClick, roles = [] }: PersonnelCardProp
       {/* View Details */}
       <div className="mt-4 flex items-center justify-end text-sm text-primary opacity-0 transition-opacity group-hover:opacity-100">
         {t('personnel.viewProfile')}
-        <ChevronRight className="ml-1 h-4 w-4" />
+        <ChevronRight className="ms-1 h-4 w-4" />
       </div>
     </div>
   );

@@ -446,7 +446,7 @@ export default function EquipmentDetailPage() {
                 </h1>
                 {item.hasPendingTransfer && (
                   <Badge variant="outline" className="text-warning border-warning">
-                    <AlertTriangle className="h-3 w-3 mr-1" />
+                    <AlertTriangle className="h-3 w-3 me-1" />
                     {t('equipment.transferPending')}
                   </Badge>
                 )}
@@ -780,7 +780,7 @@ export default function EquipmentDetailPage() {
             ) : (
               <div className="space-y-3">
                 {history.map((record) => (
-                  <div key={record.id} className="flex items-start gap-3 text-sm border-l-2 border-primary/30 pl-3 py-1">
+                  <div key={record.id} className="flex items-start gap-3 text-sm border-s-2 border-primary/30 ps-3 py-1">
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <Badge variant="outline" className="text-xs">{record.fromUnitType}</Badge>

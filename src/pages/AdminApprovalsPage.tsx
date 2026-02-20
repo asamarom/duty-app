@@ -246,7 +246,7 @@ export default function AdminApprovalsPage() {
           <Dialog open={addUserDialogOpen} onOpenChange={setAddUserDialogOpen}>
             <DialogTrigger asChild>
               <Button>
-                <UserPlus className="mr-2 h-4 w-4" />
+                <UserPlus className="me-2 h-4 w-4" />
                 {t('approvals.addUser')}
               </Button>
             </DialogTrigger>
@@ -305,7 +305,7 @@ export default function AdminApprovalsPage() {
               <Clock className="h-4 w-4" />
               {t('status.pending')}
               {pendingRequests.length > 0 && (
-                <Badge variant="secondary" className="ml-1">
+                <Badge variant="secondary" className="ms-1">
                   {pendingRequests.length}
                 </Badge>
               )}
@@ -366,9 +366,9 @@ export default function AdminApprovalsPage() {
                           disabled={processingId === request.id}
                         >
                           {processingId === request.id ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            <Loader2 className="me-2 h-4 w-4 animate-spin" />
                           ) : (
-                            <CheckCircle className="mr-2 h-4 w-4" />
+                            <CheckCircle className="me-2 h-4 w-4" />
                           )}
                           {t('approvals.approve')}
                         </Button>
@@ -378,7 +378,7 @@ export default function AdminApprovalsPage() {
                           onClick={() => openDeclineDialog(request)}
                           disabled={processingId === request.id}
                         >
-                          <XCircle className="mr-2 h-4 w-4" />
+                          <XCircle className="me-2 h-4 w-4" />
                           {t('approvals.decline')}
                         </Button>
                       </div>
@@ -483,9 +483,9 @@ export default function AdminApprovalsPage() {
                 disabled={processingId === selectedRequest?.id}
               >
                 {processingId === selectedRequest?.id ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="me-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <XCircle className="mr-2 h-4 w-4" />
+                  <XCircle className="me-2 h-4 w-4" />
                 )}
                 {t('approvals.decline')}
               </Button>

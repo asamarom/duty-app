@@ -89,12 +89,12 @@ export function TestLoginForm({ onLogin }: TestLoginFormProps) {
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="me-2 h-4 w-4 animate-spin" />
               Signing in as test user...
             </>
           ) : (
             <>
-              <FlaskConical className="mr-2 h-4 w-4" />
+              <FlaskConical className="me-2 h-4 w-4" />
               Sign in as Test User
             </>
           )}

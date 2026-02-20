@@ -486,7 +486,7 @@ export default function PersonnelDetailPage() {
                     </label>
                   </div>
                   <Badge variant={formData.is_signature_approved ? 'secondary' : 'outline'} className="mt-3">
-                    <Briefcase className="mr-1 h-3 w-3" />
+                    <Briefcase className="me-1 h-3 w-3" />
                     {t(formData.is_signature_approved ? 'personnel.signatureApprovedBadge' : 'personnel.signatureNotApproved')}
                   </Badge>
                 </CardContent>

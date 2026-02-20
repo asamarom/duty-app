@@ -542,7 +542,7 @@ export function BulkAssignDialog({ open, onOpenChange, selectedItems, onAssign }
               onClick={handleSubmit}
               disabled={!isValid() || isSubmitting}
             >
-              {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {isSubmitting && <Loader2 className="h-4 w-4 me-2 animate-spin" />}
               {t('common.assign')}
             </Button>
           )}

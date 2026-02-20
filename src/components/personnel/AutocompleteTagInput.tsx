@@ -110,7 +110,7 @@ export function AutocompleteTagInput({
             <button
               type="button"
               onClick={() => removeValue(value)}
-              className="ml-1 hover:text-destructive"
+              className="ms-1 hover:text-destructive"
             >
               <X className="h-3 w-3" />
             </button>
