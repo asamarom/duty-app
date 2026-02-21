@@ -2,80 +2,62 @@
 
 ## Overview
 
-This project uses a **comprehensive two-tier testing** deployment pipeline:
+This project uses a **fast CI + comprehensive staging testing** deployment pipeline:
 
-1. **CI Workflow** (`ci.yml`): Fast tests with Firebase emulators
+1. **CI Workflow** (`ci.yml`): Fast quality checks (2-3 min)
    - TypeScript type checking
    - ESLint
    - Unit tests
    - Security rules tests
-   - E2E tests with emulators
-   - Performance tests
 
-2. **Deploy & Test Workflow** (`deploy-and-test.yml`): Real environment testing
+2. **Deploy & Test Workflow** (`deploy-and-test.yml`): Comprehensive real environment testing (11-15 min)
    - Deploys to Vercel staging
-   - Runs E2E tests on real staging deployment
-   - Deploys to production only if staging tests pass
+   - E2E tests (Desktop) on real staging deployment
+   - E2E tests (Mobile) with RTL validation
+   - Performance tests on staging
+   - Deploys to production only if ALL staging tests pass
    - Runs smoke tests on production
 
-This ensures all code is validated both in isolated test environments AND on real deployed infrastructure before reaching production users.
+**Total time**: ~13-18 minutes (reduced from 19-31 min by removing duplicate testing)
+
+This approach provides **faster feedback** on code quality issues while ensuring **comprehensive testing** on real deployed infrastructure before production.
 
 ## Pipeline Flow
 
 ```mermaid
 graph TD
-    A[Push to main] --> B[CI: Typecheck/Lint/Unit/Rules]
-    B --> C[CI: E2E with Emulators]
-    C -->|Tests Pass| D[Deploy to Staging]
-    C -->|Tests Fail| E[Block Deployment & Notify]
-    D --> F[E2E Tests on Real Staging]
-    F -->|Tests Pass| G[Deploy to Production]
-    F -->|Tests Fail| H[Block Production & Notify]
-    G --> I[Smoke Test Production]
+    A[Push to main] --> B[CI: Fast Checks]
+    B[Typecheck/Lint/Unit/Rules<br/>2-3 min] -->|Pass| C[Deploy to Staging]
+    B -->|Fail| E[❌ Block & Notify]
+    C[Vercel Deploy<br/>1-2 min] --> D[Comprehensive Testing]
+    D[E2E Desktop + Mobile + Performance<br/>8-12 min] -->|Pass| F[Deploy to Production]
+    D -->|Fail| G[❌ Block Production & Notify]
+    F --> H[Smoke Test Production]
 
     style B fill:#bbf,stroke:#333
-    style C fill:#bbf,stroke:#333
-    style F fill:#f9f,stroke:#333
-    style G fill:#9f9,stroke:#333
+    style D fill:#f9f,stroke:#333
+    style F fill:#9f9,stroke:#333
     style E fill:#f99,stroke:#333
-    style H fill:#f99,stroke:#333
+    style G fill:#f99,stroke:#333
 ```
 
 ## Pipeline Stages
 
 ### Phase 1: CI Workflow (ci.yml)
 
-#### 1. Fast Checks (Parallel)
+#### 1. Fast Quality Checks (All Parallel)
 - **Trigger**: Push to `main` or PR
-- **Duration**: ~2-3 minutes
-- **Jobs**:
+- **Duration**: ~2-3 minutes total
+- **Jobs** (all run in parallel):
   - TypeScript type checking
   - ESLint
   - Unit tests
   - Security rules tests (with Firestore emulator)
-
-#### 2. E2E Tests with Emulators
-- **Trigger**: After fast checks pass
-- **Duration**: ~5-10 minutes
-- **Environment**: Firebase emulators (Auth, Firestore)
-- **What it tests**:
-  - ✅ Authentication flows
-  - ✅ CRUD operations
-  - ✅ Security rules enforcement
-  - ✅ UI interactions
-- **Can skip**: Add `[skip e2e]` to commit message
-
-#### 3. Performance Tests
-- **Trigger**: After fast checks pass (parallel with E2E)
-- **Duration**: ~2-3 minutes
-- **What it tests**:
-  - ✅ Page load times
-  - ✅ Time to interactive
-  - ✅ Core Web Vitals
+- **Goal**: Fast feedback on code quality issues
 
 ### Phase 2: Deploy & Test Workflow (deploy-and-test.yml)
 
-#### 4. Deploy to Staging
+#### 2. Deploy to Staging
 - **Trigger**: After CI workflow completes successfully
 - **Environment**: Vercel Preview
 - **Duration**: ~2-3 minutes
@@ -85,25 +67,39 @@ graph TD
   - Uses staging Firebase (`duty-staging`)
   - Outputs preview URL for testing
 
-#### 5. E2E Tests on Real Staging
+#### 3. Comprehensive Testing on Staging
 - **Trigger**: After staging deployment succeeds
-- **Duration**: ~5-10 minutes
+- **Duration**: ~8-12 minutes total
 - **Environment**: Real Vercel staging deployment
-- **What it tests**:
+
+**3a. E2E Tests - Desktop**
   - ✅ Authentication (test users can log in)
-  - ✅ RTL alignment (Hebrew mode works correctly)
   - ✅ Equipment page functionality
+  - ✅ Personnel management
   - ✅ Data loading from staging Firebase
   - ✅ All critical user flows
-  - ✅ Environment-specific configuration
+
+**3b. E2E Tests - Mobile**
+  - ✅ RTL alignment (Hebrew mode on mobile)
+  - ✅ Mobile viewport testing (Pixel 5)
+  - ✅ Touch interactions
+  - ✅ Responsive design
+  - ✅ Visual regression snapshots
+
+**3c. Performance Tests**
+  - ✅ Page load times
+  - ✅ Time to interactive
+  - ✅ Core Web Vitals
   - ✅ Real network conditions
 
-- **Test Scope**:
+- **Test Commands**:
   ```bash
-  npm run test:e2e:staging
+  npm run test:e2e:staging          # Desktop
+  npm run test:e2e:staging:mobile   # Mobile
+  npm run test:perf                 # Performance
   ```
 
-#### 6. Deploy to Production
+#### 4. Deploy to Production
 - **Trigger**: After staging E2E tests pass (main branch only)
 - **Environment**: Vercel Production
 - **What it does**:
@@ -112,7 +108,7 @@ graph TD
   - Uses production Firebase (`duty-82f42`)
   - Only runs if ALL tests passed
 
-#### 7. Smoke Test Production (Optional)
+#### 5. Smoke Test Production (Optional)
 - **Trigger**: After production deployment
 - **Purpose**: Verify critical paths work in production
 - **Failure handling**: Logs warning but doesn't rollback (deployment already complete)
@@ -224,17 +220,19 @@ Smoke Test ⚠️  Failed
 | Stage | Duration | Blocking | Workflow |
 |-------|----------|----------|----------|
 | **Phase 1: CI** | | | |
-| Fast Checks | ~2-3 min | ✅ | ci.yml |
-| E2E (emulators) | ~5-10 min | ✅ | ci.yml |
-| Performance | ~2-3 min | ❌ (parallel) | ci.yml |
-| **Phase 2: Deploy** | | | |
-| Staging Deploy | ~2-3 min | ✅ | deploy-and-test.yml |
-| E2E (real staging) | ~5-10 min | ✅ (blocks prod) | deploy-and-test.yml |
-| Production Deploy | ~2-3 min | ❌ (after tests) | deploy-and-test.yml |
+| Fast Checks (parallel) | ~2-3 min | ✅ | ci.yml |
+| **Phase 2: Deploy & Test** | | | |
+| Staging Deploy | ~1-2 min | ✅ | deploy-and-test.yml |
+| E2E Desktop | ~4-6 min | ✅ (blocks prod) | deploy-and-test.yml |
+| E2E Mobile | ~3-5 min | ✅ (blocks prod) | deploy-and-test.yml |
+| Performance | ~1-2 min | ✅ (blocks prod) | deploy-and-test.yml |
+| Production Deploy | ~1-2 min | ❌ (after tests) | deploy-and-test.yml |
 | Smoke Test | ~2-3 min | ❌ (post-deploy) | deploy-and-test.yml |
-| **Total** | ~21-31 min | ~16-28 min blocking |
+| **Total** | ~13-21 min | ~11-18 min blocking |
 
-**Note**: Performance tests run in parallel with E2E emulator tests, so they don't add to the critical path.
+**Improvement**: Reduced from 21-31 min to 13-21 min by eliminating duplicate E2E testing.
+
+**Note**: All tests run sequentially on staging to ensure comprehensive validation before production.
 
 ## Local Development Workflow
 

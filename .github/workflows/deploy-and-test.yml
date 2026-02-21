@@ -1,14 +1,18 @@
 name: Deploy & Test Pipeline
 
-# This workflow complements ci.yml by testing on REAL deployed environments.
-# ci.yml runs: typecheck, lint, unit tests, rules tests, E2E with emulators
-# This workflow runs: deploy to staging → E2E on real staging → deploy to prod
+# This workflow handles deployment and ALL E2E testing on real environments.
+# ci.yml runs FAST checks only: typecheck, lint, unit tests, rules tests
+# This workflow runs: deploy → comprehensive testing → deploy to prod
 #
 # Flow:
-# 1. CI workflow runs all tests with emulators
-# 2. This workflow deploys to Vercel staging and tests the real deployment
-# 3. If staging tests pass, deploys to production
-# 4. Runs smoke tests on production
+# 1. CI workflow runs fast quality checks (2-3 min)
+# 2. This workflow deploys to Vercel staging (1-2 min)
+# 3. Runs comprehensive tests on staging (8-12 min):
+#    - E2E Desktop tests
+#    - E2E Mobile tests (RTL, critical paths)
+#    - Performance tests
+# 4. If all tests pass, deploys to production
+# 5. Runs smoke tests on production
 
 on:
   # Only trigger after CI completes successfully (avoids duplicate runs)
@@ -90,6 +94,11 @@ jobs:
         env:
           STAGING_URL: ${{ needs.deploy-staging.outputs.preview-url }}
         run: npx cross-env TEST_ENV=staging playwright test --project=staging-mobile
+
+      - name: Run Performance Tests on Staging
+        env:
+          STAGING_URL: ${{ needs.deploy-staging.outputs.preview-url }}
+        run: npx cross-env TEST_ENV=staging playwright test e2e/performance.spec.ts --project=staging
 
       - name: Upload Staging Test Results
         if: always()
