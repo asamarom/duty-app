@@ -52,7 +52,6 @@ jobs:
   rules-tests:
     name: Security Rules Tests
     runs-on: ubuntu-latest
-    needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
 
