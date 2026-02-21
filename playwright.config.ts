@@ -128,6 +128,31 @@ export default defineConfig({
       dependencies: ['setup'],
       testIgnore: /auth\.spec\.ts/,
     },
+    // Mobile testing - Android
+    {
+      name: 'mobile-chrome',
+      use: {
+        ...devices['Pixel 5'],
+      },
+      testMatch: /.*mobile\.spec\.ts/, // Only run mobile-specific tests
+    },
+    // Mobile testing - iOS
+    {
+      name: 'mobile-safari',
+      use: {
+        ...devices['iPhone 13'],
+      },
+      testMatch: /.*mobile\.spec\.ts/, // Only run mobile-specific tests
+    },
+    // Staging mobile - for CI testing
+    {
+      name: 'staging-mobile',
+      use: {
+        ...devices['Pixel 5'],
+        baseURL: FIREBASE_TEST_URL,
+      },
+      testMatch: /.*\.(spec|mobile)\.ts/, // Run all tests including mobile-specific
+    },
   ],
 
   // Run Firebase emulators and local dev server when not testing remote

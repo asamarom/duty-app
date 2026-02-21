@@ -30,15 +30,19 @@ test.describe('Localization [I18N]', () => {
     await page.goto('/');
     await page.waitForLoadState('domcontentloaded');
 
-    // Check for RTL direction attribute on html or body
+    // Check for RTL direction attribute on html element
     const htmlDir = await page.locator('html').getAttribute('dir');
-    const bodyDir = await page.locator('body').getAttribute('dir');
 
-    // Check for RTL-specific CSS classes
-    const hasRtlClass = await page.locator('.rtl, [dir="rtl"]').first().isVisible().catch(() => false);
+    // The app MUST have RTL set on the html element for proper Hebrew support
+    expect(htmlDir).toBe('rtl');
 
-    // The app should support RTL layout
-    // Pass if RTL is set or if app has RTL-aware layout
-    expect(htmlDir === 'rtl' || bodyDir === 'rtl' || hasRtlClass || true).toBeTruthy();
+    // Verify RTL is applied to key layout containers
+    const mainContent = page.locator('main, [role="main"]').first();
+    if (await mainContent.isVisible().catch(() => false)) {
+      const mainDir = await mainContent.evaluate(el =>
+        window.getComputedStyle(el).direction
+      );
+      expect(mainDir).toBe('rtl');
+    }
   });
 });
