@@ -106,11 +106,18 @@ jobs:
           # Tokens are generated fresh in the previous step and exported to GITHUB_ENV
         run: npx playwright test --project=staging-auth-setup
 
+      - name: Debug - List auth files
+        run: |
+          echo "Listing e2e/.auth/ directory:"
+          ls -la e2e/.auth/ || echo "Directory does not exist"
+          echo "Finding all staging-*.json files:"
+          find e2e -name "staging-*.json" -type f || echo "No files found"
+
       - name: Upload auth state
         uses: actions/upload-artifact@v4
         with:
           name: staging-auth-state
-          path: e2e/.auth/
+          path: e2e/.auth/*.json
           retention-days: 1
 
   # Step 3: Run E2E Tests on Real Staging Deployment (Parallel)
