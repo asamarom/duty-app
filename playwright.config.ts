@@ -117,7 +117,7 @@ export default defineConfig({
       name: 'staging',
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: FIREBASE_TEST_URL,
+        // Use dynamic baseURL from top-level config (respects STAGING_URL env var)
       },
     },
     // Staging with test user auth
@@ -125,8 +125,8 @@ export default defineConfig({
       name: 'staging-auth',
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: FIREBASE_TEST_URL,
         storageState: './e2e/.auth/user.json',
+        // Use dynamic baseURL from top-level config (respects STAGING_URL env var)
       },
       dependencies: ['setup'],
       testIgnore: /auth\.spec\.ts/,
@@ -152,7 +152,7 @@ export default defineConfig({
       name: 'staging-mobile',
       use: {
         ...devices['Pixel 5'],
-        baseURL: FIREBASE_TEST_URL,
+        // Use dynamic baseURL from top-level config (respects STAGING_URL env var)
       },
       testMatch: /.*\.(spec|mobile)\.ts/, // Run all tests including mobile-specific
     },
