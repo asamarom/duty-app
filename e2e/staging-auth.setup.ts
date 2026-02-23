@@ -28,9 +28,9 @@ const TEST_USER_TOKENS = {
 };
 
 const authFiles = {
-  admin: './e2e/.auth/staging-admin.json',
-  leader: './e2e/.auth/staging-leader.json',
-  user: './e2e/.auth/staging-user.json',
+  admin: 'e2e/.auth/staging-admin.json',
+  leader: 'e2e/.auth/staging-leader.json',
+  user: 'e2e/.auth/staging-user.json',
 };
 
 setup('authenticate as admin', async ({ page }) => {
