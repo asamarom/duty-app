@@ -60,11 +60,21 @@ export const TEST_USER_INFO: Record<TestUserType, {
 };
 
 /**
- * Login as a test user using the test login form.
+ * Check if we're running on staging (real Firebase, not emulators).
+ */
+export function isStagingTest(): boolean {
+  return process.env.TEST_ENV === 'staging';
+}
+
+/**
+ * Login as a test user.
+ *
+ * - On local/emulator: Uses the test login form
+ * - On staging: Uses pre-authenticated storage state (no login needed)
  *
  * Prerequisites:
- * - App must be running with VITE_TEST_MODE=true
- * - Test users must be seeded in the database
+ * - Local: App must be running with VITE_TEST_MODE=true and test users seeded
+ * - Staging: Auth setup must have run to create storage state files
  *
  * @param page - Playwright page instance
  * @param userType - Type of test user to login as
@@ -83,6 +93,19 @@ export async function loginAsTestUser(
   const { waitForNavigation = true, expectedUrl } = options;
   const userInfo = TEST_USER_INFO[userType];
 
+  // On staging, storage state is already loaded via project config
+  // Just navigate to the expected page - we're already authenticated
+  if (isStagingTest()) {
+    const targetUrl = expectedUrl ?? userInfo.expectedRoute;
+    await page.goto(targetUrl);
+
+    if (waitForNavigation) {
+      await page.waitForURL(`**${targetUrl}`, { timeout: 15000 });
+    }
+    return;
+  }
+
+  // Local: use test login form
   // Navigate to auth page
   await page.goto('/auth');
 

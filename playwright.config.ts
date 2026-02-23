@@ -112,24 +112,36 @@ export default defineConfig({
       dependencies: ['setup'],
       testIgnore: [/auth\.spec\.ts/, /auth\.setup\.ts/, /user-lifecycle\.spec\.ts/],
     },
-    // Staging/Test environment (has test login form enabled)
+    // Staging/Test environment - uses custom token auth
     {
       name: 'staging',
       use: {
         ...devices['Desktop Chrome'],
+        storageState: './e2e/.auth/staging-user.json',
         // Use dynamic baseURL from top-level config (respects STAGING_URL env var)
       },
+      // Desktop: exclude mobile-specific tests to avoid overlap with staging-mobile project
+      testIgnore: /.*\.mobile\.spec\.ts/,
     },
-    // Staging with test user auth
+    // Staging admin tests (requires admin role)
     {
-      name: 'staging-auth',
+      name: 'staging-admin',
       use: {
         ...devices['Desktop Chrome'],
-        storageState: './e2e/.auth/user.json',
+        storageState: './e2e/.auth/staging-admin.json',
         // Use dynamic baseURL from top-level config (respects STAGING_URL env var)
       },
-      dependencies: ['setup'],
-      testIgnore: /auth\.spec\.ts/,
+      testMatch: /admin.*\.spec\.ts/,
+    },
+    // Staging leader tests (requires leader role)
+    {
+      name: 'staging-leader',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: './e2e/.auth/staging-leader.json',
+        // Use dynamic baseURL from top-level config (respects STAGING_URL env var)
+      },
+      testMatch: /.*battalion.*\.spec\.ts/,
     },
     // Mobile testing - Android
     {
@@ -154,7 +166,7 @@ export default defineConfig({
         ...devices['Pixel 5'],
         // Use dynamic baseURL from top-level config (respects STAGING_URL env var)
       },
-      testMatch: /.*\.(spec|mobile)\.ts/, // Run all tests including mobile-specific
+      testMatch: /.*\.mobile\.spec\.ts/, // Run ONLY mobile-specific tests to avoid overlap with staging project
     },
   ],
 

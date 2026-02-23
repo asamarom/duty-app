@@ -49,3 +49,4 @@ nul
 # Vercel
 .vercel
 *firebase-adminsdk*.json
+firebase-staging-service-account.json
