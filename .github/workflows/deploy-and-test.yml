@@ -104,7 +104,7 @@ jobs:
           VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
           # Tokens are generated fresh in the previous step and exported to GITHUB_ENV
-        run: npx playwright test e2e/staging-auth.setup.ts
+        run: npx playwright test --project=staging-auth-setup
 
       - name: Upload auth state
         uses: actions/upload-artifact@v4

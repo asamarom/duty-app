@@ -76,6 +76,15 @@ export default defineConfig({
         headless: false, // Must be visible for manual OAuth
       },
     },
+    // Staging auth setup (automated with custom tokens)
+    {
+      name: 'staging-auth-setup',
+      testMatch: /staging-auth\.setup\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        headless: true, // Headless for CI
+      },
+    },
     // Main tests - depend on setup for auth state
     {
       name: 'chromium',
