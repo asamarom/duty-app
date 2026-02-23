@@ -22,7 +22,7 @@ const testEnv = process.env.TEST_ENV; // 'production' | 'staging' | undefined
 const baseURL = testEnv === 'production'
   ? FIREBASE_PROD_URL
   : testEnv === 'staging'
-    ? FIREBASE_TEST_URL
+    ? (process.env.STAGING_URL || FIREBASE_TEST_URL)  // Use dynamic Vercel URL if provided
     : (process.env.BASE_URL || 'http://localhost:8080');
 
 const isRemote = testEnv === 'production' || testEnv === 'staging';
@@ -39,8 +39,11 @@ export default defineConfig({
   // Retry on CI only
   retries: process.env.CI ? 2 : 0,
 
-  // Limit parallel workers on CI
-  workers: process.env.CI ? 1 : undefined,
+  // Parallel workers on CI
+  // For staging tests: 2 workers (no emulator conflicts, saves CI minutes)
+  // For local with emulators: 1 worker (avoid conflicts)
+  workers: process.env.CI && process.env.TEST_ENV === 'staging' ? 2 :
+           process.env.CI ? 1 : undefined,
 
   // Reporter to use
   reporter: [
