@@ -9,6 +9,7 @@
  */
 
 import { test as setup, expect } from '@playwright/test';
+import * as path from 'path';
 
 // Firebase Staging config (from environment variables)
 const firebaseConfig = {
@@ -27,10 +28,12 @@ const TEST_USER_TOKENS = {
   user: process.env.TEST_USER_USER_TOKEN || '',
 };
 
+// Use absolute paths from project root
+const projectRoot = path.resolve(__dirname, '..');
 const authFiles = {
-  admin: 'e2e/.auth/staging-admin.json',
-  leader: 'e2e/.auth/staging-leader.json',
-  user: 'e2e/.auth/staging-user.json',
+  admin: path.join(projectRoot, 'e2e', '.auth', 'staging-admin.json'),
+  leader: path.join(projectRoot, 'e2e', '.auth', 'staging-leader.json'),
+  user: path.join(projectRoot, 'e2e', '.auth', 'staging-user.json'),
 };
 
 setup('authenticate as admin', async ({ page }) => {
