@@ -108,16 +108,22 @@ jobs:
 
       - name: Debug - List auth files
         run: |
+          echo "Current working directory: $(pwd)"
           echo "Listing e2e/.auth/ directory:"
           ls -la e2e/.auth/ || echo "Directory does not exist"
           echo "Finding all staging-*.json files:"
-          find e2e -name "staging-*.json" -type f || echo "No files found"
+          find . -name "staging-*.json" -type f || echo "No files found"
+          echo "Contents of e2e directory:"
+          ls -la e2e/ || echo "e2e directory does not exist"
 
       - name: Upload auth state
         uses: actions/upload-artifact@v4
         with:
           name: staging-auth-state
-          path: e2e/.auth/*.json
+          path: |
+            e2e/.auth/staging-admin.json
+            e2e/.auth/staging-leader.json
+            e2e/.auth/staging-user.json
           retention-days: 1
 
   # Step 3: Run E2E Tests on Real Staging Deployment (Parallel)
