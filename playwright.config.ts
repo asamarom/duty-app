@@ -133,6 +133,8 @@ export default defineConfig({
       testIgnore: /.*\.mobile\.spec\.ts/,
     },
     // Staging admin tests (requires admin role)
+    // Matches: admin-*.spec.ts, performance.spec.ts, dashboard.spec.ts, equipment.spec.ts,
+    // personnel.spec.ts, i18n.spec.ts, units.spec.ts, transfers*.spec.ts, user-lifecycle.spec.ts, rtl.spec.ts
     {
       name: 'staging-admin',
       use: {
@@ -140,7 +142,8 @@ export default defineConfig({
         storageState: './e2e/.auth/staging-admin.json',
         // Use dynamic baseURL from top-level config (respects STAGING_URL env var)
       },
-      testMatch: /admin.*\.spec\.ts/,
+      testMatch: /(admin|performance|dashboard|equipment|personnel|i18n|units|transfers|user-lifecycle|rtl).*\.spec\.ts/,
+      testIgnore: /.*\.mobile\.spec\.ts/, // Exclude mobile tests
     },
     // Staging leader tests (requires leader role)
     {
