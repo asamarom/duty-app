@@ -85,6 +85,11 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
 
+      - name: Generate Custom Tokens
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node scripts/generate-staging-auth-tokens.cjs
+
       - name: Create auth directory
         run: mkdir -p e2e/.auth
 
@@ -98,9 +103,7 @@ jobs:
           VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
           VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
-          TEST_USER_ADMIN_TOKEN: ${{ secrets.TEST_USER_ADMIN_TOKEN }}
-          TEST_USER_LEADER_TOKEN: ${{ secrets.TEST_USER_LEADER_TOKEN }}
-          TEST_USER_USER_TOKEN: ${{ secrets.TEST_USER_USER_TOKEN }}
+          # Tokens are generated fresh in the previous step and exported to GITHUB_ENV
         run: npx playwright test e2e/staging-auth.setup.ts
 
       - name: Upload auth state

@@ -44,52 +44,36 @@ node scripts/seed-firebase-staging.cjs
    Created personnel: Bob Johnson
 ```
 
-### Step 2: Generate Custom Tokens (REQUIRED)
+### Step 2: Add Firebase Service Account to GitHub Secrets (REQUIRED)
 
-Generate Firebase custom tokens for test users:
+Firebase custom tokens expire after 1 hour, so we can't pre-generate them. Instead, CI generates fresh tokens before each test run using the service account.
 
-```bash
-cd /home/ubuntu/duty-app
-node scripts/generate-staging-auth-tokens.cjs
+1. Open your local `firebase-staging-service-account.json` file
+
+2. Copy the **entire JSON contents** (it should start with `{` and end with `}`)
+
+3. Go to: https://github.com/asamarom/duty-app/settings/secrets/actions
+
+4. Click **"New repository secret"**
+
+5. Add this secret:
+   - Name: `FIREBASE_SERVICE_ACCOUNT`
+   - Value: [paste entire JSON from step 2]
+
+**Example format of the JSON:**
+```json
+{
+  "type": "service_account",
+  "project_id": "duty-staging",
+  "private_key_id": "...",
+  "private_key": "-----BEGIN PRIVATE KEY-----\n...",
+  "client_email": "...",
+  "client_id": "...",
+  ...
+}
 ```
 
-**Expected output:**
-```
-🔑 Firebase Custom Tokens Generated
-
-Copy these tokens to GitHub Secrets:
-
-1. Go to: https://github.com/asamarom/duty-app/settings/secrets/actions
-
-2. Add these secrets:
-
-   TEST_USER_ADMIN_TOKEN:
-   eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
-
-   TEST_USER_LEADER_TOKEN:
-   eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
-
-   TEST_USER_USER_TOKEN:
-   eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-### Step 3: Add Tokens to GitHub Secrets (REQUIRED)
-
-1. Go to: https://github.com/asamarom/duty-app/settings/secrets/actions
-
-2. Click **"New repository secret"**
-
-3. Add each secret:
-   - Name: `TEST_USER_ADMIN_TOKEN`
-   - Value: [paste token from step 2]
-
-   - Name: `TEST_USER_LEADER_TOKEN`
-   - Value: [paste token from step 2]
-
-   - Name: `TEST_USER_USER_TOKEN`
-   - Value: [paste token from step 2]
-
-### Step 4: Push and Test (REQUIRED)
+### Step 3: Push and Test (REQUIRED)
 
 Push the changes to trigger the updated workflow:
 
@@ -106,6 +90,7 @@ After pushing, the Deploy & Test workflow will:
    - Deploys to Vercel preview URL
 
 2. **Setup Staging Auth** (1-2 min) ← NEW JOB
+   - Generates fresh custom tokens (valid for 1 hour)
    - Authenticates with Firebase using custom tokens
    - Saves storage state for all 3 test users
 
@@ -127,9 +112,12 @@ After pushing, the Deploy & Test workflow will:
 
 ## 🐛 Troubleshooting
 
-### If auth setup fails with "No custom token for admin"
+### If auth setup fails with "Failed to parse FIREBASE_SERVICE_ACCOUNT"
 
-This means you haven't added the tokens to GitHub Secrets yet. Complete Step 3 above.
+This means the service account JSON wasn't added correctly to GitHub Secrets. Make sure you:
+1. Copied the ENTIRE JSON file contents (starts with `{`, ends with `}`)
+2. Named the secret exactly: `FIREBASE_SERVICE_ACCOUNT`
+3. Didn't add any extra whitespace or formatting
 
 ### If battalion scoping tests still fail
 
@@ -163,12 +151,12 @@ If both show 109 tests, the config changes didn't apply. Try pushing again.
 Your implementation is successful when:
 
 1. ✅ Re-seeded Firebase with 6 personnel
-2. ✅ Generated custom tokens
-3. ✅ Added 3 tokens to GitHub Secrets
-4. ✅ Pushed to trigger new workflow
-5. ✅ All E2E tests PASS on staging
-6. ✅ Test runtime reduced from ~54min to ~13min
-7. ✅ Zero tests skipped (full coverage maintained)
+2. ✅ Added Firebase service account to GitHub Secrets
+3. ✅ Pushed to trigger new workflow
+4. ✅ All E2E tests PASS on staging
+5. ✅ Test runtime reduced from ~54min to ~13min
+6. ✅ Zero tests skipped (full coverage maintained)
+7. ✅ Custom tokens generated fresh on every CI run (no manual updates needed)
 
 ---
 
@@ -177,20 +165,22 @@ Your implementation is successful when:
 Run these commands in order:
 
 ```bash
-# Step 1: Re-seed Firebase
+# Step 1: Re-seed Firebase with 6 personnel
 node scripts/seed-firebase-staging.cjs
 
-# Step 2: Generate tokens
-node scripts/generate-staging-auth-tokens.cjs
+# Step 2: Add service account to GitHub Secrets (manual)
+# 1. Copy contents of firebase-staging-service-account.json
+# 2. Go to: https://github.com/asamarom/duty-app/settings/secrets/actions
+# 3. Add secret: FIREBASE_SERVICE_ACCOUNT = [paste JSON]
 
-# Step 3: Copy tokens to GitHub Secrets (manual)
-# https://github.com/asamarom/duty-app/settings/secrets/actions
-
-# Step 4: Push and watch tests pass
+# Step 3: Push and watch tests pass
+# (CI will generate fresh tokens automatically before each run)
 git push origin main
 
-# Step 5: Monitor workflow
+# Step 4: Monitor workflow
 # https://github.com/asamarom/duty-app/actions
 ```
 
 Once you see all tests passing in the workflow, you're done! 🎉
+
+**Note:** Tokens are now generated automatically in CI before each test run, so you never need to manually update them.
