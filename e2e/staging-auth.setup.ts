@@ -10,6 +10,7 @@
 
 import { test as setup, expect } from '@playwright/test';
 import * as path from 'path';
+import * as fs from 'fs';
 import { fileURLToPath } from 'url';
 
 // ES module equivalent of __dirname
@@ -33,12 +34,11 @@ const TEST_USER_TOKENS = {
   user: process.env.TEST_USER_USER_TOKEN || '',
 };
 
-// Use absolute paths from project root
-const projectRoot = path.resolve(__dirname, '..');
+// Auth state file paths (relative to e2e directory)
 const authFiles = {
-  admin: path.join(projectRoot, 'e2e', '.auth', 'staging-admin.json'),
-  leader: path.join(projectRoot, 'e2e', '.auth', 'staging-leader.json'),
-  user: path.join(projectRoot, 'e2e', '.auth', 'staging-user.json'),
+  admin: path.join(__dirname, '.auth', 'staging-admin.json'),
+  leader: path.join(__dirname, '.auth', 'staging-leader.json'),
+  user: path.join(__dirname, '.auth', 'staging-user.json'),
 };
 
 setup('authenticate as admin', async ({ page }) => {
@@ -96,9 +96,24 @@ async function authenticateAndSave(page: any, userType: 'admin' | 'leader' | 'us
   }
 
   console.log(`✅ Authenticated as ${userType}, saving session...`);
+  console.log(`📁 Target path: ${authFiles[userType]}`);
+  console.log(`📁 Directory exists: ${fs.existsSync(path.dirname(authFiles[userType]))}`);
+  console.log(`📁 Working directory: ${process.cwd()}`);
 
   // Save authenticated session
-  await page.context().storageState({ path: authFiles[userType] });
+  try {
+    await page.context().storageState({ path: authFiles[userType] });
+    console.log(`💾 Session saved successfully`);
 
-  console.log(`💾 Session saved to ${authFiles[userType]}`);
+    // Verify file was created
+    if (fs.existsSync(authFiles[userType])) {
+      const stats = fs.statSync(authFiles[userType]);
+      console.log(`✅ File verified: ${authFiles[userType]} (${stats.size} bytes)`);
+    } else {
+      throw new Error(`File was not created at ${authFiles[userType]}`);
+    }
+  } catch (error) {
+    console.error(`❌ Failed to save session: ${error}`);
+    throw error;
+  }
 }
