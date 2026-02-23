@@ -97,11 +97,9 @@ export async function loginAsTestUser(
   // Just navigate to the expected page - we're already authenticated
   if (isStagingTest()) {
     const targetUrl = expectedUrl ?? userInfo.expectedRoute;
-    await page.goto(targetUrl);
-
-    if (waitForNavigation) {
-      await page.waitForURL(`**${targetUrl}`, { timeout: 15000 });
-    }
+    await page.goto(targetUrl, { waitUntil: 'load' });
+    // No need to waitForURL - we're already at the target URL after goto() completes
+    // The storage state handles authentication automatically
     return;
   }
 
