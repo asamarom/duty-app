@@ -121,6 +121,15 @@ export default defineConfig({
       dependencies: ['setup'],
       testIgnore: [/auth\.spec\.ts/, /auth\.setup\.ts/, /user-lifecycle\.spec\.ts/],
     },
+    // Staging unauthenticated tests (auth.spec.ts only - tests redirect behavior)
+    {
+      name: 'staging-unauth',
+      use: {
+        ...devices['Desktop Chrome'],
+        // No storageState - tests unauthenticated scenarios
+      },
+      testMatch: /auth\.spec\.ts/,
+    },
     // Staging/Test environment - uses custom token auth
     {
       name: 'staging',
@@ -129,8 +138,8 @@ export default defineConfig({
         storageState: './e2e/.auth/staging-user.json',
         // Use dynamic baseURL from top-level config (respects STAGING_URL env var)
       },
-      // Desktop: exclude mobile-specific tests to avoid overlap with staging-mobile project
-      testIgnore: /.*\.mobile\.spec\.ts/,
+      // Desktop: exclude mobile-specific tests, auth tests, and role-specific tests
+      testIgnore: [/.*\.mobile\.spec\.ts/, /auth\.spec\.ts/, /battalion.*\.spec\.ts/],
     },
     // Staging admin tests (requires admin role)
     // Matches: admin-*.spec.ts, performance.spec.ts, dashboard.spec.ts, equipment.spec.ts,
@@ -143,7 +152,7 @@ export default defineConfig({
         // Use dynamic baseURL from top-level config (respects STAGING_URL env var)
       },
       testMatch: /(admin|performance|dashboard|equipment|personnel|i18n|units|transfers|user-lifecycle|rtl).*\.spec\.ts/,
-      testIgnore: /.*\.mobile\.spec\.ts/, // Exclude mobile tests
+      testIgnore: [/.*\.mobile\.spec\.ts/, /auth\.spec\.ts/], // Exclude mobile and auth tests
     },
     // Staging leader tests (requires leader role)
     {
@@ -154,6 +163,7 @@ export default defineConfig({
         // Use dynamic baseURL from top-level config (respects STAGING_URL env var)
       },
       testMatch: /.*battalion.*\.spec\.ts/,
+      testIgnore: /auth\.spec\.ts/, // Exclude auth tests
     },
     // Mobile testing - Android
     {

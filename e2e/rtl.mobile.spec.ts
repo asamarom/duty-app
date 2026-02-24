@@ -16,9 +16,10 @@ import { loginAsTestUser } from './utils/test-auth';
 test.describe('Mobile RTL [Equipment Page]', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page, 'admin');
-    await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(3000); // Extra time for mobile rendering
+    await page.goto('/equipment', { waitUntil: 'load' });
+    // Wait for page content to be visible instead of networkidle (Firebase keeps connections open)
+    await page.locator('header, [role="banner"]').first().waitFor({ timeout: 10000 }).catch(() => {});
+    await page.waitForTimeout(1000); // Brief wait for mobile rendering
   });
 
   test('[M-RTL-1] Mobile viewport should have RTL direction', async ({ page }) => {

@@ -12,9 +12,10 @@ import { loginAsTestUser } from './utils/test-auth';
 test.describe('RTL Layout [Equipment Page]', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page, 'admin');
-    await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000); // Wait for data to load
+    await page.goto('/equipment', { waitUntil: 'load' });
+    // Wait for page content to be visible instead of networkidle (Firebase keeps connections open)
+    await page.locator('h1, h2').filter({ hasText: /מלאי ציוד|equipment/i }).first().waitFor({ timeout: 10000 }).catch(() => {});
+    await page.waitForTimeout(1000); // Brief wait for data to stabilize
   });
 
   test('[RTL-1] HTML should have RTL direction', async ({ page }) => {

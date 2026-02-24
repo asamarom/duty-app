@@ -161,7 +161,7 @@ jobs:
         env:
           STAGING_URL: ${{ needs.deploy-staging.outputs.preview-url }}
           TEST_ENV: staging
-        run: npx cross-env TEST_ENV=staging playwright test --project=staging --project=staging-admin --project=staging-leader
+        run: npx cross-env TEST_ENV=staging playwright test --project=staging-unauth --project=staging --project=staging-admin --project=staging-leader
 
       - name: Upload Desktop Test Results
         if: always()
