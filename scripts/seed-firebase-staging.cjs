@@ -67,6 +67,13 @@ const auth = admin.auth();
 
 const TEST_PASSWORD = 'TestPassword123!';
 
+// Fixed UIDs for Auth users (must match generate-staging-auth-tokens.cjs)
+const TEST_USER_UIDS = {
+  admin: 'pp7voDBZFPTrl4ldASBlcgpwidv1',
+  leader: 'vlxirvIybcTHt6VitMNUCvCN1nj2',
+  user: 'fcHGizEBWaU2Kj9xiEOvt2ag3eB2',
+};
+
 // Fixed IDs for test data
 const TEST_UNIT_IDS = {
   battalion: '00000000-0000-0000-0000-100000000001',
@@ -121,13 +128,23 @@ async function createAuthUser(user) {
     // Delete if exists
     await deleteUserByEmail(user.email);
 
-    // Create new user
-    const userRecord = await auth.createUser({
+    // Use predefined UID if available (for admin, leader, user)
+    // This ensures UIDs match those used in generate-staging-auth-tokens.cjs
+    const uid = TEST_USER_UIDS[user.key];
+    const createUserOptions = {
       email: user.email,
       password: TEST_PASSWORD,
       displayName: user.displayName,
       emailVerified: true,
-    });
+    };
+
+    // Only add uid if we have a predefined one
+    if (uid) {
+      createUserOptions.uid = uid;
+    }
+
+    // Create new user
+    const userRecord = await auth.createUser(createUserOptions);
 
     // Set custom claims for role
     if (user.role) {
