@@ -33,7 +33,7 @@ jobs:
   # Step 1: Deploy to Staging (only after CI passes)
   deploy-staging:
     name: Deploy to Staging
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     # Only run if CI workflow completed successfully, or if triggered directly
     if: |
       github.event_name != 'workflow_run' ||
@@ -68,7 +68,7 @@ jobs:
   # Step 2: Setup Staging Auth (Custom Tokens)
   setup-staging-auth:
     name: Setup Staging Authentication
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: deploy-staging
     steps:
       - uses: actions/checkout@v4
@@ -134,7 +134,7 @@ jobs:
   # Step 3: Run E2E Tests on Real Staging Deployment (Parallel)
   test-staging-desktop:
     name: E2E Desktop Tests on Staging
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [deploy-staging, setup-staging-auth]
     steps:
       - uses: actions/checkout@v4
@@ -173,7 +173,7 @@ jobs:
 
   test-staging-mobile:
     name: E2E Mobile Tests on Staging
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [deploy-staging, setup-staging-auth]
     steps:
       - uses: actions/checkout@v4
@@ -212,7 +212,7 @@ jobs:
 
   test-staging-performance:
     name: Performance Tests on Staging
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [deploy-staging, setup-staging-auth]
     steps:
       - uses: actions/checkout@v4
@@ -252,7 +252,7 @@ jobs:
   # Step 3: Deploy to Production (only on main branch, after tests pass)
   deploy-production:
     name: Deploy to Production
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [deploy-staging, test-staging-desktop, test-staging-mobile, test-staging-performance]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
@@ -286,7 +286,7 @@ jobs:
   # Step 4: Smoke Test Production (optional but recommended)
   smoke-test-production:
     name: Smoke Test Production
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: deploy-production
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
