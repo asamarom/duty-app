@@ -130,7 +130,8 @@ export default defineConfig({
       },
       testMatch: /auth\.spec\.ts/,
     },
-    // Staging/Test environment - uses custom token auth
+    // Staging/Test environment - uses custom token auth (regular user role)
+    // This project should NOT run admin/leader tests - they run in staging-admin/staging-leader
     {
       name: 'staging',
       use: {
@@ -138,8 +139,13 @@ export default defineConfig({
         storageState: './e2e/.auth/staging-user.json',
         // Use dynamic baseURL from top-level config (respects STAGING_URL env var)
       },
-      // Desktop: exclude mobile-specific tests, auth tests, and role-specific tests
-      testIgnore: [/.*\.mobile\.spec\.ts/, /auth\.spec\.ts/, /battalion.*\.spec\.ts/],
+      // Exclude: mobile tests, auth tests, admin tests, and leader tests
+      testIgnore: [
+        /.*\.mobile\.spec\.ts/,           // Mobile tests (run in staging-mobile)
+        /auth\.spec\.ts/,                 // Auth tests (run in staging-unauth)
+        /battalion.*\.spec\.ts/,          // Leader tests (run in staging-leader)
+        /(admin|performance|dashboard|equipment|personnel|i18n|units|transfers|user-lifecycle|rtl).*\.spec\.ts/, // Admin tests (run in staging-admin)
+      ],
     },
     // Staging admin tests (requires admin role)
     // Matches: admin-*.spec.ts, performance.spec.ts, dashboard.spec.ts, equipment.spec.ts,
