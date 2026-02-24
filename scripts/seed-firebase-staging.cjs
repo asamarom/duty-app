@@ -18,29 +18,42 @@ const admin = require('firebase-admin');
 const path = require('path');
 const fs = require('fs');
 
-// Try to load service account from common locations
-const serviceAccountPaths = [
-  path.join(__dirname, '..', 'firebase-staging-service-account.json'),
-  path.join(__dirname, '..', 'service-account-staging.json'),
-  path.join(__dirname, 'firebase-staging-service-account.json'),
-];
+// Load service account from environment variable (CI) or file (local)
+let serviceAccount;
 
-let serviceAccount = null;
-for (const saPath of serviceAccountPaths) {
-  if (fs.existsSync(saPath)) {
-    serviceAccount = require(saPath);
-    console.log(`✅ Found service account at: ${saPath}`);
-    break;
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  // CI: Use service account from GitHub Secret
+  try {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    console.log('🔐 Using service account from FIREBASE_SERVICE_ACCOUNT env var');
+  } catch (error) {
+    console.error('❌ Failed to parse FIREBASE_SERVICE_ACCOUNT:', error.message);
+    process.exit(1);
   }
-}
+} else {
+  // Local: Try to load service account from common locations
+  const serviceAccountPaths = [
+    path.join(__dirname, '..', 'firebase-staging-service-account.json'),
+    path.join(__dirname, '..', 'service-account-staging.json'),
+    path.join(__dirname, 'firebase-staging-service-account.json'),
+  ];
 
-if (!serviceAccount) {
-  console.error('\n❌ Service account key not found!\n');
-  console.error('Please download it from Firebase Console:');
-  console.error('1. Go to: https://console.firebase.google.com/project/duty-staging/settings/serviceaccounts/adminsdk');
-  console.error('2. Click "Generate new private key"');
-  console.error('3. Save the file as "firebase-staging-service-account.json" in the project root\n');
-  process.exit(1);
+  for (const saPath of serviceAccountPaths) {
+    if (fs.existsSync(saPath)) {
+      serviceAccount = require(saPath);
+      console.log(`✅ Found service account at: ${saPath}`);
+      break;
+    }
+  }
+
+  if (!serviceAccount) {
+    console.error('\n❌ Service account key not found!\n');
+    console.error('Please download it from Firebase Console:');
+    console.error('1. Go to: https://console.firebase.google.com/project/duty-staging/settings/serviceaccounts/adminsdk');
+    console.error('2. Click "Generate new private key"');
+    console.error('3. Save the file as "firebase-staging-service-account.json" in the project root\n');
+    process.exit(1);
+  }
 }
 
 // Initialize Firebase Admin
