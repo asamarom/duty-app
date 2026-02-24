@@ -72,22 +72,42 @@ async function authenticateAndSave(page: any, userType: 'admin' | 'leader' | 'us
   // Navigate to the staging app
   await page.goto('/');
 
+  // Wait for app to fully load
+  await page.waitForLoadState('domcontentloaded');
+
   // Sign in using custom token via Firebase SDK
-  await page.evaluate(async ({ config, customToken }) => {
-    // Dynamically import Firebase SDK
-    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js');
-    const { getAuth, signInWithCustomToken } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
+  // We need to use the SAME Firebase instance that the app uses
+  const authResult = await page.evaluate(async ({ customToken }) => {
+    // Access the app's Firebase auth instance that should already be initialized
+    // @ts-ignore - accessing global Firebase instance
+    const auth = window.auth;
 
-    // Initialize Firebase
-    const app = initializeApp(config);
-    const auth = getAuth(app);
+    if (!auth) {
+      throw new Error('App Firebase auth instance not found on window.auth');
+    }
 
-    // Sign in with custom token
-    await signInWithCustomToken(auth, customToken);
-  }, { config: firebaseConfig, customToken: token });
+    // Dynamically import signInWithCustomToken
+    const { signInWithCustomToken } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
 
-  // Wait for authentication to complete and redirect
-  await page.waitForTimeout(3000);
+    // Sign in with custom token using the app's existing auth instance
+    const userCredential = await signInWithCustomToken(auth, customToken);
+
+    return {
+      uid: userCredential.user.uid,
+      email: userCredential.user.email
+    };
+  }, { customToken: token });
+
+  console.log(`🔓 Signed in as: ${authResult.email} (${authResult.uid})`);
+
+  // Wait for Firebase to persist auth state to localStorage/IndexedDB
+  // and for the app to redirect to the dashboard
+  await page.waitForTimeout(5000);
+
+  // Additionally wait for navigation to complete
+  await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
+    console.log('⚠️  networkidle timeout - continuing anyway');
+  });
 
   // Verify we're authenticated by checking we're on dashboard (not auth page)
   const currentUrl = page.url();

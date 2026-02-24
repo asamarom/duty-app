@@ -30,3 +30,9 @@ if (firestoreEmulatorHost) {
   console.log('[Firebase] Connecting to Firestore emulator:', host, port);
   connectFirestoreEmulator(db, host, parseInt(port, 10));
 }
+
+// Expose auth instance on window for E2E tests to access
+// This allows staging auth setup to use the same Firebase instance as the app
+if (typeof window !== 'undefined') {
+  (window as any).auth = auth;
+}
