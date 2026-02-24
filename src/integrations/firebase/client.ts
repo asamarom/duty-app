@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getAuth, connectAuthEmulator, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getFunctions } from 'firebase/functions';
 
@@ -14,6 +14,13 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+
+// Set persistence to localStorage instead of IndexedDB
+// This is required for Playwright storage state to capture Firebase auth
+// (storage state only captures cookies and localStorage, not IndexedDB)
+setPersistence(auth, browserLocalPersistence).catch((error) => {
+  console.error('[Firebase] Failed to set persistence:', error);
+});
 export const db = getFirestore(app);
 export const functions = getFunctions(app);
 
