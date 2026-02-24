@@ -128,9 +128,12 @@ async function createAuthUser(user) {
     // Delete if exists by email
     await deleteUserByEmail(user.email);
 
+    // Use predefined UID if available (for admin, leader, user)
+    // This ensures UIDs match those used in generate-staging-auth-tokens.cjs
+    const uid = TEST_USER_UIDS[user.key];
+
     // Also delete by UID if we have a predefined one
     // This handles the case where a user with this UID exists but different email
-    const uid = TEST_USER_UIDS[user.key];
     if (uid) {
       try {
         await auth.deleteUser(uid);
@@ -141,10 +144,6 @@ async function createAuthUser(user) {
         }
       }
     }
-
-    // Use predefined UID if available (for admin, leader, user)
-    // This ensures UIDs match those used in generate-staging-auth-tokens.cjs
-    const uid = TEST_USER_UIDS[user.key];
     const createUserOptions = {
       email: user.email,
       password: TEST_PASSWORD,
