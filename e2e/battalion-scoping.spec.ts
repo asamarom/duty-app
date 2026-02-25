@@ -9,6 +9,7 @@ test.describe('Battalion Scoping — Data Visibility', () => {
   });
 
   test('[SCOPE-1] leader sees multiple personnel from different sub-units in their battalion', async ({ page }) => {
+    test.skip(isStagingTest(), 'Staging cannot switch to leader role');
     test.setTimeout(45000);
 
     await loginAsTestUser(page, 'leader');
@@ -26,6 +27,7 @@ test.describe('Battalion Scoping — Data Visibility', () => {
   });
 
   test('[SCOPE-2] leader sees personnel from both their company and other sub-units', async ({ page }) => {
+    test.skip(isStagingTest(), 'Staging cannot switch to leader role');
     test.setTimeout(45000);
 
     await loginAsTestUser(page, 'leader');
@@ -58,6 +60,7 @@ test.describe('Battalion Scoping — Data Visibility', () => {
   });
 
   test('[SCOPE-4] leader equipment page loads without infinite spinner', async ({ page }) => {
+    test.skip(isStagingTest(), 'Staging cannot switch to leader role');
     test.setTimeout(45000);
 
     await loginAsTestUser(page, 'leader');
@@ -75,6 +78,7 @@ test.describe('Battalion Scoping — Data Visibility', () => {
   });
 
   test('[SCOPE-5] regular user equipment page loads without infinite spinner', async ({ page }) => {
+    test.skip(isStagingTest(), 'Staging cannot switch to regular user role');
     test.setTimeout(45000);
 
     await loginAsTestUser(page, 'user');

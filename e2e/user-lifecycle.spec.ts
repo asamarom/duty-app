@@ -5,6 +5,7 @@ import {
   isTestModeEnabled,
   verifyLoggedInAs,
   clearAuthState,
+  isStagingTest,
   TEST_USER_INFO,
   type TestUserType,
 } from './utils/test-auth';
@@ -18,6 +19,8 @@ test.describe('User Lifecycle E2E Tests', () => {
   });
 
   test.describe('Test Mode Verification', () => {
+    test.skip(isStagingTest(), 'Test mode UI only exists in local development');
+
     test('should show test login form when VITE_TEST_MODE=true', async ({ page }) => {
       const testModeActive = await isTestModeEnabled(page);
       expect(testModeActive).toBe(true);
@@ -40,6 +43,8 @@ test.describe('User Lifecycle E2E Tests', () => {
   });
 
   test.describe('Approved Users - Dashboard Access', () => {
+    test.skip(isStagingTest(), 'Staging uses single pre-authenticated user per project');
+
     test('admin user should access dashboard', async ({ page }) => {
       await loginAsTestUser(page, 'admin');
       await verifyLoggedInAs(page, 'admin');
@@ -64,6 +69,8 @@ test.describe('User Lifecycle E2E Tests', () => {
   });
 
   test.describe('Unapproved Users - Restricted Access', () => {
+    test.skip(isStagingTest(), 'Staging cannot test unapproved user flows');
+
     test('new user should be redirected to signup request page', async ({ page }) => {
       await loginAsTestUser(page, 'new');
 
@@ -96,6 +103,8 @@ test.describe('User Lifecycle E2E Tests', () => {
   });
 
   test.describe('Logout Flow', () => {
+    test.skip(isStagingTest(), 'Staging uses pre-loaded auth state');
+
     test('should successfully logout and redirect to auth page', async ({ page }) => {
       // Login first
       await loginAsTestUser(page, 'user');
@@ -114,6 +123,8 @@ test.describe('User Lifecycle E2E Tests', () => {
   });
 
   test.describe('Role-Based Navigation', () => {
+    test.skip(isStagingTest(), 'Staging cannot switch between user roles');
+
     test('admin should see admin menu items', async ({ page }) => {
       await loginAsTestUser(page, 'admin');
 
@@ -134,6 +145,8 @@ test.describe('User Lifecycle E2E Tests', () => {
   });
 
   test.describe('Session Persistence', () => {
+    test.skip(isStagingTest(), 'Staging uses pre-loaded storage state');
+
     test('should maintain session after page refresh', async ({ page }) => {
       await loginAsTestUser(page, 'admin');
       await verifyLoggedInAs(page, 'admin');
@@ -148,6 +161,8 @@ test.describe('User Lifecycle E2E Tests', () => {
   });
 
   test.describe('Protected Routes', () => {
+    test.skip(isStagingTest(), 'Staging cannot test unauthenticated flows');
+
     test('unauthenticated user should be redirected to auth page', async ({ page }) => {
       // Try to access dashboard directly without login
       await page.goto('/');
@@ -179,6 +194,8 @@ test.describe('User Lifecycle E2E Tests', () => {
 });
 
 test.describe('Admin Mode [AUTH-4]', () => {
+  test.skip(isStagingTest(), 'Staging cannot switch between user roles');
+
   test.beforeEach(async ({ page }) => {
     if (!isStagingTest()) {
       await clearAuthState(page);
@@ -269,6 +286,8 @@ test.describe('Admin Mode [AUTH-4]', () => {
 });
 
 test.describe('Onboarding Form [ONBOARD-3]', () => {
+  test.skip(isStagingTest(), 'Staging cannot test new user onboarding flow');
+
   test('[ONBOARD-3] should display signup form with all required fields', async ({ page }) => {
     if (!isStagingTest()) {
       await clearAuthState(page);
@@ -291,6 +310,8 @@ test.describe('Onboarding Form [ONBOARD-3]', () => {
 });
 
 test.describe('Full User Lifecycle Flow', () => {
+  test.skip(isStagingTest(), 'Staging cannot test multi-user workflows');
+
   test('complete lifecycle: login -> navigate -> logout -> login as different user', async ({ page }) => {
     // Step 1: Login as admin
     await loginAsTestUser(page, 'admin');
