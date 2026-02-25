@@ -1,9 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { loginAsTestUser, clearAuthState } from './utils/test-auth';
+import { loginAsTestUser, clearAuthState, isStagingTest } from './utils/test-auth';
 
 test.describe('Battalion Scoping — Data Visibility', () => {
   test.beforeEach(async ({ page }) => {
-    await clearAuthState(page);
+    if (!isStagingTest()) {
+      await clearAuthState(page);
+    }
   });
 
   test('[SCOPE-1] leader sees multiple personnel from different sub-units in their battalion', async ({ page }) => {

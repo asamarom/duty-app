@@ -1,9 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { loginAsTestUser, clearAuthState } from './utils/test-auth';
+import { loginAsTestUser, clearAuthState, isStagingTest } from './utils/test-auth';
 
 test.describe('Equipment Management (Authenticated)', () => {
   test.beforeEach(async ({ page }) => {
-    await clearAuthState(page);
+    if (!isStagingTest()) {
+      await clearAuthState(page);
+    }
     await loginAsTestUser(page, 'admin');
   });
 

@@ -12,7 +12,9 @@ import {
 test.describe('User Lifecycle E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
     // Clear any existing auth state
-    await clearAuthState(page);
+    if (!isStagingTest()) {
+      await clearAuthState(page);
+    }
   });
 
   test.describe('Test Mode Verification', () => {
@@ -178,7 +180,9 @@ test.describe('User Lifecycle E2E Tests', () => {
 
 test.describe('Admin Mode [AUTH-4]', () => {
   test.beforeEach(async ({ page }) => {
-    await clearAuthState(page);
+    if (!isStagingTest()) {
+      await clearAuthState(page);
+    }
   });
 
   test('[AUTH-4] should toggle admin mode on and off', async ({ page }) => {
@@ -266,7 +270,9 @@ test.describe('Admin Mode [AUTH-4]', () => {
 
 test.describe('Onboarding Form [ONBOARD-3]', () => {
   test('[ONBOARD-3] should display signup form with all required fields', async ({ page }) => {
-    await clearAuthState(page);
+    if (!isStagingTest()) {
+      await clearAuthState(page);
+    }
     await loginAsTestUser(page, 'new');
 
     // Should be on signup request page

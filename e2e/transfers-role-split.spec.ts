@@ -1,9 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { loginAsTestUser, clearAuthState } from './utils/test-auth';
+import { loginAsTestUser, clearAuthState, isStagingTest } from './utils/test-auth';
 
 test.describe('Admin/Leader — full transfers page', () => {
   test.beforeEach(async ({ page }) => {
-    await clearAuthState(page);
+    if (!isStagingTest()) {
+      await clearAuthState(page);
+    }
   });
 
   test('admin sees Transfers tab on Equipment page', async ({ page }) => {
@@ -45,7 +47,9 @@ test.describe('Admin/Leader — full transfers page', () => {
 
 test.describe('Regular user — no standalone transfers page', () => {
   test.beforeEach(async ({ page }) => {
-    await clearAuthState(page);
+    if (!isStagingTest()) {
+      await clearAuthState(page);
+    }
   });
 
   test('user does NOT see standalone Transfers nav link', async ({ page }) => {
@@ -67,7 +71,9 @@ test.describe('Regular user — no standalone transfers page', () => {
 
 test.describe('Regular user — My Requests in Equipment page', () => {
   test.beforeEach(async ({ page }) => {
-    await clearAuthState(page);
+    if (!isStagingTest()) {
+      await clearAuthState(page);
+    }
   });
 
   test('user sees Transfers tab on Equipment page', async ({ page }) => {

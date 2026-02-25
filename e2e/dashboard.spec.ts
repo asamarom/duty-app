@@ -1,10 +1,13 @@
 import { test, expect } from '@playwright/test';
-import { loginAsTestUser, clearAuthState } from './utils/test-auth';
+import { loginAsTestUser, clearAuthState, isStagingTest } from './utils/test-auth';
 
 test.describe('Dashboard (Authenticated)', () => {
   // For staging with test users, login before each test
   test.beforeEach(async ({ page }) => {
-    await clearAuthState(page);
+    // Only clear auth state for local tests (not staging, which uses pre-loaded storage state)
+    if (!isStagingTest()) {
+      await clearAuthState(page);
+    }
     await loginAsTestUser(page, 'admin');
   });
 

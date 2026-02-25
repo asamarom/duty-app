@@ -1,9 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { loginAsTestUser, clearAuthState } from './utils/test-auth';
+import { loginAsTestUser, clearAuthState, isStagingTest } from './utils/test-auth';
 
 test.describe('Equipment Transfer Workflow [XFER]', () => {
   test.beforeEach(async ({ page }) => {
-    await clearAuthState(page);
+    if (!isStagingTest()) {
+      await clearAuthState(page);
+    }
   });
 
   test('[XFER-1] should allow user to initiate transfer request', async ({ page }) => {
@@ -256,7 +258,9 @@ test.describe('Equipment Transfer Workflow [XFER]', () => {
 
 test.describe('Bulk Transfer Quantity [XFER-11, XFER-12]', () => {
   test('[XFER-11] bulk item transfer should preserve quantity in transfer request', async ({ page }) => {
-    await clearAuthState(page);
+    if (!isStagingTest()) {
+      await clearAuthState(page);
+    }
     await loginAsTestUser(page, 'admin');
     await page.goto('/equipment');
     await page.waitForLoadState('domcontentloaded');
@@ -303,7 +307,9 @@ test.describe('Bulk Transfer Quantity [XFER-11, XFER-12]', () => {
   });
 
   test('[XFER-12] approved transfer should apply stored quantity to new assignment', async ({ page }) => {
-    await clearAuthState(page);
+    if (!isStagingTest()) {
+      await clearAuthState(page);
+    }
     await loginAsTestUser(page, 'admin');
     await page.goto('/equipment');
     await page.waitForLoadState('domcontentloaded');
@@ -346,7 +352,9 @@ test.describe('Bulk Transfer Quantity [XFER-11, XFER-12]', () => {
 
 test.describe('User Experience [UX-1]', () => {
   test('[UX-1] should not show full-page spinner when returning to transfers page', async ({ page }) => {
-    await clearAuthState(page);
+    if (!isStagingTest()) {
+      await clearAuthState(page);
+    }
     await loginAsTestUser(page, 'admin');
 
     // First visit: navigate to transfers page and wait for full load
@@ -381,7 +389,9 @@ test.describe('User Experience [UX-1]', () => {
 
 test.describe('Transfer Permission Rules [AUTH-2]', () => {
   test('[AUTH-2] should verify signature_approved attribute controls transfer permissions', async ({ page }) => {
-    await clearAuthState(page);
+    if (!isStagingTest()) {
+      await clearAuthState(page);
+    }
     await loginAsTestUser(page, 'admin');
     await page.goto('/equipment');
     await page.waitForLoadState('domcontentloaded');
