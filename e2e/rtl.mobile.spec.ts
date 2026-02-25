@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginAsTestUser } from './utils/test-auth';
+import { loginAsTestUser, isStagingTest } from './utils/test-auth';
 
 /**
  * Mobile RTL Tests
@@ -115,8 +115,9 @@ test.describe('Mobile RTL [Equipment Page]', () => {
   });
 
   test('[M-RTL-8] Mobile page title should align right', async ({ page }) => {
-    const title = page.locator('h1, h2').filter({ hasText: /מלאי ציוד|equipment/i }).first();
-    await expect(title).toBeVisible();
+    // Look for h1 in MobileHeader (more specific)
+    const title = page.locator('h1').filter({ hasText: /מלאי ציוד|equipment/i }).first();
+    await expect(title).toBeVisible({ timeout: 10000 });
 
     const titleBox = await title.boundingBox();
     const viewport = page.viewportSize();
@@ -130,6 +131,8 @@ test.describe('Mobile RTL [Equipment Page]', () => {
   });
 
   test('[M-RTL-9] Visual snapshot - Mobile Equipment Page RTL', async ({ page }) => {
+    test.skip(isStagingTest(), 'Visual snapshots not needed on staging');
+
     // Wait for content to fully render
     await page.waitForTimeout(2000);
 
@@ -155,6 +158,8 @@ test.describe('Mobile RTL [Dashboard]', () => {
   });
 
   test('[M-RTL-D2] Visual snapshot - Mobile Dashboard RTL', async ({ page }) => {
+    test.skip(isStagingTest(), 'Visual snapshots not needed on staging');
+
     await page.waitForTimeout(2000);
 
     await expect(page).toHaveScreenshot('mobile-dashboard-rtl.png', {

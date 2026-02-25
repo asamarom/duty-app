@@ -30,7 +30,7 @@ interface PersonnelWithRoles extends Personnel {
 
 export default function PersonnelPage() {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
   const { toast } = useToast();
   const { isAdmin, isLeader } = useEffectiveRole();
 
@@ -133,7 +133,7 @@ export default function PersonnelPage() {
         />
       </div>
 
-      <div className="tactical-grid min-h-screen p-4 lg:p-6">
+      <div className="tactical-grid min-h-screen p-4 lg:p-6" dir={dir}>
         {/* Desktop Header */}
         <header className="mb-6 hidden lg:block">
           <div className="flex items-center justify-between">

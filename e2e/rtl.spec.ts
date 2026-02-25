@@ -13,8 +13,8 @@ test.describe('RTL Layout [Equipment Page]', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page, 'admin');
     await page.goto('/equipment', { waitUntil: 'load' });
-    // Wait for page content to be visible instead of networkidle (Firebase keeps connections open)
-    await page.locator('h1, h2').filter({ hasText: /מלאי ציוד|equipment/i }).first().waitFor({ timeout: 10000 }).catch(() => {});
+    // Wait for header (works for both desktop and mobile/MobileHeader)
+    await page.locator('header, [role="banner"]').first().waitFor({ timeout: 10000 });
     await page.waitForTimeout(1000); // Brief wait for data to stabilize
   });
 
@@ -24,8 +24,9 @@ test.describe('RTL Layout [Equipment Page]', () => {
   });
 
   test('[RTL-2] Page title should align to the right', async ({ page }) => {
-    const title = page.locator('h1, h2').filter({ hasText: /מלאי ציוד|equipment/i }).first();
-    await expect(title).toBeVisible();
+    // Look for title in both desktop header and MobileHeader (h1 only, more specific)
+    const title = page.locator('h1').filter({ hasText: /מלאי ציוד|equipment/i }).first();
+    await expect(title).toBeVisible({ timeout: 10000 });
 
     const parent = title.locator('..');
     const titleBox = await title.boundingBox();
@@ -156,11 +157,12 @@ test.describe('RTL Layout [Personnel Page]', () => {
     }
   });
 
-  test('[RTL-P2] Personnel table should respect RTL', async ({ page }) => {
-    const table = page.locator('[role="table"]').first();
+  test('[RTL-P2] Personnel content should respect RTL', async ({ page }) => {
+    // Personnel uses grid layout, not table - check for grid or table
+    const contentContainer = page.locator('.grid, [role="table"]').first();
 
-    if (await table.isVisible().catch(() => false)) {
-      const direction = await table.evaluate(el =>
+    if (await contentContainer.isVisible().catch(() => false)) {
+      const direction = await contentContainer.evaluate(el =>
         window.getComputedStyle(el).direction
       );
       expect(direction).toBe('rtl');
