@@ -13,9 +13,11 @@ test.describe('RTL Layout [Equipment Page]', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page, 'admin');
     await page.goto('/equipment', { waitUntil: 'load' });
-    // Wait for page content to load (equipment stats or title)
-    await page.locator('h1').filter({ hasText: /מלאי ציוד|equipment/i }).first().waitFor({ timeout: 10000 });
-    await page.waitForTimeout(1000); // Brief wait for data to stabilize
+    // Wait for loading state to complete - the loader disappears when data is ready
+    await page.waitForLoadState('networkidle');
+    // Wait for the equipment content to be visible (stats card or table)
+    await page.locator('[role="tablist"]').first().waitFor({ timeout: 10000 });
+    await page.waitForTimeout(500); // Brief wait for rendering to stabilize
   });
 
   test('[RTL-1] HTML should have RTL direction', async ({ page }) => {
@@ -25,8 +27,8 @@ test.describe('RTL Layout [Equipment Page]', () => {
 
   test('[RTL-2] Page title should align to the right', async ({ page }) => {
     // Look for title in both desktop header and MobileHeader (h1 only, more specific)
-    const title = page.locator('h1').filter({ hasText: /מלאי ציוד|equipment/i }).first();
-    await expect(title).toBeVisible({ timeout: 10000 });
+    const title = page.locator('h1').filter({ hasText: /מלאי ציוד|equipment inventory/i }).first();
+    await expect(title).toBeVisible({ timeout: 5000 });
 
     const parent = title.locator('..');
     const titleBox = await title.boundingBox();
