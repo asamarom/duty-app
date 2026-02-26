@@ -13,10 +13,8 @@ test.describe('RTL Layout [Equipment Page]', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page, 'admin');
     await page.goto('/equipment', { waitUntil: 'load' });
-    // Wait for loading state to complete - the loader disappears when data is ready
-    await page.waitForLoadState('networkidle');
-    // Wait for the equipment content to be visible (stats card or table)
-    await page.locator('[role="tablist"]').first().waitFor({ timeout: 10000 });
+    // Wait for page UI to load (tablist appears when page is ready)
+    await page.locator('[role="tablist"]').first().waitFor({ timeout: 15000 });
     await page.waitForTimeout(500); // Brief wait for rendering to stabilize
   });
 
