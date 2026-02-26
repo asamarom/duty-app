@@ -13,8 +13,8 @@ test.describe('RTL Layout [Equipment Page]', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page, 'admin');
     await page.goto('/equipment', { waitUntil: 'load' });
-    // Wait for header (works for both desktop and mobile/MobileHeader)
-    await page.locator('header, [role="banner"]').first().waitFor({ timeout: 10000 });
+    // Wait for page content to load (equipment stats or title)
+    await page.locator('h1').filter({ hasText: /מלאי ציוד|equipment/i }).waitFor({ timeout: 10000 });
     await page.waitForTimeout(1000); // Brief wait for data to stabilize
   });
 
