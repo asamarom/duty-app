@@ -18,7 +18,7 @@ test.describe('Mobile RTL [Equipment Page]', () => {
     await loginAsTestUser(page, 'admin');
     await page.goto('/equipment', { waitUntil: 'load' });
     // Wait for page content to load (equipment title in mobile header)
-    await page.locator('h1').filter({ hasText: /מלאי ציוד|equipment/i }).waitFor({ timeout: 10000 });
+    await page.locator('h1').filter({ hasText: /מלאי ציוד|equipment/i }).first().waitFor({ timeout: 10000 });
     await page.waitForTimeout(1000); // Brief wait for mobile rendering
   });
 
