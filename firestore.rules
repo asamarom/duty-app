@@ -183,6 +183,20 @@ service cloud.firestore {
     match /equipment/{equipmentId} {
       // CRITICAL FIX: Battalion-based access control
       // Admins can read all, others can only read equipment in their battalion
+      //
+      // SECURITY NOTE: This rule allows reading all equipment within a battalion.
+      // Additional client-side filtering in useEquipment hook ensures users only
+      // see equipment assigned to their unit or personally assigned to them.
+      // This is necessary because Firestore rules cannot efficiently join with
+      // the equipmentAssignments collection to check unit ownership.
+      //
+      // Defense-in-depth strategy:
+      // 1. Rules: Restrict to battalion level (server-side)
+      // 2. Client filtering: Restrict to unit/personal level (useEquipment hook)
+      // 3. UI: Only show relevant equipment in Equipment tab
+      //
+      // Future improvement: Denormalize assignedUnitId onto equipment documents
+      // to enable unit-level filtering in Firestore rules.
       allow read: if hasAnyRole() && (isAdmin() || isSameBattalion(resource.data.battalionId));
 
       // Admins and leaders can create equipment

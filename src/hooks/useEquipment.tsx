@@ -63,12 +63,42 @@ export function useEquipment(): UseEquipmentReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
-  const { battalionId } = useUserBattalion();
+  const { battalionId, unitId } = useUserBattalion();
+  const [currentUserPersonnelId, setCurrentUserPersonnelId] = useState<string | null>(null);
 
   const equipmentDocsRef = useRef<QueryDocumentSnapshot[]>([]);
   const assignmentDocsRef = useRef<QueryDocumentSnapshot[]>([]);
   const pendingDocsRef = useRef<QueryDocumentSnapshot[]>([]);
   const rebuildingRef = useRef(false);
+
+  // Fetch current user's personnel record to determine equipment visibility
+  useEffect(() => {
+    if (!user?.uid) {
+      setCurrentUserPersonnelId(null);
+      return;
+    }
+
+    const fetchPersonnel = async () => {
+      try {
+        const personnelQuery = query(
+          collection(db, 'personnel'),
+          where('userId', '==', user.uid)
+        );
+        const snapshot = await getDocs(personnelQuery);
+
+        if (!snapshot.empty) {
+          setCurrentUserPersonnelId(snapshot.docs[0].id);
+        } else {
+          setCurrentUserPersonnelId(null);
+        }
+      } catch (err) {
+        console.error('Error fetching personnel record:', err);
+        setCurrentUserPersonnelId(null);
+      }
+    };
+
+    fetchPersonnel();
+  }, [user?.uid]);
 
   const rebuild = useCallback(async () => {
     if (rebuildingRef.current) return;
@@ -192,7 +222,39 @@ export function useEquipment(): UseEquipmentReturn {
         }
       });
 
-      setEquipment(mappedEquipment);
+      // SECURITY: Filter equipment based on visibility rules.
+      // This is a critical security filter that ensures users only see equipment
+      // they should have access to. While Firestore rules restrict reads to battalion
+      // level (necessary due to Firestore's inability to efficiently join collections),
+      // this client-side filter provides defense-in-depth by further restricting
+      // visibility to unit/personal level.
+      //
+      // Filter rules:
+      // - Show unassigned equipment (available to all for assignment)
+      // - Show equipment assigned to the current user's unit
+      // - Show equipment assigned to the current user personally
+      // - Hide equipment assigned to other units (even within same battalion)
+      const filteredEquipment = mappedEquipment.filter((item) => {
+        // Always show unassigned equipment
+        if (item.assignmentLevel === 'unassigned') {
+          return true;
+        }
+
+        // Show equipment assigned to the current user's unit
+        if (unitId && item.currentUnitId === unitId) {
+          return true;
+        }
+
+        // Show equipment assigned to the current user personally
+        if (currentUserPersonnelId && item.currentPersonnelId === currentUserPersonnelId) {
+          return true;
+        }
+
+        // Hide all other equipment
+        return false;
+      });
+
+      setEquipment(filteredEquipment);
       setLoading(false);
     } catch (err) {
       console.error('useEquipment: rebuild error', err);
@@ -202,7 +264,7 @@ export function useEquipment(): UseEquipmentReturn {
     } finally {
       rebuildingRef.current = false;
     }
-  }, []);
+  }, [unitId, currentUserPersonnelId]);
 
   const addEquipment = useCallback(
     async (item: Omit<Equipment, 'id'>, assignment?: AssignmentData) => {
