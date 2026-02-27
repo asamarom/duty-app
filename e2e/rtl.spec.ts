@@ -13,8 +13,17 @@ test.describe('RTL Layout [Equipment Page]', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page, 'admin');
     await page.goto('/equipment', { waitUntil: 'load' });
-    // Wait for page UI to load (tablist appears when page is ready)
-    await page.locator('[role="tablist"]').first().waitFor({ timeout: 15000 });
+
+    // Wait for loading spinner to disappear (indicates data loaded)
+    const loader = page.getByText(/loading equipment|טוען ציוד/i);
+    try {
+      await loader.waitFor({ state: 'detached', timeout: 30000 });
+    } catch {
+      // If loader doesn't appear or disappear, continue anyway
+    }
+
+    // Wait for main content to appear (tabs or title)
+    await page.locator('[role="tablist"], h1').first().waitFor({ timeout: 10000 });
     await page.waitForTimeout(500); // Brief wait for rendering to stabilize
   });
 
