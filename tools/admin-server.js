@@ -15,6 +15,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Serve role-switcher.html
+app.get('/role-switcher', (req, res) => {
+  res.sendFile(path.join(__dirname, 'role-switcher.html'));
+});
+
 // GET /api/user/:uid — read user doc
 app.get('/api/user/:uid', async (req, res) => {
   try {
@@ -62,7 +67,7 @@ app.post('/api/user/:uid/unit', async (req, res) => {
   }
 });
 
-const PORT = 3998;
+const PORT = 3999;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Admin server running on http://0.0.0.0:${PORT}`);
 });
