@@ -15,9 +15,30 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve role-switcher.html
+// Serve role-switcher.html (original with Firebase Auth emulator)
 app.get('/role-switcher', (req, res) => {
   res.sendFile(path.join(__dirname, 'role-switcher.html'));
+});
+
+// Serve role-switcher-simple.html (simplified with admin API)
+app.get('/role-switcher-simple', (req, res) => {
+  res.sendFile(path.join(__dirname, 'role-switcher-simple.html'));
+});
+
+// Default to simple version
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'role-switcher-simple.html'));
+});
+
+// GET /api/users — list all users (for role-switcher dropdown)
+app.get('/api/users', async (req, res) => {
+  try {
+    const snap = await db.collection('users').orderBy('fullName').get();
+    const users = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // GET /api/user/:uid — read user doc
