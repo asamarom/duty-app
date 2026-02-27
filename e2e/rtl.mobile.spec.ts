@@ -124,9 +124,22 @@ test.describe('Mobile RTL [Equipment Page]', () => {
   });
 
   test('[M-RTL-8] Mobile page title should align right', async ({ page }) => {
-    // Look for visible h1 in MobileHeader
-    const title = page.locator('h1:visible').filter({ hasText: /מלאי ציוד|equipment inventory/i }).first();
-    await expect(title).toBeVisible({ timeout: 5000 });
+    // Find all h1s with equipment text, filter for visible ones
+    const titles = page.locator('h1').filter({ hasText: /מלאי ציוד|equipment inventory/i });
+    const count = await titles.count();
+
+    // Find the first visible one
+    let title;
+    for (let i = 0; i < count; i++) {
+      const t = titles.nth(i);
+      if (await t.isVisible()) {
+        title = t;
+        break;
+      }
+    }
+
+    expect(title).toBeTruthy();
+    await expect(title!).toBeVisible({ timeout: 5000 });
 
     const titleBox = await title.boundingBox();
     const viewport = page.viewportSize();

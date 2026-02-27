@@ -33,12 +33,25 @@ test.describe('RTL Layout [Equipment Page]', () => {
   });
 
   test('[RTL-2] Page title should align to the right', async ({ page }) => {
-    // Look for visible title (desktop or mobile header)
-    const title = page.locator('h1:visible').filter({ hasText: /מלאי ציוד|equipment inventory/i }).first();
-    await expect(title).toBeVisible({ timeout: 5000 });
+    // Find all h1s with equipment text, filter for visible ones
+    const titles = page.locator('h1').filter({ hasText: /מלאי ציוד|equipment inventory/i });
+    const count = await titles.count();
 
-    const parent = title.locator('..');
-    const titleBox = await title.boundingBox();
+    // Find the first visible one
+    let title;
+    for (let i = 0; i < count; i++) {
+      const t = titles.nth(i);
+      if (await t.isVisible()) {
+        title = t;
+        break;
+      }
+    }
+
+    expect(title).toBeTruthy();
+    await expect(title!).toBeVisible({ timeout: 5000 });
+
+    const parent = title!.locator('..');
+    const titleBox = await title!.boundingBox();
     const parentBox = await parent.boundingBox();
 
     if (titleBox && parentBox) {
