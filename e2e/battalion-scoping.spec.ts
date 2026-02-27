@@ -46,12 +46,22 @@ test.describe('Battalion Scoping — Data Visibility', () => {
     test.setTimeout(45000);
 
     await loginAsTestUser(page, 'admin');
-    await page.goto('/personnel');
-    await page.waitForLoadState('domcontentloaded');
+    await page.goto('/personnel', { waitUntil: 'load' });
 
-    // Wait for at least one personnel card to appear
+    // Wait for loading spinner to disappear
+    const loader = page.getByText(/loading|טוען/i);
+    try {
+      await loader.waitFor({ state: 'detached', timeout: 30000 });
+    } catch {
+      // If loader doesn't appear, continue
+    }
+
+    // Wait for personnel cards to load with all data
     const personnelCards = page.locator('.card-tactical');
     await personnelCards.first().waitFor({ state: 'visible', timeout: 20000 });
+
+    // Give a moment for all cards to render
+    await page.waitForTimeout(2000);
 
     const count = await personnelCards.count();
 
