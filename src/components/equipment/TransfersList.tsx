@@ -75,7 +75,7 @@ export function TransfersList() {
   };
 
   const TransferCard = ({ request, showActions }: { request: AssignmentRequest; showActions: boolean }) => (
-    <Card className="mb-3">
+    <Card className="mb-3" dir={dir}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 min-w-0 flex-1">
@@ -99,7 +99,7 @@ export function TransfersList() {
               </p>
             </div>
           </div>
-          <div className="flex flex-col items-end gap-2 shrink-0">
+          <div className={`flex flex-col gap-2 shrink-0 ${dir === 'rtl' ? 'items-start' : 'items-end'}`}>
             {getStatusBadge(request)}
             {showActions && (
               <div className="flex gap-2 mt-1">
@@ -146,14 +146,14 @@ export function TransfersList() {
 
   return (
     <>
-      <Tabs defaultValue="incoming">
-        <div className="flex mb-4">
+      <Tabs defaultValue="incoming" dir={dir}>
+        <div className="flex mb-4" dir={dir}>
         <TabsList>
           <TabsTrigger value="incoming" className="gap-2">
             <Inbox className="h-4 w-4" />
             {t('transfers.incoming')}
             {incomingTransfers.length > 0 && (
-              <Badge variant="secondary" className="ms-1">{incomingTransfers.length}</Badge>
+              <Badge variant="secondary" className={dir === 'rtl' ? 'me-1' : 'ms-1'}>{incomingTransfers.length}</Badge>
             )}
           </TabsTrigger>
           {isAdmin && (
