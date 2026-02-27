@@ -60,10 +60,15 @@ test.describe('Battalion Scoping — Data Visibility', () => {
     const personnelCards = page.locator('.card-tactical');
     await personnelCards.first().waitFor({ state: 'visible', timeout: 20000 });
 
-    // Give a moment for all cards to render
-    await page.waitForTimeout(2000);
-
-    const count = await personnelCards.count();
+    // Wait longer for Firebase to load all personnel records
+    // Poll until we have at least 3 cards or timeout
+    let count = 0;
+    const maxAttempts = 10;
+    for (let i = 0; i < maxAttempts; i++) {
+      await page.waitForTimeout(1000);
+      count = await personnelCards.count();
+      if (count >= 3) break;
+    }
 
     // Must show at least 3: Test Admin (battalion) + Test Leader (company) + Test User (platoon)
     expect(count).toBeGreaterThanOrEqual(3);
