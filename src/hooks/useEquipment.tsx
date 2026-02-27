@@ -259,14 +259,24 @@ export function useEquipment(): UseEquipmentReturn {
         }
 
         // Check if this equipment has a pending transfer OUT from the user's unit
+        // Only hide if this is a serialized item (quantity=1 per row) OR if entire quantity is pending
         const pendingTransfers = pendingTransfersOut.get(baseEquipmentId);
-        if (pendingTransfers && unitId) {
-          const hasTransferOut = pendingTransfers.some(t => t.fromUnitId === unitId);
-          if (hasTransferOut && item.currentUnitId === unitId) {
-            // This item is assigned to user's unit but has a pending transfer OUT
+        if (pendingTransfers && unitId && item.currentUnitId === unitId) {
+          // Calculate total quantity pending transfer OUT from this unit
+          const totalPendingOut = pendingTransfers
+            .filter(t => t.fromUnitId === unitId)
+            .reduce((sum, t) => sum + (t.quantity || 1), 0);
+
+          // Only hide if the ENTIRE quantity of this row is pending transfer OUT
+          // For serialized items (currentQuantity = 1), hide if there's any pending transfer
+          // For bulk items, only hide if all items in this row are pending transfer
+          if (totalPendingOut >= item.currentQuantity) {
+            // All items in this row are pending transfer OUT
             // Hide it from the equipment list (it will appear in Transfers tab)
             return false;
           }
+          // If only SOME items are pending transfer, still show the row
+          // The UI can indicate how many are pending
         }
 
         // Show equipment assigned to the current user's unit
