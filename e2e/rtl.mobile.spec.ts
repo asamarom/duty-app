@@ -124,6 +124,10 @@ test.describe('Mobile RTL [Equipment Page]', () => {
   });
 
   test('[M-RTL-8] Mobile page title should align right', async ({ page }) => {
+    // Wait for any h1 with equipment text to be visible
+    const titleLocator = page.locator('h1').filter({ hasText: /מלאי ציוד|equipment inventory/i });
+    await titleLocator.first().waitFor({ state: 'visible', timeout: 10000 });
+
     // Find all h1s with equipment text, filter for visible ones
     const titles = page.locator('h1').filter({ hasText: /מלאי ציוד|equipment inventory/i });
     const count = await titles.count();
