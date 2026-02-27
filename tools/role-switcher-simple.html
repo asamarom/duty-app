@@ -113,7 +113,7 @@
     </div>
 
     <div class="group">
-      <div class="section-label">Role</div>
+      <div class="section-label">Roles (click to toggle)</div>
       <div class="btn-row" id="role-buttons"></div>
     </div>
 
@@ -133,7 +133,7 @@
   const ROLES = ['admin', 'leader', 'user'];
 
   let currentUid = null;
-  let currentRole = null;
+  let currentRoles = []; // Changed to array for multi-select
   let currentUnitId = null;
   let allUnits = [];
   let allUsers = [];
@@ -164,7 +164,8 @@
       allUsers.forEach(user => {
         const option = document.createElement('option');
         option.value = user.uid;
-        option.textContent = `${user.fullName || 'Unknown'} (${(user.roles || ['user'])[0]})`;
+        const roles = user.roles || ['user'];
+        option.textContent = `${user.fullName || 'Unknown'} (${roles.join(', ')})`;
         select.appendChild(option);
       });
 
@@ -202,12 +203,17 @@
       const res = await fetch(`${API_BASE}/user/${currentUid}`);
       const userData = await res.json();
 
-      currentRole = (userData.roles || ['user'])[0];
+      currentRoles = userData.roles || ['user'];
       currentUnitId = userData.unitId;
       const name = userData.fullName || 'Unknown';
 
       document.getElementById('user-name').textContent = name;
-      document.getElementById('user-role').innerHTML = `<span class="badge badge-${currentRole}">${currentRole}</span>`;
+
+      // Display all roles as badges
+      const roleBadges = currentRoles.map(role =>
+        `<span class="badge badge-${role}">${role}</span>`
+      ).join(' ');
+      document.getElementById('user-role').innerHTML = roleBadges;
 
       const currentUnit = allUnits.find(u => u.id === currentUnitId);
       document.getElementById('user-unit').textContent = currentUnit
@@ -229,9 +235,9 @@
     container.innerHTML = '';
     for (const role of ROLES) {
       const btn = document.createElement('button');
-      btn.className = 'btn btn-role' + (role === currentRole ? ' active' : '');
+      btn.className = 'btn btn-role' + (currentRoles.includes(role) ? ' active' : '');
       btn.textContent = role;
-      btn.onclick = () => setRole(role);
+      btn.onclick = () => toggleRole(role);
       container.appendChild(btn);
     }
   }
@@ -254,20 +260,37 @@
   }
 
   // ── Mutations ─────────────────────────────────────────────────────────────────
-  async function setRole(role) {
+  async function toggleRole(role) {
     try {
+      // Toggle role in array
+      let newRoles;
+      if (currentRoles.includes(role)) {
+        // Remove role (but keep at least one)
+        newRoles = currentRoles.filter(r => r !== role);
+        if (newRoles.length === 0) {
+          showStatus('✗ User must have at least one role', false);
+          return;
+        }
+      } else {
+        // Add role
+        newRoles = [...currentRoles, role];
+      }
+
       const res = await fetch(`${API_BASE}/user/${currentUid}/role`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roles: [role] }),
+        body: JSON.stringify({ roles: newRoles }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Role update failed');
 
-      currentRole = role;
-      document.getElementById('user-role').innerHTML = `<span class="badge badge-${role}">${role}</span>`;
+      currentRoles = newRoles;
+      const roleBadges = currentRoles.map(r =>
+        `<span class="badge badge-${r}">${r}</span>`
+      ).join(' ');
+      document.getElementById('user-role').innerHTML = roleBadges;
       renderRoleButtons();
-      showStatus(`✓ Role changed to ${role}`, true);
+      showStatus(`✓ Roles updated: ${newRoles.join(', ')}`, true);
     } catch (err) {
       showStatus(`✗ ${err.message}`, false);
     }
