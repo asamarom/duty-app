@@ -355,37 +355,17 @@ jobs:
           echo "All E2E tests passed on staging before production deployment"
 
   # ══════════════════════════════════════════════════════════════════════════
-  # Phase 6: Smoke Test Production (Optional but Recommended)
+  # Phase 6: Production Smoke Tests - DISABLED
   # ══════════════════════════════════════════════════════════════════════════
-
-  smoke-test-production:
-    name: Smoke Test Production
-    runs-on: ubuntu-latest
-    needs: deploy-production
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium
-
-      - name: Run Critical Path Tests on Production
-        run: npm run test:e2e:prod || echo "⚠️ Production smoke tests failed, but deployment already completed"
-        continue-on-error: true
-
-      - name: Upload Production Test Results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: production-smoke-test-report
-          path: playwright-report/
-          retention-days: 30
+  #
+  # Production smoke tests are disabled because:
+  # 1. Production uses real Firebase OAuth (no test login form)
+  # 2. Tests cannot authenticate without manual OAuth flow
+  # 3. All E2E tests already pass on staging before production deployment
+  # 4. Deployment has already succeeded at this point
+  #
+  # To manually test production:
+  #   1. Generate auth tokens: npm run test:e2e:prod:setup
+  #   2. Run authenticated tests: npm run test:e2e:prod:auth
+  #
+  # ══════════════════════════════════════════════════════════════════════════
