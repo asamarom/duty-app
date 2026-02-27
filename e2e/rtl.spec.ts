@@ -33,8 +33,8 @@ test.describe('RTL Layout [Equipment Page]', () => {
   });
 
   test('[RTL-2] Page title should align to the right', async ({ page }) => {
-    // Look for title in both desktop header and MobileHeader (h1 only, more specific)
-    const title = page.locator('h1').filter({ hasText: /מלאי ציוד|equipment inventory/i }).first();
+    // Look for visible title (desktop or mobile header)
+    const title = page.locator('h1:visible').filter({ hasText: /מלאי ציוד|equipment inventory/i }).first();
     await expect(title).toBeVisible({ timeout: 5000 });
 
     const parent = title.locator('..');
@@ -147,9 +147,19 @@ test.describe('RTL Layout [Equipment Page]', () => {
 test.describe('RTL Layout [Personnel Page]', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page, 'admin');
-    await page.goto('/personnel');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    await page.goto('/personnel', { waitUntil: 'load' });
+
+    // Wait for loading spinner to disappear
+    const loader = page.getByText(/loading|טוען/i);
+    try {
+      await loader.waitFor({ state: 'detached', timeout: 30000 });
+    } catch {
+      // If loader doesn't appear, continue
+    }
+
+    // Wait for main content to appear
+    await page.locator('main, [role="main"], .grid').first().waitFor({ timeout: 10000 });
+    await page.waitForTimeout(1000);
   });
 
   test('[RTL-P1] Personnel page should have RTL direction', async ({ page }) => {
@@ -182,8 +192,19 @@ test.describe('RTL Layout [Personnel Page]', () => {
 test.describe('RTL Layout [Dashboard]', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page, 'admin');
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.goto('/', { waitUntil: 'load' });
+
+    // Wait for loading spinner to disappear
+    const loader = page.getByText(/loading|טוען/i);
+    try {
+      await loader.waitFor({ state: 'detached', timeout: 30000 });
+    } catch {
+      // If loader doesn't appear, continue
+    }
+
+    // Wait for main content to appear
+    await page.locator('main, [role="main"], [class*="grid"]').first().waitFor({ timeout: 10000 });
+    await page.waitForTimeout(1000);
   });
 
   test('[RTL-D1] Dashboard should have RTL direction', async ({ page }) => {
