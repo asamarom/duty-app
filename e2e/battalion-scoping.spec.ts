@@ -43,7 +43,7 @@ test.describe('Battalion Scoping — Data Visibility', () => {
   });
 
   test('[SCOPE-3] admin sees all battalion personnel', async ({ page }) => {
-    test.setTimeout(45000);
+    test.setTimeout(60000);
 
     await loginAsTestUser(page, 'admin');
     await page.goto('/personnel', { waitUntil: 'load' });
@@ -58,15 +58,25 @@ test.describe('Battalion Scoping — Data Visibility', () => {
 
     // Wait for personnel cards to load with all data
     const personnelCards = page.locator('.card-tactical');
-    await personnelCards.first().waitFor({ state: 'visible', timeout: 20000 });
+
+    // Give Firebase more time to load the first card
+    await page.waitForTimeout(3000);
+
+    try {
+      await personnelCards.first().waitFor({ state: 'visible', timeout: 25000 });
+    } catch (e) {
+      console.log('No personnel cards found after 25 seconds');
+      throw e;
+    }
 
     // Wait longer for Firebase to load all personnel records
-    // Poll until we have at least 3 cards or timeout
+    // Poll until we have at least 3 cards or timeout (20 attempts = 20 seconds)
     let count = 0;
-    const maxAttempts = 10;
+    const maxAttempts = 20;
     for (let i = 0; i < maxAttempts; i++) {
       await page.waitForTimeout(1000);
       count = await personnelCards.count();
+      console.log(`Attempt ${i + 1}/${maxAttempts}: Found ${count} personnel cards`);
       if (count >= 3) break;
     }
 
