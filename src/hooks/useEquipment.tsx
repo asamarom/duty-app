@@ -37,6 +37,7 @@ export interface EquipmentWithAssignment extends Equipment {
   assignmentLevel: AssignmentLevel;
   hasPendingTransfer?: boolean;
   currentQuantity?: number;
+  pendingTransferOutQuantity?: number;
 }
 
 export interface AssignmentData {
@@ -250,48 +251,70 @@ export function useEquipment(): UseEquipmentReturn {
       // - Show equipment assigned to the current user personally
       // - Hide equipment assigned to other units (even within same battalion)
       // - Hide equipment with pending transfers OUT from user's unit
-      const filteredEquipment = mappedEquipment.filter((item) => {
-        const baseEquipmentId = item.id.split('--')[0];
+      const filteredEquipment = mappedEquipment
+        .filter((item) => {
+          const baseEquipmentId = item.id.split('--')[0];
 
-        // Always show unassigned equipment
-        if (item.assignmentLevel === 'unassigned') {
-          return true;
-        }
-
-        // Check if this equipment has a pending transfer OUT from the user's unit
-        // Only hide if this is a serialized item (quantity=1 per row) OR if entire quantity is pending
-        const pendingTransfers = pendingTransfersOut.get(baseEquipmentId);
-        if (pendingTransfers && unitId && item.currentUnitId === unitId) {
-          // Calculate total quantity pending transfer OUT from this unit
-          const totalPendingOut = pendingTransfers
-            .filter(t => t.fromUnitId === unitId)
-            .reduce((sum, t) => sum + (t.quantity || 1), 0);
-
-          // Only hide if the ENTIRE quantity of this row is pending transfer OUT
-          // For serialized items (currentQuantity = 1), hide if there's any pending transfer
-          // For bulk items, only hide if all items in this row are pending transfer
-          if (totalPendingOut >= item.currentQuantity) {
-            // All items in this row are pending transfer OUT
-            // Hide it from the equipment list (it will appear in Transfers tab)
-            return false;
+          // Always show unassigned equipment
+          if (item.assignmentLevel === 'unassigned') {
+            return true;
           }
-          // If only SOME items are pending transfer, still show the row
-          // The UI can indicate how many are pending
-        }
 
-        // Show equipment assigned to the current user's unit
-        if (unitId && item.currentUnitId === unitId) {
-          return true;
-        }
+          // Check if this equipment has a pending transfer OUT from the user's unit
+          // Only hide if this is a serialized item (quantity=1 per row) OR if entire quantity is pending
+          const pendingTransfers = pendingTransfersOut.get(baseEquipmentId);
+          if (pendingTransfers && unitId && item.currentUnitId === unitId) {
+            // Calculate total quantity pending transfer OUT from this unit
+            const totalPendingOut = pendingTransfers
+              .filter(t => t.fromUnitId === unitId)
+              .reduce((sum, t) => sum + (t.quantity || 1), 0);
 
-        // Show equipment assigned to the current user personally
-        if (currentUserPersonnelId && item.currentPersonnelId === currentUserPersonnelId) {
-          return true;
-        }
+            // Only hide if the ENTIRE quantity of this row is pending transfer OUT
+            // For serialized items (currentQuantity = 1), hide if there's any pending transfer
+            // For bulk items, only hide if all items in this row are pending transfer
+            if (totalPendingOut >= item.currentQuantity) {
+              // All items in this row are pending transfer OUT
+              // Hide it from the equipment list (it will appear in Transfers tab)
+              return false;
+            }
+          }
 
-        // Hide all other equipment
-        return false;
-      });
+          // Show equipment assigned to the current user's unit
+          if (unitId && item.currentUnitId === unitId) {
+            return true;
+          }
+
+          // Show equipment assigned to the current user personally
+          if (currentUserPersonnelId && item.currentPersonnelId === currentUserPersonnelId) {
+            return true;
+          }
+
+          // Hide all other equipment
+          return false;
+        })
+        .map((item) => {
+          // Adjust currentQuantity to exclude items pending transfer OUT
+          const baseEquipmentId = item.id.split('--')[0];
+          const pendingTransfers = pendingTransfersOut.get(baseEquipmentId);
+
+          if (pendingTransfers && unitId && item.currentUnitId === unitId) {
+            const totalPendingOut = pendingTransfers
+              .filter(t => t.fromUnitId === unitId)
+              .reduce((sum, t) => sum + (t.quantity || 1), 0);
+
+            // Reduce displayed quantity by the number pending transfer OUT
+            const adjustedQuantity = Math.max(0, item.currentQuantity - totalPendingOut);
+
+            return {
+              ...item,
+              currentQuantity: adjustedQuantity,
+              // Optional: Add a field to indicate how many are pending
+              pendingTransferOutQuantity: totalPendingOut,
+            };
+          }
+
+          return item;
+        });
 
       setEquipment(filteredEquipment);
       setLoading(false);
