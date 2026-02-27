@@ -148,10 +148,25 @@ export function useEquipment(): UseEquipmentReturn {
         assignmentsByEquipment.get(equipId)!.push({ id: docSnap.id, ...data });
       });
 
-      // Build pending equipment IDs set
+      // Build pending equipment IDs set and track transfer direction
       const pendingEquipmentIds = new Set(
         pendingDocsRef.current.map((d) => (d.data() as AssignmentRequestDoc).equipmentId)
       );
+
+      // Build map of equipment with pending transfers OUT from user's unit
+      // Key: equipmentId, Value: { fromUnitId, toUnitId, quantity }
+      const pendingTransfersOut = new Map<string, Array<{ fromUnitId: string | null; toUnitId: string | null; quantity?: number }>>();
+      pendingDocsRef.current.forEach((d) => {
+        const data = d.data() as AssignmentRequestDoc;
+        if (!pendingTransfersOut.has(data.equipmentId)) {
+          pendingTransfersOut.set(data.equipmentId, []);
+        }
+        pendingTransfersOut.get(data.equipmentId)!.push({
+          fromUnitId: data.fromUnitId,
+          toUnitId: data.toUnitId,
+          quantity: data.quantity
+        });
+      });
 
       // Build mapped equipment
       const mappedEquipment: EquipmentWithAssignment[] = [];
@@ -231,13 +246,27 @@ export function useEquipment(): UseEquipmentReturn {
       //
       // Filter rules:
       // - Show unassigned equipment (available to all for assignment)
-      // - Show equipment assigned to the current user's unit
+      // - Show equipment assigned to the current user's unit (BUT NOT if pending transfer OUT)
       // - Show equipment assigned to the current user personally
       // - Hide equipment assigned to other units (even within same battalion)
+      // - Hide equipment with pending transfers OUT from user's unit
       const filteredEquipment = mappedEquipment.filter((item) => {
+        const baseEquipmentId = item.id.split('--')[0];
+
         // Always show unassigned equipment
         if (item.assignmentLevel === 'unassigned') {
           return true;
+        }
+
+        // Check if this equipment has a pending transfer OUT from the user's unit
+        const pendingTransfers = pendingTransfersOut.get(baseEquipmentId);
+        if (pendingTransfers && unitId) {
+          const hasTransferOut = pendingTransfers.some(t => t.fromUnitId === unitId);
+          if (hasTransferOut && item.currentUnitId === unitId) {
+            // This item is assigned to user's unit but has a pending transfer OUT
+            // Hide it from the equipment list (it will appear in Transfers tab)
+            return false;
+          }
         }
 
         // Show equipment assigned to the current user's unit
