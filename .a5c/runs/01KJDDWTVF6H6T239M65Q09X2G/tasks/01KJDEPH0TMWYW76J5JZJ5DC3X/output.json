@@ -1,0 +1,7 @@
+{
+  "success": true,
+  "commitSha": "56f55910711ac7b1866dc109cdcd68bb999d4a8b",
+  "commitMessage": "fix: update RTL test selectors to match actual page structure",
+  "pushed": true,
+  "pushedBranch": "main"
+}

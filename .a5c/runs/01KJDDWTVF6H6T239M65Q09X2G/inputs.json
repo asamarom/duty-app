@@ -1,0 +1,6 @@
+{
+  "testType": "all",
+  "maxAttempts": 5,
+  "runLocally": false,
+  "ciRunId": null
+}

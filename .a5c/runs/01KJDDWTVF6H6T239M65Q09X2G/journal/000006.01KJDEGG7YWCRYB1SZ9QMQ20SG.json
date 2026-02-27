@@ -1,0 +1,20 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-26T17:03:58.206Z",
+  "data": {
+    "effectId": "01KJDEGG1HPPZZ6S1ZPZ55KPSK",
+    "invocationKey": "duty-app/e2e-test-debugging:S000003:apply-fixes",
+    "invocationHash": "b5bc1a5348aa6340cc8e5e8ceb2ec0eb8dcbb63a14da495d98b8a15752588f1a",
+    "stepId": "S000003",
+    "taskId": "apply-fixes",
+    "kind": "agent",
+    "label": "agent",
+    "taskDefRef": "tasks/01KJDEGG1HPPZZ6S1ZPZ55KPSK/task.json",
+    "labels": [
+      "agent",
+      "remediation",
+      "attempt-1"
+    ]
+  },
+  "checksum": "352cfbd3309a144693db0fe5f9c84b064b403ab723395305f54369d72553bc73"
+}

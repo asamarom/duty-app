@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KJDEPH0TMWYW76J5JZJ5DC3X",
+  "taskId": "commit-changes",
+  "invocationKey": "duty-app/e2e-test-debugging:S000004:commit-changes",
+  "status": "ok",
+  "result": {
+    "commitMessage": "fix: update RTL test selectors to match actual page structure",
+    "commitSha": "56f55910711ac7b1866dc109cdcd68bb999d4a8b",
+    "pushed": true,
+    "pushedBranch": "main",
+    "success": true
+  },
+  "startedAt": "2026-02-26T17:08:37.612Z",
+  "finishedAt": "2026-02-26T17:08:37.612Z",
+  "value": {
+    "commitMessage": "fix: update RTL test selectors to match actual page structure",
+    "commitSha": "56f55910711ac7b1866dc109cdcd68bb999d4a8b",
+    "pushed": true,
+    "pushedBranch": "main",
+    "success": true
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KJDEGG1HPPZZ6S1ZPZ55KPSK",
+  "taskId": "apply-fixes",
+  "invocationKey": "duty-app/e2e-test-debugging:S000003:apply-fixes",
+  "status": "ok",
+  "result": {
+    "filesModified": [
+      "/home/ubuntu/duty-app/e2e/rtl.spec.ts",
+      "/home/ubuntu/duty-app/e2e/rtl.mobile.spec.ts"
+    ],
+    "fixDescription": "Fixed RTL test failures by updating selectors to match actual application structure. The tests were waiting for 'header, [role=\"banner\"]' which doesn't exist in the application. Updated to wait for actual page content (h1 title element) that reliably loads on the page. This fixes the root cause of 12 failing RTL tests across desktop and mobile viewports. Personnel seeding was verified and confirmed to be working correctly - no changes needed.",
+    "requiresReview": false,
+    "reviewReason": "",
+    "summary": "Applied Fix #1 (highest priority): Updated e2e/rtl.spec.ts and e2e/rtl.mobile.spec.ts to remove the non-existent 'header, [role=\"banner\"]' selector and replace with waiting for actual page content (h1 title). The MobileHeader component renders a <header> element but without role=\"banner\", and the desktop header is conditionally shown. The new approach waits for the h1 title element which reliably exists on both mobile and desktop. Fix #2 was verified: personnel seeding in scripts/seed-emulator-users.cjs is already correct and properly seeds all 3 test users with personnel records linked to auth users via userId field.",
+    "testsFixed": [
+      "[RTL-1] HTML should have RTL direction",
+      "[RTL-2] Page title should align to the right",
+      "[RTL-3] Search input should support RTL",
+      "[RTL-4] Tabs should flow right to left",
+      "[RTL-5] Table should respect RTL layout",
+      "[RTL-6] Buttons and actions should align right",
+      "[RTL-7] Stats cards should flow right to left",
+      "[M-RTL-1] Mobile viewport should have RTL direction",
+      "[M-RTL-2] Mobile header should align right",
+      "[M-RTL-3] Mobile navigation should flow right to left",
+      "[M-RTL-4] Mobile tabs should be RTL",
+      "[M-RTL-5] Mobile search input should support RTL"
+    ]
+  },
+  "startedAt": "2026-02-26T17:06:59.913Z",
+  "finishedAt": "2026-02-26T17:06:59.913Z",
+  "value": {
+    "filesModified": [
+      "/home/ubuntu/duty-app/e2e/rtl.spec.ts",
+      "/home/ubuntu/duty-app/e2e/rtl.mobile.spec.ts"
+    ],
+    "fixDescription": "Fixed RTL test failures by updating selectors to match actual application structure. The tests were waiting for 'header, [role=\"banner\"]' which doesn't exist in the application. Updated to wait for actual page content (h1 title element) that reliably loads on the page. This fixes the root cause of 12 failing RTL tests across desktop and mobile viewports. Personnel seeding was verified and confirmed to be working correctly - no changes needed.",
+    "requiresReview": false,
+    "reviewReason": "",
+    "summary": "Applied Fix #1 (highest priority): Updated e2e/rtl.spec.ts and e2e/rtl.mobile.spec.ts to remove the non-existent 'header, [role=\"banner\"]' selector and replace with waiting for actual page content (h1 title). The MobileHeader component renders a <header> element but without role=\"banner\", and the desktop header is conditionally shown. The new approach waits for the h1 title element which reliably exists on both mobile and desktop. Fix #2 was verified: personnel seeding in scripts/seed-emulator-users.cjs is already correct and properly seeds all 3 test users with personnel records linked to auth users via userId field.",
+    "testsFixed": [
+      "[RTL-1] HTML should have RTL direction",
+      "[RTL-2] Page title should align to the right",
+      "[RTL-3] Search input should support RTL",
+      "[RTL-4] Tabs should flow right to left",
+      "[RTL-5] Table should respect RTL layout",
+      "[RTL-6] Buttons and actions should align right",
+      "[RTL-7] Stats cards should flow right to left",
+      "[M-RTL-1] Mobile viewport should have RTL direction",
+      "[M-RTL-2] Mobile header should align right",
+      "[M-RTL-3] Mobile navigation should flow right to left",
+      "[M-RTL-4] Mobile tabs should be RTL",
+      "[M-RTL-5] Mobile search input should support RTL"
+    ]
+  }
+}

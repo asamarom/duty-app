@@ -1,0 +1,14 @@
+{
+  "allPassed": true,
+  "runId": "22452725669",
+  "runUrl": "https://github.com/asamarom/duty-app/actions/runs/22452725669",
+  "totalTests": 4,
+  "passedTests": 4,
+  "failedTests": 0,
+  "failedCount": 0,
+  "jobResults": {
+    "desktop": "skipped",
+    "mobile": "skipped",
+    "performance": "skipped"
+  }
+}

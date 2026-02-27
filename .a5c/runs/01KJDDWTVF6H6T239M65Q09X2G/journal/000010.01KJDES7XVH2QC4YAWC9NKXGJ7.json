@@ -1,0 +1,21 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-26T17:08:44.603Z",
+  "data": {
+    "effectId": "01KJDES7VFYV8XGM47865K9VBM",
+    "invocationKey": "duty-app/e2e-test-debugging:S000005:verify-ci",
+    "invocationHash": "834d26cc520c6a5dd3d93303b7d7e630f1597453637c7dd08cf529e98f8ddd2d",
+    "stepId": "S000005",
+    "taskId": "verify-ci",
+    "kind": "agent",
+    "label": "agent",
+    "taskDefRef": "tasks/01KJDES7VFYV8XGM47865K9VBM/task.json",
+    "labels": [
+      "agent",
+      "verification",
+      "ci",
+      "attempt-1"
+    ]
+  },
+  "checksum": "0bf265030852723333b4652fe34ba9fe90060a3a77ad61aff59c975138793d9d"
+}

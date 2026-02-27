@@ -1,0 +1,20 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-26T16:56:42.728Z",
+  "data": {
+    "effectId": "01KJDE36YQZRP7RGGV8CZX3FD9",
+    "invocationKey": "duty-app/e2e-test-debugging:S000002:analyze-failures",
+    "invocationHash": "4880a9339a09fd69d0b0636106b243fa9e43ed046db1e8eee08bd0f21d2d68d8",
+    "stepId": "S000002",
+    "taskId": "analyze-failures",
+    "kind": "agent",
+    "label": "agent",
+    "taskDefRef": "tasks/01KJDE36YQZRP7RGGV8CZX3FD9/task.json",
+    "labels": [
+      "agent",
+      "analysis",
+      "attempt-1"
+    ]
+  },
+  "checksum": "7fa2431e3fe6fd6fcda1d178a6483d9730657e49c809b024f4708d86f8027973"
+}

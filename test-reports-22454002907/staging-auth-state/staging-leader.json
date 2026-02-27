@@ -1,0 +1,44 @@
+{
+  "cookies": [
+    {
+      "name": "vercel-experiment-uuid",
+      "value": "MeI9uk_NpRSG9955sdlJJ",
+      "domain": "vercel.live",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None",
+      "partitionKey": "https://duty-bwqq321u1-asas-projects-25ed4645.vercel.app",
+      "_crHasCrossSiteAncestor": true
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://duty-bwqq321u1-asas-projects-25ed4645.vercel.app",
+      "localStorage": [
+        {
+          "name": "firebase:authUser:AIzaSyBCEsDWXYAP-2I6JnbO5rgmdUCCx_7qEd4:[DEFAULT]",
+          "value": "{\"uid\":\"vlxirvIybcTHt6VitMNUCvCN1nj2\",\"email\":\"test-leader@e2e.local\",\"emailVerified\":true,\"displayName\":\"Test Leader\",\"isAnonymous\":false,\"providerData\":[{\"providerId\":\"password\",\"uid\":\"test-leader@e2e.local\",\"displayName\":\"Test Leader\",\"email\":\"test-leader@e2e.local\",\"phoneNumber\":null,\"photoURL\":null}],\"stsTokenManager\":{\"refreshToken\":\"AMf-vBzf5yeoOJSIxMwLlTcRL9A2s7kx8GljUoIUJ3UI2GUZh2qfCPPq0Xefb5vGE-tTFwij5IVOi45F-QYR-Fe3XP3RQ4bEkVwBWpTM3zV27uDYKIp8d804l_SYK8sDisLPMmsl-3NGXd88KpDmnBJQVxUMd8jf2dt0GbZgkb8qVKTqcuW9lbg\",\"accessToken\":\"eyJhbGciOiJSUzI1NiIsImtpZCI6IjJjMjdhZmY1YzlkNGU1MzVkNWRjMmMwNWM1YTE2N2FlMmY1NjgxYzIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiVGVzdCBMZWFkZXIiLCJyb2xlIjoibGVhZGVyIiwiaXNzIjoiaHR0cHM6Ly9zZWN1cmV0b2tlbi5nb29nbGUuY29tL2R1dHktc3RhZ2luZyIsImF1ZCI6ImR1dHktc3RhZ2luZyIsImF1dGhfdGltZSI6MTc3MjEyNzkyNiwidXNlcl9pZCI6InZseGlydkl5YmNUSHQ2Vml0TU5VQ3ZDTjFuajIiLCJzdWIiOiJ2bHhpcnZJeWJjVEh0NlZpdE1OVUN2Q04xbmoyIiwiaWF0IjoxNzcyMTI3OTI2LCJleHAiOjE3NzIxMzE1MjYsImVtYWlsIjoidGVzdC1sZWFkZXJAZTJlLmxvY2FsIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsidGVzdC1sZWFkZXJAZTJlLmxvY2FsIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiY3VzdG9tIn19.OMPua15QF1i0DGamwFTdo3Ce343XVY4RxgLlvq-04E0mBFk72QoM9sFuK952SyMvUgH9mI-d29asgySuzY-0EBk-nC5ZeS7QzsWwAQCwK6k2CKnH221rlaZk56GBdctVZdkHW1eVC275TdfgJ7uP4-j_z4e9WP5IVxNEYLAmni6-fs3pCio_9ZcbV4q8r0j2TIlZfAV0WRA2lzq1bl3gzdDnOJZODEdtVrjDe0Foy0gR-BupD_lKB5fmFciYTRgvV_1TdYql9xln2kPJ9bl4G-fU25VqcfIccQAb9kgRiN-sZpz3SSwXRtp579kJM2-LQAxWLd2PRMHg8o9RoSGNeQ\",\"expirationTime\":1772131526668},\"createdAt\":\"1772127914958\",\"lastLoginAt\":\"1772127926641\",\"apiKey\":\"AIzaSyBCEsDWXYAP-2I6JnbO5rgmdUCCx_7qEd4\",\"appName\":\"[DEFAULT]\"}"
+        },
+        {
+          "name": "pmtb_admin_mode",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "origin": "https://vercel.live",
+      "localStorage": [
+        {
+          "name": "vid-https://duty-bwqq321u1-asas-projects-25ed4645.vercel.app",
+          "value": "\"17721279264800.7869117089638897\""
+        },
+        {
+          "name": "vercel-toolbar-experiment-uuid-https://duty-bwqq321u1-asas-projects-25ed4645.vercel.app",
+          "value": "\"MeI9uk_NpRSG9955sdlJJ\""
+        }
+      ]
+    }
+  ]
+}

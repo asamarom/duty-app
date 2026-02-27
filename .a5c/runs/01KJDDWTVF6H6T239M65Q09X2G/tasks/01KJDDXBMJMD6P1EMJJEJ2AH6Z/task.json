@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJDDXBMJMD6P1EMJJEJ2AH6Z",
+  "taskId": "investigate-ci-failures",
+  "invocationKey": "duty-app/e2e-test-debugging:S000001:investigate-ci-failures",
+  "stepId": "S000001",
+  "kind": "agent",
+  "title": "Investigate CI Failures",
+  "description": "Check GitHub Actions, download reports, identify failing tests",
+  "labels": [
+    "agent",
+    "ci-analysis",
+    "investigation"
+  ],
+  "io": {
+    "inputJsonPath": "tasks/01KJDDXBMJMD6P1EMJJEJ2AH6Z/input.json",
+    "outputJsonPath": "tasks/01KJDDXBMJMD6P1EMJJEJ2AH6Z/result.json"
+  },
+  "inputs": {
+    "ciRunId": null,
+    "repoPath": "/home/ubuntu/duty-app",
+    "testType": "all"
+  }
+}

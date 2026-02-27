@@ -1,0 +1,177 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KJDE36YQZRP7RGGV8CZX3FD9",
+  "taskId": "analyze-failures",
+  "invocationKey": "duty-app/e2e-test-debugging:S000002:analyze-failures",
+  "status": "ok",
+  "result": {
+    "fixPriorities": [
+      "Fix #1: Update RTL test selectors to match actual application structure (fixes 12 tests)",
+      "Fix #2: Verify and fix personnel seeding in seed-emulator-users.cjs (fixes 1 test)",
+      "Fix #3: Ensure auth setup runs successfully for staging tests (prevents future staging failures)"
+    ],
+    "recommendations": [
+      {
+        "action": "Update the beforeEach hook in e2e/rtl.spec.ts to wait for elements that actually exist in the application. Instead of waiting for 'header, [role=\"banner\"]', wait for page-specific content that indicates the page has loaded (e.g., page heading, main content area, or specific UI elements like the equipment table or personnel grid).",
+        "estimatedImpact": "Fixes 11 RTL tests on desktop and 1 mobile RTL test (12 total). This is the highest impact fix.",
+        "files": [
+          "/home/ubuntu/duty-app/e2e/rtl.spec.ts (lines 13-19)",
+          "/home/ubuntu/duty-app/e2e/rtl.mobile.spec.ts (lines 17-23)"
+        ],
+        "rationale": "The application uses a Sidebar for desktop navigation (not a header with role='banner'), and the MobileHeader is hidden on desktop viewports with 'lg:hidden' class. The test is timing out because it's waiting for elements that don't exist or aren't visible. By waiting for actual page content instead, tests will be more reliable and match the actual application structure."
+      },
+      {
+        "action": "Verify that the seed script (scripts/seed-emulator-users.cjs) creates personnel records in the 'personnel' collection, not just user authentication records. Check that it seeds at least 3 personnel: Test Admin (battalion-level), Test Leader (company-level), and Test User (platoon-level). If personnel seeding is missing, add it to the seed script.",
+        "estimatedImpact": "Fixes 1 battalion scoping test. Medium priority but important for data integrity testing.",
+        "files": [
+          "/home/ubuntu/duty-app/scripts/seed-emulator-users.cjs",
+          "/home/ubuntu/duty-app/e2e/battalion-scoping.spec.ts (line 59)"
+        ],
+        "rationale": "The test expects >=3 personnel cards but only 1 is present. This indicates the seed script may only be creating auth users without corresponding personnel records in Firestore. The battalion scoping feature depends on having multiple personnel at different unit levels to verify cross-unit visibility."
+      },
+      {
+        "action": "Add a check in the test setup to verify that required page elements load before proceeding. Replace hardcoded selectors with more flexible page state detection (e.g., wait for network idle, check for main content visibility, or use page-specific test IDs).",
+        "estimatedImpact": "Prevents future test failures due to UI structure changes. Improves test reliability across all RTL tests.",
+        "files": [
+          "/home/ubuntu/duty-app/e2e/rtl.spec.ts",
+          "/home/ubuntu/duty-app/e2e/rtl.mobile.spec.ts",
+          "/home/ubuntu/duty-app/src/components/layout/MobileHeader.tsx (add data-testid)",
+          "/home/ubuntu/duty-app/src/pages/EquipmentPage.tsx (add data-testid to header)",
+          "/home/ubuntu/duty-app/src/pages/PersonnelPage.tsx (add data-testid to header)"
+        ],
+        "rationale": "The current approach of waiting for specific header elements is brittle and doesn't account for responsive design where elements are hidden/shown based on viewport. Using more robust wait strategies (like waiting for the page heading with actual text content, or using data-testid attributes) will make tests more maintainable."
+      },
+      {
+        "action": "For the mobile RTL test that can't find equipment heading: update the test to wait for the MobileHeader component specifically (which renders on mobile), or wait for the page title h1 element that contains the equipment title. The current selector may be too generic or the mobile viewport isn't triggering the correct responsive layout.",
+        "estimatedImpact": "Fixes 1 mobile RTL test. Ensures mobile-specific testing works correctly.",
+        "files": [
+          "/home/ubuntu/duty-app/e2e/rtl.mobile.spec.ts (lines 117-120)"
+        ],
+        "rationale": "Mobile layouts use MobileHeader component which is shown with 'lg:hidden' class. The test needs to account for this responsive behavior and wait for mobile-specific elements rather than desktop headers."
+      }
+    ],
+    "rootCauses": [
+      {
+        "affectedTests": [
+          "[RTL-1] HTML should have RTL direction",
+          "[RTL-2] Page title should align to the right",
+          "[RTL-3] Search input should support RTL",
+          "[RTL-4] Tabs should flow right to left",
+          "[RTL-5] Table should respect RTL layout",
+          "[RTL-6] Buttons and actions should align right",
+          "[RTL-7] Stats cards should flow right to left",
+          "[RTL-P1] Personnel page should have RTL direction",
+          "[RTL-P2] Personnel content should respect RTL",
+          "[RTL-D1] Dashboard should have RTL direction",
+          "[RTL-D2] Dashboard cards should flow right to left",
+          "[M-RTL-8] Mobile page title should align right"
+        ],
+        "category": "CSS/Layout Issue - Header Not Visible",
+        "description": "The RTL tests are looking for 'header' or '[role=\"banner\"]' elements that don't exist in the application. The desktop layout uses a Sidebar component (role=\"complementary\") instead of a header, and the MobileHeader component uses a plain <header> element without role=\"banner\". The beforeEach hook in rtl.spec.ts line 17 waits for 'header, [role=\"banner\"]' which times out because the desktop Sidebar doesn't match this selector. The MobileHeader exists but may be hidden on desktop viewports due to CSS classes.",
+        "severity": "critical"
+      },
+      {
+        "affectedTests": [
+          "[SCOPE-3] admin sees all battalion personnel"
+        ],
+        "category": "Test Data Issue - Insufficient Personnel Seeded",
+        "description": "The battalion scoping test expects at least 3 personnel (Test Admin + Test Leader + Test User) to be visible to admin users, but only 1 is present in the database. This indicates the seed script (scripts/seed-emulator-users.cjs) is not properly seeding all test personnel records, or the personnel collection is not being populated correctly during test setup.",
+        "severity": "major"
+      },
+      {
+        "affectedTests": [
+          "All staging tests (if running against staging environment)"
+        ],
+        "category": "Test Setup Issue - Auth State Missing",
+        "description": "The .auth directory exists but contains only a .gitkeep file with no actual auth state files (staging-admin.json, staging-leader.json, staging-user.json). This suggests the staging-auth.setup.ts script has not been run successfully, or the auth state files are being deleted/not persisted. All staging tests depend on these pre-authenticated sessions.",
+        "severity": "critical"
+      }
+    ]
+  },
+  "startedAt": "2026-02-26T17:03:41.514Z",
+  "finishedAt": "2026-02-26T17:03:41.514Z",
+  "value": {
+    "fixPriorities": [
+      "Fix #1: Update RTL test selectors to match actual application structure (fixes 12 tests)",
+      "Fix #2: Verify and fix personnel seeding in seed-emulator-users.cjs (fixes 1 test)",
+      "Fix #3: Ensure auth setup runs successfully for staging tests (prevents future staging failures)"
+    ],
+    "recommendations": [
+      {
+        "action": "Update the beforeEach hook in e2e/rtl.spec.ts to wait for elements that actually exist in the application. Instead of waiting for 'header, [role=\"banner\"]', wait for page-specific content that indicates the page has loaded (e.g., page heading, main content area, or specific UI elements like the equipment table or personnel grid).",
+        "estimatedImpact": "Fixes 11 RTL tests on desktop and 1 mobile RTL test (12 total). This is the highest impact fix.",
+        "files": [
+          "/home/ubuntu/duty-app/e2e/rtl.spec.ts (lines 13-19)",
+          "/home/ubuntu/duty-app/e2e/rtl.mobile.spec.ts (lines 17-23)"
+        ],
+        "rationale": "The application uses a Sidebar for desktop navigation (not a header with role='banner'), and the MobileHeader is hidden on desktop viewports with 'lg:hidden' class. The test is timing out because it's waiting for elements that don't exist or aren't visible. By waiting for actual page content instead, tests will be more reliable and match the actual application structure."
+      },
+      {
+        "action": "Verify that the seed script (scripts/seed-emulator-users.cjs) creates personnel records in the 'personnel' collection, not just user authentication records. Check that it seeds at least 3 personnel: Test Admin (battalion-level), Test Leader (company-level), and Test User (platoon-level). If personnel seeding is missing, add it to the seed script.",
+        "estimatedImpact": "Fixes 1 battalion scoping test. Medium priority but important for data integrity testing.",
+        "files": [
+          "/home/ubuntu/duty-app/scripts/seed-emulator-users.cjs",
+          "/home/ubuntu/duty-app/e2e/battalion-scoping.spec.ts (line 59)"
+        ],
+        "rationale": "The test expects >=3 personnel cards but only 1 is present. This indicates the seed script may only be creating auth users without corresponding personnel records in Firestore. The battalion scoping feature depends on having multiple personnel at different unit levels to verify cross-unit visibility."
+      },
+      {
+        "action": "Add a check in the test setup to verify that required page elements load before proceeding. Replace hardcoded selectors with more flexible page state detection (e.g., wait for network idle, check for main content visibility, or use page-specific test IDs).",
+        "estimatedImpact": "Prevents future test failures due to UI structure changes. Improves test reliability across all RTL tests.",
+        "files": [
+          "/home/ubuntu/duty-app/e2e/rtl.spec.ts",
+          "/home/ubuntu/duty-app/e2e/rtl.mobile.spec.ts",
+          "/home/ubuntu/duty-app/src/components/layout/MobileHeader.tsx (add data-testid)",
+          "/home/ubuntu/duty-app/src/pages/EquipmentPage.tsx (add data-testid to header)",
+          "/home/ubuntu/duty-app/src/pages/PersonnelPage.tsx (add data-testid to header)"
+        ],
+        "rationale": "The current approach of waiting for specific header elements is brittle and doesn't account for responsive design where elements are hidden/shown based on viewport. Using more robust wait strategies (like waiting for the page heading with actual text content, or using data-testid attributes) will make tests more maintainable."
+      },
+      {
+        "action": "For the mobile RTL test that can't find equipment heading: update the test to wait for the MobileHeader component specifically (which renders on mobile), or wait for the page title h1 element that contains the equipment title. The current selector may be too generic or the mobile viewport isn't triggering the correct responsive layout.",
+        "estimatedImpact": "Fixes 1 mobile RTL test. Ensures mobile-specific testing works correctly.",
+        "files": [
+          "/home/ubuntu/duty-app/e2e/rtl.mobile.spec.ts (lines 117-120)"
+        ],
+        "rationale": "Mobile layouts use MobileHeader component which is shown with 'lg:hidden' class. The test needs to account for this responsive behavior and wait for mobile-specific elements rather than desktop headers."
+      }
+    ],
+    "rootCauses": [
+      {
+        "affectedTests": [
+          "[RTL-1] HTML should have RTL direction",
+          "[RTL-2] Page title should align to the right",
+          "[RTL-3] Search input should support RTL",
+          "[RTL-4] Tabs should flow right to left",
+          "[RTL-5] Table should respect RTL layout",
+          "[RTL-6] Buttons and actions should align right",
+          "[RTL-7] Stats cards should flow right to left",
+          "[RTL-P1] Personnel page should have RTL direction",
+          "[RTL-P2] Personnel content should respect RTL",
+          "[RTL-D1] Dashboard should have RTL direction",
+          "[RTL-D2] Dashboard cards should flow right to left",
+          "[M-RTL-8] Mobile page title should align right"
+        ],
+        "category": "CSS/Layout Issue - Header Not Visible",
+        "description": "The RTL tests are looking for 'header' or '[role=\"banner\"]' elements that don't exist in the application. The desktop layout uses a Sidebar component (role=\"complementary\") instead of a header, and the MobileHeader component uses a plain <header> element without role=\"banner\". The beforeEach hook in rtl.spec.ts line 17 waits for 'header, [role=\"banner\"]' which times out because the desktop Sidebar doesn't match this selector. The MobileHeader exists but may be hidden on desktop viewports due to CSS classes.",
+        "severity": "critical"
+      },
+      {
+        "affectedTests": [
+          "[SCOPE-3] admin sees all battalion personnel"
+        ],
+        "category": "Test Data Issue - Insufficient Personnel Seeded",
+        "description": "The battalion scoping test expects at least 3 personnel (Test Admin + Test Leader + Test User) to be visible to admin users, but only 1 is present in the database. This indicates the seed script (scripts/seed-emulator-users.cjs) is not properly seeding all test personnel records, or the personnel collection is not being populated correctly during test setup.",
+        "severity": "major"
+      },
+      {
+        "affectedTests": [
+          "All staging tests (if running against staging environment)"
+        ],
+        "category": "Test Setup Issue - Auth State Missing",
+        "description": "The .auth directory exists but contains only a .gitkeep file with no actual auth state files (staging-admin.json, staging-leader.json, staging-user.json). This suggests the staging-auth.setup.ts script has not been run successfully, or the auth state files are being deleted/not persisted. All staging tests depend on these pre-authenticated sessions.",
+        "severity": "critical"
+      }
+    ]
+  }
+}

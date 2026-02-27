@@ -43,6 +43,7 @@ test.describe('Battalion Scoping — Data Visibility', () => {
   });
 
   test('[SCOPE-3] admin sees all battalion personnel', async ({ page }) => {
+    test.skip(isStagingTest(), 'Staging uses fixed auth per project - cannot test admin from leader project');
     test.setTimeout(60000);
 
     await loginAsTestUser(page, 'admin');

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJDES7VFYV8XGM47865K9VBM",
+  "taskId": "verify-ci",
+  "invocationKey": "duty-app/e2e-test-debugging:S000005:verify-ci",
+  "stepId": "S000005",
+  "kind": "agent",
+  "title": "Verify in CI - Attempt 1",
+  "description": "Wait for CI to complete and check if tests pass",
+  "labels": [
+    "agent",
+    "attempt-1",
+    "ci",
+    "verification"
+  ],
+  "io": {
+    "inputJsonPath": "tasks/01KJDES7VFYV8XGM47865K9VBM/input.json",
+    "outputJsonPath": "tasks/01KJDES7VFYV8XGM47865K9VBM/result.json"
+  },
+  "inputs": {
+    "attempt": 1,
+    "testType": "all"
+  }
+}

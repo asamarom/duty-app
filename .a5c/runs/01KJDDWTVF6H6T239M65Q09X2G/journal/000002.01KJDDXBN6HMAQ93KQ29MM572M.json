@@ -1,0 +1,20 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-26T16:53:30.918Z",
+  "data": {
+    "effectId": "01KJDDXBMJMD6P1EMJJEJ2AH6Z",
+    "invocationKey": "duty-app/e2e-test-debugging:S000001:investigate-ci-failures",
+    "invocationHash": "e77744f801c1ca5510f36293539c31b02da8f13dd262e7320efceb1729c92c90",
+    "stepId": "S000001",
+    "taskId": "investigate-ci-failures",
+    "kind": "agent",
+    "label": "agent",
+    "taskDefRef": "tasks/01KJDDXBMJMD6P1EMJJEJ2AH6Z/task.json",
+    "labels": [
+      "agent",
+      "investigation",
+      "ci-analysis"
+    ]
+  },
+  "checksum": "9729d4b9347989855fc4375852ec237c76a2bbe8a37559a59d3da8aad9ef71f4"
+}

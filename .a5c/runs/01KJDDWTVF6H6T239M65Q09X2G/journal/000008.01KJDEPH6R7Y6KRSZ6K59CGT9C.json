@@ -1,0 +1,20 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-26T17:07:15.801Z",
+  "data": {
+    "effectId": "01KJDEPH0TMWYW76J5JZJ5DC3X",
+    "invocationKey": "duty-app/e2e-test-debugging:S000004:commit-changes",
+    "invocationHash": "db9244d92978b05dacc7eac103745e94617883fb19e12f61aa24145d44979e17",
+    "stepId": "S000004",
+    "taskId": "commit-changes",
+    "kind": "agent",
+    "label": "agent",
+    "taskDefRef": "tasks/01KJDEPH0TMWYW76J5JZJ5DC3X/task.json",
+    "labels": [
+      "agent",
+      "commit",
+      "attempt-1"
+    ]
+  },
+  "checksum": "0707bed5e766bb73e9f28fe9e8194718a05e5f488cf2c86b589aed4cb42300ea"
+}

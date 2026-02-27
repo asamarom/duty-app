@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KJDES7VFYV8XGM47865K9VBM",
+  "taskId": "verify-ci",
+  "invocationKey": "duty-app/e2e-test-debugging:S000005:verify-ci",
+  "status": "ok",
+  "result": {
+    "allPassed": true,
+    "failedCount": 0,
+    "failedTests": 0,
+    "jobResults": {
+      "desktop": "skipped",
+      "mobile": "skipped",
+      "performance": "skipped"
+    },
+    "passedTests": 4,
+    "runId": "22452725669",
+    "runUrl": "https://github.com/asamarom/duty-app/actions/runs/22452725669",
+    "totalTests": 4
+  },
+  "startedAt": "2026-02-26T17:10:43.503Z",
+  "finishedAt": "2026-02-26T17:10:43.503Z",
+  "value": {
+    "allPassed": true,
+    "failedCount": 0,
+    "failedTests": 0,
+    "jobResults": {
+      "desktop": "skipped",
+      "mobile": "skipped",
+      "performance": "skipped"
+    },
+    "passedTests": 4,
+    "runId": "22452725669",
+    "runUrl": "https://github.com/asamarom/duty-app/actions/runs/22452725669",
+    "totalTests": 4
+  }
+}

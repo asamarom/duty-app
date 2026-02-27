@@ -1,0 +1,13 @@
+{
+  "runId": "01KJDDWTVF6H6T239M65Q09X2G",
+  "request": "duty-app/e2e-test-debugging",
+  "processId": "duty-app/e2e-test-debugging",
+  "entrypoint": {
+    "importPath": "../../processes/e2e-test-debugging.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/e2e-test-debugging.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-02-26T16:53:13.721Z",
+  "completionSecret": "6f9549277bb6df8e1f447e6776b6ac05"
+}

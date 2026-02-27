@@ -1,0 +1,92 @@
+{
+  "hasFailures": true,
+  "failedTestCount": 13,
+  "failuresByCategory": {
+    "desktop": 12,
+    "mobile": 1,
+    "performance": 0
+  },
+  "failedTests": [
+    {
+      "name": "[staging-admin] › e2e/rtl.spec.ts:21:3 › RTL Layout [Equipment Page] › [RTL-1] HTML should have RTL direction",
+      "category": "desktop",
+      "error": "TimeoutError: locator.waitFor: Timeout 10000ms exceeded. waiting for locator('header, [role=\"banner\"]').first() to be visible - 21 × locator resolved to hidden <header class=\"sticky top-0 z-40 bg-background/95 backdrop-blur-lg border-b border-border px-4 py-3\">…</header>",
+      "stackTrace": "at /home/runner/work/duty-app/duty-app/e2e/rtl.spec.ts:17:59"
+    },
+    {
+      "name": "[staging-admin] › e2e/rtl.spec.ts:26:3 › RTL Layout [Equipment Page] › [RTL-2] Page title should align to the right",
+      "category": "desktop",
+      "error": "TimeoutError: locator.waitFor: Timeout 10000ms exceeded. waiting for locator('header, [role=\"banner\"]').first() to be visible - 21 × locator resolved to hidden <header>",
+      "stackTrace": "at /home/ubuntu/duty-app/e2e/rtl.spec.ts:17:59"
+    },
+    {
+      "name": "[staging-admin] › e2e/rtl.spec.ts:44:3 › RTL Layout [Equipment Page] › [RTL-3] Search input should support RTL",
+      "category": "desktop",
+      "error": "TimeoutError: locator.waitFor: Timeout 10000ms exceeded. waiting for locator('header, [role=\"banner\"]').first() to be visible",
+      "stackTrace": "at /home/ubuntu/duty-app/e2e/rtl.spec.ts:17:59"
+    },
+    {
+      "name": "[staging-admin] › e2e/rtl.spec.ts:61:3 › RTL Layout [Equipment Page] › [RTL-4] Tabs should flow right to left",
+      "category": "desktop",
+      "error": "TimeoutError: locator.waitFor: Timeout 10000ms exceeded. waiting for locator('header, [role=\"banner\"]').first() to be visible",
+      "stackTrace": "at /home/ubuntu/duty-app/e2e/rtl.spec.ts:17:59"
+    },
+    {
+      "name": "[staging-admin] › e2e/rtl.spec.ts:84:3 › RTL Layout [Equipment Page] › [RTL-5] Table should respect RTL layout",
+      "category": "desktop",
+      "error": "TimeoutError: locator.waitFor: Timeout 10000ms exceeded. waiting for locator('header, [role=\"banner\"]').first() to be visible",
+      "stackTrace": "at /home/ubuntu/duty-app/e2e/rtl.spec.ts:17:59"
+    },
+    {
+      "name": "[staging-admin] › e2e/rtl.spec.ts:110:3 › RTL Layout [Equipment Page] › [RTL-6] Buttons and actions should align right",
+      "category": "desktop",
+      "error": "TimeoutError: locator.waitFor: Timeout 10000ms exceeded. waiting for locator('header, [role=\"banner\"]').first() to be visible",
+      "stackTrace": "at /home/ubuntu/duty-app/e2e/rtl.spec.ts:17:59"
+    },
+    {
+      "name": "[staging-admin] › e2e/rtl.spec.ts:124:3 › RTL Layout [Equipment Page] › [RTL-7] Stats cards should flow right to left",
+      "category": "desktop",
+      "error": "TimeoutError: locator.waitFor: Timeout 10000ms exceeded. waiting for locator('header, [role=\"banner\"]').first() to be visible",
+      "stackTrace": "at /home/ubuntu/duty-app/e2e/rtl.spec.ts:17:59"
+    },
+    {
+      "name": "[staging-admin] › e2e/rtl.spec.ts:146:3 › RTL Layout [Personnel Page] › [RTL-P1] Personnel page should have RTL direction",
+      "category": "desktop",
+      "error": "TimeoutError: locator.waitFor: Timeout 10000ms exceeded. waiting for locator('header, [role=\"banner\"]').first() to be visible",
+      "stackTrace": "at /home/ubuntu/duty-app/e2e/rtl.spec.ts:17:59"
+    },
+    {
+      "name": "[staging-admin] › e2e/rtl.spec.ts:160:3 › RTL Layout [Personnel Page] › [RTL-P2] Personnel content should respect RTL",
+      "category": "desktop",
+      "error": "TimeoutError: locator.waitFor: Timeout 10000ms exceeded. waiting for locator('header, [role=\"banner\"]').first() to be visible",
+      "stackTrace": "at /home/ubuntu/duty-app/e2e/rtl.spec.ts:17:59"
+    },
+    {
+      "name": "[staging-admin] › e2e/rtl.spec.ts:180:3 › RTL Layout [Dashboard] › [RTL-D1] Dashboard should have RTL direction",
+      "category": "desktop",
+      "error": "TimeoutError: locator.waitFor: Timeout 10000ms exceeded. waiting for locator('header, [role=\"banner\"]').first() to be visible",
+      "stackTrace": "at /home/ubuntu/duty-app/e2e/rtl.spec.ts:17:59"
+    },
+    {
+      "name": "[staging-admin] › e2e/rtl.spec.ts:185:3 › RTL Layout [Dashboard] › [RTL-D2] Dashboard cards should flow right to left",
+      "category": "desktop",
+      "error": "TimeoutError: locator.waitFor: Timeout 10000ms exceeded. waiting for locator('header, [role=\"banner\"]').first() to be visible",
+      "stackTrace": "at /home/ubuntu/duty-app/e2e/rtl.spec.ts:17:59"
+    },
+    {
+      "name": "[staging-leader] › e2e/battalion-scoping.spec.ts:45:3 › Battalion Scoping — Data Visibility › [SCOPE-3] admin sees all battalion personnel",
+      "category": "desktop",
+      "error": "Error: expect(received).toBeGreaterThanOrEqual(expected) - Expected: >= 3, Received: 1",
+      "stackTrace": "at /home/ubuntu/duty-app/e2e/battalion-scoping.spec.ts:59:19"
+    },
+    {
+      "name": "[staging-mobile] › e2e/rtl.mobile.spec.ts:117:3 › Mobile RTL [Equipment Page] › [M-RTL-8] Mobile page title should align right",
+      "category": "mobile",
+      "error": "Error: expect(locator).toBeVisible() failed - Locator: locator('h1').filter({ hasText: /מלאי ציוד|equipment/i }).first() - Expected: visible - Timeout: 10000ms - Error: element(s) not found",
+      "stackTrace": "at /home/ubuntu/duty-app/e2e/rtl.mobile.spec.ts:120:25"
+    }
+  ],
+  "ciRunId": "22402844198",
+  "artifactsDownloaded": true,
+  "context": "CI Run 22402844198 from 2026-02-25T15:09:54Z. 13 tests failed across Desktop (12) and Mobile (1) categories. Performance tests passed. Root cause: RTL tests (11) failing due to hidden header element not becoming visible within timeout - indicates potential CSS/layout issue with sticky header visibility. Battalion scoping test failing because only 1 personnel visible instead of expected ≥3, indicating insufficient test data seeded in Firebase staging. Mobile RTL test failing to find equipment page heading element. Previous analysis documents indicate VITE_TEST_MODE was removed from Vercel and custom token authentication was implemented, but new RTL-specific layout issues have emerged."
+}
