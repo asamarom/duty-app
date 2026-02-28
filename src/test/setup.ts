@@ -45,3 +45,8 @@ vi.mock('@/contexts/LanguageContext', () => ({
     })),
     LanguageProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
+
+// Mock usePendingRequestsCount
+vi.mock('@/hooks/usePendingRequestsCount', () => ({
+    usePendingRequestsCount: vi.fn(() => 0),
+}));

@@ -79,7 +79,7 @@ describe('UnitsTab Component', () => {
       renderWithProviders(<UnitsTab />);
 
       expect(screen.queryByText(/no.*access/i)).not.toBeInTheDocument();
-      expect(screen.getByText(/view.*units/i)).toBeInTheDocument();
+      expect(screen.getByText('settings.viewAllUnits')).toBeInTheDocument();
     });
 
     it('shows unit management for admins', () => {
@@ -94,7 +94,7 @@ describe('UnitsTab Component', () => {
       renderWithProviders(<UnitsTab />);
 
       expect(screen.queryByText(/no.*access/i)).not.toBeInTheDocument();
-      expect(screen.getByText(/view.*units/i)).toBeInTheDocument();
+      expect(screen.getByText('settings.viewAllUnits')).toBeInTheDocument();
     });
   });
 

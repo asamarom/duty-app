@@ -288,8 +288,8 @@ describe('MobileNav Component', () => {
       const moreButton = screen.getByRole('button', { name: /more/i });
       await user.click(moreButton);
 
-      // Leaders should NOT see approvals (admin-only)
-      expect(screen.queryByText(/approvals/i)).not.toBeInTheDocument();
+      // Leaders should see approvals in the dropdown (admin/leader can access)
+      expect(screen.getByText('nav.approvals')).toBeInTheDocument();
     });
   });
 

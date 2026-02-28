@@ -3,6 +3,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { SettingsTabs } from './SettingsTabs';
 import { MemoryRouter } from 'react-router-dom';
 import { LanguageProvider } from '@/contexts/LanguageContext';
+import userEvent from '@testing-library/user-event';
+
+// Unmock LanguageContext to use real implementation for these tests
+vi.unmock('@/contexts/LanguageContext');
 
 // Mock useEffectiveRole hook
 const mockUseEffectiveRole = vi.fn(() => ({
@@ -84,13 +88,12 @@ describe('SettingsTabs Component', () => {
         roles: ['leader'],
       });
 
-      const { user } = await import('@testing-library/user-event');
-      const userEvent = user.setup();
+      const user = userEvent.setup();
 
       renderWithProviders(<SettingsTabs />);
 
       const unitsTab = screen.getByRole('tab', { name: /units/i });
-      await userEvent.click(unitsTab);
+      await user.click(unitsTab);
 
       expect(unitsTab).toHaveAttribute('aria-selected', 'true');
     });
@@ -104,13 +107,12 @@ describe('SettingsTabs Component', () => {
         roles: ['admin'],
       });
 
-      const { user } = await import('@testing-library/user-event');
-      const userEvent = user.setup();
+      const user = userEvent.setup();
 
       renderWithProviders(<SettingsTabs />);
 
       const approvalsTab = screen.getByRole('tab', { name: /approvals/i });
-      await userEvent.click(approvalsTab);
+      await user.click(approvalsTab);
 
       expect(approvalsTab).toHaveAttribute('aria-selected', 'true');
     });
@@ -124,14 +126,13 @@ describe('SettingsTabs Component', () => {
         roles: ['admin'],
       });
 
-      const { user } = await import('@testing-library/user-event');
-      const userEvent = user.setup();
+      const user = userEvent.setup();
 
       renderWithProviders(<SettingsTabs />);
 
       // Click Units tab
       const unitsTab = screen.getByRole('tab', { name: /units/i });
-      await userEvent.click(unitsTab);
+      await user.click(unitsTab);
 
       // Check that the Units tabpanel is visible
       const unitsPanel = screen.getByRole('tabpanel');
@@ -156,8 +157,7 @@ describe('SettingsTabs Component', () => {
         roles: ['admin'],
       });
 
-      const { user } = await import('@testing-library/user-event');
-      const userEvent = user.setup();
+      const user = userEvent.setup();
 
       renderWithProviders(<SettingsTabs />);
 
@@ -167,7 +167,7 @@ describe('SettingsTabs Component', () => {
       expect(profileTab).toHaveAttribute('aria-selected', 'true');
       expect(unitsTab).toHaveAttribute('aria-selected', 'false');
 
-      await userEvent.click(unitsTab);
+      await user.click(unitsTab);
 
       expect(profileTab).toHaveAttribute('aria-selected', 'false');
       expect(unitsTab).toHaveAttribute('aria-selected', 'true');
@@ -306,8 +306,7 @@ describe('SettingsTabs Component', () => {
         roles: ['admin'],
       });
 
-      const { user } = await import('@testing-library/user-event');
-      const userEvent = user.setup();
+      const user = userEvent.setup();
 
       renderWithProviders(<SettingsTabs />);
 
@@ -318,7 +317,7 @@ describe('SettingsTabs Component', () => {
       expect(document.activeElement).toBe(profileTab);
 
       // Arrow keys should navigate between tabs
-      await userEvent.keyboard('{ArrowRight}');
+      await user.keyboard('{ArrowRight}');
       const unitsTab = screen.getByRole('tab', { name: /units/i });
       expect(document.activeElement).toBe(unitsTab);
     });
