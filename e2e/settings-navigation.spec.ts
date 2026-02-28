@@ -26,7 +26,11 @@ test.describe('Settings Page - Structure [Admin]', () => {
   test('[SETTINGS-1] should display 3 tabs in Settings page for admin', async ({ page }) => {
     // Wait for tabs to be visible
     const tabsList = page.locator('[role="tablist"]');
-    await expect(tabsList).toBeVisible({ timeout: 10000 });
+    await expect(tabsList).toBeVisible({ timeout: 15000 });
+
+    // Wait for all tabs to load (roles need to be fetched from Firestore first)
+    const allTabs = page.locator('[role="tab"]');
+    await expect(allTabs).toHaveCount(3, { timeout: 15000 });
 
     // Check for Profile tab (English or Hebrew)
     const profileTab = page.getByRole('tab', { name: /profile|פרופיל/i });
@@ -39,13 +43,13 @@ test.describe('Settings Page - Structure [Admin]', () => {
     // Check for Approvals tab (English or Hebrew)
     const approvalsTab = page.getByRole('tab', { name: /approvals|אישורים/i });
     await expect(approvalsTab).toBeVisible();
-
-    // Should have exactly 3 tabs
-    const allTabs = page.locator('[role="tab"]');
-    await expect(allTabs).toHaveCount(3);
   });
 
   test('[SETTINGS-2] Profile tab should show language selector and logout', async ({ page }) => {
+    // Wait for tabs to load (roles from Firestore)
+    const allTabs = page.locator('[role="tab"]');
+    await expect(allTabs).toHaveCount(3, { timeout: 15000 });
+
     // Click on Profile tab if not already active
     const profileTab = page.getByRole('tab', { name: /profile|פרופיל/i });
     await profileTab.click();
@@ -67,6 +71,10 @@ test.describe('Settings Page - Structure [Admin]', () => {
   });
 
   test('[SETTINGS-3] Units tab should show units management for admin', async ({ page }) => {
+    // Wait for tabs to load (roles from Firestore)
+    const allTabs = page.locator('[role="tab"]');
+    await expect(allTabs).toHaveCount(3, { timeout: 15000 });
+
     // Click on Units tab
     const unitsTab = page.getByRole('tab', { name: /units|יחידות/i });
     await unitsTab.click();
@@ -84,6 +92,10 @@ test.describe('Settings Page - Structure [Admin]', () => {
   });
 
   test('[SETTINGS-4] Approvals tab should show approvals for admin', async ({ page }) => {
+    // Wait for tabs to load (roles from Firestore)
+    const allTabs = page.locator('[role="tab"]');
+    await expect(allTabs).toHaveCount(3, { timeout: 15000 });
+
     // Click on Approvals tab
     const approvalsTab = page.getByRole('tab', { name: /approvals|אישורים/i });
     await approvalsTab.click();
@@ -133,6 +145,10 @@ test.describe('Settings Page - Structure [Admin]', () => {
   });
 
   test('[SETTINGS-7] Tab switching should work correctly', async ({ page }) => {
+    // Wait for tabs to load (roles from Firestore)
+    const allTabs = page.locator('[role="tab"]');
+    await expect(allTabs).toHaveCount(3, { timeout: 15000 });
+
     // Start with Profile tab
     const profileTab = page.getByRole('tab', { name: /profile|פרופיל/i });
     await profileTab.click();
@@ -174,14 +190,19 @@ test.describe('Settings Page - Structure [Leader]', () => {
 
   test('[SETTINGS-L1] should display 2 tabs for leader', async ({ page }) => {
     const tabsList = page.locator('[role="tablist"]');
-    await expect(tabsList).toBeVisible({ timeout: 10000 });
+    await expect(tabsList).toBeVisible({ timeout: 15000 });
 
     // Leaders see Profile + Units (but NOT Approvals)
+    // Wait for roles to load from Firestore
     const allTabs = page.locator('[role="tab"]');
-    await expect(allTabs).toHaveCount(2);
+    await expect(allTabs).toHaveCount(2, { timeout: 15000 });
   });
 
   test('[SETTINGS-L2] Units tab should show units management for leader', async ({ page }) => {
+    // Wait for tabs to load (roles from Firestore)
+    const allTabs = page.locator('[role="tab"]');
+    await expect(allTabs).toHaveCount(2, { timeout: 15000 });
+
     const unitsTab = page.getByRole('tab', { name: /units|יחידות/i });
     await unitsTab.click();
     await page.waitForTimeout(500);
