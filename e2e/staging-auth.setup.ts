@@ -115,14 +115,6 @@ async function authenticateAndSave(page: any, userType: 'admin' | 'leader' | 'us
     throw new Error(`Authentication failed for ${userType} - still on auth page`);
   }
 
-  // Set admin mode to ON for admin users in localStorage
-  if (userType === 'admin') {
-    await page.evaluate(() => {
-      localStorage.setItem('pmtb_admin_mode', 'true');
-    });
-    console.log(`🔑 Set admin mode to ON in localStorage`);
-  }
-
   console.log(`✅ Authenticated as ${userType}, saving session...`);
   console.log(`📁 Target path: ${authFiles[userType]}`);
   console.log(`📁 Directory exists: ${fs.existsSync(path.dirname(authFiles[userType]))}`);
