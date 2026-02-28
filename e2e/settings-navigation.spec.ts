@@ -19,6 +19,12 @@ test.describe('Settings Page - Structure [Admin]', () => {
       await clearAuthState(page);
     }
     await loginAsTestUser(page, 'admin');
+
+    // Ensure admin mode is ON for admin users
+    await page.evaluate(() => {
+      localStorage.setItem('pmtb_admin_mode', 'true');
+    });
+
     await page.goto('/settings', { waitUntil: 'load' });
     await page.waitForTimeout(1000); // Wait for UI to stabilize
   });
