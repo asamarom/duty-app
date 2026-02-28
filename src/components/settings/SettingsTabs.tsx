@@ -12,9 +12,13 @@ export function SettingsTabs() {
   const showUnitsTab = isAdmin || isLeader;
   const showApprovalsTab = isAdmin;
 
+  // Calculate number of visible tabs
+  const tabCount = 1 + (showUnitsTab ? 1 : 0) + (showApprovalsTab ? 1 : 0);
+  const gridColsClass = tabCount === 1 ? 'grid-cols-1' : tabCount === 2 ? 'grid-cols-2' : 'grid-cols-3';
+
   return (
     <Tabs defaultValue="profile" className="w-full">
-      <TabsList aria-label={t('settings.tabs')} className="grid w-full grid-cols-3">
+      <TabsList aria-label={t('settings.tabs')} className={`grid w-full ${gridColsClass}`}>
         <TabsTrigger value="profile">{t('settings.profile')}</TabsTrigger>
         {showUnitsTab && <TabsTrigger value="units">{t('settings.units')}</TabsTrigger>}
         {showApprovalsTab && <TabsTrigger value="approvals">{t('settings.approvals')}</TabsTrigger>}
