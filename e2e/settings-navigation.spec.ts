@@ -172,12 +172,13 @@ test.describe('Settings Page - Structure [Leader]', () => {
     await page.waitForTimeout(1000);
   });
 
-  test('[SETTINGS-L1] should display 3 tabs for leader', async ({ page }) => {
+  test('[SETTINGS-L1] should display 2 tabs for leader', async ({ page }) => {
     const tabsList = page.locator('[role="tablist"]');
     await expect(tabsList).toBeVisible({ timeout: 10000 });
 
+    // Leaders see Profile + Units (but NOT Approvals)
     const allTabs = page.locator('[role="tab"]');
-    await expect(allTabs).toHaveCount(3);
+    await expect(allTabs).toHaveCount(2);
   });
 
   test('[SETTINGS-L2] Units tab should show units management for leader', async ({ page }) => {
@@ -195,16 +196,12 @@ test.describe('Settings Page - Structure [Leader]', () => {
     expect(hasUnitsContent || hasAddButton).toBeTruthy();
   });
 
-  test('[SETTINGS-L3] Approvals tab should show approvals for leader', async ({ page }) => {
+  test('[SETTINGS-L3] Approvals tab should NOT be visible for leader', async ({ page }) => {
+    // Leaders should NOT see the Approvals tab (admin-only)
     const approvalsTab = page.getByRole('tab', { name: /approvals|אישורים/i });
-    await approvalsTab.click();
-    await page.waitForTimeout(500);
 
-    // Leader should see approvals
-    const approvalsContent = page.getByText(/pending|approved|declined|ממתין|אושר|נדחה/i).first();
-    const hasApprovalsContent = await approvalsContent.isVisible().catch(() => false);
-
-    expect(hasApprovalsContent).toBeTruthy();
+    // Approvals tab should not exist for leaders
+    await expect(approvalsTab).not.toBeVisible();
   });
 });
 
