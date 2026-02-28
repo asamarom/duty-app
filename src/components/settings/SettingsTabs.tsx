@@ -7,7 +7,7 @@ import { ApprovalsTab } from './ApprovalsTab';
 
 export function SettingsTabs() {
   const { t } = useLanguage();
-  const { isAdmin, isLeader } = useEffectiveRole();
+  const { isAdmin, isLeader, loading } = useEffectiveRole();
 
   const showUnitsTab = isAdmin || isLeader;
   const showApprovalsTab = isAdmin;
@@ -15,6 +15,15 @@ export function SettingsTabs() {
   // Calculate number of visible tabs
   const tabCount = 1 + (showUnitsTab ? 1 : 0) + (showApprovalsTab ? 1 : 0);
   const gridColsClass = tabCount === 1 ? 'grid-cols-1' : tabCount === 2 ? 'grid-cols-2' : 'grid-cols-3';
+
+  // Show loading state while roles are being fetched
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-muted-foreground">{t('loading')}</div>
+      </div>
+    );
+  }
 
   return (
     <Tabs defaultValue="profile" className="w-full">
