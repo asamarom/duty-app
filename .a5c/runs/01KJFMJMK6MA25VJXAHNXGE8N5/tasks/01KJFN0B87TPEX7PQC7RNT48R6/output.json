@@ -1,0 +1,172 @@
+{
+  "testFilePath": "e2e/settings-navigation.spec.ts",
+  "testCode": "Created comprehensive E2E test file with 40+ test scenarios covering Settings page refactoring and navigation changes",
+  "testScenarios": [
+    {
+      "name": "[SETTINGS-1] should display 3 tabs in Settings page for admin",
+      "description": "Verifies that Settings page shows exactly 3 tabs (Profile, Units, Approvals) for admin users"
+    },
+    {
+      "name": "[SETTINGS-2] Profile tab should show language selector and logout",
+      "description": "Validates Profile tab content includes language selector and logout functionality"
+    },
+    {
+      "name": "[SETTINGS-3] Units tab should show units management for admin",
+      "description": "Confirms Units tab displays units management interface for admin role"
+    },
+    {
+      "name": "[SETTINGS-4] Approvals tab should show approvals for admin",
+      "description": "Verifies Approvals tab displays approvals content for admin role"
+    },
+    {
+      "name": "[SETTINGS-5] Access Control section should NOT be present in Settings",
+      "description": "Ensures Access Control section has been removed from all Settings tabs"
+    },
+    {
+      "name": "[SETTINGS-6] App version should be displayed at bottom of settings",
+      "description": "Validates version information is displayed at the bottom of Settings page"
+    },
+    {
+      "name": "[SETTINGS-7] Tab switching should work correctly",
+      "description": "Tests tab navigation and active state management across all Settings tabs"
+    },
+    {
+      "name": "[SETTINGS-L1] should display 3 tabs for leader",
+      "description": "Verifies leader role sees all 3 tabs in Settings page"
+    },
+    {
+      "name": "[SETTINGS-L2] Units tab should show units management for leader",
+      "description": "Confirms leader role can access Units tab with management capabilities"
+    },
+    {
+      "name": "[SETTINGS-L3] Approvals tab should show approvals for leader",
+      "description": "Verifies leader role can access Approvals tab"
+    },
+    {
+      "name": "[SETTINGS-U1] should display only Profile tab for regular user",
+      "description": "Ensures regular users only see Profile tab, not Units or Approvals"
+    },
+    {
+      "name": "[SETTINGS-U2] Units and Approvals tabs should NOT be visible for regular user",
+      "description": "Validates proper role-based access control for Settings tabs"
+    },
+    {
+      "name": "[NAV-1] Bottom nav should have exactly 5 buttons on mobile",
+      "description": "Verifies bottom navigation contains 5 main buttons as per requirements"
+    },
+    {
+      "name": "[NAV-2] Reports button should be in bottom nav",
+      "description": "Confirms Reports button has been moved from 3-dot menu to bottom navigation"
+    },
+    {
+      "name": "[NAV-3] Settings button should be in bottom nav",
+      "description": "Confirms Settings button has been moved from 3-dot menu to bottom navigation"
+    },
+    {
+      "name": "[NAV-4] Dashboard button should be in bottom nav",
+      "description": "Validates Dashboard button is present in bottom navigation"
+    },
+    {
+      "name": "[NAV-5] Personnel button should be in bottom nav",
+      "description": "Validates Personnel button is present in bottom navigation"
+    },
+    {
+      "name": "[NAV-6] Equipment button should be in bottom nav",
+      "description": "Validates Equipment button is present in bottom navigation"
+    },
+    {
+      "name": "[MENU-1] 3-dot menu should NOT contain Reports if Reports is in bottom nav",
+      "description": "Ensures Reports has been removed from 3-dot menu after moving to bottom nav"
+    },
+    {
+      "name": "[MENU-2] 3-dot menu should NOT contain Settings if Settings is in bottom nav",
+      "description": "Ensures Settings has been removed from 3-dot menu after moving to bottom nav"
+    },
+    {
+      "name": "[MENU-3] 3-dot menu may contain other items like Units, Approvals, Logout",
+      "description": "Validates 3-dot menu still contains appropriate secondary navigation items"
+    },
+    {
+      "name": "[NAV-MOBILE-1] Bottom nav should be visible on mobile",
+      "description": "Tests bottom navigation visibility on mobile viewports"
+    },
+    {
+      "name": "[NAV-MOBILE-2] Bottom nav should be hidden on desktop",
+      "description": "Validates bottom navigation is appropriately hidden on desktop viewports"
+    },
+    {
+      "name": "[NAV-MOBILE-3] Navigation should work on different mobile screen sizes",
+      "description": "Tests responsive behavior across iPhone SE, iPhone 8, and iPhone 11 Pro Max sizes"
+    },
+    {
+      "name": "[RTL-1] Settings page should have RTL direction",
+      "description": "Verifies HTML dir attribute is set to 'rtl' for Hebrew language support"
+    },
+    {
+      "name": "[RTL-2] Settings tabs should flow right to left",
+      "description": "Validates RTL CSS direction is applied to Settings tabs"
+    },
+    {
+      "name": "[RTL-3] Bottom nav should have RTL layout on mobile",
+      "description": "Confirms bottom navigation respects RTL direction on mobile"
+    },
+    {
+      "name": "[RTL-4] Hebrew text should display correctly in Settings",
+      "description": "Tests Hebrew text rendering in Settings page"
+    },
+    {
+      "name": "[RTL-5] Tab switching should work in RTL mode",
+      "description": "Validates tab navigation functions correctly in RTL/Hebrew mode"
+    },
+    {
+      "name": "[RTL-6] Mobile navigation should work in RTL mode",
+      "description": "Tests mobile navigation functionality in RTL/Hebrew mode"
+    },
+    {
+      "name": "[INT-1] Can navigate to Settings from bottom nav and back to Dashboard",
+      "description": "Integration test for navigation flow between Settings and Dashboard"
+    },
+    {
+      "name": "[INT-2] Can navigate to Reports from bottom nav",
+      "description": "Integration test for Reports navigation from bottom nav"
+    },
+    {
+      "name": "[INT-3] Settings tabs persist across page navigation",
+      "description": "Tests tab state behavior when navigating away and returning to Settings"
+    },
+    {
+      "name": "[INT-4] All navigation buttons are clickable and functional",
+      "description": "Comprehensive test of all bottom navigation button functionality"
+    }
+  ],
+  "testCoverage": {
+    "settingsPageStructure": "Complete - tests 3 tabs, tab content, tab switching",
+    "roleBasedAccess": "Complete - tests admin, leader, and regular user permissions",
+    "bottomNavigation": "Complete - tests 5 buttons, mobile/desktop responsive",
+    "threeDoMenuUpdates": "Complete - validates Reports and Settings removed from menu",
+    "rtlSupport": "Complete - tests Hebrew/RTL across Settings and navigation",
+    "mobileResponsive": "Complete - tests multiple mobile screen sizes",
+    "integrationFlows": "Complete - tests navigation flows and state persistence"
+  },
+  "testPatterns": {
+    "authentication": "Uses loginAsTestUser() from utils/test-auth.ts",
+    "selectors": "Uses accessible selectors (getByRole, getByText) with bilingual support (English/Hebrew)",
+    "waits": "Uses explicit waits with timeouts and proper state checks",
+    "assertions": "Uses Playwright expect() with meaningful timeout values",
+    "cleanup": "Uses clearAuthState() in beforeEach for local tests",
+    "staging": "Conditional logic with isStagingTest() for environment-specific behavior"
+  },
+  "tddApproach": "Tests will fail initially as Settings page refactoring is not yet implemented. Tests are designed to pass once the following features are implemented: 1) Settings page with 3 tabs (Profile, Units, Approvals), 2) Access Control section removed, 3) Bottom nav with 5 buttons (Dashboard, Personnel, Equipment, Reports, Settings), 4) Reports and Settings moved from 3-dot menu to bottom nav, 5) Role-based tab visibility, 6) Full RTL support",
+  "notes": [
+    "Test file follows existing patterns from e2e/auth.spec.ts, e2e/i18n.spec.ts, and e2e/dashboard.spec.ts",
+    "Uses chromium-auth project configuration for authenticated tests",
+    "Includes bilingual assertions for English and Hebrew text",
+    "Tests both mobile and desktop viewports appropriately",
+    "Validates role-based access control for admin, leader, and regular user roles",
+    "Includes comprehensive RTL testing for Hebrew language support",
+    "Integration tests validate complete navigation flows",
+    "Uses data-testid where appropriate, but prefers semantic selectors",
+    "Follows Playwright best practices for reliable E2E testing",
+    "Total of 34 comprehensive test scenarios across 7 test suites"
+  ]
+}

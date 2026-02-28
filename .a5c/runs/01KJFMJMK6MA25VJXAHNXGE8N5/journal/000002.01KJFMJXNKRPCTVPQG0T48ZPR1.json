@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-27T13:28:37.811Z",
+  "data": {
+    "effectId": "01KJFMJXF8VCK4EX302HSTFJPY",
+    "invocationKey": "settings-navigation-refactor:S000001:plan-architecture",
+    "invocationHash": "20f4fdce6cf0c64611266ee1401106bd15612ab1966a20d2a7cb3b5a4341f937",
+    "stepId": "S000001",
+    "taskId": "plan-architecture",
+    "kind": "agent",
+    "label": "Plan architecture and component structure",
+    "taskDefRef": "tasks/01KJFMJXF8VCK4EX302HSTFJPY/task.json"
+  },
+  "checksum": "9af45ae7d10f8f0130d257862ab39abf17a086777e70c33afc884667d846977f"
+}

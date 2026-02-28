@@ -9,6 +9,8 @@ import {
   LayoutDashboard,
   Users,
   Package,
+  ClipboardList,
+  Settings,
   MoreHorizontal,
   ShieldCheck,
   User,
@@ -45,13 +47,13 @@ export function MobileNav() {
     { name: t('nav.dashboard'), href: '/', icon: LayoutDashboard },
     { name: t('nav.personnel'), href: '/personnel', icon: Users },
     { name: t('nav.equipment'), href: '/equipment', icon: Package },
+    { name: t('nav.reports'), href: '/reports', icon: ClipboardList },
+    { name: t('nav.settings'), href: '/settings', icon: Settings },
   ];
 
   const moreItems: { name: string; href: string; adminOnly?: boolean }[] = [
     { name: t('nav.units'), href: '/units' },
     { name: t('nav.approvals'), href: '/approvals', adminOnly: true },
-    { name: t('nav.reports'), href: '/reports' },
-    { name: t('nav.settings'), href: '/settings' },
   ];
 
   const filteredMainNav = mainNavigation.filter(item => !item.adminOnly || hasAdminAccess);

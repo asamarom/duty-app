@@ -1,0 +1,108 @@
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useEffectiveRole } from '@/hooks/useEffectiveRole';
+import { Users, Building2, Shield } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+
+export function UnitsTab() {
+  const { t } = useLanguage();
+  const { isAdmin, isLeader } = useEffectiveRole();
+  const navigate = useNavigate();
+
+  const canManageUnits = isAdmin || isLeader;
+
+  return (
+    <div className="space-y-4 mt-4">
+      {/* Unit Management Info */}
+      <Card className="card-tactical border-border/50">
+        <CardHeader className="p-4 lg:p-6 pb-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 lg:h-10 lg:w-10 items-center justify-center rounded-lg bg-primary/20">
+              <Building2 className="h-4 w-4 lg:h-5 lg:w-5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-sm lg:text-base">{t('settings.unitManagement')}</CardTitle>
+              <CardDescription className="text-xs lg:text-sm">
+                {t('settings.manageYourUnits')}
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0">
+          {canManageUnits ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between rounded-lg border border-border/50 bg-secondary/50 p-3">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs lg:text-sm text-foreground">
+                    {t('settings.viewAllUnits')}
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/units')}
+                >
+                  {t('common.view')}
+                </Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant={isAdmin ? 'rank' : 'tactical'}>
+                  {isAdmin ? t('personnel.roleAdmin') : t('personnel.roleLeader')}
+                </Badge>
+                <span className="text-xs text-muted-foreground">
+                  {t('settings.accessLevel')}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-4">
+              <Shield className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">
+                {t('settings.noUnitAccess')}
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Unit Permissions */}
+      {canManageUnits && (
+        <Card className="card-tactical border-border/50">
+          <CardHeader className="p-4 lg:p-6 pb-3">
+            <CardTitle className="text-sm lg:text-base">{t('settings.permissions')}</CardTitle>
+            <CardDescription className="text-xs lg:text-sm">
+              {t('settings.whatYouCanDo')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0">
+            <ul className="space-y-2 text-xs lg:text-sm">
+              <li className="flex items-center gap-2">
+                <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                <span>{t('settings.viewUnits')}</span>
+              </li>
+              {isAdmin && (
+                <>
+                  <li className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                    <span>{t('settings.createUnits')}</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                    <span>{t('settings.deleteUnits')}</span>
+                  </li>
+                </>
+              )}
+              <li className="flex items-center gap-2">
+                <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                <span>{t('settings.managePersonnel')}</span>
+              </li>
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}

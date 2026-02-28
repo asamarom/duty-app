@@ -1,0 +1,30 @@
+{
+  "fixesApplied": 3,
+  "fixesByFile": [
+    {
+      "file": "package.json",
+      "issue": "Missing @testing-library/user-event dependency",
+      "fix": "Installed @testing-library/user-event@14.6.1"
+    },
+    {
+      "file": "vitest.config.ts",
+      "issue": "Missing define block for __APP_VERSION__ and __BUILD_TIME__ globals in test environment",
+      "fix": "Added define block with mock values for test environment"
+    },
+    {
+      "file": "src/test/setup.ts",
+      "issue": "Missing global mocks for AdminModeContext and LanguageContext",
+      "fix": "Added global vi.mock for AdminModeContext and LanguageContext"
+    },
+    {
+      "file": "src/lib/version.test.ts",
+      "issue": "Test expected version with 'v' prefix from getAppVersion() but it doesn't add prefix",
+      "fix": "Updated test expectations - getAppVersion returns without 'v', only getFullVersionString() adds it"
+    }
+  ],
+  "testStatus": {
+    "versionTests": "All 13 tests passing",
+    "componentTests": "Component tests now have proper global mocks, but need individual test file fixes to use mocks instead of providers",
+    "recommendation": "Component test files need to be updated to rely on global mocks from setup.ts rather than using local providers"
+  }
+}

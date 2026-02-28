@@ -1,0 +1,12 @@
+{
+  "type": "RUN_FAILED",
+  "recordedAt": "2026-02-27T10:13:20.808Z",
+  "data": {
+    "error": {
+      "name": "RunFailedError",
+      "message": "Result payload missing data",
+      "stack": "RunFailedError: Result payload missing data\n    at resolveStoredResultValue (/usr/lib/node_modules/@a5c-ai/babysitter-sdk/dist/runtime/intrinsics/task.js:208:11)\n    at handleExistingInvocation (/usr/lib/node_modules/@a5c-ai/babysitter-sdk/dist/runtime/intrinsics/task.js:54:25)\n    at async process (file:///home/ubuntu/duty-app/.a5c/processes/fix-equipment-pending-visibility.js:83:22)\n    at async /usr/lib/node_modules/@a5c-ai/babysitter-sdk/dist/runtime/orchestrateIteration.js:86:28\n    at async withRunLock (/usr/lib/node_modules/@a5c-ai/babysitter-sdk/dist/storage/lock.js:69:16)\n    at async orchestrateIteration (/usr/lib/node_modules/@a5c-ai/babysitter-sdk/dist/runtime/orchestrateIteration.js:61:12)\n    at async runIterate (/usr/lib/node_modules/@a5c-ai/babysitter-sdk/dist/cli/commands/runIterate.js:67:29)\n    at async handleRunIterate (/usr/lib/node_modules/@a5c-ai/babysitter-sdk/dist/cli/main.js:651:24)\n    at async Object.run (/usr/lib/node_modules/@a5c-ai/babysitter-sdk/dist/cli/main.js:1392:28)"
+    }
+  },
+  "checksum": "51940e13137b2b79fc0cece6aa920955f9d9687469d22208930049e4d3365dcf"
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KJJJMZE47GC398907BHRE7TE",
+  "taskId": "refactor-settings-page",
+  "invocationKey": "settings-navigation-refactor:S000009:refactor-settings-page",
+  "status": "ok",
+  "result": {
+    "changesCount": 3,
+    "modifiedFiles": [
+      "src/pages/SettingsPage.tsx"
+    ]
+  },
+  "startedAt": "2026-02-28T16:53:47.912Z",
+  "finishedAt": "2026-02-28T16:53:47.912Z",
+  "value": {
+    "changesCount": 3,
+    "modifiedFiles": [
+      "src/pages/SettingsPage.tsx"
+    ]
+  }
+}

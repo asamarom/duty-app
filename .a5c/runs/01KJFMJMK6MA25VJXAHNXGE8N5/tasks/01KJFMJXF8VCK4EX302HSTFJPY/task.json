@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJFMJXF8VCK4EX302HSTFJPY",
+  "taskId": "plan-architecture",
+  "invocationKey": "settings-navigation-refactor:S000001:plan-architecture",
+  "stepId": "S000001",
+  "kind": "agent",
+  "title": "Plan architecture and component structure",
+  "description": "Analyze current code and design refactoring approach",
+  "io": {
+    "inputJsonPath": "tasks/01KJFMJXF8VCK4EX302HSTFJPY/input.json",
+    "outputJsonPath": "tasks/01KJFMJXF8VCK4EX302HSTFJPY/result.json"
+  },
+  "inputs": {
+    "currentNav": "src/components/layout/MobileNav.tsx",
+    "currentSettings": "src/pages/SettingsPage.tsx",
+    "requirementId": "UI-SETTINGS-NAV-1"
+  }
+}

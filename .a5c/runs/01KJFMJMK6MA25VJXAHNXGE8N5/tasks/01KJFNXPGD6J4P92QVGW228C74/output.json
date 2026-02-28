@@ -1,0 +1,49 @@
+{
+  "testFiles": [
+    "src/components/settings/SettingsTabs.test.tsx",
+    "src/components/settings/ProfileTab.test.tsx",
+    "src/components/settings/UnitsTab.test.tsx",
+    "src/components/settings/ApprovalsTab.test.tsx",
+    "src/lib/version.test.ts",
+    "src/pages/SettingsPage.test.tsx",
+    "src/components/layout/MobileNav.test.tsx"
+  ],
+  "totalTestCases": 52,
+  "testsByComponent": [
+    {
+      "component": "SettingsTabs",
+      "testFile": "src/components/settings/SettingsTabs.test.tsx",
+      "testCount": 8
+    },
+    {
+      "component": "ProfileTab",
+      "testFile": "src/components/settings/ProfileTab.test.tsx",
+      "testCount": 7
+    },
+    {
+      "component": "UnitsTab",
+      "testFile": "src/components/settings/UnitsTab.test.tsx",
+      "testCount": 6
+    },
+    {
+      "component": "ApprovalsTab",
+      "testFile": "src/components/settings/ApprovalsTab.test.tsx",
+      "testCount": 6
+    },
+    {
+      "component": "version",
+      "testFile": "src/lib/version.test.ts",
+      "testCount": 5
+    },
+    {
+      "component": "SettingsPage",
+      "testFile": "src/pages/SettingsPage.test.tsx",
+      "testCount": 10
+    },
+    {
+      "component": "MobileNav",
+      "testFile": "src/components/layout/MobileNav.test.tsx",
+      "testCount": 10
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-28T16:57:26.030Z",
+  "data": {
+    "effectId": "01KJJJXZ7ZEMXAE5JDDJXHWJGE",
+    "invocationKey": "settings-navigation-refactor:S000013:__sdk.breakpoint",
+    "invocationHash": "b109182112e9d1965cc177972a4625640e2f179bc9ee4a992884fc26c0ca74ce",
+    "stepId": "S000013",
+    "taskId": "__sdk.breakpoint",
+    "kind": "breakpoint",
+    "label": "breakpoint",
+    "taskDefRef": "tasks/01KJJJXZ7ZEMXAE5JDDJXHWJGE/task.json",
+    "labels": [
+      "breakpoint"
+    ]
+  },
+  "checksum": "87ca7c67a7048ea7834ee75f8138b9a58f0067f3d87bbbb9096a6b0d3f3df932"
+}

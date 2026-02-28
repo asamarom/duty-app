@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-28T17:05:36.014Z",
+  "data": {
+    "effectId": "01KJJKCXQWJPVHE0WGYGPFQJ3Q",
+    "invocationKey": "settings-navigation-refactor:S000014:fix-failing-tests",
+    "invocationHash": "2b5ae46b50343851af42eeb40ca78b93d3ad67514c1cc7ccc2dcc6ee35d1715d",
+    "stepId": "S000014",
+    "taskId": "fix-failing-tests",
+    "kind": "agent",
+    "label": "Fix failing unit tests",
+    "taskDefRef": "tasks/01KJJKCXQWJPVHE0WGYGPFQJ3Q/task.json"
+  },
+  "checksum": "7204a236529f34736c1dbbc58bf05fcd6d721d70185b7f83f378e6ca02ff85b9"
+}

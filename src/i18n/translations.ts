@@ -283,6 +283,19 @@ export const translations = {
     'settings.standardAccess': 'Standard access',
     'settings.adminAccess': 'Admin Access',
 
+    // Settings Tabs
+    'settings.tabs.profile': 'Profile',
+    'settings.tabs.units': 'Units',
+    'settings.tabs.approvals': 'Approvals',
+    'settings.profile.title': 'Profile Settings',
+    'settings.profile.subtitle': 'Manage your personal information and preferences',
+    'settings.units.title': 'Unit Management',
+    'settings.units.subtitle': 'Manage organizational structure',
+    'settings.approvals.title': 'Signup Approvals',
+    'settings.approvals.subtitle': 'Review and approve user access requests',
+    'settings.version': 'Version',
+    'settings.buildTime': 'Built on',
+
     // Status
     'status.home': 'Home',
     'status.onDuty': 'On Duty',
@@ -804,6 +817,19 @@ export const translations = {
     'settings.unitManagement': 'ניהול יחידה',
     'settings.standardAccess': 'גישה רגילה',
     'settings.adminAccess': 'גישת מנהל',
+
+    // Settings Tabs
+    'settings.tabs.profile': 'פרופיל',
+    'settings.tabs.units': 'יחידות',
+    'settings.tabs.approvals': 'אישורים',
+    'settings.profile.title': 'הגדרות פרופיל',
+    'settings.profile.subtitle': 'נהל את המידע האישי וההעדפות שלך',
+    'settings.units.title': 'ניהול יחידות',
+    'settings.units.subtitle': 'נהל את המבנה הארגוני',
+    'settings.approvals.title': 'אישורי הרשמה',
+    'settings.approvals.subtitle': 'סקור ואשר בקשות גישה של משתמשים',
+    'settings.version': 'גרסה',
+    'settings.buildTime': 'נבנה ב',
 
     // Status
     'status.home': 'בבית',

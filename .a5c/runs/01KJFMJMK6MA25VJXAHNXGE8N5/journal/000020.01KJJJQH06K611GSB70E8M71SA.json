@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-28T16:53:54.822Z",
+  "data": {
+    "effectId": "01KJJJQGZJDTXZ0958VCGTW48B",
+    "invocationKey": "settings-navigation-refactor:S000010:refactor-bottom-nav",
+    "invocationHash": "4674ef8602dbe58e996f1367a4cb5a6c51df891ced46d7846b603683408c3fb9",
+    "stepId": "S000010",
+    "taskId": "refactor-bottom-nav",
+    "kind": "agent",
+    "label": "Refactor bottom navigation",
+    "taskDefRef": "tasks/01KJJJQGZJDTXZ0958VCGTW48B/task.json"
+  },
+  "checksum": "f060b6e65abd9980eca0469c81bc7757d34b56799dc1b5c2d1f67b36a6d90472"
+}

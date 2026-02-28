@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-27T13:51:59.516Z",
+  "data": {
+    "effectId": "01KJFNXPGD6J4P92QVGW228C74",
+    "invocationKey": "settings-navigation-refactor:S000005:write-unit-tests",
+    "invocationHash": "39de305e1b592e2426a6c6057cfe9ab07b11dac0eefe653ca2f02bd36f2e0cc8",
+    "stepId": "S000005",
+    "taskId": "write-unit-tests",
+    "kind": "agent",
+    "label": "Write unit tests for new components",
+    "taskDefRef": "tasks/01KJFNXPGD6J4P92QVGW228C74/task.json"
+  },
+  "checksum": "13a98f73b1a933a532a699b792ba32f8957117db3ef6d58c4caf1ffe302ce921"
+}

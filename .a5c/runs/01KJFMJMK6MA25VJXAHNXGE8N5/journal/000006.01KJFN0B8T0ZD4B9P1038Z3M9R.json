@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-27T13:35:57.722Z",
+  "data": {
+    "effectId": "01KJFN0B87TPEX7PQC7RNT48R6",
+    "invocationKey": "settings-navigation-refactor:S000003:write-e2e-tests",
+    "invocationHash": "e8b787ee55405a9e99ac87c7b584cd889e9f501fd4e9cadfac0228872b4cb6ad",
+    "stepId": "S000003",
+    "taskId": "write-e2e-tests",
+    "kind": "agent",
+    "label": "Write E2E tests for Settings refactoring",
+    "taskDefRef": "tasks/01KJFN0B87TPEX7PQC7RNT48R6/task.json"
+  },
+  "checksum": "89e6ec6bf4a07473f71311633fa8cfae27e242ae43c646680879ff4e46ae5692"
+}

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJJKCXQWJPVHE0WGYGPFQJ3Q",
+  "taskId": "fix-failing-tests",
+  "invocationKey": "settings-navigation-refactor:S000014:fix-failing-tests",
+  "stepId": "S000014",
+  "kind": "agent",
+  "title": "Fix failing unit tests",
+  "description": "Debug and fix test failures",
+  "io": {
+    "inputJsonPath": "tasks/01KJJKCXQWJPVHE0WGYGPFQJ3Q/input.json",
+    "outputJsonPath": "tasks/01KJJKCXQWJPVHE0WGYGPFQJ3Q/result.json"
+  },
+  "inputs": {
+    "failures": [
+      {
+        "message": "Failed to resolve import @testing-library/user-event",
+        "test": "src/components/settings/SettingsTabs.test.tsx"
+      },
+      {
+        "message": "Failed to resolve import @testing-library/user-event",
+        "test": "src/components/settings/ProfileTab.test.tsx"
+      },
+      {
+        "message": "Failed to resolve import @testing-library/user-event",
+        "test": "src/components/settings/UnitsTab.test.tsx"
+      },
+      {
+        "message": "Failed to resolve import @testing-library/user-event",
+        "test": "src/components/settings/ApprovalsTab.test.tsx"
+      },
+      {
+        "message": "Failed to resolve import @testing-library/user-event",
+        "test": "src/pages/SettingsPage.test.tsx"
+      },
+      {
+        "message": "Failed to resolve import @testing-library/user-event",
+        "test": "src/components/layout/MobileNav.test.tsx"
+      },
+      {
+        "message": "ReferenceError: __APP_VERSION__ is not defined - need to mock in vitest.config.ts",
+        "test": "src/lib/version.test.ts - getAppVersion"
+      },
+      {
+        "message": "ReferenceError: __BUILD_TIME__ is not defined - need to mock in vitest.config.ts",
+        "test": "src/lib/version.test.ts - getBuildDate"
+      }
+    ],
+    "testType": "unit"
+  }
+}

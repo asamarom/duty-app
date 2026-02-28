@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-28T17:05:58.028Z",
+  "data": {
+    "effectId": "01KJJKDK7V3S621Q5ESF5B9NA8",
+    "invocationKey": "settings-navigation-refactor:S000015:run-unit-tests",
+    "invocationHash": "097f00facd23cb7d93f1cecf873369f1a80d185b266636961ff8c015d78ed9ad",
+    "stepId": "S000015",
+    "taskId": "run-unit-tests",
+    "kind": "agent",
+    "label": "Run unit tests",
+    "taskDefRef": "tasks/01KJJKDK7V3S621Q5ESF5B9NA8/task.json"
+  },
+  "checksum": "d103d1a65902d250c843f5e2a16c6a4e52e6364746efe61ed5cdf8d6ebb64081"
+}

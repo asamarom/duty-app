@@ -20,7 +20,28 @@ vi.mock('@/integrations/firebase/client', () => ({
 // Mock Auth context (use 'uid' to match Firebase Auth property name)
 vi.mock('@/hooks/useAuth', () => ({
     useAuth: vi.fn(() => ({
-        user: { uid: 'test-user-id', id: 'test-user-id' },
+        user: { uid: 'test-user-id', id: 'test-user-id', email: 'test@example.com' },
         loading: false,
+        signOut: vi.fn(),
     })),
+}));
+
+// Mock AdminModeContext
+vi.mock('@/contexts/AdminModeContext', () => ({
+    useAdminMode: vi.fn(() => ({
+        isAdminMode: false,
+        toggleAdminMode: vi.fn(),
+    })),
+    AdminModeProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
+// Mock LanguageContext
+vi.mock('@/contexts/LanguageContext', () => ({
+    useLanguage: vi.fn(() => ({
+        language: 'en',
+        direction: 'ltr',
+        setLanguage: vi.fn(),
+        t: (key: string) => key,
+    })),
+    LanguageProvider: ({ children }: { children: React.ReactNode }) => children,
 }));

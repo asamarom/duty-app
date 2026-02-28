@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-27T10:10:04.999Z",
+  "data": {
+    "effectId": "01KJF97BZQYB3EFDFEPT6VJG05",
+    "invocationKey": "fix-equipment-pending-visibility:S000002:identify-fix",
+    "invocationHash": "1927f8710adfc829d6b102267f536b196918af5d13970dd45c0418a3ea5493a8",
+    "stepId": "S000002",
+    "taskId": "identify-fix",
+    "kind": "agent",
+    "label": "Identify exact fix location",
+    "taskDefRef": "tasks/01KJF97BZQYB3EFDFEPT6VJG05/task.json"
+  },
+  "checksum": "e22d80a9549ee846e9b5eb7e84f3a5ed092e34bd9fc0c9b3139668b6169cfc83"
+}

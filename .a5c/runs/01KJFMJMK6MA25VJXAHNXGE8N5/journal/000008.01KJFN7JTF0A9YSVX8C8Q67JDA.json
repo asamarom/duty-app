@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-27T13:39:54.831Z",
+  "data": {
+    "effectId": "01KJFN7JSYQAJPVP3ZVT4JW9SC",
+    "invocationKey": "settings-navigation-refactor:S000004:run-e2e-tests",
+    "invocationHash": "22c8a751db672bf2ba8426d84ddf409cef639ced814068e468adf4a08f17dce1",
+    "stepId": "S000004",
+    "taskId": "run-e2e-tests",
+    "kind": "agent",
+    "label": "Run E2E tests (expect failure)",
+    "taskDefRef": "tasks/01KJFN7JSYQAJPVP3ZVT4JW9SC/task.json"
+  },
+  "checksum": "27516b0780f145e01c806cca56dc5a38e0b5c96a1ee8ad0271de0465ee372b21"
+}

@@ -1,0 +1,164 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJJJMZE47GC398907BHRE7TE",
+  "taskId": "refactor-settings-page",
+  "invocationKey": "settings-navigation-refactor:S000009:refactor-settings-page",
+  "stepId": "S000009",
+  "kind": "agent",
+  "title": "Refactor Settings page",
+  "description": "Update Settings page with tabs and version",
+  "io": {
+    "inputJsonPath": "tasks/01KJJJMZE47GC398907BHRE7TE/input.json",
+    "outputJsonPath": "tasks/01KJJJMZE47GC398907BHRE7TE/result.json"
+  },
+  "inputs": {
+    "addVersion": true,
+    "plan": {
+      "architecturalNotes": {
+        "accessControlRemoval": "The Access Control section (showing Admin/Leader/User roles with badges) will be completely removed from SettingsPage. Role information is still available via AdminMode toggle for actual admins.",
+        "codeReuse": "UnitsTab will reuse logic from useUnitsManagement hook and UnitsPage rendering patterns. ApprovalsTab will reuse AdminApprovalsPage logic but adapted for tab context. ProfileTab extracts language settings from current SettingsPage.",
+        "dataFetching": "UnitsTab uses useUnitsManagement hook for real-time data. ApprovalsTab fetches signup requests using existing Firebase patterns. ProfileTab reads from useLanguage and useAuth contexts.",
+        "errorHandling": "Each tab handles its own errors using toast notifications (useToast hook). Loading states handled independently per tab using existing patterns (Loader2 component).",
+        "mobileDesign": "Tabs should use scrollable TabsList on mobile if needed. Tab content should have proper padding and spacing for mobile. Header remains consistent with existing MobileHeader pattern.",
+        "mobileNavLayout": "Bottom navigation will have exactly 5 evenly-spaced buttons. Remove 'More' menu entirely. All 5 items should be first-class nav items with icons and labels.",
+        "navigationIcons": "Dashboard: LayoutDashboard, Personnel: Users, Equipment: Package, Reports: ClipboardList, Settings: Settings (all from lucide-react)",
+        "roleBasedAccess": "ProfileTab is visible to all users. UnitsTab requires admin or leader role (use useEffectiveRole hook). ApprovalsTab requires admin or leader role (use useEffectiveRole hook). Conditionally render tab triggers based on roles.",
+        "rtlSupport": "All components must check dir from useLanguage() context. Use conditional classes for RTL (e.g., ${dir === 'rtl' ? 'rotate-180' : ''} for chevrons). Ensure margins/paddings use logical properties (ms/me instead of ml/mr).",
+        "stateManagement": "Each tab manages its own state independently. No shared state between tabs except what comes from context/hooks. Tab selection state is controlled by Radix Tabs component.",
+        "tabStructure": "Use Radix UI Tabs (@radix-ui/react-tabs) which is already installed. Main SettingsTabs component will contain TabsList with 3 triggers and 3 TabsContent sections.",
+        "versionManagement": "Create VITE_APP_VERSION from package.json version at build time. Create VITE_BUILD_TIME as ISO timestamp during build. Use Vite's define plugin to inject these as constants. version.ts utility exports getVersion() and getBuildTime() functions."
+      },
+      "componentsToCreate": [
+        "src/components/settings/SettingsTabs.tsx",
+        "src/components/settings/ProfileTab.tsx",
+        "src/components/settings/UnitsTab.tsx",
+        "src/components/settings/ApprovalsTab.tsx",
+        "src/lib/version.ts"
+      ],
+      "componentsToModify": [
+        "src/pages/SettingsPage.tsx",
+        "src/components/layout/MobileNav.tsx",
+        "src/components/layout/Sidebar.tsx",
+        "src/i18n/translations.ts",
+        "vite.config.ts"
+      ],
+      "fileStructure": {
+        "modifiedFiles": [
+          "src/pages/SettingsPage.tsx - Simplified to use SettingsTabs component, remove Access Control, add version footer",
+          "src/components/layout/MobileNav.tsx - Add Reports and Settings to main nav (5 total), remove from More menu",
+          "src/components/layout/Sidebar.tsx - Verify consistency (already has Reports and Settings in main nav)",
+          "src/i18n/translations.ts - Add new translation keys for tabs and version info",
+          "vite.config.ts - Add define plugin to inject version and build time as environment variables"
+        ],
+        "newDirectory": "src/components/settings/ - New directory to contain all settings-related tab components",
+        "newFiles": [
+          "src/components/settings/SettingsTabs.tsx - Main tabs container with role-based conditional rendering",
+          "src/components/settings/ProfileTab.tsx - Language settings and user profile (extracted from current SettingsPage)",
+          "src/components/settings/UnitsTab.tsx - Battalion/Company/Platoon management (extracted from UnitsPage)",
+          "src/components/settings/ApprovalsTab.tsx - Signup approvals with pending/processed tabs (extracted from AdminApprovalsPage)",
+          "src/lib/version.ts - Version utility to read app version and build time from Vite env vars"
+        ]
+      },
+      "implementationSteps": [
+        "Step 1: Update Vite configuration (vite.config.ts) to inject version and build time as environment variables using define plugin",
+        "Step 2: Create version utility (src/lib/version.ts) that reads VITE_APP_VERSION and VITE_BUILD_TIME from environment",
+        "Step 3: Update translations file (src/i18n/translations.ts) to add all new translation keys for tabs, profile, units, approvals sections, and version info",
+        "Step 4: Create ProfileTab component (src/components/settings/ProfileTab.tsx) - Extract language settings and user profile info from current SettingsPage, ensure RTL support with dir prop",
+        "Step 5: Create UnitsTab component (src/components/settings/UnitsTab.tsx) - Extract core units management UI from UnitsPage (battalions hierarchy, create/edit/delete dialogs), adapt for tab layout",
+        "Step 6: Create ApprovalsTab component (src/components/settings/ApprovalsTab.tsx) - Extract approvals UI from AdminApprovalsPage (pending/processed tabs, approve/decline logic), adapt for nested tab layout",
+        "Step 7: Create SettingsTabs component (src/components/settings/SettingsTabs.tsx) - Implement Radix UI Tabs with Profile, Units, Approvals tabs, manage tab state, ensure mobile-responsive design with RTL support",
+        "Step 8: Refactor SettingsPage (src/pages/SettingsPage.tsx) - Remove Access Control section, integrate SettingsTabs component, add version display at bottom using version utility, maintain mobile/desktop layouts",
+        "Step 9: Update MobileNav (src/components/layout/MobileNav.tsx) - Remove Units and Approvals from 3-dot menu, add Reports and Settings as nav buttons (total 5: Dashboard, Personnel, Equipment, Reports, Settings), add proper icons (ClipboardList for Reports, Settings for Settings)",
+        "Step 10: Update Sidebar navigation (src/components/layout/Sidebar.tsx) - Ensure consistency with new structure, Reports and Settings remain in main navigation",
+        "Step 11: Test RTL support for Hebrew - Verify all tabs, tab content, and navigation work correctly in RTL mode with proper text alignment and icon positioning",
+        "Step 12: Test mobile responsiveness - Verify tabs work on mobile devices, bottom nav has 5 buttons properly spaced, tab content scrolls correctly",
+        "Step 13: Test role-based access - Verify Units and Approvals tabs only show for admin/leader roles, regular users only see Profile tab",
+        "Step 14: Verify version display shows correctly at bottom of Settings page with proper formatting and internationalization"
+      ],
+      "securityConsiderations": {
+        "adminModeRespect": "AdminMode context should be respected. When admin mode is off, actual admins should see user view. UnitsTab and ApprovalsTab should respect effective role, not just actual role.",
+        "dataSecurity": "UnitsTab and ApprovalsTab handle sensitive data. Ensure Firestore security rules are enforced. Components should gracefully handle permission errors.",
+        "inputValidation": "All form inputs in tabs should use existing validation patterns (react-hook-form + zod where applicable). Prevent XSS and injection attacks.",
+        "roleBasedRendering": "Use useEffectiveRole() to check admin/leader status. Only render Units and Approvals tabs for authorized users. Do not just hide with CSS - conditionally render based on role."
+      },
+      "technicalConsiderations": {
+        "buildTimeInjection": "Use new Date().toISOString() in vite.config.ts define block to capture build timestamp. This runs at build time, not runtime.",
+        "existingComponents": "Card, Button, Input, Select, Badge, Dialog, Tabs (Radix UI), MobileHeader, MainLayout, Loader2 (lucide-react)",
+        "existingHooks": "useEffectiveRole (role checking), useLanguage (i18n and RTL), useAuth (user info), useUnitsManagement (units CRUD), useToast (notifications), usePendingRequestsCount (pending approvals badge)",
+        "firebaseIntegration": "UnitsTab and ApprovalsTab will need Firebase integration for real-time data. Use existing patterns from UnitsPage and AdminApprovalsPage.",
+        "packageJsonVersion": "Read from package.json using Node.js require or import in vite.config.ts (build time). Current version is 0.0.0 per package.json.",
+        "radixTabs": "Already installed (@radix-ui/react-tabs@^1.1.12). Import from @/components/ui/tabs. Components: Tabs (root), TabsList (container), TabsTrigger (button), TabsContent (panel).",
+        "responsiveBreakpoints": "Use lg: prefix for desktop (1024px+). Mobile-first approach. Hide desktop headers on mobile with lg:hidden. Show mobile headers with lg:hidden.",
+        "tabPersistence": "Consider using URL query params or localStorage to persist selected tab across page reloads (optional enhancement, not required for MVP).",
+        "viteEnvironmentVars": "Use define plugin in vite.config.ts to inject build-time constants. Access via import.meta.env in code. Example: VITE_APP_VERSION will be import.meta.env.VITE_APP_VERSION."
+      },
+      "testingConsiderations": {
+        "e2eTests": "Will need E2E tests for new navigation structure (5 buttons in mobile nav). Test tab switching in Settings page. Test role-based tab visibility.",
+        "mobileVisualRegression": "Test mobile nav with 5 buttons on various screen sizes. Ensure proper spacing and no overflow.",
+        "roleBasedTests": "Test as admin, leader, and user roles. Verify appropriate tabs show/hide. Test admin mode toggle impact on tab visibility.",
+        "rtlTesting": "Test all new components in Hebrew (RTL) mode. Verify icons, text alignment, and layout work correctly.",
+        "versionDisplay": "Verify version info displays correctly at bottom of Settings. Test in both English and Hebrew."
+      },
+      "translationKeys": [
+        {
+          "en": "Profile",
+          "he": "פרופיל",
+          "key": "settings.tabs.profile"
+        },
+        {
+          "en": "Units",
+          "he": "יחידות",
+          "key": "settings.tabs.units"
+        },
+        {
+          "en": "Approvals",
+          "he": "אישורים",
+          "key": "settings.tabs.approvals"
+        },
+        {
+          "en": "Profile Settings",
+          "he": "הגדרות פרופיל",
+          "key": "settings.profile.title"
+        },
+        {
+          "en": "Manage your personal information and preferences",
+          "he": "נהל את המידע האישי וההעדפות שלך",
+          "key": "settings.profile.subtitle"
+        },
+        {
+          "en": "Unit Management",
+          "he": "ניהול יחידות",
+          "key": "settings.units.title"
+        },
+        {
+          "en": "Manage organizational structure",
+          "he": "נהל את המבנה הארגוני",
+          "key": "settings.units.subtitle"
+        },
+        {
+          "en": "Signup Approvals",
+          "he": "אישורי הרשמה",
+          "key": "settings.approvals.title"
+        },
+        {
+          "en": "Review and approve user access requests",
+          "he": "סקור ואשר בקשות גישה של משתמשים",
+          "key": "settings.approvals.subtitle"
+        },
+        {
+          "en": "Version",
+          "he": "גרסה",
+          "key": "settings.version"
+        },
+        {
+          "en": "Built on",
+          "he": "נבנה ב",
+          "key": "settings.buildTime"
+        }
+      ],
+      "versionStrategy": "Read version from package.json and display with optional build timestamp using Vite environment variables (VITE_APP_VERSION from package.json and VITE_BUILD_TIME from build date). Create a utility function at src/lib/version.ts to encapsulate version logic."
+    },
+    "removeAccessControl": true,
+    "tabsComponent": "src/components/settings/SettingsTabs.tsx"
+  }
+}

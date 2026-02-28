@@ -1,0 +1,87 @@
+{
+  "passed": false,
+  "totalCount": 34,
+  "passedCount": 18,
+  "failedCount": 13,
+  "skippedCount": 3,
+  "failures": [
+    {
+      "test": "[SETTINGS-1] should display 3 tabs in Settings page for admin",
+      "message": "expect(locator).toBeVisible() failed - Locator: locator('[role=\"tablist\"]') - Expected: visible - Timeout: 10000ms - Error: element(s) not found",
+      "file": "e2e/settings-navigation.spec.ts",
+      "line": 29
+    },
+    {
+      "test": "[SETTINGS-2] Profile tab should show language selector and logout",
+      "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for getByRole('tab', { name: /profile|פרופיל/i })",
+      "file": "e2e/settings-navigation.spec.ts",
+      "line": 51
+    },
+    {
+      "test": "[SETTINGS-3] Units tab should show units management for admin",
+      "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for getByRole('tab', { name: /units|יחידות/i })",
+      "file": "e2e/settings-navigation.spec.ts",
+      "line": 72
+    },
+    {
+      "test": "[SETTINGS-4] Approvals tab should show approvals for admin",
+      "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for getByRole('tab', { name: /approvals|אישורים/i })",
+      "file": "e2e/settings-navigation.spec.ts",
+      "line": 89
+    },
+    {
+      "test": "[SETTINGS-7] Tab switching should work correctly",
+      "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for getByRole('tab', { name: /profile|פרופיל/i })",
+      "file": "e2e/settings-navigation.spec.ts",
+      "line": 138
+    },
+    {
+      "test": "[SETTINGS-L1] should display 3 tabs for leader",
+      "message": "expect(locator).toBeVisible() failed - Locator: locator('[role=\"tablist\"]') - Expected: visible - Timeout: 10000ms - Error: element(s) not found",
+      "file": "e2e/settings-navigation.spec.ts",
+      "line": 177
+    },
+    {
+      "test": "[SETTINGS-L2] Units tab should show units management for leader",
+      "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for getByRole('tab', { name: /units|יחידות/i })",
+      "file": "e2e/settings-navigation.spec.ts",
+      "line": 185
+    },
+    {
+      "test": "[SETTINGS-L3] Approvals tab should show approvals for leader",
+      "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for getByRole('tab', { name: /approvals|אישורים/i })",
+      "file": "e2e/settings-navigation.spec.ts",
+      "line": 200
+    },
+    {
+      "test": "[NAV-1] Bottom nav should have exactly 5 buttons on mobile",
+      "message": "expect(locator).toBeVisible() failed - Locator: locator('nav').filter({ hasText: /dashboard|personnel|equipment|reports|settings/i }) - Expected: visible - Timeout: 10000ms - Error: element(s) not found",
+      "file": "e2e/settings-navigation.spec.ts",
+      "line": 272
+    },
+    {
+      "test": "[NAV-2] Reports button should be in bottom nav",
+      "message": "expect(received).toBeTruthy() - Received: false",
+      "file": "e2e/settings-navigation.spec.ts",
+      "line": 296
+    },
+    {
+      "test": "[NAV-3] Settings button should be in bottom nav",
+      "message": "expect(received).toBeTruthy() - Received: false",
+      "file": "e2e/settings-navigation.spec.ts",
+      "line": 310
+    },
+    {
+      "test": "[MENU-2] 3-dot menu should NOT contain Settings if Settings is in bottom nav",
+      "message": "expect(received).toBeFalsy() - Received: true",
+      "file": "e2e/settings-navigation.spec.ts",
+      "line": 397
+    },
+    {
+      "test": "[INT-1] Can navigate to Settings from bottom nav and back to Dashboard",
+      "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for locator('nav').last().getByText(/settings|הגדרות/i).first()",
+      "file": "e2e/settings-navigation.spec.ts",
+      "line": 607
+    }
+  ]
+}

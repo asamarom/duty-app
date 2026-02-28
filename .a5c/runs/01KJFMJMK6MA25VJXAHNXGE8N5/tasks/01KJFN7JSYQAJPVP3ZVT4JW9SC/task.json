@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJFN7JSYQAJPVP3ZVT4JW9SC",
+  "taskId": "run-e2e-tests",
+  "invocationKey": "settings-navigation-refactor:S000004:run-e2e-tests",
+  "stepId": "S000004",
+  "kind": "agent",
+  "title": "Run E2E tests (expect failure)",
+  "description": "Execute Playwright E2E tests",
+  "io": {
+    "inputJsonPath": "tasks/01KJFN7JSYQAJPVP3ZVT4JW9SC/input.json",
+    "outputJsonPath": "tasks/01KJFN7JSYQAJPVP3ZVT4JW9SC/result.json"
+  },
+  "inputs": {
+    "expectFailure": true,
+    "testFile": "e2e/settings-navigation.spec.ts"
+  }
+}

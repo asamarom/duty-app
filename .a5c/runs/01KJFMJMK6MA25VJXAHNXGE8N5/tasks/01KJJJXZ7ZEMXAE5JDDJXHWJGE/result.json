@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KJJJXZ7ZEMXAE5JDDJXHWJGE",
+  "taskId": "__sdk.breakpoint",
+  "invocationKey": "settings-navigation-refactor:S000013:__sdk.breakpoint",
+  "status": "ok",
+  "result": {
+    "approved": true,
+    "decision": "iterate_on_fixes"
+  },
+  "startedAt": "2026-02-28T16:57:52.103Z",
+  "finishedAt": "2026-02-28T16:57:52.103Z",
+  "value": {
+    "approved": true,
+    "decision": "iterate_on_fixes"
+  }
+}

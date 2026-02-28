@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-27T10:07:29.503Z",
+  "data": {
+    "effectId": "01KJF92M3XRV7K3Y9ZYWH0CQ98",
+    "invocationKey": "fix-equipment-pending-visibility:S000001:analyze-bug",
+    "invocationHash": "b7c891b622f79d811839a3820ed0e086feff37f4170c503cae43949017398561",
+    "stepId": "S000001",
+    "taskId": "analyze-bug",
+    "kind": "agent",
+    "label": "Analyze equipment visibility bug",
+    "taskDefRef": "tasks/01KJF92M3XRV7K3Y9ZYWH0CQ98/task.json"
+  },
+  "checksum": "0f6ba029dc08467736505f8ac253c61ca1261d055d30f820be1c6387d3b6a478"
+}

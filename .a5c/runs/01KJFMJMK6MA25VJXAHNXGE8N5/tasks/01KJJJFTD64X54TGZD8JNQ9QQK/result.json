@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KJJJFTD64X54TGZD8JNQ9QQK",
+  "taskId": "implement-version-management",
+  "invocationKey": "settings-navigation-refactor:S000007:implement-version-management",
+  "status": "ok",
+  "result": {
+    "currentVersion": "0.0.0",
+    "versionFile": "src/lib/version.ts"
+  },
+  "startedAt": "2026-02-28T16:50:11.999Z",
+  "finishedAt": "2026-02-28T16:50:11.999Z",
+  "value": {
+    "currentVersion": "0.0.0",
+    "versionFile": "src/lib/version.ts"
+  }
+}

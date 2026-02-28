@@ -1,0 +1,8 @@
+{
+  "componentPath": "src/components/settings/SettingsTabs.tsx",
+  "relatedFiles": [
+    "src/components/settings/ProfileTab.tsx",
+    "src/components/settings/UnitsTab.tsx",
+    "src/components/settings/ApprovalsTab.tsx"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-02-27T10:07:00.216Z",
+  "data": {
+    "runId": "01KJF91QGNNNAX34B04TEB0G3D",
+    "processId": "fix-equipment-pending-visibility",
+    "entrypoint": {
+      "importPath": "../../processes/fix-equipment-pending-visibility.js",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json"
+  },
+  "checksum": "de4de79a44cf4d43c1b2381669c0a9a10254481a3f2d3fbaf14691fc89d72a63"
+}

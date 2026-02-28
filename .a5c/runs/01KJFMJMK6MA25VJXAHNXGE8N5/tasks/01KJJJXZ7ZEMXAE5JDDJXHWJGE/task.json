@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJJJXZ7ZEMXAE5JDDJXHWJGE",
+  "taskId": "__sdk.breakpoint",
+  "invocationKey": "settings-navigation-refactor:S000013:__sdk.breakpoint",
+  "stepId": "S000013",
+  "kind": "breakpoint",
+  "title": "breakpoint",
+  "metadata": {
+    "label": "breakpoint",
+    "payload": {
+      "context": {
+        "files": [
+          {
+            "format": "json",
+            "label": "Test Results",
+            "path": "tasks/undefined/test-results.json"
+          },
+          {
+            "format": "markdown",
+            "label": "Failure Details",
+            "path": "tasks/undefined/failures.md"
+          }
+        ]
+      },
+      "question": "11 unit test(s) still failing after implementation. Review failures and decide: iterate on fixes, revise tests, or investigate?",
+      "title": "Unit Tests Failing"
+    },
+    "requestedAt": "2026-02-28T16:57:26.015Z"
+  },
+  "inputs": {
+    "label": "breakpoint",
+    "payload": {
+      "context": {
+        "files": [
+          {
+            "format": "json",
+            "label": "Test Results",
+            "path": "tasks/undefined/test-results.json"
+          },
+          {
+            "format": "markdown",
+            "label": "Failure Details",
+            "path": "tasks/undefined/failures.md"
+          }
+        ]
+      },
+      "question": "11 unit test(s) still failing after implementation. Review failures and decide: iterate on fixes, revise tests, or investigate?",
+      "title": "Unit Tests Failing"
+    },
+    "requestedAt": "2026-02-28T16:57:26.015Z"
+  }
+}

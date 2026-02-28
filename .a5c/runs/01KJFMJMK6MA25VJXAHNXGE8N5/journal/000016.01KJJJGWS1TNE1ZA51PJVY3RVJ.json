@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-28T16:50:17.505Z",
+  "data": {
+    "effectId": "01KJJJGWP00MR0N8045G7BEP1W",
+    "invocationKey": "settings-navigation-refactor:S000008:create-settings-tabs",
+    "invocationHash": "d06c7b7d0593b712eeda380fe266a647178e4f99ad319260b654717a0f7f5b0a",
+    "stepId": "S000008",
+    "taskId": "create-settings-tabs",
+    "kind": "agent",
+    "label": "Create SettingsTabs component",
+    "taskDefRef": "tasks/01KJJJGWP00MR0N8045G7BEP1W/task.json"
+  },
+  "checksum": "4faffb7e616d2cd8ebb7aee7d6911b3c9d45959544d61bf58fa35afc27353fc0"
+}

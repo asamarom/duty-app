@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KJJJQGZJDTXZ0958VCGTW48B",
+  "taskId": "refactor-bottom-nav",
+  "invocationKey": "settings-navigation-refactor:S000010:refactor-bottom-nav",
+  "status": "ok",
+  "result": {
+    "buttonsInNav": 5,
+    "changesCount": 2,
+    "modifiedFiles": [
+      "src/components/layout/MobileNav.tsx"
+    ]
+  },
+  "startedAt": "2026-02-28T16:54:21.322Z",
+  "finishedAt": "2026-02-28T16:54:21.322Z",
+  "value": {
+    "buttonsInNav": 5,
+    "changesCount": 2,
+    "modifiedFiles": [
+      "src/components/layout/MobileNav.tsx"
+    ]
+  }
+}

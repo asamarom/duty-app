@@ -1,0 +1,13 @@
+{
+  "runId": "01KJFMJMK6MA25VJXAHNXGE8N5",
+  "request": "settings-navigation-refactor",
+  "processId": "settings-navigation-refactor",
+  "entrypoint": {
+    "importPath": "../../processes/settings-navigation-refactor.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/settings-navigation-refactor.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-02-27T13:28:28.524Z",
+  "completionSecret": "01957fe6b32fda013209a5d701f73067"
+}

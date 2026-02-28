@@ -1,0 +1,16 @@
+{
+  "keysAdded": 11,
+  "newKeys": [
+    "settings.tabs.profile",
+    "settings.tabs.units",
+    "settings.tabs.approvals",
+    "settings.profile.title",
+    "settings.profile.subtitle",
+    "settings.units.title",
+    "settings.units.subtitle",
+    "settings.approvals.title",
+    "settings.approvals.subtitle",
+    "settings.version",
+    "settings.buildTime"
+  ]
+}

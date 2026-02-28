@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KJJJS1X6PJ3E6YESYX96ZTWS",
+  "taskId": "run-unit-tests",
+  "invocationKey": "settings-navigation-refactor:S000012:run-unit-tests",
+  "status": "ok",
+  "result": {
+    "failedCount": 11,
+    "failures": [
+      {
+        "message": "Failed to resolve import @testing-library/user-event",
+        "test": "src/components/settings/SettingsTabs.test.tsx"
+      },
+      {
+        "message": "Failed to resolve import @testing-library/user-event",
+        "test": "src/components/settings/ProfileTab.test.tsx"
+      },
+      {
+        "message": "Failed to resolve import @testing-library/user-event",
+        "test": "src/components/settings/UnitsTab.test.tsx"
+      },
+      {
+        "message": "Failed to resolve import @testing-library/user-event",
+        "test": "src/components/settings/ApprovalsTab.test.tsx"
+      },
+      {
+        "message": "Failed to resolve import @testing-library/user-event",
+        "test": "src/pages/SettingsPage.test.tsx"
+      },
+      {
+        "message": "Failed to resolve import @testing-library/user-event",
+        "test": "src/components/layout/MobileNav.test.tsx"
+      },
+      {
+        "message": "ReferenceError: __APP_VERSION__ is not defined - need to mock in vitest.config.ts",
+        "test": "src/lib/version.test.ts - getAppVersion"
+      },
+      {
+        "message": "ReferenceError: __BUILD_TIME__ is not defined - need to mock in vitest.config.ts",
+        "test": "src/lib/version.test.ts - getBuildDate"
+      }
+    ],
+    "note": "Tests failing due to: 1) Missing @testing-library/user-event package, 2) Need to define globals in vitest.config.ts",
+    "passed": false,
+    "passedCount": 0,
+    "totalCount": 56
+  },
+  "startedAt": "2026-02-28T16:57:19.614Z",
+  "finishedAt": "2026-02-28T16:57:19.614Z",
+  "value": {
+    "failedCount": 11,
+    "failures": [
+      {
+        "message": "Failed to resolve import @testing-library/user-event",
+        "test": "src/components/settings/SettingsTabs.test.tsx"
+      },
+      {
+        "message": "Failed to resolve import @testing-library/user-event",
+        "test": "src/components/settings/ProfileTab.test.tsx"
+      },
+      {
+        "message": "Failed to resolve import @testing-library/user-event",
+        "test": "src/components/settings/UnitsTab.test.tsx"
+      },
+      {
+        "message": "Failed to resolve import @testing-library/user-event",
+        "test": "src/components/settings/ApprovalsTab.test.tsx"
+      },
+      {
+        "message": "Failed to resolve import @testing-library/user-event",
+        "test": "src/pages/SettingsPage.test.tsx"
+      },
+      {
+        "message": "Failed to resolve import @testing-library/user-event",
+        "test": "src/components/layout/MobileNav.test.tsx"
+      },
+      {
+        "message": "ReferenceError: __APP_VERSION__ is not defined - need to mock in vitest.config.ts",
+        "test": "src/lib/version.test.ts - getAppVersion"
+      },
+      {
+        "message": "ReferenceError: __BUILD_TIME__ is not defined - need to mock in vitest.config.ts",
+        "test": "src/lib/version.test.ts - getBuildDate"
+      }
+    ],
+    "note": "Tests failing due to: 1) Missing @testing-library/user-event package, 2) Need to define globals in vitest.config.ts",
+    "passed": false,
+    "passedCount": 0,
+    "totalCount": 56
+  }
+}

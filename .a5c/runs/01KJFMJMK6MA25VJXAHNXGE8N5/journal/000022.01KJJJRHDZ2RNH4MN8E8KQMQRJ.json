@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-28T16:54:28.031Z",
+  "data": {
+    "effectId": "01KJJJRHDFCNK7ZNM09MG9PW3W",
+    "invocationKey": "settings-navigation-refactor:S000011:update-translations",
+    "invocationHash": "200d1322aa468fa6bfeb673fc98c3c131dc3e3276f5bc419ea805cb4effbc9cc",
+    "stepId": "S000011",
+    "taskId": "update-translations",
+    "kind": "agent",
+    "label": "Update i18n translations",
+    "taskDefRef": "tasks/01KJJJRHDFCNK7ZNM09MG9PW3W/task.json"
+  },
+  "checksum": "fa332b6df525ea27f13cfff417c59208cc294db670fd48b2e0564f73a33c9540"
+}

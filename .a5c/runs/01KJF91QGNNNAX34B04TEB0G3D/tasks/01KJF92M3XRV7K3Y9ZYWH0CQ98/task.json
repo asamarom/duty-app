@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJF92M3XRV7K3Y9ZYWH0CQ98",
+  "taskId": "analyze-bug",
+  "invocationKey": "fix-equipment-pending-visibility:S000001:analyze-bug",
+  "stepId": "S000001",
+  "kind": "agent",
+  "title": "Analyze equipment visibility bug",
+  "io": {
+    "inputJsonPath": "tasks/01KJF92M3XRV7K3Y9ZYWH0CQ98/input.json",
+    "outputJsonPath": "tasks/01KJF92M3XRV7K3Y9ZYWH0CQ98/output.json"
+  },
+  "inputs": {}
+}

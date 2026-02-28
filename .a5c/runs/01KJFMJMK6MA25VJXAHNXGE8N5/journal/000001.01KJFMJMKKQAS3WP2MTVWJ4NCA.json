@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-02-27T13:28:28.531Z",
+  "data": {
+    "runId": "01KJFMJMK6MA25VJXAHNXGE8N5",
+    "processId": "settings-navigation-refactor",
+    "entrypoint": {
+      "importPath": "../../processes/settings-navigation-refactor.js",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json"
+  },
+  "checksum": "3a0e6e79d246ccb4d6482236dfe49dae6ceeefbdb7b786d480da4de6a6387c70"
+}

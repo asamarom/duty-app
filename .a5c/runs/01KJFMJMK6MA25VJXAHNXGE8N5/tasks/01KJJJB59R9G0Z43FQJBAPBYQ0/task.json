@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJJJB59R9G0Z43FQJBAPBYQ0",
+  "taskId": "run-unit-tests",
+  "invocationKey": "settings-navigation-refactor:S000006:run-unit-tests",
+  "stepId": "S000006",
+  "kind": "agent",
+  "title": "Run unit tests (expect failure)",
+  "description": "Execute Vitest unit tests",
+  "io": {
+    "inputJsonPath": "tasks/01KJJJB59R9G0Z43FQJBAPBYQ0/input.json",
+    "outputJsonPath": "tasks/01KJJJB59R9G0Z43FQJBAPBYQ0/result.json"
+  },
+  "inputs": {
+    "expectFailure": true,
+    "testFiles": [
+      "src/components/settings/SettingsTabs.test.tsx",
+      "src/components/settings/ProfileTab.test.tsx",
+      "src/components/settings/UnitsTab.test.tsx",
+      "src/components/settings/ApprovalsTab.test.tsx",
+      "src/lib/version.test.ts",
+      "src/pages/SettingsPage.test.tsx",
+      "src/components/layout/MobileNav.test.tsx"
+    ]
+  }
+}

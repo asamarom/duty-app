@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJJJFTD64X54TGZD8JNQ9QQK",
+  "taskId": "implement-version-management",
+  "invocationKey": "settings-navigation-refactor:S000007:implement-version-management",
+  "stepId": "S000007",
+  "kind": "agent",
+  "title": "Implement version management strategy",
+  "description": "Create version display system",
+  "io": {
+    "inputJsonPath": "tasks/01KJJJFTD64X54TGZD8JNQ9QQK/input.json",
+    "outputJsonPath": "tasks/01KJJJFTD64X54TGZD8JNQ9QQK/result.json"
+  },
+  "inputs": {
+    "currentVersion": "0.0.0",
+    "strategy": "Read version from package.json and display with optional build timestamp using Vite environment variables (VITE_APP_VERSION from package.json and VITE_BUILD_TIME from build date). Create a utility function at src/lib/version.ts to encapsulate version logic."
+  }
+}

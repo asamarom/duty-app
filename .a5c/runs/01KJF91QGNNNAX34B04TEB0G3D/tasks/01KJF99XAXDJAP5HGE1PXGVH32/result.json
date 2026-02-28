@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KJF99XAXDJAP5HGE1PXGVH32",
+  "taskId": "implement-fix",
+  "invocationKey": "fix-equipment-pending-visibility:S000003:implement-fix",
+  "status": "ok",
+  "result": {
+    "changesDescription": "Implemented equipment visibility filtering to fix the bug where users could see equipment assigned to other units. Changes made: (1) Modified line 66 to extract unitId from useUserBattalion hook alongside battalionId. (2) Added currentUserPersonnelId state variable on line 67 to track the current user's personnel record ID. (3) Added a useEffect hook (lines 74-101) that fetches the current user's personnel record from Firestore by querying the personnel collection with userId. (4) Implemented filtering logic (lines 195-217) that filters the mappedEquipment array before calling setEquipment, applying visibility rules based on assignment level, unit ownership, and personal ownership. (5) Updated the rebuild callback dependency array (line 229) to include unitId and currentUserPersonnelId, ensuring the rebuild function is recreated when these values change. (6) Added comprehensive comments explaining the filtering logic throughout the code.",
+    "edgeCasesHandled": [
+      "User without a personnel record: When user?.uid is null/undefined or no personnel record exists, currentUserPersonnelId is set to null, and the user will only see unassigned equipment",
+      "User without a unit assignment: When unitId is null/undefined, the user will only see unassigned equipment and equipment personally assigned to them",
+      "Equipment with multiple assignments: Each assignment creates a separate row in the equipment list, and filtering is applied to each row independently based on its specific assignment",
+      "Unassigned equipment with remaining quantity: Always visible to all users regardless of unit or personnel ID, enabling equipment to be discovered and assigned",
+      "Race condition during personnel fetch: The useEffect properly handles async operations and sets currentUserPersonnelId to null on error, defaulting to safe visibility behavior",
+      "Equipment assigned at different levels (battalion/company/platoon): The filtering logic uses the currentUnitId field which represents the specific unit assignment, working correctly across all organizational levels"
+    ],
+    "filesModified": [
+      "/home/ubuntu/duty-app/src/hooks/useEquipment.tsx"
+    ],
+    "filteringLogic": "The filtering logic implements a three-tier visibility system: (1) Unassigned equipment (assignmentLevel === 'unassigned') is always visible to all users, making it available for assignment. (2) Equipment assigned to the current user's unit (currentUnitId === unitId) is visible, allowing unit members to see and manage unit-level equipment. (3) Equipment assigned to the current user personally (currentPersonnelId === currentUserPersonnelId) is visible, ensuring users can always see their individually assigned equipment. Any equipment that doesn't meet these criteria is filtered out and hidden from the user. This creates a clear separation of concerns where users only see equipment relevant to their scope of responsibility."
+  },
+  "startedAt": "2026-02-27T10:12:54.435Z",
+  "finishedAt": "2026-02-27T10:12:54.435Z",
+  "value": {
+    "changesDescription": "Implemented equipment visibility filtering to fix the bug where users could see equipment assigned to other units. Changes made: (1) Modified line 66 to extract unitId from useUserBattalion hook alongside battalionId. (2) Added currentUserPersonnelId state variable on line 67 to track the current user's personnel record ID. (3) Added a useEffect hook (lines 74-101) that fetches the current user's personnel record from Firestore by querying the personnel collection with userId. (4) Implemented filtering logic (lines 195-217) that filters the mappedEquipment array before calling setEquipment, applying visibility rules based on assignment level, unit ownership, and personal ownership. (5) Updated the rebuild callback dependency array (line 229) to include unitId and currentUserPersonnelId, ensuring the rebuild function is recreated when these values change. (6) Added comprehensive comments explaining the filtering logic throughout the code.",
+    "edgeCasesHandled": [
+      "User without a personnel record: When user?.uid is null/undefined or no personnel record exists, currentUserPersonnelId is set to null, and the user will only see unassigned equipment",
+      "User without a unit assignment: When unitId is null/undefined, the user will only see unassigned equipment and equipment personally assigned to them",
+      "Equipment with multiple assignments: Each assignment creates a separate row in the equipment list, and filtering is applied to each row independently based on its specific assignment",
+      "Unassigned equipment with remaining quantity: Always visible to all users regardless of unit or personnel ID, enabling equipment to be discovered and assigned",
+      "Race condition during personnel fetch: The useEffect properly handles async operations and sets currentUserPersonnelId to null on error, defaulting to safe visibility behavior",
+      "Equipment assigned at different levels (battalion/company/platoon): The filtering logic uses the currentUnitId field which represents the specific unit assignment, working correctly across all organizational levels"
+    ],
+    "filesModified": [
+      "/home/ubuntu/duty-app/src/hooks/useEquipment.tsx"
+    ],
+    "filteringLogic": "The filtering logic implements a three-tier visibility system: (1) Unassigned equipment (assignmentLevel === 'unassigned') is always visible to all users, making it available for assignment. (2) Equipment assigned to the current user's unit (currentUnitId === unitId) is visible, allowing unit members to see and manage unit-level equipment. (3) Equipment assigned to the current user personally (currentPersonnelId === currentUserPersonnelId) is visible, ensuring users can always see their individually assigned equipment. Any equipment that doesn't meet these criteria is filtered out and hidden from the user. This creates a clear separation of concerns where users only see equipment relevant to their scope of responsibility."
+  }
+}

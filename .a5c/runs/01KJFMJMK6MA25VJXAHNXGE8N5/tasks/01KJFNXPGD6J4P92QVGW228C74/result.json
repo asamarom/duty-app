@@ -1,0 +1,107 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KJFNXPGD6J4P92QVGW228C74",
+  "taskId": "write-unit-tests",
+  "invocationKey": "settings-navigation-refactor:S000005:write-unit-tests",
+  "status": "ok",
+  "result": {
+    "testFiles": [
+      "src/components/settings/SettingsTabs.test.tsx",
+      "src/components/settings/ProfileTab.test.tsx",
+      "src/components/settings/UnitsTab.test.tsx",
+      "src/components/settings/ApprovalsTab.test.tsx",
+      "src/lib/version.test.ts",
+      "src/pages/SettingsPage.test.tsx",
+      "src/components/layout/MobileNav.test.tsx"
+    ],
+    "testsByComponent": [
+      {
+        "component": "SettingsTabs",
+        "testCount": 8,
+        "testFile": "src/components/settings/SettingsTabs.test.tsx"
+      },
+      {
+        "component": "ProfileTab",
+        "testCount": 7,
+        "testFile": "src/components/settings/ProfileTab.test.tsx"
+      },
+      {
+        "component": "UnitsTab",
+        "testCount": 6,
+        "testFile": "src/components/settings/UnitsTab.test.tsx"
+      },
+      {
+        "component": "ApprovalsTab",
+        "testCount": 6,
+        "testFile": "src/components/settings/ApprovalsTab.test.tsx"
+      },
+      {
+        "component": "version",
+        "testCount": 5,
+        "testFile": "src/lib/version.test.ts"
+      },
+      {
+        "component": "SettingsPage",
+        "testCount": 10,
+        "testFile": "src/pages/SettingsPage.test.tsx"
+      },
+      {
+        "component": "MobileNav",
+        "testCount": 10,
+        "testFile": "src/components/layout/MobileNav.test.tsx"
+      }
+    ],
+    "totalTestCases": 52
+  },
+  "startedAt": "2026-02-28T16:46:58.907Z",
+  "finishedAt": "2026-02-28T16:46:58.907Z",
+  "value": {
+    "testFiles": [
+      "src/components/settings/SettingsTabs.test.tsx",
+      "src/components/settings/ProfileTab.test.tsx",
+      "src/components/settings/UnitsTab.test.tsx",
+      "src/components/settings/ApprovalsTab.test.tsx",
+      "src/lib/version.test.ts",
+      "src/pages/SettingsPage.test.tsx",
+      "src/components/layout/MobileNav.test.tsx"
+    ],
+    "testsByComponent": [
+      {
+        "component": "SettingsTabs",
+        "testCount": 8,
+        "testFile": "src/components/settings/SettingsTabs.test.tsx"
+      },
+      {
+        "component": "ProfileTab",
+        "testCount": 7,
+        "testFile": "src/components/settings/ProfileTab.test.tsx"
+      },
+      {
+        "component": "UnitsTab",
+        "testCount": 6,
+        "testFile": "src/components/settings/UnitsTab.test.tsx"
+      },
+      {
+        "component": "ApprovalsTab",
+        "testCount": 6,
+        "testFile": "src/components/settings/ApprovalsTab.test.tsx"
+      },
+      {
+        "component": "version",
+        "testCount": 5,
+        "testFile": "src/lib/version.test.ts"
+      },
+      {
+        "component": "SettingsPage",
+        "testCount": 10,
+        "testFile": "src/pages/SettingsPage.test.tsx"
+      },
+      {
+        "component": "MobileNav",
+        "testCount": 10,
+        "testFile": "src/components/layout/MobileNav.test.tsx"
+      }
+    ],
+    "totalTestCases": 52
+  }
+}

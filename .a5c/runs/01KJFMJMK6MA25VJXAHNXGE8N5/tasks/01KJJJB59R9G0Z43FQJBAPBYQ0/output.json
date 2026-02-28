@@ -1,0 +1,15 @@
+{
+  "passed": false,
+  "totalCount": 56,
+  "passedCount": 0,
+  "failedCount": 6,
+  "failures": [
+    {"test": "src/components/settings/SettingsTabs.test.tsx", "message": "Failed to resolve import @testing-library/user-event - package not installed"},
+    {"test": "src/components/settings/ProfileTab.test.tsx", "message": "Failed to resolve import @testing-library/user-event - package not installed"},
+    {"test": "src/components/settings/UnitsTab.test.tsx", "message": "Failed to resolve import @testing-library/user-event - package not installed"},
+    {"test": "src/components/settings/ApprovalsTab.test.tsx", "message": "Failed to resolve import @testing-library/user-event - package not installed"},
+    {"test": "src/pages/SettingsPage.test.tsx", "message": "Failed to resolve import @testing-library/user-event - package not installed"},
+    {"test": "src/components/layout/MobileNav.test.tsx", "message": "Failed to resolve import @testing-library/user-event - package not installed"}
+  ],
+  "note": "Need to install @testing-library/user-event package or remove imports from test files"
+}

@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJFMR0568QRN3ETPJ14ZD1HV",
+  "taskId": "__sdk.breakpoint",
+  "invocationKey": "settings-navigation-refactor:S000002:__sdk.breakpoint",
+  "stepId": "S000002",
+  "kind": "breakpoint",
+  "title": "breakpoint",
+  "metadata": {
+    "label": "breakpoint",
+    "payload": {
+      "context": {
+        "files": [
+          {
+            "format": "markdown",
+            "label": "Architecture Plan",
+            "path": "tasks/plan-architecture/architecture-plan.md"
+          },
+          {
+            "format": "json",
+            "label": "Component Structure",
+            "path": "tasks/plan-architecture/component-structure.json"
+          }
+        ]
+      },
+      "question": "Architecture plan ready:\n\nComponents to create: src/components/settings/SettingsTabs.tsx, src/components/settings/ProfileTab.tsx, src/components/settings/UnitsTab.tsx, src/components/settings/ApprovalsTab.tsx, src/lib/version.ts\nComponents to modify: src/pages/SettingsPage.tsx, src/components/layout/MobileNav.tsx, src/components/layout/Sidebar.tsx, src/i18n/translations.ts, vite.config.ts\nVersion management: Read version from package.json and display with optional build timestamp using Vite environment variables (VITE_APP_VERSION from package.json and VITE_BUILD_TIME from build date). Create a utility function at src/lib/version.ts to encapsulate version logic.\n\nReview the plan and approve to continue?",
+      "title": "Architecture Plan Review"
+    },
+    "requestedAt": "2026-02-27T13:31:24.197Z"
+  },
+  "inputs": {
+    "label": "breakpoint",
+    "payload": {
+      "context": {
+        "files": [
+          {
+            "format": "markdown",
+            "label": "Architecture Plan",
+            "path": "tasks/plan-architecture/architecture-plan.md"
+          },
+          {
+            "format": "json",
+            "label": "Component Structure",
+            "path": "tasks/plan-architecture/component-structure.json"
+          }
+        ]
+      },
+      "question": "Architecture plan ready:\n\nComponents to create: src/components/settings/SettingsTabs.tsx, src/components/settings/ProfileTab.tsx, src/components/settings/UnitsTab.tsx, src/components/settings/ApprovalsTab.tsx, src/lib/version.ts\nComponents to modify: src/pages/SettingsPage.tsx, src/components/layout/MobileNav.tsx, src/components/layout/Sidebar.tsx, src/i18n/translations.ts, vite.config.ts\nVersion management: Read version from package.json and display with optional build timestamp using Vite environment variables (VITE_APP_VERSION from package.json and VITE_BUILD_TIME from build date). Create a utility function at src/lib/version.ts to encapsulate version logic.\n\nReview the plan and approve to continue?",
+      "title": "Architecture Plan Review"
+    },
+    "requestedAt": "2026-02-27T13:31:24.197Z"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-28T16:52:31.330Z",
+  "data": {
+    "effectId": "01KJJJMZE47GC398907BHRE7TE",
+    "invocationKey": "settings-navigation-refactor:S000009:refactor-settings-page",
+    "invocationHash": "ae7903d4cc963cb201cb66e504b470890d5b33de935c074b2fda265d0c605d87",
+    "stepId": "S000009",
+    "taskId": "refactor-settings-page",
+    "kind": "agent",
+    "label": "Refactor Settings page",
+    "taskDefRef": "tasks/01KJJJMZE47GC398907BHRE7TE/task.json"
+  },
+  "checksum": "4e8a0478f21ac1a4f4e64f7a1053aa47007d083930fb51a86d41a3843f083db4"
+}

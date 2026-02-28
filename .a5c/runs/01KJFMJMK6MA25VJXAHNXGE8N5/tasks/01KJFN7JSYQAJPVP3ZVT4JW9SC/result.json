@@ -1,0 +1,183 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KJFN7JSYQAJPVP3ZVT4JW9SC",
+  "taskId": "run-e2e-tests",
+  "invocationKey": "settings-navigation-refactor:S000004:run-e2e-tests",
+  "status": "ok",
+  "result": {
+    "failedCount": 13,
+    "failures": [
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 29,
+        "message": "expect(locator).toBeVisible() failed - Locator: locator('[role=\"tablist\"]') - Expected: visible - Timeout: 10000ms - Error: element(s) not found",
+        "test": "[SETTINGS-1] should display 3 tabs in Settings page for admin"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 51,
+        "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for getByRole('tab', { name: /profile|פרופיל/i })",
+        "test": "[SETTINGS-2] Profile tab should show language selector and logout"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 72,
+        "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for getByRole('tab', { name: /units|יחידות/i })",
+        "test": "[SETTINGS-3] Units tab should show units management for admin"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 89,
+        "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for getByRole('tab', { name: /approvals|אישורים/i })",
+        "test": "[SETTINGS-4] Approvals tab should show approvals for admin"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 138,
+        "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for getByRole('tab', { name: /profile|פרופיל/i })",
+        "test": "[SETTINGS-7] Tab switching should work correctly"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 177,
+        "message": "expect(locator).toBeVisible() failed - Locator: locator('[role=\"tablist\"]') - Expected: visible - Timeout: 10000ms - Error: element(s) not found",
+        "test": "[SETTINGS-L1] should display 3 tabs for leader"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 185,
+        "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for getByRole('tab', { name: /units|יחידות/i })",
+        "test": "[SETTINGS-L2] Units tab should show units management for leader"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 200,
+        "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for getByRole('tab', { name: /approvals|אישורים/i })",
+        "test": "[SETTINGS-L3] Approvals tab should show approvals for leader"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 272,
+        "message": "expect(locator).toBeVisible() failed - Locator: locator('nav').filter({ hasText: /dashboard|personnel|equipment|reports|settings/i }) - Expected: visible - Timeout: 10000ms - Error: element(s) not found",
+        "test": "[NAV-1] Bottom nav should have exactly 5 buttons on mobile"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 296,
+        "message": "expect(received).toBeTruthy() - Received: false",
+        "test": "[NAV-2] Reports button should be in bottom nav"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 310,
+        "message": "expect(received).toBeTruthy() - Received: false",
+        "test": "[NAV-3] Settings button should be in bottom nav"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 397,
+        "message": "expect(received).toBeFalsy() - Received: true",
+        "test": "[MENU-2] 3-dot menu should NOT contain Settings if Settings is in bottom nav"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 607,
+        "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for locator('nav').last().getByText(/settings|הגדרות/i).first()",
+        "test": "[INT-1] Can navigate to Settings from bottom nav and back to Dashboard"
+      }
+    ],
+    "passed": false,
+    "passedCount": 18,
+    "skippedCount": 3,
+    "totalCount": 34
+  },
+  "startedAt": "2026-02-27T13:51:53.032Z",
+  "finishedAt": "2026-02-27T13:51:53.032Z",
+  "value": {
+    "failedCount": 13,
+    "failures": [
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 29,
+        "message": "expect(locator).toBeVisible() failed - Locator: locator('[role=\"tablist\"]') - Expected: visible - Timeout: 10000ms - Error: element(s) not found",
+        "test": "[SETTINGS-1] should display 3 tabs in Settings page for admin"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 51,
+        "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for getByRole('tab', { name: /profile|פרופיל/i })",
+        "test": "[SETTINGS-2] Profile tab should show language selector and logout"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 72,
+        "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for getByRole('tab', { name: /units|יחידות/i })",
+        "test": "[SETTINGS-3] Units tab should show units management for admin"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 89,
+        "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for getByRole('tab', { name: /approvals|אישורים/i })",
+        "test": "[SETTINGS-4] Approvals tab should show approvals for admin"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 138,
+        "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for getByRole('tab', { name: /profile|פרופיל/i })",
+        "test": "[SETTINGS-7] Tab switching should work correctly"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 177,
+        "message": "expect(locator).toBeVisible() failed - Locator: locator('[role=\"tablist\"]') - Expected: visible - Timeout: 10000ms - Error: element(s) not found",
+        "test": "[SETTINGS-L1] should display 3 tabs for leader"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 185,
+        "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for getByRole('tab', { name: /units|יחידות/i })",
+        "test": "[SETTINGS-L2] Units tab should show units management for leader"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 200,
+        "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for getByRole('tab', { name: /approvals|אישורים/i })",
+        "test": "[SETTINGS-L3] Approvals tab should show approvals for leader"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 272,
+        "message": "expect(locator).toBeVisible() failed - Locator: locator('nav').filter({ hasText: /dashboard|personnel|equipment|reports|settings/i }) - Expected: visible - Timeout: 10000ms - Error: element(s) not found",
+        "test": "[NAV-1] Bottom nav should have exactly 5 buttons on mobile"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 296,
+        "message": "expect(received).toBeTruthy() - Received: false",
+        "test": "[NAV-2] Reports button should be in bottom nav"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 310,
+        "message": "expect(received).toBeTruthy() - Received: false",
+        "test": "[NAV-3] Settings button should be in bottom nav"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 397,
+        "message": "expect(received).toBeFalsy() - Received: true",
+        "test": "[MENU-2] 3-dot menu should NOT contain Settings if Settings is in bottom nav"
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "line": 607,
+        "message": "Test timeout of 30000ms exceeded - locator.click: Test timeout of 30000ms exceeded - waiting for locator('nav').last().getByText(/settings|הגדרות/i).first()",
+        "test": "[INT-1] Can navigate to Settings from bottom nav and back to Dashboard"
+      }
+    ],
+    "passed": false,
+    "passedCount": 18,
+    "skippedCount": 3,
+    "totalCount": 34
+  }
+}

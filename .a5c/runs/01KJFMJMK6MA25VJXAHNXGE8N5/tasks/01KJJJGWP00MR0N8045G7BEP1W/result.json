@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KJJJGWP00MR0N8045G7BEP1W",
+  "taskId": "create-settings-tabs",
+  "invocationKey": "settings-navigation-refactor:S000008:create-settings-tabs",
+  "status": "ok",
+  "result": {
+    "componentPath": "src/components/settings/SettingsTabs.tsx",
+    "relatedFiles": [
+      "src/components/settings/ProfileTab.tsx",
+      "src/components/settings/UnitsTab.tsx",
+      "src/components/settings/ApprovalsTab.tsx"
+    ]
+  },
+  "startedAt": "2026-02-28T16:50:31.702Z",
+  "finishedAt": "2026-02-28T16:50:31.702Z",
+  "value": {
+    "componentPath": "src/components/settings/SettingsTabs.tsx",
+    "relatedFiles": [
+      "src/components/settings/ProfileTab.tsx",
+      "src/components/settings/UnitsTab.tsx",
+      "src/components/settings/ApprovalsTab.tsx"
+    ]
+  }
+}

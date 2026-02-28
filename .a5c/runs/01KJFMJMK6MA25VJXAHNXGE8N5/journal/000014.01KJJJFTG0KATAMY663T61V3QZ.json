@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-28T16:49:42.400Z",
+  "data": {
+    "effectId": "01KJJJFTD64X54TGZD8JNQ9QQK",
+    "invocationKey": "settings-navigation-refactor:S000007:implement-version-management",
+    "invocationHash": "3196b384a80733bb59662f3bf7dac041d1d946efdbb1167edc982c25b4803965",
+    "stepId": "S000007",
+    "taskId": "implement-version-management",
+    "kind": "agent",
+    "label": "Implement version management strategy",
+    "taskDefRef": "tasks/01KJJJFTD64X54TGZD8JNQ9QQK/task.json"
+  },
+  "checksum": "206fc348351637c2ac886cfac140ff430a4d132bdd60944318e64a0db438180e"
+}

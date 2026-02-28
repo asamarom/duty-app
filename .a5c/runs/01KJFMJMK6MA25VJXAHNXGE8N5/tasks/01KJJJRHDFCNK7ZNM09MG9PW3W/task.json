@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJJJRHDFCNK7ZNM09MG9PW3W",
+  "taskId": "update-translations",
+  "invocationKey": "settings-navigation-refactor:S000011:update-translations",
+  "stepId": "S000011",
+  "kind": "agent",
+  "title": "Update i18n translations",
+  "description": "Add new translation keys for tabs and UI",
+  "io": {
+    "inputJsonPath": "tasks/01KJJJRHDFCNK7ZNM09MG9PW3W/input.json",
+    "outputJsonPath": "tasks/01KJJJRHDFCNK7ZNM09MG9PW3W/result.json"
+  },
+  "inputs": {
+    "newKeys": [
+      {
+        "en": "Profile",
+        "he": "פרופיל",
+        "key": "settings.tabs.profile"
+      },
+      {
+        "en": "Units",
+        "he": "יחידות",
+        "key": "settings.tabs.units"
+      },
+      {
+        "en": "Approvals",
+        "he": "אישורים",
+        "key": "settings.tabs.approvals"
+      },
+      {
+        "en": "Profile Settings",
+        "he": "הגדרות פרופיל",
+        "key": "settings.profile.title"
+      },
+      {
+        "en": "Manage your personal information and preferences",
+        "he": "נהל את המידע האישי וההעדפות שלך",
+        "key": "settings.profile.subtitle"
+      },
+      {
+        "en": "Unit Management",
+        "he": "ניהול יחידות",
+        "key": "settings.units.title"
+      },
+      {
+        "en": "Manage organizational structure",
+        "he": "נהל את המבנה הארגוני",
+        "key": "settings.units.subtitle"
+      },
+      {
+        "en": "Signup Approvals",
+        "he": "אישורי הרשמה",
+        "key": "settings.approvals.title"
+      },
+      {
+        "en": "Review and approve user access requests",
+        "he": "סקור ואשר בקשות גישה של משתמשים",
+        "key": "settings.approvals.subtitle"
+      },
+      {
+        "en": "Version",
+        "he": "גרסה",
+        "key": "settings.version"
+      },
+      {
+        "en": "Built on",
+        "he": "נבנה ב",
+        "key": "settings.buildTime"
+      }
+    ]
+  }
+}

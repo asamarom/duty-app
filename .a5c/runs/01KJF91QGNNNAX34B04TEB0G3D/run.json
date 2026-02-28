@@ -1,0 +1,13 @@
+{
+  "runId": "01KJF91QGNNNAX34B04TEB0G3D",
+  "request": "fix-equipment-pending-visibility",
+  "processId": "fix-equipment-pending-visibility",
+  "entrypoint": {
+    "importPath": "../../processes/fix-equipment-pending-visibility.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/fix-equipment-pending-visibility.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-02-27T10:07:00.124Z",
+  "completionSecret": "52a731c6e7f2e22432d810b3112c8559"
+}

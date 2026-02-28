@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-27T10:11:28.236Z",
+  "data": {
+    "effectId": "01KJF99XAXDJAP5HGE1PXGVH32",
+    "invocationKey": "fix-equipment-pending-visibility:S000003:implement-fix",
+    "invocationHash": "224df9de80333e9d5db797cf7bcccc152102e16cd3459b69c5ee96238977b550",
+    "stepId": "S000003",
+    "taskId": "implement-fix",
+    "kind": "agent",
+    "label": "Implement the filtering fix",
+    "taskDefRef": "tasks/01KJF99XAXDJAP5HGE1PXGVH32/task.json"
+  },
+  "checksum": "d99c90233ce2df426b3382f72d873cdc8ddd6f0245298bdc5e9c538ea523f6f5"
+}

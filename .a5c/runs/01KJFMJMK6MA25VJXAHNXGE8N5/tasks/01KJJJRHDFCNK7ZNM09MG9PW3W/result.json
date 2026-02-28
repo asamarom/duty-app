@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KJJJRHDFCNK7ZNM09MG9PW3W",
+  "taskId": "update-translations",
+  "invocationKey": "settings-navigation-refactor:S000011:update-translations",
+  "status": "ok",
+  "result": {
+    "keysAdded": 11,
+    "newKeys": [
+      "settings.tabs.profile",
+      "settings.tabs.units",
+      "settings.tabs.approvals",
+      "settings.profile.title",
+      "settings.profile.subtitle",
+      "settings.units.title",
+      "settings.units.subtitle",
+      "settings.approvals.title",
+      "settings.approvals.subtitle",
+      "settings.version",
+      "settings.buildTime"
+    ]
+  },
+  "startedAt": "2026-02-28T16:54:37.908Z",
+  "finishedAt": "2026-02-28T16:54:37.908Z",
+  "value": {
+    "keysAdded": 11,
+    "newKeys": [
+      "settings.tabs.profile",
+      "settings.tabs.units",
+      "settings.tabs.approvals",
+      "settings.profile.title",
+      "settings.profile.subtitle",
+      "settings.units.title",
+      "settings.units.subtitle",
+      "settings.approvals.title",
+      "settings.approvals.subtitle",
+      "settings.version",
+      "settings.buildTime"
+    ]
+  }
+}
