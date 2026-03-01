@@ -1,17 +1,76 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useEffectiveRole } from '@/hooks/useEffectiveRole';
-import { ShieldCheck, UserCheck, AlertCircle } from 'lucide-react';
+import { ShieldCheck, UserCheck, AlertCircle, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import { ApprovalsSheet } from './ApprovalsSheet';
 import { usePendingRequestsCount } from '@/hooks/usePendingRequestsCount';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/integrations/firebase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 export function ApprovalsTab() {
   const { t } = useLanguage();
   const { isAdmin } = useEffectiveRole();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const pendingCount = usePendingRequestsCount();
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [approvedCount, setApprovedCount] = useState<number | null>(null);
+  const [loadingApproved, setLoadingApproved] = useState(true);
+
+  // Fetch approved count in user's unit
+  useEffect(() => {
+    const fetchApprovedCount = async () => {
+      if (!isAdmin || !user) {
+        setLoadingApproved(false);
+        return;
+      }
+
+      try {
+        setLoadingApproved(true);
+
+        // Get user's personnel record to find their unit
+        const personnelQuery = query(
+          collection(db, 'personnel'),
+          where('userId', '==', user.uid)
+        );
+        const personnelSnap = await getDocs(personnelQuery);
+
+        let userUnitId = null;
+        if (!personnelSnap.empty) {
+          const personnelData = personnelSnap.docs[0].data();
+          userUnitId = personnelData.unitId || personnelData.battalionId;
+        }
+
+        // Get approved requests count
+        const requestsQuery = query(
+          collection(db, 'signupRequests'),
+          where('status', '==', 'approved')
+        );
+        const requestsSnap = await getDocs(requestsQuery);
+
+        // If we have a unit, filter by it; otherwise show all
+        let count = requestsSnap.size;
+        if (userUnitId) {
+          count = requestsSnap.docs.filter(doc => {
+            const data = doc.data();
+            return data.requestedUnitId === userUnitId;
+          }).length;
+        }
+
+        setApprovedCount(count);
+      } catch (error) {
+        console.error('Error fetching approved count:', error);
+        setApprovedCount(null);
+      } finally {
+        setLoadingApproved(false);
+      }
+    };
+
+    fetchApprovedCount();
+  }, [isAdmin, user]);
 
   if (!isAdmin) {
     return (
@@ -30,7 +89,7 @@ export function ApprovalsTab() {
 
   return (
     <div className="space-y-4 mt-4">
-      {/* Pending Approvals */}
+      {/* Pending Approvals Summary */}
       <Card className="card-tactical border-border/50">
         <CardHeader className="p-4 lg:p-6 pb-3">
           <div className="flex items-center gap-3">
@@ -47,30 +106,52 @@ export function ApprovalsTab() {
         </CardHeader>
         <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0">
           <div className="space-y-3">
-            <div className="flex items-center justify-between rounded-lg border border-border/50 bg-secondary/50 p-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xs lg:text-sm text-foreground">
+            {/* Pending Count */}
+            <div className="rounded-lg border border-border/50 bg-secondary/50 p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">
                   {t('settings.pendingRequests')}
                 </span>
-                {pendingCount > 0 && (
+                {pendingCount > 0 ? (
                   <Badge variant="destructive" className="text-xs">
-                    {pendingCount}
+                    {t('settings.pendingCount', { count: pendingCount.toString() })}
                   </Badge>
+                ) : (
+                  <span className="text-xs text-muted-foreground">
+                    {t('settings.noPendingRequests')}
+                  </span>
                 )}
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/approvals')}
-              >
-                {t('common.view')}
-              </Button>
+
+              {/* Approved Count */}
+              <div className="mt-2 pt-2 border-t border-border/30">
+                {loadingApproved ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">
+                      {t('common.loading')}
+                    </span>
+                  </div>
+                ) : approvedCount !== null ? (
+                  <span className="text-xs text-muted-foreground">
+                    {approvedCount} {t('settings.approvedInYourUnit')}
+                  </span>
+                ) : null}
+              </div>
             </div>
+
+            {/* Manage Approvals Button */}
+            <Button
+              className="w-full"
+              onClick={() => setIsSheetOpen(true)}
+            >
+              {t('settings.manageApprovals')}
+            </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Admin Permissions */}
+      {/* Admin Permissions Card */}
       <Card className="card-tactical border-border/50">
         <CardHeader className="p-4 lg:p-6 pb-3">
           <div className="flex items-center gap-3">
@@ -106,6 +187,9 @@ export function ApprovalsTab() {
           </ul>
         </CardContent>
       </Card>
+
+      {/* Approvals Sheet */}
+      <ApprovalsSheet isOpen={isSheetOpen} onClose={() => setIsSheetOpen(false)} />
     </div>
   );
 }

@@ -1,17 +1,25 @@
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useEffectiveRole } from '@/hooks/useEffectiveRole';
-import { Users, Building2, Shield } from 'lucide-react';
+import { useUnitsManagement } from '@/hooks/useUnitsManagement';
+import { Building2, Shield } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import { UnitsSheet } from './UnitsSheet';
 
 export function UnitsTab() {
   const { t } = useLanguage();
   const { isAdmin, isLeader } = useEffectiveRole();
-  const navigate = useNavigate();
+  const { battalions, companies, platoons, loading } = useUnitsManagement();
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const canManageUnits = isAdmin || isLeader;
+
+  // Calculate battalion-scoped counts
+  const battalionCount = battalions.length;
+  const companyCount = companies.length;
+  const platoonCount = platoons.length;
 
   return (
     <div className="space-y-4 mt-4">
@@ -33,29 +41,42 @@ export function UnitsTab() {
         <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0">
           {canManageUnits ? (
             <div className="space-y-3">
-              <div className="flex items-center justify-between rounded-lg border border-border/50 bg-secondary/50 p-3">
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-xs lg:text-sm text-foreground">
-                    {t('settings.viewAllUnits')}
+              {/* Summary Statistics */}
+              <div className="rounded-lg border border-border/50 bg-secondary/50 p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs text-muted-foreground">
+                    {t('settings.unitsInYourBattalion')}
                   </span>
+                  <Badge variant={isAdmin ? 'rank' : 'tactical'}>
+                    {isAdmin ? t('personnel.roleAdmin') : t('personnel.roleLeader')}
+                  </Badge>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate('/units')}
-                >
-                  {t('common.view')}
-                </Button>
+                {loading ? (
+                  <p className="text-xs lg:text-sm text-muted-foreground">
+                    {t('common.loading')}
+                  </p>
+                ) : battalionCount === 0 && companyCount === 0 && platoonCount === 0 ? (
+                  <p className="text-xs lg:text-sm text-foreground">
+                    {t('settings.noUnitsYet')}
+                  </p>
+                ) : (
+                  <p className="text-xs lg:text-sm text-foreground">
+                    {t('settings.unitStats', {
+                      battalions: battalionCount.toString(),
+                      companies: companyCount.toString(),
+                      platoons: platoonCount.toString(),
+                    })}
+                  </p>
+                )}
               </div>
-              <div className="flex items-center gap-2">
-                <Badge variant={isAdmin ? 'rank' : 'tactical'}>
-                  {isAdmin ? t('personnel.roleAdmin') : t('personnel.roleLeader')}
-                </Badge>
-                <span className="text-xs text-muted-foreground">
-                  {t('settings.accessLevel')}
-                </span>
-              </div>
+
+              {/* Manage Units Button */}
+              <Button
+                className="w-full"
+                onClick={() => setIsSheetOpen(true)}
+              >
+                {t('settings.manageUnits')}
+              </Button>
             </div>
           ) : (
             <div className="text-center py-4">
@@ -68,6 +89,8 @@ export function UnitsTab() {
         </CardContent>
       </Card>
 
+      {/* Units Sheet */}
+      <UnitsSheet isOpen={isSheetOpen} onClose={() => setIsSheetOpen(false)} />
     </div>
   );
 }
