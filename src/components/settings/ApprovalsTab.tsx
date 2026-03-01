@@ -91,7 +91,7 @@ export function ApprovalsTab() {
     <div className="space-y-4 mt-4">
       {/* Pending Approvals Summary */}
       <Card className="card-tactical border-border/50">
-        <CardHeader className="p-4 lg:p-6 pb-3">
+        <CardHeader className="p-4 lg:p-6 pb-3" dir={language === 'he' ? 'rtl' : 'ltr'}>
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 lg:h-10 lg:w-10 items-center justify-center rounded-lg bg-destructive/20">
               <UserCheck className="h-4 w-4 lg:h-5 lg:w-5 text-destructive" />
@@ -153,7 +153,7 @@ export function ApprovalsTab() {
 
       {/* Admin Permissions Card */}
       <Card className="card-tactical border-border/50">
-        <CardHeader className="p-4 lg:p-6 pb-3">
+        <CardHeader className="p-4 lg:p-6 pb-3" dir={language === 'he' ? 'rtl' : 'ltr'}>
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 lg:h-10 lg:w-10 items-center justify-center rounded-lg bg-primary/20">
               <ShieldCheck className="h-4 w-4 lg:h-5 lg:w-5 text-primary" />
