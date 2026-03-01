@@ -68,41 +68,6 @@ export function UnitsTab() {
         </CardContent>
       </Card>
 
-      {/* Unit Permissions */}
-      {canManageUnits && (
-        <Card className="card-tactical border-border/50">
-          <CardHeader className="p-4 lg:p-6 pb-3">
-            <CardTitle className="text-sm lg:text-base">{t('settings.permissions')}</CardTitle>
-            <CardDescription className="text-xs lg:text-sm">
-              {t('settings.whatYouCanDo')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0">
-            <ul className="space-y-2 text-xs lg:text-sm">
-              <li className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                <span>{t('settings.viewUnits')}</span>
-              </li>
-              {isAdmin && (
-                <>
-                  <li className="flex items-center gap-2">
-                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                    <span>{t('settings.createUnits')}</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                    <span>{t('settings.deleteUnits')}</span>
-                  </li>
-                </>
-              )}
-              <li className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                <span>{t('settings.managePersonnel')}</span>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
