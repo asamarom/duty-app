@@ -12,7 +12,7 @@ import { db } from '@/integrations/firebase/client';
 import { useAuth } from '@/hooks/useAuth';
 
 export function ApprovalsTab() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { isAdmin } = useEffectiveRole();
   const { user } = useAuth();
   const pendingCount = usePendingRequestsCount();
@@ -76,7 +76,7 @@ export function ApprovalsTab() {
     return (
       <div className="space-y-4 mt-4">
         <Card className="card-tactical border-border/50">
-          <CardContent className="p-8 text-center">
+          <CardContent className="p-8 text-center" dir={language === 'he' ? 'rtl' : 'ltr'}>
             <AlertCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
               {t('settings.adminOnlyFeature')}
@@ -105,7 +105,7 @@ export function ApprovalsTab() {
           </div>
         </CardHeader>
         <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0">
-          <div className="space-y-3">
+          <div className="space-y-3" dir={language === 'he' ? 'rtl' : 'ltr'}>
             {/* Pending Count */}
             <div className="rounded-lg border border-border/50 bg-secondary/50 p-3">
               <div className="flex items-center justify-between gap-2">
@@ -167,7 +167,7 @@ export function ApprovalsTab() {
           </div>
         </CardHeader>
         <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0">
-          <ul className="space-y-2 text-xs lg:text-sm">
+          <ul className="space-y-2 text-xs lg:text-sm" dir={language === 'he' ? 'rtl' : 'ltr'}>
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary" />
               <span>{t('settings.approveUsers')}</span>

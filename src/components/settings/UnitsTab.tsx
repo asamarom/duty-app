@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { UnitsSheet } from './UnitsSheet';
 
 export function UnitsTab() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { isAdmin, isLeader } = useEffectiveRole();
   const { battalions, companies, platoons, loading } = useUnitsManagement();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -42,7 +42,7 @@ export function UnitsTab() {
           {canManageUnits ? (
             <div className="space-y-3">
               {/* Summary Statistics */}
-              <div className="rounded-lg border border-border/50 bg-secondary/50 p-3">
+              <div className="rounded-lg border border-border/50 bg-secondary/50 p-3" dir={language === 'he' ? 'rtl' : 'ltr'}>
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <span className="text-xs text-muted-foreground">
                     {t('settings.unitsInYourBattalion')}
@@ -77,7 +77,7 @@ export function UnitsTab() {
               </Button>
             </div>
           ) : (
-            <div className="text-center py-4">
+            <div className="text-center py-4" dir={language === 'he' ? 'rtl' : 'ltr'}>
               <Shield className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
                 {t('settings.noUnitAccess')}

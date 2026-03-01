@@ -111,14 +111,20 @@ export function ProfileTab() {
             </div>
           </CardHeader>
           <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0">
-            <div className="space-y-2 text-xs lg:text-sm">
+            <div className="space-y-2 text-xs lg:text-sm" dir={language === 'he' ? 'rtl' : 'ltr'}>
               <div className="flex justify-between gap-2">
                 <span className="text-muted-foreground">{t('personnel.fullName')}</span>
-                <span className="font-medium text-right">{currentPersonnel.firstName} {currentPersonnel.lastName}</span>
+                <span className="font-medium text-right">
+                  {currentPersonnel.firstName && currentPersonnel.lastName
+                    ? `${currentPersonnel.firstName} ${currentPersonnel.lastName}`
+                    : t('common.notAvailable')}
+                </span>
               </div>
               <div className="flex justify-between gap-2">
                 <span className="text-muted-foreground">{t('personnel.serviceNumber')}</span>
-                <span className="font-medium text-right">{currentPersonnel.serviceNumber}</span>
+                <span className="font-medium text-right">
+                  {currentPersonnel.serviceNumber || t('common.notAvailable')}
+                </span>
               </div>
             </div>
           </CardContent>
@@ -142,7 +148,7 @@ export function ProfileTab() {
             </div>
           </CardHeader>
           <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0">
-            <div className="space-y-2 text-xs lg:text-sm">
+            <div className="space-y-2 text-xs lg:text-sm" dir={language === 'he' ? 'rtl' : 'ltr'}>
               <div className="flex justify-between gap-2">
                 <span className="text-muted-foreground">{t('profile.personnelRecord')}</span>
                 <Badge variant="secondary" className="shrink-0 text-xs">{t('common.linked')}</Badge>
@@ -190,7 +196,7 @@ export function ProfileTab() {
             </div>
           </CardHeader>
           <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground" dir={language === 'he' ? 'rtl' : 'ltr'}>
               {t('adminMode.description')}
             </p>
           </CardContent>
