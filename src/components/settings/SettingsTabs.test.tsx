@@ -5,6 +5,21 @@ import { MemoryRouter } from 'react-router-dom';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import userEvent from '@testing-library/user-event';
 
+// Mock window.matchMedia for useMediaQuery hook
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+});
+
 // Unmock LanguageContext to use real implementation for these tests
 vi.unmock('@/contexts/LanguageContext');
 
@@ -19,6 +34,29 @@ const mockUseEffectiveRole = vi.fn(() => ({
 
 vi.mock('@/hooks/useEffectiveRole', () => ({
   useEffectiveRole: () => mockUseEffectiveRole(),
+}));
+
+// Mock useUnitsManagement hook
+vi.mock('@/hooks/useUnitsManagement', () => ({
+  useUnitsManagement: () => ({
+    battalions: [],
+    companies: [],
+    platoons: [],
+    loading: false,
+  }),
+}));
+
+// Mock Firestore
+vi.mock('firebase/firestore', () => ({
+  collection: vi.fn(),
+  query: vi.fn(),
+  where: vi.fn(),
+  orderBy: vi.fn(),
+  getDocs: vi.fn(() => Promise.resolve({ size: 0, docs: [], empty: true })),
+  onSnapshot: vi.fn((q, callback) => {
+    callback({ docs: [], empty: true });
+    return vi.fn();
+  }),
 }));
 
 // Helper to render with all required providers
