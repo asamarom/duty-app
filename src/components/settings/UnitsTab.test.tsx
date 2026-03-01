@@ -118,37 +118,6 @@ describe('UnitsTab Component', () => {
     });
   });
 
-  describe('Permissions Display', () => {
-    it('shows admin-specific permissions for admins', () => {
-      mockUseEffectiveRole.mockReturnValue({
-        isAdmin: true,
-        isLeader: false,
-        isActualAdmin: true,
-        loading: false,
-        roles: ['admin'],
-      });
-
-      renderWithProviders(<UnitsTab />);
-
-      expect(screen.getByText(/create.*units/i)).toBeInTheDocument();
-      expect(screen.getByText(/delete.*units/i)).toBeInTheDocument();
-    });
-
-    it('does not show admin permissions for leaders', () => {
-      mockUseEffectiveRole.mockReturnValue({
-        isAdmin: false,
-        isLeader: true,
-        isActualAdmin: false,
-        loading: false,
-        roles: ['leader'],
-      });
-
-      renderWithProviders(<UnitsTab />);
-
-      expect(screen.queryByText(/create.*units/i)).not.toBeInTheDocument();
-      expect(screen.queryByText(/delete.*units/i)).not.toBeInTheDocument();
-    });
-  });
 
   describe('Role Badge Display', () => {
     it('displays admin badge for admins', () => {

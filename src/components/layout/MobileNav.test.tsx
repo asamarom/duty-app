@@ -89,18 +89,20 @@ describe('MobileNav Component', () => {
   });
 
   describe('Navigation Rendering', () => {
-    it('renders all main navigation items', () => {
+    it('renders all 5 main navigation items', () => {
       renderWithProviders(<MobileNav />);
 
       expect(screen.getByRole('link', { name: /dashboard/i })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /personnel/i })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /equipment/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /reports/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /settings/i })).toBeInTheDocument();
     });
 
-    it('renders more menu button', () => {
+    it('does not render more menu button', () => {
       renderWithProviders(<MobileNav />);
 
-      expect(screen.getByRole('button', { name: /more/i })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /more/i })).not.toBeInTheDocument();
     });
 
     it('has fixed positioning at bottom', () => {
@@ -134,64 +136,14 @@ describe('MobileNav Component', () => {
     });
   });
 
-  describe('More Menu', () => {
-    it('opens dropdown when more button is clicked', async () => {
-      const user = userEvent.setup();
+  describe('Fixed Navigation Items', () => {
+    it('shows Settings link for all users', () => {
       renderWithProviders(<MobileNav />);
 
-      const moreButton = screen.getByRole('button', { name: /more/i });
-      await user.click(moreButton);
-
-      // Menu items should be visible
-      expect(screen.getByText(/units/i)).toBeInTheDocument();
-      expect(screen.getByText(/reports/i)).toBeInTheDocument();
-      expect(screen.getByText(/settings/i)).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /settings/i })).toBeInTheDocument();
     });
 
-    it('displays user email in dropdown', async () => {
-      const user = userEvent.setup();
-      renderWithProviders(<MobileNav />);
-
-      const moreButton = screen.getByRole('button', { name: /more/i });
-      await user.click(moreButton);
-
-      expect(screen.getByText('test@example.com')).toBeInTheDocument();
-    });
-
-    it('shows sign out option', async () => {
-      const user = userEvent.setup();
-      renderWithProviders(<MobileNav />);
-
-      const moreButton = screen.getByRole('button', { name: /more/i });
-      await user.click(moreButton);
-
-      expect(screen.getByText(/sign.*out/i)).toBeInTheDocument();
-    });
-  });
-
-  describe('Admin Mode Toggle', () => {
-    it('shows admin mode toggle for actual admins', async () => {
-      const user = userEvent.setup();
-      mockUseEffectiveRole.mockReturnValue({
-        isAdmin: true,
-        isLeader: false,
-        isActualAdmin: true,
-        isAdminMode: false,
-        loading: false,
-        roles: ['admin'],
-      });
-
-      renderWithProviders(<MobileNav />);
-
-      const moreButton = screen.getByRole('button', { name: /more/i });
-      await user.click(moreButton);
-
-      // Should show admin mode toggle
-      expect(screen.getByText(/user.*view/i)).toBeInTheDocument();
-    });
-
-    it('does not show admin mode toggle for non-admins', async () => {
-      const user = userEvent.setup();
+    it('shows all 5 navigation items regardless of role', () => {
       mockUseEffectiveRole.mockReturnValue({
         isAdmin: false,
         isLeader: false,
@@ -203,58 +155,11 @@ describe('MobileNav Component', () => {
 
       renderWithProviders(<MobileNav />);
 
-      const moreButton = screen.getByRole('button', { name: /more/i });
-      await user.click(moreButton);
-
-      expect(screen.queryByText(/admin.*view/i)).not.toBeInTheDocument();
-      expect(screen.queryByText(/user.*view/i)).not.toBeInTheDocument();
+      const navLinks = screen.getAllByRole('link');
+      expect(navLinks).toHaveLength(5);
     });
 
-    it('toggles admin mode when switch is clicked', async () => {
-      const user = userEvent.setup();
-      mockUseEffectiveRole.mockReturnValue({
-        isAdmin: true,
-        isLeader: false,
-        isActualAdmin: true,
-        isAdminMode: false,
-        loading: false,
-        roles: ['admin'],
-      });
-
-      renderWithProviders(<MobileNav />);
-
-      const moreButton = screen.getByRole('button', { name: /more/i });
-      await user.click(moreButton);
-
-      const adminToggle = screen.getByRole('switch');
-      await user.click(adminToggle);
-
-      expect(mockToggleAdminMode).toHaveBeenCalled();
-    });
-  });
-
-  describe('Role-Based Menu Items', () => {
-    it('hides approvals for non-admins', async () => {
-      const user = userEvent.setup();
-      mockUseEffectiveRole.mockReturnValue({
-        isAdmin: false,
-        isLeader: false,
-        isActualAdmin: false,
-        isAdminMode: false,
-        loading: false,
-        roles: ['user'],
-      });
-
-      renderWithProviders(<MobileNav />);
-
-      const moreButton = screen.getByRole('button', { name: /more/i });
-      await user.click(moreButton);
-
-      expect(screen.queryByText(/approvals/i)).not.toBeInTheDocument();
-    });
-
-    it('shows approvals for admins', async () => {
-      const user = userEvent.setup();
+    it('shows all 5 navigation items for admins too', () => {
       mockUseEffectiveRole.mockReturnValue({
         isAdmin: true,
         isLeader: false,
@@ -266,51 +171,8 @@ describe('MobileNav Component', () => {
 
       renderWithProviders(<MobileNav />);
 
-      const moreButton = screen.getByRole('button', { name: /more/i });
-      await user.click(moreButton);
-
-      expect(screen.getByText(/approvals/i)).toBeInTheDocument();
-    });
-
-    it('shows approvals for leaders', async () => {
-      const user = userEvent.setup();
-      mockUseEffectiveRole.mockReturnValue({
-        isAdmin: false,
-        isLeader: true,
-        isActualAdmin: false,
-        isAdminMode: false,
-        loading: false,
-        roles: ['leader'],
-      });
-
-      renderWithProviders(<MobileNav />);
-
-      const moreButton = screen.getByRole('button', { name: /more/i });
-      await user.click(moreButton);
-
-      // Leaders should see approvals in the dropdown (admin/leader can access)
-      expect(screen.getByText('nav.approvals')).toBeInTheDocument();
-    });
-  });
-
-  describe('Loading State', () => {
-    it('shows loading indicator when roles are loading', async () => {
-      const user = userEvent.setup();
-      mockUseEffectiveRole.mockReturnValue({
-        isAdmin: false,
-        isLeader: false,
-        isActualAdmin: false,
-        isAdminMode: false,
-        loading: true,
-        roles: [],
-      });
-
-      renderWithProviders(<MobileNav />);
-
-      const moreButton = screen.getByRole('button', { name: /more/i });
-      await user.click(moreButton);
-
-      expect(screen.getByText(/loading/i)).toBeInTheDocument();
+      const navLinks = screen.getAllByRole('link');
+      expect(navLinks).toHaveLength(5);
     });
   });
 });
