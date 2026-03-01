@@ -51,4 +51,16 @@ test.describe('Settings Page - Structure [Regular User]', () => {
     const hasApprovalsTab = await approvalsTab.isVisible().catch(() => false);
     expect(hasApprovalsTab).toBeFalsy();
   });
+
+  test('[SETTINGS-U3] Regular user should NOT see Manage Units or Manage Approvals buttons', async ({ page }) => {
+    // Check that Manage Units button is NOT visible
+    const manageUnitsButton = page.getByRole('button', { name: /manage units|נהל יחידות/i });
+    const hasManageUnits = await manageUnitsButton.isVisible().catch(() => false);
+    expect(hasManageUnits).toBeFalsy();
+
+    // Check that Manage Approvals button is NOT visible
+    const manageApprovalsButton = page.getByRole('button', { name: /manage approvals|נהל אישורים/i });
+    const hasManageApprovals = await manageApprovalsButton.isVisible().catch(() => false);
+    expect(hasManageApprovals).toBeFalsy();
+  });
 });

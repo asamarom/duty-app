@@ -64,7 +64,7 @@ test.describe('Settings Page - Structure [Admin]', () => {
     expect(hasLogout).toBeTruthy();
   });
 
-  test('[SETTINGS-3] Units tab should show units management for admin', async ({ page }) => {
+  test('[SETTINGS-3] Units tab should show summary stats and Manage Units button', async ({ page }) => {
     // Wait for tabs to load (roles from Firestore)
     const allTabs = page.locator('[role="tab"]');
     await expect(allTabs).toHaveCount(3, { timeout: 15000 });
@@ -74,18 +74,19 @@ test.describe('Settings Page - Structure [Admin]', () => {
     await unitsTab.click();
     await page.waitForTimeout(500);
 
-    // Check that units content is visible
-    const unitsContent = page.getByText(/battalion|company|platoon|גדוד|פלוגה|מחלקה/i).first();
-    const hasUnitsContent = await unitsContent.isVisible().catch(() => false);
+    // Check that summary statistics are visible
+    const summaryStats = page.getByText(/units in your battalion|יחידות בגדוד שלך/i).or(
+      page.getByText(/battalion|company|platoon|גדוד|פלוגה|מחלקה/i)
+    );
+    const hasSummary = await summaryStats.first().isVisible().catch(() => false);
+    expect(hasSummary).toBeTruthy();
 
-    // Or check for "add unit" or "manage units" buttons
-    const addUnitButton = page.getByRole('button', { name: /add unit|הוסף יחידה/i });
-    const hasAddButton = await addUnitButton.isVisible().catch(() => false);
-
-    expect(hasUnitsContent || hasAddButton).toBeTruthy();
+    // Check for "Manage Units" button
+    const manageUnitsButton = page.getByRole('button', { name: /manage units|נהל יחידות/i });
+    await expect(manageUnitsButton).toBeVisible({ timeout: 5000 });
   });
 
-  test('[SETTINGS-4] Approvals tab should show approvals for admin', async ({ page }) => {
+  test('[SETTINGS-4] Approvals tab should show summary stats and Manage Approvals button', async ({ page }) => {
     // Wait for tabs to load (roles from Firestore)
     const allTabs = page.locator('[role="tab"]');
     await expect(allTabs).toHaveCount(3, { timeout: 15000 });
@@ -95,15 +96,16 @@ test.describe('Settings Page - Structure [Admin]', () => {
     await approvalsTab.click();
     await page.waitForTimeout(500);
 
-    // Check that approvals content is visible
-    const approvalsContent = page.getByText(/pending|approved|declined|ממתין|אושר|נדחה/i).first();
-    const hasApprovalsContent = await approvalsContent.isVisible().catch(() => false);
+    // Check that pending approvals summary is visible
+    const pendingSummary = page.getByText(/pending approvals|אישורים ממתינים/i).or(
+      page.getByText(/pending requests|בקשות ממתינות/i)
+    );
+    const hasSummary = await pendingSummary.first().isVisible().catch(() => false);
+    expect(hasSummary).toBeTruthy();
 
-    // Or check for table/list of approvals
-    const approvalsTable = page.locator('[role="table"], [class*="approvals"]').first();
-    const hasTable = await approvalsTable.isVisible().catch(() => false);
-
-    expect(hasApprovalsContent || hasTable).toBeTruthy();
+    // Check for "Manage Approvals" button
+    const manageApprovalsButton = page.getByRole('button', { name: /manage approvals|נהל אישורים/i });
+    await expect(manageApprovalsButton).toBeVisible({ timeout: 5000 });
   });
 
   test('[SETTINGS-5] Access Control section should NOT be present in Settings', async ({ page }) => {
@@ -169,5 +171,86 @@ test.describe('Settings Page - Structure [Admin]', () => {
     // Verify Approvals tab is active
     const approvalsTabActive = await approvalsTab.getAttribute('aria-selected');
     expect(approvalsTabActive).toBe('true');
+  });
+
+  test('[SETTINGS-8] Manage Units button should open Units sheet', async ({ page }) => {
+    // Wait for tabs to load
+    const allTabs = page.locator('[role="tab"]');
+    await expect(allTabs).toHaveCount(3, { timeout: 15000 });
+
+    // Navigate to Units tab
+    const unitsTab = page.getByRole('tab', { name: /units|יחידות/i });
+    await unitsTab.click();
+    await page.waitForTimeout(500);
+
+    // Click "Manage Units" button
+    const manageUnitsButton = page.getByRole('button', { name: /manage units|נהל יחידות/i });
+    await manageUnitsButton.click();
+    await page.waitForTimeout(500);
+
+    // Verify sheet/dialog opened
+    const sheet = page.locator('[role="dialog"]').or(page.locator('[class*="sheet"]'));
+    await expect(sheet.first()).toBeVisible({ timeout: 5000 });
+
+    // Sheet should contain units management content
+    const sheetContent = sheet.first();
+    const hasUnitsContent = await sheetContent.getByText(/battalion|company|platoon|add unit|גדוד|פלוגה|מחלקה|הוסף יחידה/i).first().isVisible().catch(() => false);
+    expect(hasUnitsContent).toBeTruthy();
+  });
+
+  test('[SETTINGS-9] Manage Approvals button should open Approvals sheet', async ({ page }) => {
+    // Wait for tabs to load
+    const allTabs = page.locator('[role="tab"]');
+    await expect(allTabs).toHaveCount(3, { timeout: 15000 });
+
+    // Navigate to Approvals tab
+    const approvalsTab = page.getByRole('tab', { name: /approvals|אישורים/i });
+    await approvalsTab.click();
+    await page.waitForTimeout(500);
+
+    // Click "Manage Approvals" button
+    const manageApprovalsButton = page.getByRole('button', { name: /manage approvals|נהל אישורים/i });
+    await manageApprovalsButton.click();
+    await page.waitForTimeout(500);
+
+    // Verify sheet/dialog opened
+    const sheet = page.locator('[role="dialog"]').or(page.locator('[class*="sheet"]'));
+    await expect(sheet.first()).toBeVisible({ timeout: 5000 });
+
+    // Sheet should contain approvals management content
+    const sheetContent = sheet.first();
+    const hasApprovalsContent = await sheetContent.getByText(/pending|approved|declined|approve|decline|ממתין|אושר|נדחה|אשר|דחה/i).first().isVisible().catch(() => false);
+    expect(hasApprovalsContent).toBeTruthy();
+  });
+
+  test('[SETTINGS-10] Admin should see summary statistics in Units and Approvals tabs', async ({ page }) => {
+    // Wait for tabs to load
+    const allTabs = page.locator('[role="tab"]');
+    await expect(allTabs).toHaveCount(3, { timeout: 15000 });
+
+    // Check Units tab summary
+    const unitsTab = page.getByRole('tab', { name: /units|יחידות/i });
+    await unitsTab.click();
+    await page.waitForTimeout(500);
+
+    // Look for unit statistics or counts
+    const unitStats = page.getByText(/\d+.*battalion|battalion.*\d+|גדוד.*\d+|\d+.*גדוד/i).or(
+      page.getByText(/units in your battalion|יחידות בגדוד/i)
+    );
+    const hasUnitStats = await unitStats.first().isVisible().catch(() => false);
+
+    // Check Approvals tab summary
+    const approvalsTab = page.getByRole('tab', { name: /approvals|אישורים/i });
+    await approvalsTab.click();
+    await page.waitForTimeout(500);
+
+    // Look for pending count or approval statistics
+    const approvalStats = page.getByText(/\d+.*pending|pending.*\d+|ממתין.*\d+|\d+.*ממתין/i).or(
+      page.getByText(/pending requests|בקשות ממתינות/i)
+    );
+    const hasApprovalStats = await approvalStats.first().isVisible().catch(() => false);
+
+    // At least one tab should show statistics
+    expect(hasUnitStats || hasApprovalStats).toBeTruthy();
   });
 });

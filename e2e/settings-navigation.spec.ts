@@ -165,7 +165,7 @@ test.describe('3-Dot Menu - Updated Functionality', () => {
     }
   });
 
-  test('[MENU-3] 3-dot menu may contain other items like Units, Approvals, Logout', async ({ page }) => {
+  test('[MENU-3] 3-dot menu should NOT contain Units or Approvals navigation links', async ({ page }) => {
     const moreButton = page.getByRole('button', { name: /more|עוד/i }).or(
       page.locator('button').filter({ hasText: /⋯|more/i })
     );
@@ -176,16 +176,16 @@ test.describe('3-Dot Menu - Updated Functionality', () => {
       await moreButton.click();
       await page.waitForTimeout(500);
 
-      // 3-dot menu may still contain Units, Approvals, or user actions
+      // Units and Approvals are now in Settings tabs, not as separate nav items
       const menuContent = page.locator('[role="menu"], [class*="dropdown"]');
 
-      // Check for possible menu items (at least one should exist)
+      // Check that Units and Approvals navigation links are NOT in 3-dot menu
       const hasUnits = await menuContent.getByText(/units|יחידות/i).isVisible().catch(() => false);
       const hasApprovals = await menuContent.getByText(/approvals|אישורים/i).isVisible().catch(() => false);
-      const hasLogout = await menuContent.getByText(/logout|התנתק|sign out/i).isVisible().catch(() => false);
 
-      // At least one menu item should exist
-      expect(hasUnits || hasApprovals || hasLogout).toBeTruthy();
+      // Neither should be in the menu as navigation links
+      expect(hasUnits).toBeFalsy();
+      expect(hasApprovals).toBeFalsy();
     } else {
       test.skip();
     }
@@ -310,7 +310,7 @@ test.describe('Settings & Navigation - RTL (Hebrew)', () => {
     expect(hasHebrew).toBeTruthy();
   });
 
-  test('[RTL-5] Tab switching should work in RTL mode', async ({ page }) => {
+  test('[RTL-5] Tab switching and sheet opening should work in RTL mode', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/settings');
     await page.waitForTimeout(1000);
@@ -335,6 +335,27 @@ test.describe('Settings & Navigation - RTL (Hebrew)', () => {
 
       const isActive = await unitsTab.getAttribute('aria-selected');
       expect(isActive).toBe('true');
+
+      // Verify "Manage Units" button exists and opens sheet in RTL mode
+      const manageUnitsButton = page.getByRole('button', { name: /manage units|נהל יחידות/i });
+      if (await manageUnitsButton.isVisible().catch(() => false)) {
+        await manageUnitsButton.click();
+        await page.waitForTimeout(500);
+
+        // Check for sheet/modal opening
+        const sheet = page.locator('[role="dialog"]').or(page.locator('[class*="sheet"]'));
+        const hasSheet = await sheet.isVisible().catch(() => false);
+        expect(hasSheet).toBeTruthy();
+
+        // Close sheet if open
+        const closeButton = page.getByRole('button', { name: /close|סגור/i }).or(
+          page.locator('[aria-label*="close"], [aria-label*="סגור"]')
+        );
+        if (await closeButton.first().isVisible().catch(() => false)) {
+          await closeButton.first().click();
+          await page.waitForTimeout(300);
+        }
+      }
     }
   });
 

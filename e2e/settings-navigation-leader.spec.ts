@@ -27,7 +27,7 @@ test.describe('Settings Page - Structure [Leader]', () => {
     await expect(allTabs).toHaveCount(2, { timeout: 15000 });
   });
 
-  test('[SETTINGS-L2] Units tab should show units management for leader', async ({ page }) => {
+  test('[SETTINGS-L2] Units tab should show Manage Units button for leader', async ({ page }) => {
     // Wait for tabs to load (roles from Firestore)
     const allTabs = page.locator('[role="tab"]');
     await expect(allTabs).toHaveCount(2, { timeout: 15000 });
@@ -36,14 +36,16 @@ test.describe('Settings Page - Structure [Leader]', () => {
     await unitsTab.click();
     await page.waitForTimeout(500);
 
-    // Leader should see units management
-    const unitsContent = page.getByText(/battalion|company|platoon|גדוד|פלוגה|מחלקה/i).first();
-    const hasUnitsContent = await unitsContent.isVisible().catch(() => false);
+    // Leader should see "Manage Units" button
+    const manageUnitsButton = page.getByRole('button', { name: /manage units|נהל יחידות/i });
+    await expect(manageUnitsButton).toBeVisible({ timeout: 5000 });
 
-    const addUnitButton = page.getByRole('button', { name: /add unit|הוסף יחידה/i });
-    const hasAddButton = await addUnitButton.isVisible().catch(() => false);
-
-    expect(hasUnitsContent || hasAddButton).toBeTruthy();
+    // Check for summary statistics
+    const summaryStats = page.getByText(/units in your battalion|יחידות בגדוד שלך/i).or(
+      page.getByText(/battalion|company|platoon|גדוד|פלוגה|מחלקה/i)
+    );
+    const hasSummary = await summaryStats.first().isVisible().catch(() => false);
+    expect(hasSummary).toBeTruthy();
   });
 
   test('[SETTINGS-L3] Approvals tab should NOT be visible for leader', async ({ page }) => {
@@ -52,5 +54,30 @@ test.describe('Settings Page - Structure [Leader]', () => {
 
     // Approvals tab should not exist for leaders
     await expect(approvalsTab).not.toBeVisible();
+  });
+
+  test('[SETTINGS-L4] Manage Units button should open Units sheet for leader', async ({ page }) => {
+    // Wait for tabs to load
+    const allTabs = page.locator('[role="tab"]');
+    await expect(allTabs).toHaveCount(2, { timeout: 15000 });
+
+    // Navigate to Units tab
+    const unitsTab = page.getByRole('tab', { name: /units|יחידות/i });
+    await unitsTab.click();
+    await page.waitForTimeout(500);
+
+    // Click "Manage Units" button
+    const manageUnitsButton = page.getByRole('button', { name: /manage units|נהל יחידות/i });
+    await manageUnitsButton.click();
+    await page.waitForTimeout(500);
+
+    // Verify sheet/dialog opened
+    const sheet = page.locator('[role="dialog"]').or(page.locator('[class*="sheet"]'));
+    await expect(sheet.first()).toBeVisible({ timeout: 5000 });
+
+    // Sheet should contain units management content
+    const sheetContent = sheet.first();
+    const hasUnitsContent = await sheetContent.getByText(/battalion|company|platoon|add unit|גדוד|פלוגה|מחלקה|הוסף יחידה/i).first().isVisible().catch(() => false);
+    expect(hasUnitsContent).toBeTruthy();
   });
 });
