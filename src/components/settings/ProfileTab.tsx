@@ -42,9 +42,10 @@ export function ProfileTab() {
   // Get user role badges
   const roleBadges = useMemo(() => {
     const badges = [];
-    if (actualRoles.includes('admin')) badges.push({ label: t('personnel.roleAdmin'), variant: 'default' as const });
-    if (actualRoles.includes('leader')) badges.push({ label: t('personnel.roleLeader'), variant: 'secondary' as const });
-    if (actualRoles.includes('user') || actualRoles.length === 0) badges.push({ label: t('personnel.roleUser'), variant: 'outline' as const });
+    const roles = actualRoles || [];
+    if (roles.includes('admin')) badges.push({ label: t('personnel.roleAdmin'), variant: 'default' as const });
+    if (roles.includes('leader')) badges.push({ label: t('personnel.roleLeader'), variant: 'secondary' as const });
+    if (roles.includes('user') || roles.length === 0) badges.push({ label: t('personnel.roleUser'), variant: 'outline' as const });
     return badges;
   }, [actualRoles, t]);
 
