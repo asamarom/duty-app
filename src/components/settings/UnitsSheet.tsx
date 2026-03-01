@@ -35,10 +35,10 @@ export function UnitsSheet({ isOpen, onClose }: UnitsSheetProps) {
     );
   }
 
-  // Mobile: Full-screen sheet
+  // Mobile: Bottom sheet (doesn't cover the page title)
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="h-[100vh] p-0 flex flex-col">
+      <SheetContent side="bottom" className="h-[75vh] p-0 flex flex-col">
         <SheetHeader className="px-4 pt-6 pb-4 border-b">
           <SheetTitle>{t('settings.units.title')}</SheetTitle>
         </SheetHeader>
