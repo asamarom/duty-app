@@ -24,6 +24,19 @@ test.describe('Settings Page - Structure [Admin]', () => {
   });
 
   test('[SETTINGS-1] should display 3 tabs in Settings page for admin', async ({ page }) => {
+    // Debug: Check what's on the page
+    const pageContent = await page.evaluate(() => {
+      const tabs = document.querySelectorAll('[role="tab"]');
+      const adminMode = localStorage.getItem('pmtb_admin_mode');
+      return {
+        tabCount: tabs.length,
+        tabNames: Array.from(tabs).map(t => t.textContent),
+        adminMode,
+        loadingText: document.body.textContent?.includes('Loading') || document.body.textContent?.includes('loading'),
+      };
+    });
+    console.log('Page state:', pageContent);
+
     // Wait for tabs to be visible
     const tabsList = page.locator('[role="tablist"]');
     await expect(tabsList).toBeVisible({ timeout: 15000 });
