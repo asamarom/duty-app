@@ -10,7 +10,13 @@ vi.unmock('@/contexts/LanguageContext');
 
 // Mock useAuth hook
 const mockUseAuth = vi.fn(() => ({
-  user: { email: 'test@example.com', uid: 'test-uid' },
+  user: {
+    email: 'test@example.com',
+    uid: 'test-uid',
+    metadata: {
+      creationTime: '2024-01-01T00:00:00.000Z',
+    }
+  },
   loading: false,
   signInWithGoogle: vi.fn(),
   signInWithPassword: vi.fn(),
@@ -26,6 +32,7 @@ const mockUseEffectiveRole = vi.fn(() => ({
   isAdmin: false,
   isLeader: false,
   isActualAdmin: false,
+  actualRoles: ['user'],
   loading: false,
   roles: ['user'],
 }));
@@ -51,12 +58,36 @@ vi.mock('firebase/firestore', () => ({
   collection: vi.fn(),
   query: vi.fn(),
   where: vi.fn(),
+  orderBy: vi.fn(),
   getDocs: vi.fn(() => Promise.resolve({ size: 0, docs: [], empty: true })),
 }));
 
 // Mock version module
 vi.mock('@/lib/version', () => ({
   getAppVersion: () => 'v1.0.0-test',
+}));
+
+// Mock useCurrentPersonnel hook
+vi.mock('@/hooks/useCurrentPersonnel', () => ({
+  useCurrentPersonnel: () => ({
+    currentPersonnel: null,
+    loading: false,
+  }),
+}));
+
+// Mock useUserBattalion hook
+vi.mock('@/hooks/useUserBattalion', () => ({
+  useUserBattalion: () => ({
+    unitId: null,
+    loading: false,
+  }),
+}));
+
+// Mock useUnits hook
+vi.mock('@/hooks/useUnits', () => ({
+  useUnits: () => ({
+    getUnitById: vi.fn(() => null),
+  }),
 }));
 
 // Helper to render with all required providers
@@ -84,6 +115,7 @@ describe('ProfileTab Component', () => {
       isAdmin: false,
       isLeader: false,
       isActualAdmin: false,
+      actualRoles: ['user'],
       loading: false,
       roles: ['user'],
     });
@@ -99,7 +131,9 @@ describe('ProfileTab Component', () => {
     it('displays authenticated badge for logged in user', () => {
       renderWithProviders(<ProfileTab />);
 
-      expect(screen.getByText(/authenticated/i)).toBeInTheDocument();
+      // The badge shows "Authenticated" (English) or "מאומת" (Hebrew)
+      const badge = screen.getByText(/Authenticated|מאומת/);
+      expect(badge).toBeInTheDocument();
     });
 
     it('shows user profile icon', () => {
@@ -159,6 +193,7 @@ describe('ProfileTab Component', () => {
         isAdmin: true,
         isLeader: false,
         isActualAdmin: true,
+        actualRoles: ['admin'],
         loading: false,
         roles: ['admin'],
       });
@@ -174,6 +209,7 @@ describe('ProfileTab Component', () => {
         isAdmin: true,
         isLeader: false,
         isActualAdmin: true,
+        actualRoles: ['admin'],
         loading: false,
         roles: ['admin'],
       });
