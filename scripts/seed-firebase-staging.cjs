@@ -678,8 +678,92 @@ async function seedEquipment() {
 
 // ── Main ───────────────────────────────────────────────────────────
 
+// Version of the test data structure - increment when schema changes
+const SEED_DATA_VERSION = 1;
+
+/**
+ * Check if valid test data already exists in staging.
+ * Returns true if data exists and is up-to-date, false if seeding is needed.
+ */
+async function checkExistingData() {
+  try {
+    // Check if all test users exist
+    const testUsers = [
+      TEST_USER_UIDS.admin,
+      TEST_USER_UIDS.leader,
+      TEST_USER_UIDS.user,
+    ];
+
+    for (const uid of testUsers) {
+      try {
+        await auth.getUser(uid);
+      } catch (error) {
+        console.log(`   Missing test user: ${uid}`);
+        return false;
+      }
+    }
+
+    // Check if user documents exist in Firestore with correct roles
+    const userDoc = await db.collection('users').doc(TEST_USER_UIDS.admin).get();
+    if (!userDoc.exists || !userDoc.data()?.roles?.includes('admin')) {
+      console.log('   Admin user doc missing or invalid');
+      return false;
+    }
+
+    // Check version marker
+    const versionDoc = await db.collection('_metadata').doc('seed_version').get();
+    if (!versionDoc.exists || versionDoc.data()?.version !== SEED_DATA_VERSION) {
+      console.log('   Seed data version mismatch or missing');
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.log(`   Error checking existing data: ${error.message}`);
+    return false;
+  }
+}
+
+/**
+ * Mark the seed data with current version
+ */
+async function markSeedVersion() {
+  await db.collection('_metadata').doc('seed_version').set({
+    version: SEED_DATA_VERSION,
+    lastSeeded: admin.firestore.FieldValue.serverTimestamp(),
+  });
+}
+
 async function main() {
+  // Check for --force flag
+  const forceReseed = process.argv.includes('--force');
+
   console.log('🌱 Seeding Firebase Staging project: duty-staging\n');
+
+  // Check if data already exists (unless forced)
+  if (!forceReseed) {
+    console.log('🔍 Checking for existing test data...');
+    const dataExists = await checkExistingData();
+
+    if (dataExists) {
+      console.log('✅ Valid test data already exists - skipping seed');
+      console.log('💡 Use --force flag to force re-seeding\n');
+      console.log('📧 Test user emails:');
+      console.log('   - test-admin@e2e.local (admin)');
+      console.log('   - test-leader@e2e.local (leader)');
+      console.log('   - test-user@e2e.local (user)');
+      console.log('   - test-new@e2e.local (no role)');
+      console.log('   - test-pending@e2e.local (pending approval)');
+      console.log('   - test-declined@e2e.local (declined)');
+      console.log(`\n🔑 Password: ${TEST_PASSWORD}\n`);
+      process.exit(0);
+    }
+
+    console.log('⚠️  Test data missing or outdated - will recreate\n');
+  } else {
+    console.log('⚠️  --force flag detected - will recreate all data\n');
+  }
+
   console.log('⚠️  WARNING: This will DELETE existing test data and recreate it!\n');
 
   try {
@@ -690,6 +774,7 @@ async function main() {
     await seedSignupRequests();
     await seedAdminUnitAssignments();
     await seedEquipment();
+    await markSeedVersion();
 
     console.log('\n✅ All test data seeded successfully!');
     console.log(`\n📧 Test user emails:`);
