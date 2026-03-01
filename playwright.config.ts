@@ -139,17 +139,18 @@ export default defineConfig({
         storageState: './e2e/.auth/staging-user.json',
         // Use dynamic baseURL from top-level config (respects STAGING_URL env var)
       },
-      // Exclude: mobile tests, auth tests, admin tests, and leader tests
+      // Exclude: mobile tests, auth tests, admin tests, leader tests, and role-specific settings tests
       testIgnore: [
         /.*\.mobile\.spec\.ts/,           // Mobile tests (run in staging-mobile)
         /auth\.spec\.ts/,                 // Auth tests (run in staging-unauth)
         /battalion.*\.spec\.ts/,          // Leader tests (run in staging-leader)
-        /(admin|performance|dashboard|equipment|personnel|i18n|units|transfers|user-lifecycle|rtl|settings-navigation).*\.spec\.ts/, // Admin tests (run in staging-admin)
+        /(admin|performance|dashboard|equipment|personnel|i18n|units|transfers|user-lifecycle|rtl).*\.spec\.ts/, // Admin tests (run in staging-admin)
+        /settings-navigation-(admin|leader)\.spec\.ts/, // Role-specific settings tests (run in staging-admin/staging-leader)
       ],
     },
     // Staging admin tests (requires admin role)
     // Matches: admin-*.spec.ts, performance.spec.ts, dashboard.spec.ts, equipment.spec.ts,
-    // personnel.spec.ts, i18n.spec.ts, units.spec.ts, transfers*.spec.ts, user-lifecycle.spec.ts, rtl.spec.ts, settings-navigation.spec.ts
+    // personnel.spec.ts, i18n.spec.ts, units.spec.ts, transfers*.spec.ts, user-lifecycle.spec.ts, rtl.spec.ts, settings-navigation-admin.spec.ts
     {
       name: 'staging-admin',
       use: {
@@ -157,7 +158,7 @@ export default defineConfig({
         storageState: './e2e/.auth/staging-admin.json',
         // Use dynamic baseURL from top-level config (respects STAGING_URL env var)
       },
-      testMatch: /(admin|performance|dashboard|equipment|personnel|i18n|units|transfers|user-lifecycle|rtl|settings-navigation).*\.spec\.ts/,
+      testMatch: /(admin|performance|dashboard|equipment|personnel|i18n|units|transfers|user-lifecycle|rtl|settings-navigation-admin).*\.spec\.ts/,
       testIgnore: [/.*\.mobile\.spec\.ts/, /auth\.spec\.ts/], // Exclude mobile and auth tests
     },
     // Staging leader tests (requires leader role)
@@ -168,7 +169,7 @@ export default defineConfig({
         storageState: './e2e/.auth/staging-leader.json',
         // Use dynamic baseURL from top-level config (respects STAGING_URL env var)
       },
-      testMatch: /.*battalion.*\.spec\.ts/,
+      testMatch: /(battalion|settings-navigation-leader).*\.spec\.ts/,
       testIgnore: /auth\.spec\.ts/, // Exclude auth tests
     },
     // Mobile testing - Android
