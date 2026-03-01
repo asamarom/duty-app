@@ -144,12 +144,12 @@ export default defineConfig({
         /.*\.mobile\.spec\.ts/,           // Mobile tests (run in staging-mobile)
         /auth\.spec\.ts/,                 // Auth tests (run in staging-unauth)
         /battalion.*\.spec\.ts/,          // Leader tests (run in staging-leader)
-        /(admin|performance|dashboard|equipment|personnel|i18n|units|transfers|user-lifecycle|rtl).*\.spec\.ts/, // Admin tests (run in staging-admin)
+        /(admin|performance|dashboard|equipment|personnel|i18n|units|transfers|user-lifecycle|rtl|settings-navigation).*\.spec\.ts/, // Admin tests (run in staging-admin)
       ],
     },
     // Staging admin tests (requires admin role)
     // Matches: admin-*.spec.ts, performance.spec.ts, dashboard.spec.ts, equipment.spec.ts,
-    // personnel.spec.ts, i18n.spec.ts, units.spec.ts, transfers*.spec.ts, user-lifecycle.spec.ts, rtl.spec.ts
+    // personnel.spec.ts, i18n.spec.ts, units.spec.ts, transfers*.spec.ts, user-lifecycle.spec.ts, rtl.spec.ts, settings-navigation.spec.ts
     {
       name: 'staging-admin',
       use: {
@@ -157,7 +157,7 @@ export default defineConfig({
         storageState: './e2e/.auth/staging-admin.json',
         // Use dynamic baseURL from top-level config (respects STAGING_URL env var)
       },
-      testMatch: /(admin|performance|dashboard|equipment|personnel|i18n|units|transfers|user-lifecycle|rtl).*\.spec\.ts/,
+      testMatch: /(admin|performance|dashboard|equipment|personnel|i18n|units|transfers|user-lifecycle|rtl|settings-navigation).*\.spec\.ts/,
       testIgnore: [/.*\.mobile\.spec\.ts/, /auth\.spec\.ts/], // Exclude mobile and auth tests
     },
     // Staging leader tests (requires leader role)
