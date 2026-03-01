@@ -31,8 +31,9 @@ test.describe('Bottom Navigation - Structure', () => {
   });
 
   test('[NAV-1] Bottom nav should have exactly 5 buttons on mobile', async ({ page }) => {
-    // Find bottom navigation (support both English and Hebrew text)
-    const bottomNav = page.locator('nav').filter({ hasText: /dashboard|personnel|equipment|reports|settings|לוח בקרה|כוח אדם|ציוד|דוחות|הגדרות/i });
+    // Find bottom navigation (use .last() to get bottom nav, not sidebar)
+    // Support both English and Hebrew text
+    const bottomNav = page.locator('nav').filter({ hasText: /dashboard|personnel|equipment|reports|settings|לוח בקרה|כוח אדם|ציוד|דוחות|הגדרות/i }).last();
     await expect(bottomNav).toBeVisible({ timeout: 10000 });
 
     // Count visible navigation buttons (excluding dropdown menu items)
@@ -265,30 +266,22 @@ test.describe('Settings & Navigation - RTL (Hebrew)', () => {
   });
 
   test('[RTL-2] Settings tabs should flow right to left', async ({ page }) => {
+    // Set language to Hebrew to ensure RTL mode
     await page.goto('/settings');
+    await page.evaluate(() => {
+      localStorage.setItem('pmtb-language', 'he');
+    });
+    // Reload to apply language change
+    await page.reload({ waitUntil: 'load' });
     await page.waitForTimeout(1000);
 
+    // Verify HTML has RTL direction
+    const htmlDir = await page.locator('html').getAttribute('dir');
+    expect(htmlDir).toBe('rtl');
+
+    // Verify tabs are present
     const tabsList = page.locator('[role="tablist"]').first();
-
-    if (await tabsList.isVisible().catch(() => false)) {
-      // Check that HTML element has RTL direction (which controls layout)
-      // The dir attribute on html/body controls the text and layout direction
-      const htmlDir = await page.locator('html').getAttribute('dir');
-      expect(htmlDir).toBe('rtl');
-
-      // Verify tabs are actually in RTL context by checking parent direction
-      const parentDir = await tabsList.evaluate(el => {
-        let current = el.parentElement;
-        while (current) {
-          if (current.getAttribute('dir')) {
-            return current.getAttribute('dir');
-          }
-          current = current.parentElement;
-        }
-        return document.documentElement.getAttribute('dir');
-      });
-      expect(parentDir).toBe('rtl');
-    }
+    await expect(tabsList).toBeVisible({ timeout: 5000 });
   });
 
   test('[RTL-3] Bottom nav should have RTL layout on mobile', async ({ page }) => {
