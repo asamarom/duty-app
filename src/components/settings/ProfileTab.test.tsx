@@ -21,6 +21,39 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => mockUseAuth(),
 }));
 
+// Mock useEffectiveRole hook
+const mockUseEffectiveRole = vi.fn(() => ({
+  isAdmin: false,
+  isLeader: false,
+  isActualAdmin: false,
+  loading: false,
+  roles: ['user'],
+}));
+
+vi.mock('@/hooks/useEffectiveRole', () => ({
+  useEffectiveRole: () => mockUseEffectiveRole(),
+}));
+
+// Mock AdminModeContext
+const mockToggleAdminMode = vi.fn();
+vi.mock('@/contexts/AdminModeContext', () => ({
+  useAdminMode: () => ({
+    isAdminMode: false,
+    toggleAdminMode: mockToggleAdminMode,
+    setAdminMode: vi.fn(),
+  }),
+}));
+
+// Mock Firestore
+vi.mock('firebase/firestore', () => ({
+  doc: vi.fn(),
+  onSnapshot: vi.fn(),
+  collection: vi.fn(),
+  query: vi.fn(),
+  where: vi.fn(),
+  getDocs: vi.fn(() => Promise.resolve({ size: 0, docs: [], empty: true })),
+}));
+
 // Mock version module
 vi.mock('@/lib/version', () => ({
   getAppVersion: () => 'v1.0.0-test',
@@ -46,6 +79,13 @@ describe('ProfileTab Component', () => {
       signInWithGoogle: vi.fn(),
       signInWithPassword: vi.fn(),
       signOut: vi.fn(),
+    });
+    mockUseEffectiveRole.mockReturnValue({
+      isAdmin: false,
+      isLeader: false,
+      isActualAdmin: false,
+      loading: false,
+      roles: ['user'],
     });
   });
 
@@ -96,6 +136,52 @@ describe('ProfileTab Component', () => {
 
     it.skip('shows version in monospace font', () => {
       // Version is displayed in SettingsPage, not ProfileTab
+    });
+  });
+
+  describe('Admin Mode Toggle', () => {
+    it('does not show admin mode toggle for regular users', () => {
+      mockUseEffectiveRole.mockReturnValue({
+        isAdmin: false,
+        isLeader: false,
+        isActualAdmin: false,
+        loading: false,
+        roles: ['user'],
+      });
+
+      renderWithProviders(<ProfileTab />);
+
+      expect(screen.queryByText(/admin mode/i)).not.toBeInTheDocument();
+    });
+
+    it('shows admin mode toggle for admins', () => {
+      mockUseEffectiveRole.mockReturnValue({
+        isAdmin: true,
+        isLeader: false,
+        isActualAdmin: true,
+        loading: false,
+        roles: ['admin'],
+      });
+
+      renderWithProviders(<ProfileTab />);
+
+      // Check for the switch role (admin mode toggle)
+      expect(screen.getByRole('switch')).toBeInTheDocument();
+    });
+
+    it('displays switch control for admin mode', () => {
+      mockUseEffectiveRole.mockReturnValue({
+        isAdmin: true,
+        isLeader: false,
+        isActualAdmin: true,
+        loading: false,
+        roles: ['admin'],
+      });
+
+      renderWithProviders(<ProfileTab />);
+
+      const switchControl = screen.getByRole('switch');
+      expect(switchControl).toBeInTheDocument();
     });
   });
 
