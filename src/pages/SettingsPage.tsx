@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge';
 import { Lock } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { SettingsTabs } from '@/components/settings/SettingsTabs';
-import { getFullVersionString } from '@/lib/version';
 
 export default function SettingsPage() {
   const { t } = useLanguage();
@@ -19,7 +18,7 @@ export default function SettingsPage() {
         />
       </div>
 
-      <div className="tactical-grid min-h-screen p-4 lg:p-6">
+      <div className="tactical-grid p-4 lg:p-6">
         {/* Desktop Header */}
         <header className="mb-6 hidden lg:block">
           <div className="flex items-center justify-between">
@@ -41,13 +40,6 @@ export default function SettingsPage() {
         <div className="space-y-6 lg:max-w-4xl">
           {/* Settings Tabs */}
           <SettingsTabs />
-
-          {/* Version Info */}
-          <div className="text-center py-4">
-            <p className="font-mono text-xs text-muted-foreground">
-              {getFullVersionString()}
-            </p>
-          </div>
         </div>
       </div>
     </MainLayout>

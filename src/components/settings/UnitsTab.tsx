@@ -43,11 +43,11 @@ export function UnitsTab() {
             <div className="space-y-3">
               {/* Summary Statistics */}
               <div className="rounded-lg border border-border/50 bg-secondary/50 p-3">
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between gap-2 mb-2">
                   <span className="text-xs text-muted-foreground">
                     {t('settings.unitsInYourBattalion')}
                   </span>
-                  <Badge variant={isAdmin ? 'rank' : 'tactical'}>
+                  <Badge variant={isAdmin ? 'rank' : 'tactical'} className="shrink-0 text-xs">
                     {isAdmin ? t('personnel.roleAdmin') : t('personnel.roleLeader')}
                   </Badge>
                 </div>

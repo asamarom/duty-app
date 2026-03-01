@@ -295,6 +295,17 @@ export const translations = {
     'settings.approvals.subtitle': 'Review and approve user access requests',
     'settings.version': 'Version',
     'settings.buildTime': 'Built on',
+
+    // Profile
+    'profile.accountInfo': 'Account Information',
+    'profile.accountDetails': 'Account creation and status',
+    'profile.accountCreated': 'Account Created',
+    'profile.accountStatus': 'Status',
+    'profile.active': 'Active',
+    'profile.unitAssignment': 'Unit Assignment',
+    'profile.linkedPersonnel': 'Personnel record status',
+    'profile.personnelRecord': 'Personnel Record',
+    'profile.assignedUnit': 'Assigned Unit',
     // Settings - Additional keys for consolidated Settings page
     'settings.manageUnits': 'Manage Units',
     'settings.manageApprovals': 'Manage Approvals',
@@ -541,6 +552,9 @@ export const translations = {
     'common.returnHome': 'Return to Home',
     'common.assign': 'Assign',
     'common.saving': 'Saving...',
+    'common.authenticated': 'Authenticated',
+    'common.notAvailable': 'Not Available',
+    'common.linked': 'Linked',
 
     // Admin Mode
     'adminMode.title': 'Admin Mode',
@@ -863,6 +877,17 @@ export const translations = {
     'settings.approvals.subtitle': 'סקור ואשר בקשות גישה של משתמשים',
     'settings.version': 'גרסה',
     'settings.buildTime': 'נבנה ב',
+
+    // Profile
+    'profile.accountInfo': 'מידע על החשבון',
+    'profile.accountDetails': 'יצירת חשבון וסטטוס',
+    'profile.accountCreated': 'חשבון נוצר',
+    'profile.accountStatus': 'סטטוס',
+    'profile.active': 'פעיל',
+    'profile.unitAssignment': 'שיוך יחידה',
+    'profile.linkedPersonnel': 'סטטוס רשומת כוח אדם',
+    'profile.personnelRecord': 'רשומת כוח אדם',
+    'profile.assignedUnit': 'יחידה משויכת',
     // Settings - Additional keys for consolidated Settings page
     'settings.manageUnits': 'נהל יחידות',
     'settings.manageApprovals': 'נהל אישורים',
@@ -1105,6 +1130,9 @@ export const translations = {
     'common.returnHome': 'חזרה לדף הבית',
     'common.assign': 'הקצה',
     'common.saving': 'שומר...',
+    'common.authenticated': 'מאומת',
+    'common.notAvailable': 'לא זמין',
+    'common.linked': 'מקושר',
 
     // Admin Mode
     'adminMode.title': 'מצב מנהל',

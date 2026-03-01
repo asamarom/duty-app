@@ -108,16 +108,16 @@ export function ApprovalsTab() {
           <div className="space-y-3">
             {/* Pending Count */}
             <div className="rounded-lg border border-border/50 bg-secondary/50 p-3">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <span className="text-xs text-muted-foreground">
                   {t('settings.pendingRequests')}
                 </span>
                 {pendingCount > 0 ? (
-                  <Badge variant="destructive" className="text-xs">
+                  <Badge variant="destructive" className="text-xs shrink-0">
                     {t('settings.pendingCount', { count: pendingCount.toString() })}
                   </Badge>
                 ) : (
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground text-right">
                     {t('settings.noPendingRequests')}
                   </span>
                 )}

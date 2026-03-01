@@ -302,19 +302,19 @@ export function ApprovalsManagement({ showHeader = true, className }: ApprovalsM
       )}
 
       <Tabs defaultValue="pending">
-        <TabsList>
-          <TabsTrigger value="pending" className="gap-2">
-            <Clock className="h-4 w-4" />
-            {t('status.pending')}
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="pending" className="gap-1 sm:gap-2 text-xs sm:text-sm">
+            <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <span className="truncate">{t('status.pending')}</span>
             {pendingRequests.length > 0 && (
-              <Badge variant="secondary" className="ms-1">
+              <Badge variant="secondary" className="ms-0.5 sm:ms-1 text-xs shrink-0">
                 {pendingRequests.length}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="processed" className="gap-2">
-            <CheckCircle className="h-4 w-4" />
-            {t('approvals.processed')}
+          <TabsTrigger value="processed" className="gap-1 sm:gap-2 text-xs sm:text-sm">
+            <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <span className="truncate">{t('approvals.processed')}</span>
           </TabsTrigger>
         </TabsList>
 
@@ -334,36 +334,36 @@ export function ApprovalsManagement({ showHeader = true, className }: ApprovalsM
             <div className="grid gap-4">
               {pendingRequests.map((request) => (
                 <Card key={request.id}>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-lg">{request.fullName}</CardTitle>
-                        <CardDescription>{request.email}</CardDescription>
+                  <CardHeader className="pb-3 p-3 sm:p-6">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <CardTitle className="text-base sm:text-lg truncate">{request.fullName}</CardTitle>
+                        <CardDescription className="text-xs sm:text-sm truncate">{request.email}</CardDescription>
                       </div>
-                      <Badge variant="outline" className="gap-1">
+                      <Badge variant="outline" className="gap-1 shrink-0 text-xs">
                         <Clock className="h-3 w-3" />
                         {t('status.pending')}
                       </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                      <div>
+                  <CardContent className="p-3 sm:p-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-3 sm:mb-4">
+                      <div className="min-w-0">
                         <p className="text-xs text-muted-foreground">{t('approvals.serviceNumber')}</p>
-                        <p className="font-medium">{request.serviceNumber}</p>
+                        <p className="text-sm sm:text-base font-medium truncate">{request.serviceNumber}</p>
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-xs text-muted-foreground">{t('approvals.phone')}</p>
-                        <p className="font-medium">{request.phone || 'N/A'}</p>
+                        <p className="text-sm sm:text-base font-medium truncate">{request.phone || 'N/A'}</p>
                       </div>
-                      <div className="col-span-2">
+                      <div className="col-span-1 sm:col-span-2 min-w-0">
                         <p className="text-xs text-muted-foreground">{t('approvals.unit')}</p>
-                        <p className="font-medium">{getUnitPath(request)}</p>
+                        <p className="text-sm sm:text-base font-medium truncate">{getUnitPath(request)}</p>
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <Button
-                        className="flex-1"
+                        className="flex-1 h-11"
                         onClick={() => handleApprove(request)}
                         disabled={processingId === request.id}
                       >
@@ -376,7 +376,7 @@ export function ApprovalsManagement({ showHeader = true, className }: ApprovalsM
                       </Button>
                       <Button
                         variant="destructive"
-                        className="flex-1"
+                        className="flex-1 h-11"
                         onClick={() => openDeclineDialog(request)}
                         disabled={processingId === request.id}
                       >
@@ -407,15 +407,15 @@ export function ApprovalsManagement({ showHeader = true, className }: ApprovalsM
             <div className="grid gap-4">
               {processedRequests.map((request) => (
                 <Card key={request.id} className="opacity-75">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-lg">{request.fullName}</CardTitle>
-                        <CardDescription>{request.email}</CardDescription>
+                  <CardHeader className="pb-3 p-3 sm:p-6">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <CardTitle className="text-base sm:text-lg truncate">{request.fullName}</CardTitle>
+                        <CardDescription className="text-xs sm:text-sm truncate">{request.email}</CardDescription>
                       </div>
                       <Badge
                         variant={request.status === 'approved' ? 'default' : 'destructive'}
-                        className="gap-1"
+                        className="gap-1 shrink-0 text-xs"
                       >
                         {request.status === 'approved' ? (
                           <CheckCircle className="h-3 w-3" />
@@ -426,26 +426,26 @@ export function ApprovalsManagement({ showHeader = true, className }: ApprovalsM
                       </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div>
+                  <CardContent className="p-3 sm:p-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                      <div className="min-w-0">
                         <p className="text-xs text-muted-foreground">{t('approvals.serviceNumber')}</p>
-                        <p className="font-medium">{request.serviceNumber}</p>
+                        <p className="text-sm sm:text-base font-medium truncate">{request.serviceNumber}</p>
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-xs text-muted-foreground">{t('approvals.unit')}</p>
-                        <p className="font-medium">{getUnitPath(request)}</p>
+                        <p className="text-sm sm:text-base font-medium truncate">{getUnitPath(request)}</p>
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-xs text-muted-foreground">{t('approvals.reviewed')}</p>
-                        <p className="font-medium">
+                        <p className="text-sm sm:text-base font-medium truncate">
                           {request.reviewedAt && (request.reviewedAt as any).toDate?.()?.toLocaleDateString()}
                         </p>
                       </div>
                       {request.declineReason && (
-                        <div className="col-span-2">
+                        <div className="col-span-1 sm:col-span-2 min-w-0">
                           <p className="text-xs text-muted-foreground">{t('approvals.declineReason')}</p>
-                          <p className="font-medium text-destructive">{request.declineReason}</p>
+                          <p className="text-sm sm:text-base font-medium text-destructive line-clamp-2">{request.declineReason}</p>
                         </div>
                       )}
                     </div>

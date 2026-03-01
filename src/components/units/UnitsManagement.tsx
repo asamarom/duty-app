@@ -204,64 +204,66 @@ export function UnitsManagement({
       return (
         <Card key={unit.id} className="card-tactical">
           <Collapsible open={isExpanded} onOpenChange={() => toggleUnit(unit.id)}>
-            <CardHeader className="p-4">
-              <div className="flex items-center justify-between">
-                <CollapsibleTrigger className="flex items-center gap-3 flex-1 hover:opacity-80">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20">
-                    <Icon className="h-5 w-5 text-primary" />
+            <CardHeader className="p-3 sm:p-4">
+              <div className="flex items-center justify-between gap-2">
+                <CollapsibleTrigger className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 hover:opacity-80">
+                  <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-primary/20 shrink-0">
+                    <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                   </div>
-                  <div className={`text-${dir === 'rtl' ? 'right' : 'left'}`}>
-                    <CardTitle className="text-base">{unit.name}</CardTitle>
+                  <div className={`text-${dir === 'rtl' ? 'right' : 'left'} min-w-0 flex-1`}>
+                    <CardTitle className="text-sm sm:text-base truncate">{unit.name}</CardTitle>
                     {unit.designation && (
-                      <p className="text-xs text-muted-foreground">{unit.designation}</p>
+                      <p className="text-xs text-muted-foreground truncate">{unit.designation}</p>
                     )}
                   </div>
-                  <Badge variant={getStatusColor(unit.status) as any} className="mx-2">
+                  <Badge variant={getStatusColor(unit.status) as any} className="mx-1 sm:mx-2 shrink-0 text-xs">
                     {unit.status}
                   </Badge>
                   {children.length > 0 && (
                     isExpanded ? (
-                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
                     ) : (
-                      <ChevronRight className={`h-4 w-4 text-muted-foreground ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                      <ChevronRight className={`h-4 w-4 text-muted-foreground shrink-0 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                     )
                   )}
                 </CollapsibleTrigger>
                 {canManage && (
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
                     {childType && (
                       <Button
                         variant="ghost"
                         size="icon"
+                        className="h-8 w-8 sm:h-10 sm:w-10"
                         onClick={(e) => {
                           e.stopPropagation();
                           openCreateDialog(childType, unit.id);
                         }}
                         title={t(UNIT_ADD_KEYS[childType])}
                       >
-                        <Plus className="h-4 w-4" />
+                        <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </Button>
                     )}
                     <Button
                       variant="ghost"
                       size="icon"
+                      className="h-8 w-8 sm:h-10 sm:w-10"
                       onClick={(e) => {
                         e.stopPropagation();
                         openEditDialog(unit);
                       }}
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-destructive hover:text-destructive"
+                      className="text-destructive hover:text-destructive h-8 w-8 sm:h-10 sm:w-10"
                       onClick={(e) => {
                         e.stopPropagation();
                         openDeleteDialog(unit);
                       }}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     </Button>
                   </div>
                 )}
@@ -269,11 +271,11 @@ export function UnitsManagement({
             </CardHeader>
 
             <CollapsibleContent>
-              <CardContent className="pt-0 pb-4 px-4">
+              <CardContent className="pt-0 pb-3 px-3 sm:pb-4 sm:px-4">
                 {children.length === 0 ? (
-                  <p className="text-sm text-muted-foreground ps-12">{t('units.noSubUnits')}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground ps-10 sm:ps-12">{t('units.noSubUnits')}</p>
                 ) : (
-                  <div className="space-y-3 ps-6 border-s border-border ms-5">
+                  <div className="space-y-2 sm:space-y-3 ps-4 sm:ps-6 border-s border-border ms-4 sm:ms-5">
                     {children.map((child) => renderUnit(child, level + 1))}
                   </div>
                 )}
@@ -290,31 +292,31 @@ export function UnitsManagement({
           open={isExpanded}
           onOpenChange={() => toggleUnit(unit.id)}
         >
-          <div className="rounded-lg border border-border bg-secondary/30 p-3">
-            <div className="flex items-center justify-between">
-              <CollapsibleTrigger className="flex items-center gap-3 flex-1 hover:opacity-80">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/20">
-                  <Icon className="h-4 w-4 text-accent-foreground" />
+          <div className="rounded-lg border border-border bg-secondary/30 p-2 sm:p-3">
+            <div className="flex items-center justify-between gap-2">
+              <CollapsibleTrigger className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 hover:opacity-80">
+                <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-accent/20 shrink-0">
+                  <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent-foreground" />
                 </div>
-                <div className={`text-${dir === 'rtl' ? 'right' : 'left'}`}>
-                  <p className="text-sm font-medium">{unit.name}</p>
+                <div className={`text-${dir === 'rtl' ? 'right' : 'left'} min-w-0 flex-1`}>
+                  <p className="text-xs sm:text-sm font-medium truncate">{unit.name}</p>
                   {unit.designation && (
-                    <p className="text-xs text-muted-foreground">{unit.designation}</p>
+                    <p className="text-xs text-muted-foreground truncate">{unit.designation}</p>
                   )}
                 </div>
-                <Badge variant={getStatusColor(unit.status) as any} className="text-xs mx-2">
+                <Badge variant={getStatusColor(unit.status) as any} className="text-xs mx-1 sm:mx-2 shrink-0">
                   {unit.status}
                 </Badge>
                 {children.length > 0 && (
                   isExpanded ? (
-                    <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                    <ChevronDown className="h-3 w-3 text-muted-foreground shrink-0" />
                   ) : (
-                    <ChevronRight className={`h-3 w-3 text-muted-foreground ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                    <ChevronRight className={`h-3 w-3 text-muted-foreground shrink-0 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                   )
                 )}
               </CollapsibleTrigger>
               {canManage && (
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
                   {childType && (
                     <Button
                       variant="ghost"
@@ -357,7 +359,7 @@ export function UnitsManagement({
 
             <CollapsibleContent>
               {children.length > 0 && (
-                <div className="mt-3 space-y-2 ps-6 border-s border-border ms-4">
+                <div className="mt-2 sm:mt-3 space-y-2 ps-4 sm:ps-6 border-s border-border ms-3 sm:ms-4">
                   {children.map((child) => renderUnit(child, level + 1))}
                 </div>
               )}
@@ -370,22 +372,22 @@ export function UnitsManagement({
       return (
         <div
           key={unit.id}
-          className="flex items-center justify-between rounded-md border border-border bg-background/50 p-2"
+          className="flex items-center justify-between gap-2 rounded-md border border-border bg-background/50 p-2"
         >
-          <div className="flex items-center gap-2">
-            <Icon className="h-4 w-4 text-muted-foreground" />
-            <div>
-              <p className="text-sm font-medium">{unit.name}</p>
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium truncate">{unit.name}</p>
               {unit.designation && (
-                <p className="text-xs text-muted-foreground">{unit.designation}</p>
+                <p className="text-xs text-muted-foreground truncate">{unit.designation}</p>
               )}
             </div>
-            <Badge variant={getStatusColor(unit.status) as any} className="text-xs ms-2">
+            <Badge variant={getStatusColor(unit.status) as any} className="text-xs ms-1 sm:ms-2 shrink-0">
               {unit.status}
             </Badge>
           </div>
           {canManage && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
               <Button
                 variant="ghost"
                 size="icon"

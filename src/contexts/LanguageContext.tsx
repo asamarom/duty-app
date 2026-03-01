@@ -4,7 +4,7 @@ import { translations, Language, TranslationKey } from '@/i18n/translations';
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: TranslationKey) => string;
+  t: (key: TranslationKey, params?: Record<string, string | number>) => string;
   dir: 'ltr' | 'rtl';
 }
 
@@ -21,8 +21,18 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('pmtb-language', lang);
   };
 
-  const t = (key: TranslationKey): string => {
-    return translations[language][key] || translations['en'][key] || key;
+  const t = (key: TranslationKey, params?: Record<string, string | number>): string => {
+    let text = translations[language][key] || translations['en'][key] || key;
+
+    // Interpolate template variables if params provided
+    if (params) {
+      text = text.replace(/\{(\w+)\}/g, (_, paramKey) => {
+        const value = params[paramKey];
+        return value !== undefined ? String(value) : `{${paramKey}}`;
+      });
+    }
+
+    return text;
   };
 
   const dir = language === 'he' ? 'rtl' : 'ltr';
