@@ -35,6 +35,8 @@ function renderWithProviders(ui: React.ReactElement) {
 describe('SettingsTabs Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Set language to English for consistent test behavior
+    localStorage.setItem('pmtb-language', 'en');
     mockUseEffectiveRole.mockReturnValue({
       isAdmin: false,
       isLeader: false,
