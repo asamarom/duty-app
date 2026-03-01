@@ -94,34 +94,36 @@ export function ProfileTab() {
         </CardContent>
       </Card>
 
-      {/* Account Information */}
-      <Card className="card-tactical border-border/50">
-        <CardHeader className="p-4 lg:p-6 pb-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 lg:h-10 lg:w-10 items-center justify-center rounded-lg bg-primary/20">
-              <Calendar className="h-4 w-4 lg:h-5 lg:w-5 text-primary" />
+      {/* Personnel Information */}
+      {currentPersonnel && (
+        <Card className="card-tactical border-border/50">
+          <CardHeader className="p-4 lg:p-6 pb-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 lg:h-10 lg:w-10 items-center justify-center rounded-lg bg-primary/20">
+                <User className="h-4 w-4 lg:h-5 lg:w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-sm lg:text-base">{t('personnel.personnelInfo')}</CardTitle>
+                <CardDescription className="text-xs lg:text-sm">
+                  {t('personnel.details')}
+                </CardDescription>
+              </div>
             </div>
-            <div>
-              <CardTitle className="text-sm lg:text-base">{t('profile.accountInfo')}</CardTitle>
-              <CardDescription className="text-xs lg:text-sm">
-                {t('profile.accountDetails')}
-              </CardDescription>
+          </CardHeader>
+          <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0">
+            <div className="space-y-2 text-xs lg:text-sm">
+              <div className="flex justify-between gap-2">
+                <span className="text-muted-foreground">{t('personnel.fullName')}</span>
+                <span className="font-medium text-right">{currentPersonnel.firstName} {currentPersonnel.lastName}</span>
+              </div>
+              <div className="flex justify-between gap-2">
+                <span className="text-muted-foreground">{t('personnel.serviceNumber')}</span>
+                <span className="font-medium text-right">{currentPersonnel.serviceNumber}</span>
+              </div>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-4 pt-0 lg:p-6 lg:pt-0">
-          <div className="space-y-2 text-xs lg:text-sm">
-            <div className="flex justify-between gap-2">
-              <span className="text-muted-foreground">{t('profile.accountCreated')}</span>
-              <span className="font-medium text-right">{accountCreatedDate || t('common.notAvailable')}</span>
-            </div>
-            <div className="flex justify-between gap-2">
-              <span className="text-muted-foreground">{t('profile.accountStatus')}</span>
-              <Badge variant="outline" className="h-5 shrink-0 text-xs">{t('profile.active')}</Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Unit Assignment */}
       {currentPersonnel && (

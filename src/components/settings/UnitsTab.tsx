@@ -60,13 +60,11 @@ export function UnitsTab() {
                     {t('settings.noUnitsYet')}
                   </p>
                 ) : (
-                  <p className="text-xs lg:text-sm text-foreground">
-                    {t('settings.unitStats', {
-                      battalions: battalionCount.toString(),
-                      companies: companyCount.toString(),
-                      platoons: platoonCount.toString(),
-                    })}
-                  </p>
+                  <div className="space-y-1 text-xs lg:text-sm text-foreground">
+                    <div>{battalionCount} {t('settings.battalions')}</div>
+                    <div>{companyCount} {t('settings.companies')}</div>
+                    <div>{platoonCount} {t('settings.platoons')}</div>
+                  </div>
                 )}
               </div>
 

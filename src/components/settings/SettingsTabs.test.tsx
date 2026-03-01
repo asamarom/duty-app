@@ -46,7 +46,16 @@ vi.mock('@/hooks/useUnitsManagement', () => ({
   }),
 }));
 
+// Mock usePendingRequestsCount hook
+vi.mock('@/hooks/usePendingRequestsCount', () => ({
+  usePendingRequestsCount: () => 0,
+}));
+
 // Mock Firestore
+vi.mock('@/lib/firebase', () => ({
+  db: {},
+}));
+
 vi.mock('firebase/firestore', () => ({
   collection: vi.fn(),
   query: vi.fn(),

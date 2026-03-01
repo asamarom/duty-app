@@ -55,6 +55,10 @@ vi.mock('@/integrations/firebase/client', () => ({
   db: {},
 }));
 
+vi.mock('@/lib/firebase', () => ({
+  db: {},
+}));
+
 vi.mock('firebase/firestore', () => ({
   collection: vi.fn(),
   query: vi.fn(),

@@ -145,8 +145,10 @@ describe('UnitsTab Component', () => {
 
       renderWithProviders(<UnitsTab />);
 
-      // Check that the translation key is present (mocked t() returns the key)
-      expect(screen.getByText('settings.unitStats')).toBeInTheDocument();
+      // Check that each unit type is displayed on separate lines with counts
+      expect(screen.getByText(/1.*settings\.battalions/)).toBeInTheDocument();
+      expect(screen.getByText(/2.*settings\.companies/)).toBeInTheDocument();
+      expect(screen.getByText(/3.*settings\.platoons/)).toBeInTheDocument();
     });
 
     it('displays no units message when no units exist', () => {
