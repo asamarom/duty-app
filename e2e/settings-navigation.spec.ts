@@ -24,18 +24,43 @@ test.describe('Settings Page - Structure [Admin]', () => {
   });
 
   test('[SETTINGS-1] should display 3 tabs in Settings page for admin', async ({ page }) => {
-    // Debug: Check what's on the page
+    // Debug: Check what's on the page and Firebase state
     const pageContent = await page.evaluate(() => {
       const tabs = document.querySelectorAll('[role="tab"]');
       const adminMode = localStorage.getItem('pmtb_admin_mode');
+      // @ts-ignore - access window.auth for debugging
+      const currentUser = window.auth?.currentUser;
       return {
         tabCount: tabs.length,
         tabNames: Array.from(tabs).map(t => t.textContent),
         adminMode,
         loadingText: document.body.textContent?.includes('Loading') || document.body.textContent?.includes('loading'),
+        currentUserUid: currentUser?.uid,
+        currentUserEmail: currentUser?.email,
       };
     });
     console.log('Page state:', pageContent);
+
+    // Also check if we can access Firestore to see the user's roles
+    const firestoreDebug = await page.evaluate(async () => {
+      try {
+        // @ts-ignore
+        const { db, auth } = window;
+        if (!auth?.currentUser) return { error: 'No current user' };
+
+        // Dynamically import Firestore functions
+        const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+        const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+
+        return {
+          exists: userDoc.exists(),
+          data: userDoc.exists() ? userDoc.data() : null,
+        };
+      } catch (error) {
+        return { error: error.message };
+      }
+    });
+    console.log('Firestore user doc:', firestoreDebug);
 
     // Wait for tabs to be visible
     const tabsList = page.locator('[role="tablist"]');
