@@ -18,7 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
 export function TransfersList() {
-  const { t, dir } = useLanguage();
+  const { t, dir, language } = useLanguage();
   const { isAdmin } = useEffectiveRole();
   const { requests, incomingTransfers, loading, recipientApprove, recipientReject } = useAssignmentRequests();
   const { currentPersonnel, saveSignature } = useCurrentPersonnel();
@@ -148,7 +148,7 @@ export function TransfersList() {
     <>
       <Tabs defaultValue="incoming" dir={dir}>
         <div className="flex mb-4" dir={dir}>
-        <TabsList>
+        <TabsList dir={language === 'he' ? 'rtl' : 'ltr'}>
           <TabsTrigger value="incoming" className="gap-2">
             <Inbox className="h-4 w-4" />
             {t('transfers.incoming')}
