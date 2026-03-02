@@ -30,6 +30,10 @@ import {
 
 export default function EquipmentPage() {
   const { t, dir, language } = useLanguage();
+
+  // Debug: Log dir and language values
+  console.log('[EquipmentPage] language:', language, 'dir:', dir);
+
   const navigate = useNavigate();
   const { equipment, loading, assignEquipment, requestAssignment, isWithinSameUnit, refetch } = useEquipment();
   const [searchQuery, setSearchQuery] = useState('');

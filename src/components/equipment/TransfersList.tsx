@@ -19,6 +19,9 @@ import { Label } from '@/components/ui/label';
 
 export function TransfersList() {
   const { t, dir, language } = useLanguage();
+
+  // Debug: Log dir and language values
+  console.log('[TransfersList] language:', language, 'dir:', dir);
   const { isAdmin } = useEffectiveRole();
   const { requests, incomingTransfers, loading, recipientApprove, recipientReject } = useAssignmentRequests();
   const { currentPersonnel, saveSignature } = useCurrentPersonnel();
