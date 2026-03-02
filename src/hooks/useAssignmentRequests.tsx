@@ -21,7 +21,7 @@ export type AssignmentRequestStatus = 'pending' | 'approved' | 'rejected';
 
 // Module-level cache — persists across component mounts so navigating back shows
 // previously loaded data immediately while a background refresh runs silently.
-let _requestsCache: { requests: AssignmentRequest[]; incoming: AssignmentRequest[] } | null = null;
+let _requestsCache: { requests: AssignmentRequest[]; incoming: AssignmentRequest[]; outgoing: AssignmentRequest[] } | null = null;
 
 /** Exposed only for unit tests — resets the module-level cache between test runs. */
 export function _resetCacheForTesting() { _requestsCache = null; }
@@ -61,6 +61,7 @@ export interface RequestApproval {
 interface UseAssignmentRequestsReturn {
   requests: AssignmentRequest[];
   incomingTransfers: AssignmentRequest[];
+  outgoingTransfers: AssignmentRequest[];
   loading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
@@ -74,12 +75,14 @@ interface UseAssignmentRequestsReturn {
   rejectRequest: (requestId: string, notes?: string) => Promise<void>;
   recipientApprove: (requestId: string, notes?: string) => Promise<void>;
   recipientReject: (requestId: string, notes?: string) => Promise<void>;
+  cancelRequest: (requestId: string) => Promise<void>;
   getApprovalsForRequest: (requestId: string) => RequestApproval[];
 }
 
 export function useAssignmentRequests(): UseAssignmentRequestsReturn {
   const [requests, setRequests] = useState<AssignmentRequest[]>(_requestsCache?.requests ?? []);
   const [incomingTransfers, setIncomingTransfers] = useState<AssignmentRequest[]>(_requestsCache?.incoming ?? []);
+  const [outgoingTransfers, setOutgoingTransfers] = useState<AssignmentRequest[]>(_requestsCache?.outgoing ?? []);
   const [loading, setLoading] = useState(_requestsCache === null);
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
@@ -216,15 +219,22 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
             (r.to_personnel_id != null && r.to_personnel_id === currentPersonnelId)
           )
         );
-        _requestsCache = { requests: mappedRequests, incoming };
+        // Only show outgoing transfers that were initiated by the current user
+        const outgoing = mappedRequests.filter(r =>
+          r.status === 'pending' &&
+          r.requested_by === user?.uid
+        );
+        _requestsCache = { requests: mappedRequests, incoming, outgoing };
         latestRequestsRef.current = mappedRequests;
         setRequests(mappedRequests);
         setIncomingTransfers(incoming);
+        setOutgoingTransfers(outgoing);
       } catch (err) {
         console.error('useAssignmentRequests: Firestore error', err);
         setError(err as Error);
         setRequests([]);
         setIncomingTransfers([]);
+        setOutgoingTransfers([]);
       } finally {
         setLoading(false);
       }
@@ -437,6 +447,38 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     await rejectRequest(requestId, notes ? `Recipient rejected: ${notes}` : 'Recipient rejected the transfer');
   }, [rejectRequest]);
 
+  const cancelRequest = useCallback(async (requestId: string) => {
+    // Always read from the ref so we get the latest data regardless of whether
+    // the React state update from the onSnapshot has flushed yet.
+    const localReq = latestRequestsRef.current.find(r => r.id === requestId);
+    if (!localReq) {
+      throw new Error(`Assignment request ${requestId} not found`);
+    }
+
+    // Only the original requester can cancel the request
+    if (localReq.requested_by !== user?.uid) {
+      throw new Error('Only the requester can cancel');
+    }
+
+    const batch = writeBatch(db);
+
+    // Update request status to rejected
+    batch.update(doc(db, 'assignmentRequests', requestId), {
+      status: 'rejected',
+      processedBy: user!.uid,
+      processedAt: serverTimestamp(),
+    });
+
+    // Reset equipment status to serviceable
+    batch.update(doc(db, 'equipment', localReq.equipment_id), {
+      status: 'serviceable',
+      updatedAt: serverTimestamp(),
+    });
+
+    // Commit batch
+    await batch.commit();
+  }, [user]);
+
   const getApprovalsForRequest = useCallback((_requestId: string): RequestApproval[] => {
     // Approval history is not yet stored per-request in the data model.
     // Returns empty array until the data model supports it.
@@ -446,6 +488,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
   return {
     requests,
     incomingTransfers,
+    outgoingTransfers,
     loading,
     error,
     refetch,
@@ -454,6 +497,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     rejectRequest,
     recipientApprove,
     recipientReject,
+    cancelRequest,
     getApprovalsForRequest,
   };
 }

@@ -278,12 +278,18 @@ service cloud.firestore {
         (!request.resource.data.keys().hasAny(['quantity']) || (request.resource.data.quantity is int && request.resource.data.quantity > 0)) &&
         (isAdmin() || !request.resource.data.keys().hasAny(['battalionId']) || isSameBattalionCreate(request.resource.data.battalionId));
 
-      // Only admins and leaders can update requests (approve/reject)
+      // Admins and leaders can update requests (approve/reject)
+      // Users can cancel their own pending requests (self-cancellation)
       // HIGH FIX: Validate status transitions (pending → approved/rejected only)
-      allow update: if isAdminOrLeader() &&
+      allow update: if (isAdminOrLeader() &&
         resource.data.status == 'pending' &&
         request.resource.data.status in ['approved', 'rejected'] &&
-        (isAdmin() || isSameBattalion(resource.data.battalionId));
+        (isAdmin() || isSameBattalion(resource.data.battalionId))) ||
+        // Self-cancellation: users can reject their own pending requests
+        (isAuthenticated() &&
+        resource.data.requestedBy == request.auth.uid &&
+        resource.data.status == 'pending' &&
+        request.resource.data.status == 'rejected');
 
       // Only admins can delete requests
       allow delete: if isAdmin();

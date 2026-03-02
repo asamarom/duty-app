@@ -3,7 +3,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Package, ArrowRight, ArrowLeft, Check, X, Clock, History, Inbox, Loader2 } from 'lucide-react';
+import { Package, ArrowRight, ArrowLeft, Check, X, Clock, History, Inbox, Loader2, Send } from 'lucide-react';
 import { format } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAssignmentRequests, AssignmentRequest } from '@/hooks/useAssignmentRequests';
@@ -20,13 +20,14 @@ import { Label } from '@/components/ui/label';
 export function TransfersList() {
   const { t, dir, language } = useLanguage();
   const { isAdmin } = useEffectiveRole();
-  const { requests, incomingTransfers, loading, recipientApprove, recipientReject } = useAssignmentRequests();
+  const { requests, incomingTransfers, outgoingTransfers, loading, recipientApprove, recipientReject, cancelRequest } = useAssignmentRequests();
   const { currentPersonnel, saveSignature } = useCurrentPersonnel();
   const { toast } = useToast();
 
   const [sigDialogRequest, setSigDialogRequest] = useState<AssignmentRequest | null>(null);
   const [rejectRequest, setRejectRequest] = useState<AssignmentRequest | null>(null);
   const [rejectNotes, setRejectNotes] = useState('');
+  const [cancelRequestDialog, setCancelRequestDialog] = useState<AssignmentRequest | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const processedRequests = requests.filter(r => r.status !== 'pending');
@@ -67,6 +68,20 @@ export function TransfersList() {
     }
   };
 
+  const doCancel = async () => {
+    if (!cancelRequestDialog) return;
+    setSubmitting(true);
+    try {
+      await cancelRequest(cancelRequestDialog.id);
+      toast({ title: t('transfers.transferCanceled'), description: t('transfers.transferCanceledDesc') });
+      setCancelRequestDialog(null);
+    } catch {
+      toast({ title: t('common.error'), description: t('transfers.failedToProcess'), variant: 'destructive' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const getStatusBadge = (r: AssignmentRequest) => {
     if (r.status === 'pending') return <Badge variant="outline" className="text-warning border-warning"><Clock className="h-3 w-3 me-1" />{t('transfers.awaitingRecipient')}</Badge>;
     if (r.status === 'approved') return <Badge className="bg-success text-success-foreground"><Check className="h-3 w-3 me-1" />{t('status.approved')}</Badge>;
@@ -74,7 +89,7 @@ export function TransfersList() {
     return <Badge variant="secondary">{r.status}</Badge>;
   };
 
-  const TransferCard = ({ request, showActions }: { request: AssignmentRequest; showActions: boolean }) => (
+  const TransferCard = ({ request, showActions, showCancel }: { request: AssignmentRequest; showActions: boolean; showCancel?: boolean }) => (
     <Card className="mb-3" dir={dir}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
@@ -118,10 +133,24 @@ export function TransfersList() {
                   className="text-destructive border-destructive hover:bg-destructive/10"
                   onClick={() => setRejectRequest(request)}
                   disabled={submitting}
+                  data-testid="reject-btn"
                 >
                   <X className="h-4 w-4" />
                 </Button>
               </div>
+            )}
+            {showCancel && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-destructive border-destructive hover:bg-destructive/10 mt-1"
+                onClick={() => setCancelRequestDialog(request)}
+                disabled={submitting}
+                data-testid="cancel-btn"
+              >
+                <X className={`h-4 w-4 ${dir === 'rtl' ? 'ms-2' : 'me-2'}`} />
+                {t('transfers.cancel')}
+              </Button>
             )}
           </div>
         </div>
@@ -156,6 +185,13 @@ export function TransfersList() {
               <Badge variant="secondary" className={dir === 'rtl' ? 'me-1' : 'ms-1'}>{incomingTransfers.length}</Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="outgoing" className="gap-2">
+            <Send className="h-4 w-4" />
+            {t('transfers.outgoing')}
+            {outgoingTransfers.length > 0 && (
+              <Badge variant="secondary" className={dir === 'rtl' ? 'me-1' : 'ms-1'}>{outgoingTransfers.length}</Badge>
+            )}
+          </TabsTrigger>
           {isAdmin && (
             <TabsTrigger value="pending" className="gap-2">
               <Clock className="h-4 w-4" />
@@ -173,6 +209,12 @@ export function TransfersList() {
           {incomingTransfers.length === 0
             ? <EmptyState message={t('transfers.noIncoming')} />
             : incomingTransfers.map(r => <TransferCard key={r.id} request={r} showActions={true} />)}
+        </TabsContent>
+
+        <TabsContent value="outgoing">
+          {outgoingTransfers.length === 0
+            ? <EmptyState message={t('transfers.noOutgoing')} />
+            : outgoingTransfers.map(r => <TransferCard key={r.id} request={r} showActions={false} showCancel={r.status === 'pending'} />)}
         </TabsContent>
 
         {isAdmin && (
@@ -218,8 +260,26 @@ export function TransfersList() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setRejectRequest(null)}>{t('common.cancel')}</Button>
             <Button variant="destructive" onClick={doReject} disabled={submitting}>
-              {submitting && <Loader2 className="h-4 w-4 me-2 animate-spin" />}
+              {submitting && <Loader2 className={`h-4 w-4 ${dir === 'rtl' ? 'ms-2' : 'me-2'} animate-spin`} />}
               {t('transfers.reject')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel Dialog */}
+      <Dialog open={!!cancelRequestDialog} onOpenChange={(o) => !o && setCancelRequestDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('transfers.cancelTransfer')}</DialogTitle>
+            <DialogDescription>{cancelRequestDialog?.equipment_name}</DialogDescription>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">{t('transfers.cancelTransferConfirm')}</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCancelRequestDialog(null)}>{t('common.cancel')}</Button>
+            <Button variant="destructive" onClick={doCancel} disabled={submitting}>
+              {submitting && <Loader2 className={`h-4 w-4 ${dir === 'rtl' ? 'ms-2' : 'me-2'} animate-spin`} />}
+              {t('transfers.cancelTransfer')}
             </Button>
           </DialogFooter>
         </DialogContent>

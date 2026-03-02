@@ -500,6 +500,16 @@ export const translations = {
     'transfers.acceptIncoming': 'Accept Incoming Transfer',
     'transfers.rejectIncoming': 'Reject Incoming Transfer',
 
+    // Transfers - Outgoing
+    'transfers.outgoing': 'Outgoing',
+    'transfers.outgoingTransfers': 'Outgoing Transfers',
+    'transfers.noOutgoing': 'No outgoing transfers.',
+    'transfers.cancel': 'Cancel',
+    'transfers.cancelTransfer': 'Cancel Transfer',
+    'transfers.cancelTransferConfirm': 'Are you sure you want to cancel this transfer request?',
+    'transfers.transferCanceled': 'Transfer Canceled',
+    'transfers.transferCanceledDesc': 'The transfer request has been canceled.',
+
     // Signup Request Page
     'signup.requestPending': 'Request Pending',
     'signup.requestDeclined': 'Request Declined',
@@ -1000,6 +1010,16 @@ export const translations = {
     'transfers.noIncoming': 'אין העברות נכנסות הממתינות לאישורך.',
     'transfers.acceptIncoming': 'קבל העברה נכנסת',
     'transfers.rejectIncoming': 'דחה העברה נכנסת',
+
+    // Transfers - Outgoing
+    'transfers.outgoing': 'יוצאות',
+    'transfers.outgoingTransfers': 'העברות יוצאות',
+    'transfers.noOutgoing': 'אין העברות יוצאות.',
+    'transfers.cancel': 'ביטול',
+    'transfers.cancelTransfer': 'ביטול העברה',
+    'transfers.cancelTransferConfirm': 'האם אתה בטוח שברצונך לבטל בקשת העברה זו?',
+    'transfers.transferCanceled': 'ההעברה בוטלה',
+    'transfers.transferCanceledDesc': 'בקשת ההעברה בוטלה.',
 
     // Signup Request Page
     'signup.requestPending': 'בקשה ממתינה',
