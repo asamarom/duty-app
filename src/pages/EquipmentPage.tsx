@@ -146,8 +146,8 @@ export default function EquipmentPage() {
           </div>
         </header>
 
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList aria-label={t('equipment.title')} className="grid w-full grid-cols-2 mb-6" dir={dir}>
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full" dir={dir} key={`tabs-${dir}`}>
+          <TabsList aria-label={t('equipment.title')} className="grid w-full grid-cols-2 mb-6" dir={dir} key={`tabslist-${dir}`}>
             <TabsTrigger value="equipment" className="gap-2">
               <Package className="h-4 w-4" />
               {t('nav.equipment')}

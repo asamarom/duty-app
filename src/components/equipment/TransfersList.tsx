@@ -149,9 +149,9 @@ export function TransfersList() {
 
   return (
     <>
-      <Tabs defaultValue="incoming" dir={dir}>
-        <div className="flex mb-4" dir={dir}>
-        <TabsList dir={dir}>
+      <Tabs defaultValue="incoming" dir={dir} key={`tabs-${dir}`}>
+        <div className="flex mb-4" dir={dir} key={`wrapper-${dir}`}>
+        <TabsList dir={dir} key={`tabslist-${dir}`}>
           <TabsTrigger value="incoming" className="gap-2">
             <Inbox className="h-4 w-4" />
             {t('transfers.incoming')}
