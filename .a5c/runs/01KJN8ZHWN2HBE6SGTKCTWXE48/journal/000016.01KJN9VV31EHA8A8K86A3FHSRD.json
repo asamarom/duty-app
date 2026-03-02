@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-01T18:16:42.337Z",
+  "data": {
+    "effectId": "01KJN9VV2V7Z08D4CKAJFXTYC3",
+    "invocationKey": "ui-bugs-fix:S000008:generate-summary",
+    "invocationHash": "3318868adced5ad9cd8194e3873cd5e3d1a1d7152be4b431de2bdbd0f9b38544",
+    "stepId": "S000008",
+    "taskId": "generate-summary",
+    "kind": "agent",
+    "label": "Generate final summary of all fixes",
+    "taskDefRef": "tasks/01KJN9VV2V7Z08D4CKAJFXTYC3/task.json"
+  },
+  "checksum": "4249941d6cc98e14191ed99360434fab94dbbc5ad3a43fa1a4d367e6aeed7dd5"
+}

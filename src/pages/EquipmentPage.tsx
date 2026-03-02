@@ -143,7 +143,7 @@ export default function EquipmentPage() {
         </header>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList aria-label={t('equipment.title')} className="grid w-full grid-cols-2 mb-6">
+          <TabsList aria-label={t('equipment.title')} className="grid w-full grid-cols-2 mb-6" dir={language === 'he' ? 'rtl' : 'ltr'}>
             <TabsTrigger value="equipment" className="gap-2">
               <Package className="h-4 w-4" />
               {t('nav.equipment')}

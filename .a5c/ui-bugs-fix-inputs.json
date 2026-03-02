@@ -1,0 +1,11 @@
+{
+  "projectPath": "/home/ubuntu/duty-app",
+  "issues": [
+    "Different screens don't support narrow screens well enough",
+    "Settings screen shows 2 version texts and unwanted scrolling with no content at bottom",
+    "Settings screen shows 'common.authenticated' literal text instead of translated text",
+    "Profile section is slim - needs more profile information",
+    "Units tab shows {battalions}, {companies}, {platoons} template placeholders instead of actual values",
+    "Approvals tab shows {count} template placeholder instead of actual count"
+  ]
+}

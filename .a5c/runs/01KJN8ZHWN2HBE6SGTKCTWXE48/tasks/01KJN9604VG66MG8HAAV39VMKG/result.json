@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KJN9604VG66MG8HAAV39VMKG",
+  "taskId": "fix-translation-issues",
+  "invocationKey": "ui-bugs-fix:S000003:fix-translation-issues",
+  "status": "ok",
+  "result": {
+    "changes": [
+      {
+        "description": "Updated t() function to support template variable interpolation with {key} syntax",
+        "details": [
+          "Modified interface to accept optional params: Record<string, string | number>",
+          "Added regex-based interpolation logic to replace {variable} patterns with actual values"
+        ],
+        "file": "src/contexts/LanguageContext.tsx"
+      },
+      {
+        "description": "Added missing 'common.authenticated' translation key",
+        "details": [
+          "English: 'common.authenticated': 'Authenticated'",
+          "Hebrew: 'common.authenticated': 'מאומת'"
+        ],
+        "file": "src/i18n/translations.ts"
+      }
+    ],
+    "issuesFixed": [
+      "ProfileTab.tsx badge now shows 'Authenticated' instead of 'common.authenticated'",
+      "UnitsTab.tsx now shows actual counts instead of {battalions}, {companies}, {platoons}",
+      "ApprovalsTab.tsx now shows actual count instead of {count}"
+    ],
+    "summary": "Successfully fixed all three translation issues"
+  },
+  "startedAt": "2026-03-01T18:06:17.006Z",
+  "finishedAt": "2026-03-01T18:06:17.006Z",
+  "value": {
+    "changes": [
+      {
+        "description": "Updated t() function to support template variable interpolation with {key} syntax",
+        "details": [
+          "Modified interface to accept optional params: Record<string, string | number>",
+          "Added regex-based interpolation logic to replace {variable} patterns with actual values"
+        ],
+        "file": "src/contexts/LanguageContext.tsx"
+      },
+      {
+        "description": "Added missing 'common.authenticated' translation key",
+        "details": [
+          "English: 'common.authenticated': 'Authenticated'",
+          "Hebrew: 'common.authenticated': 'מאומת'"
+        ],
+        "file": "src/i18n/translations.ts"
+      }
+    ],
+    "issuesFixed": [
+      "ProfileTab.tsx badge now shows 'Authenticated' instead of 'common.authenticated'",
+      "UnitsTab.tsx now shows actual counts instead of {battalions}, {companies}, {platoons}",
+      "ApprovalsTab.tsx now shows actual count instead of {count}"
+    ],
+    "summary": "Successfully fixed all three translation issues"
+  }
+}

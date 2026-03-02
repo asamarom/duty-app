@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-01T18:04:46.626Z",
+  "data": {
+    "effectId": "01KJN9604VG66MG8HAAV39VMKG",
+    "invocationKey": "ui-bugs-fix:S000003:fix-translation-issues",
+    "invocationHash": "648648cd3b9114d4398f925a0876b877a5110da4e8e5acf640d9edc19e614f9a",
+    "stepId": "S000003",
+    "taskId": "fix-translation-issues",
+    "kind": "agent",
+    "label": "Fix translation template rendering issues",
+    "taskDefRef": "tasks/01KJN9604VG66MG8HAAV39VMKG/task.json"
+  },
+  "checksum": "2b0cd7687d31f8b9a33fba8ae3e8f5247f9cf1f8d25f6611d2cae65a2e77826f"
+}

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJN908EPBM06VT248Q9CJ8YZ",
+  "taskId": "analyze-issues",
+  "invocationKey": "ui-bugs-fix:S000001:analyze-issues",
+  "stepId": "S000001",
+  "kind": "agent",
+  "title": "Analyze UI issues and root causes",
+  "inputs": {}
+}

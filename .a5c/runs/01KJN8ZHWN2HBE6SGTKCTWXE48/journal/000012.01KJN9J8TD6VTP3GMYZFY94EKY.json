@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-01T18:11:28.717Z",
+  "data": {
+    "effectId": "01KJN9J8SXA7NCP3KBDABRHC0K",
+    "invocationKey": "ui-bugs-fix:S000006:fix-responsive-design",
+    "invocationHash": "7984204d1a4f53a64771f5311bdbcc5aafedddfcfb513ead28e44c131c67afd8",
+    "stepId": "S000006",
+    "taskId": "fix-responsive-design",
+    "kind": "agent",
+    "label": "Fix narrow screen responsiveness across screens",
+    "taskDefRef": "tasks/01KJN9J8SXA7NCP3KBDABRHC0K/task.json"
+  },
+  "checksum": "06c28eba658c9b0e8014a11cbfd22c5b693dafb49d58eb8c941b2af70985f6a2"
+}

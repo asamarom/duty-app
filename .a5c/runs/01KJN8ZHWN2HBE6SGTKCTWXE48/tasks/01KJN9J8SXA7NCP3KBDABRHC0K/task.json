@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJN9J8SXA7NCP3KBDABRHC0K",
+  "taskId": "fix-responsive-design",
+  "invocationKey": "ui-bugs-fix:S000006:fix-responsive-design",
+  "stepId": "S000006",
+  "kind": "agent",
+  "title": "Fix narrow screen responsiveness across screens",
+  "inputs": {}
+}

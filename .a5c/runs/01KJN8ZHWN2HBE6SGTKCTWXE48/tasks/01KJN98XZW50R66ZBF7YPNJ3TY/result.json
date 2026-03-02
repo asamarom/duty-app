@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KJN98XZW50R66ZBF7YPNJ3TY",
+  "taskId": "fix-version-scrolling",
+  "invocationKey": "ui-bugs-fix:S000004:fix-version-scrolling",
+  "status": "ok",
+  "result": {
+    "changes": [
+      {
+        "description": "Removed duplicate version display and fixed scrolling",
+        "details": [
+          "Removed version footer section (lines 45-50) that displayed getFullVersionString()",
+          "Removed min-h-screen class from main container to prevent unwanted scrolling",
+          "Removed unused getFullVersionString import",
+          "Version now displays only once in ProfileTab as a card component"
+        ],
+        "file": "src/pages/SettingsPage.tsx"
+      }
+    ],
+    "issuesFixed": [
+      "No more duplicate version text on Settings page",
+      "Eliminated unwanted scrolling with no content at bottom",
+      "Cleaner page layout without min-height constraints"
+    ],
+    "summary": "Successfully fixed duplicate version display and scrolling issues"
+  },
+  "startedAt": "2026-03-01T18:07:30.710Z",
+  "finishedAt": "2026-03-01T18:07:30.710Z",
+  "value": {
+    "changes": [
+      {
+        "description": "Removed duplicate version display and fixed scrolling",
+        "details": [
+          "Removed version footer section (lines 45-50) that displayed getFullVersionString()",
+          "Removed min-h-screen class from main container to prevent unwanted scrolling",
+          "Removed unused getFullVersionString import",
+          "Version now displays only once in ProfileTab as a card component"
+        ],
+        "file": "src/pages/SettingsPage.tsx"
+      }
+    ],
+    "issuesFixed": [
+      "No more duplicate version text on Settings page",
+      "Eliminated unwanted scrolling with no content at bottom",
+      "Cleaner page layout without min-height constraints"
+    ],
+    "summary": "Successfully fixed duplicate version display and scrolling issues"
+  }
+}

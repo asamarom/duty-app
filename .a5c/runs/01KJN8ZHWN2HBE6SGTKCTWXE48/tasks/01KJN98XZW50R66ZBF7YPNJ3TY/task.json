@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJN98XZW50R66ZBF7YPNJ3TY",
+  "taskId": "fix-version-scrolling",
+  "invocationKey": "ui-bugs-fix:S000004:fix-version-scrolling",
+  "stepId": "S000004",
+  "kind": "agent",
+  "title": "Fix duplicate version text and unwanted scrolling",
+  "inputs": {}
+}

@@ -1,0 +1,13 @@
+{
+  "runId": "01KJN8ZHWN2HBE6SGTKCTWXE48",
+  "request": "ui-bugs-fix",
+  "processId": "ui-bugs-fix",
+  "entrypoint": {
+    "importPath": "../../processes/ui-bugs-fix.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/ui-bugs-fix.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-03-01T18:01:15.425Z",
+  "completionSecret": "13885e94ee1d0e8e9bdc580c95a37fd0"
+}

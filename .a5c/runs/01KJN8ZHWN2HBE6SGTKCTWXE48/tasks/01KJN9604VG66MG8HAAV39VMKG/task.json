@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJN9604VG66MG8HAAV39VMKG",
+  "taskId": "fix-translation-issues",
+  "invocationKey": "ui-bugs-fix:S000003:fix-translation-issues",
+  "stepId": "S000003",
+  "kind": "agent",
+  "title": "Fix translation template rendering issues",
+  "inputs": {}
+}

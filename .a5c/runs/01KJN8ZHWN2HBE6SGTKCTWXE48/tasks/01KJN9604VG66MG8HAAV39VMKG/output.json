@@ -1,0 +1,26 @@
+{
+  "summary": "Successfully fixed all three translation issues",
+  "changes": [
+    {
+      "file": "src/contexts/LanguageContext.tsx",
+      "description": "Updated t() function to support template variable interpolation with {key} syntax",
+      "details": [
+        "Modified interface to accept optional params: Record<string, string | number>",
+        "Added regex-based interpolation logic to replace {variable} patterns with actual values"
+      ]
+    },
+    {
+      "file": "src/i18n/translations.ts",
+      "description": "Added missing 'common.authenticated' translation key",
+      "details": [
+        "English: 'common.authenticated': 'Authenticated'",
+        "Hebrew: 'common.authenticated': 'מאומת'"
+      ]
+    }
+  ],
+  "issuesFixed": [
+    "ProfileTab.tsx badge now shows 'Authenticated' instead of 'common.authenticated'",
+    "UnitsTab.tsx now shows actual counts instead of {battalions}, {companies}, {platoons}",
+    "ApprovalsTab.tsx now shows actual count instead of {count}"
+  ]
+}

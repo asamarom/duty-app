@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-01T18:01:38.610Z",
+  "data": {
+    "effectId": "01KJN908EPBM06VT248Q9CJ8YZ",
+    "invocationKey": "ui-bugs-fix:S000001:analyze-issues",
+    "invocationHash": "4c6e228c35a2f229f7ea0a4443bfe540db5ac35aea4bdf28535468dc97f8725b",
+    "stepId": "S000001",
+    "taskId": "analyze-issues",
+    "kind": "agent",
+    "label": "Analyze UI issues and root causes",
+    "taskDefRef": "tasks/01KJN908EPBM06VT248Q9CJ8YZ/task.json"
+  },
+  "checksum": "af9a0032d9e939ebd17594871829ab6d4e4aa527c161646da22594d9e21d3956"
+}

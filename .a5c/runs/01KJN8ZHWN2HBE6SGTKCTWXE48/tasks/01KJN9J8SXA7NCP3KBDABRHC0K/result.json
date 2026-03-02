@@ -1,0 +1,127 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KJN9J8SXA7NCP3KBDABRHC0K",
+  "taskId": "fix-responsive-design",
+  "invocationKey": "ui-bugs-fix:S000006:fix-responsive-design",
+  "status": "ok",
+  "result": {
+    "changes": [
+      {
+        "file": "src/components/settings/ProfileTab.tsx",
+        "improvements": [
+          "Email truncation with min-w-0 and truncate classes",
+          "Responsive text sizing (text-xs sm:text-sm)",
+          "Badge sizing improvements (shrink-0, text-xs)",
+          "Gap adjustments for narrow screens"
+        ]
+      },
+      {
+        "file": "src/components/settings/UnitsTab.tsx",
+        "improvements": [
+          "Added gap-2 for proper spacing",
+          "Badge sizing improvements (shrink-0, text-xs)"
+        ]
+      },
+      {
+        "file": "src/components/settings/ApprovalsTab.tsx",
+        "improvements": [
+          "Gap adjustments (gap-2)",
+          "Badge improvements (shrink-0, text-xs)",
+          "Text alignment (text-right)"
+        ]
+      },
+      {
+        "file": "src/components/units/UnitsManagement.tsx",
+        "improvements": [
+          "Reduced mobile padding (p-3 sm:p-4)",
+          "Responsive icon sizes (h-9 w-9 sm:h-10 sm:w-10)",
+          "Button sizing for touch targets (h-8 w-8 sm:h-10 sm:w-10)",
+          "Text truncation for long unit names",
+          "Responsive spacing throughout all levels"
+        ]
+      },
+      {
+        "file": "src/components/approvals/ApprovalsManagement.tsx",
+        "improvements": [
+          "Tab grid layout (grid-cols-2) for full width",
+          "Reduced mobile padding (p-3 sm:p-6)",
+          "Email truncation in request cards",
+          "Grid stacking on mobile (grid-cols-1 sm:grid-cols-2)",
+          "Button stacking on mobile (flex-col sm:flex-row)",
+          "Minimum touch target height (h-11 = 44px)",
+          "Line-clamp for long decline reasons"
+        ]
+      }
+    ],
+    "keyPrinciples": [
+      "Mobile-first responsive design",
+      "Proper text truncation with min-w-0",
+      "Touch-friendly target sizes (44px minimum)",
+      "Responsive padding and spacing",
+      "Grid and flex layouts that stack on mobile",
+      "Consistent badge and icon sizing"
+    ],
+    "summary": "Successfully improved responsive design for narrow screens across all Settings components"
+  },
+  "startedAt": "2026-03-01T18:15:20.906Z",
+  "finishedAt": "2026-03-01T18:15:20.906Z",
+  "value": {
+    "changes": [
+      {
+        "file": "src/components/settings/ProfileTab.tsx",
+        "improvements": [
+          "Email truncation with min-w-0 and truncate classes",
+          "Responsive text sizing (text-xs sm:text-sm)",
+          "Badge sizing improvements (shrink-0, text-xs)",
+          "Gap adjustments for narrow screens"
+        ]
+      },
+      {
+        "file": "src/components/settings/UnitsTab.tsx",
+        "improvements": [
+          "Added gap-2 for proper spacing",
+          "Badge sizing improvements (shrink-0, text-xs)"
+        ]
+      },
+      {
+        "file": "src/components/settings/ApprovalsTab.tsx",
+        "improvements": [
+          "Gap adjustments (gap-2)",
+          "Badge improvements (shrink-0, text-xs)",
+          "Text alignment (text-right)"
+        ]
+      },
+      {
+        "file": "src/components/units/UnitsManagement.tsx",
+        "improvements": [
+          "Reduced mobile padding (p-3 sm:p-4)",
+          "Responsive icon sizes (h-9 w-9 sm:h-10 sm:w-10)",
+          "Button sizing for touch targets (h-8 w-8 sm:h-10 sm:w-10)",
+          "Text truncation for long unit names",
+          "Responsive spacing throughout all levels"
+        ]
+      },
+      {
+        "file": "src/components/approvals/ApprovalsManagement.tsx",
+        "improvements": [
+          "Tab grid layout (grid-cols-2) for full width",
+          "Reduced mobile padding (p-3 sm:p-6)",
+          "Email truncation in request cards",
+          "Grid stacking on mobile (grid-cols-1 sm:grid-cols-2)",
+          "Button stacking on mobile (flex-col sm:flex-row)",
+          "Minimum touch target height (h-11 = 44px)",
+          "Line-clamp for long decline reasons"
+        ]
+      }
+    ],
+    "keyPrinciples": [
+      "Mobile-first responsive design",
+      "Proper text truncation with min-w-0",
+      "Touch-friendly target sizes (44px minimum)",
+      "Responsive padding and spacing",
+      "Grid and flex layouts that stack on mobile",
+      "Consistent badge and icon sizing"
+    ],
+    "summary": "Successfully improved responsive design for narrow screens across all Settings components"
+  }
+}

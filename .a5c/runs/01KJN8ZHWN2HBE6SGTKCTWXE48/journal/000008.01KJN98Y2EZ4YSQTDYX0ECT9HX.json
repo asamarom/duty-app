@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-01T18:06:22.798Z",
+  "data": {
+    "effectId": "01KJN98XZW50R66ZBF7YPNJ3TY",
+    "invocationKey": "ui-bugs-fix:S000004:fix-version-scrolling",
+    "invocationHash": "db30901609e01c4c6f39eaebd638adf06af3844a2cc159663ef7091da1ae0880",
+    "stepId": "S000004",
+    "taskId": "fix-version-scrolling",
+    "kind": "agent",
+    "label": "Fix duplicate version text and unwanted scrolling",
+    "taskDefRef": "tasks/01KJN98XZW50R66ZBF7YPNJ3TY/task.json"
+  },
+  "checksum": "18d610490d55ba262b2f75762ea8badc04d43e81c26418a0e9a6fc6be7b8291b"
+}

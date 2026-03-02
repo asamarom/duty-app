@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJN9528MBN1VPZCSBPEWHA0A",
+  "taskId": "__sdk.breakpoint",
+  "invocationKey": "ui-bugs-fix:S000002:__sdk.breakpoint",
+  "stepId": "S000002",
+  "kind": "breakpoint",
+  "title": "breakpoint",
+  "metadata": {
+    "label": "breakpoint",
+    "payload": "review-analysis",
+    "requestedAt": "2026-03-01T18:04:16.020Z"
+  },
+  "inputs": {
+    "label": "breakpoint",
+    "payload": "review-analysis",
+    "requestedAt": "2026-03-01T18:04:16.020Z"
+  }
+}
