@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/popover';
 
 export default function EquipmentPage() {
-  const { t, dir } = useLanguage();
+  const { t, dir, language } = useLanguage();
   const navigate = useNavigate();
   const { equipment, loading, assignEquipment, requestAssignment, isWithinSameUnit, refetch } = useEquipment();
   const [searchQuery, setSearchQuery] = useState('');
@@ -119,10 +119,31 @@ export default function EquipmentPage() {
 
   return (
     <MainLayout>
-      <Tabs value={activeTab} onValueChange={handleTabChange}>
-        {/* Tab bar */}
-        <div className="flex px-4 lg:px-6 pt-4 lg:pt-6 border-b border-border" dir={dir}>
-          <TabsList dir={dir}>
+      {/* Mobile Header */}
+      <div className="lg:hidden">
+        <MobileHeader
+          title={t('equipment.title')}
+          subtitle={`${new Set(equipment.map(e => e.id.split('--')[0])).size} ${t('equipment.totalItems')}`}
+        />
+      </div>
+
+      <div className="tactical-grid p-4 lg:p-6">
+        {/* Desktop Header */}
+        <header className="mb-6 hidden lg:block">
+          <div className="flex items-center justify-between" dir={language === 'he' ? 'rtl' : 'ltr'}>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                {t('equipment.title')}
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {t('equipment.subtitle')}
+              </p>
+            </div>
+          </div>
+        </header>
+
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <TabsList aria-label={t('equipment.title')} className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="equipment" className="gap-2">
               <Package className="h-4 w-4" />
               {t('nav.equipment')}
@@ -135,194 +156,174 @@ export default function EquipmentPage() {
               )}
             </TabsTrigger>
           </TabsList>
-        </div>
 
-        <TabsContent value="equipment">
-          {/* Mobile Header */}
-          <div className="lg:hidden">
-            <MobileHeader
-              title={t('equipment.title')}
-              subtitle={`${new Set(equipment.map(e => e.id.split('--')[0])).size} ${t('equipment.totalItems')}`}
-            />
-          </div>
-
-          <div className="tactical-grid min-h-screen p-4 lg:p-6" dir={dir}>
-            {/* Desktop Header */}
-            <header className="mb-6 hidden lg:block">
-              <div className="flex items-center justify-between" dir={dir}>
-                <div>
-                  <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                    {t('equipment.title')}
-                  </h1>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {t('equipment.subtitle')}
-                  </p>
-                </div>
-                <div className="flex gap-3">
-                  <Button
-                    variant={selectMode ? 'default' : 'outline'}
-                    onClick={handleToggleSelectMode}
-                  >
-                    <CheckSquare className="me-2 h-4 w-4" />
-                    {selectMode ? t('equipment.cancelSelection') : t('equipment.selectItems')}
-                  </Button>
-                  <Button variant="outline">
-                    <Package className="me-2 h-4 w-4" />
-                    {t('reports.equipmentAudit')}
-                  </Button>
-                  <Button variant="tactical" onClick={() => navigate('/equipment/add')}>
-                    <Plus className="me-2 h-4 w-4" />
-                    {t('common.add')} {t('nav.equipment')}
-                  </Button>
-                </div>
+          <TabsContent value="equipment">
+            <div className="space-y-4" dir={dir}>
+              {/* Desktop Action Buttons */}
+              <div className="hidden lg:flex gap-3 justify-end">
+                <Button
+                  variant={selectMode ? 'default' : 'outline'}
+                  onClick={handleToggleSelectMode}
+                >
+                  <CheckSquare className="me-2 h-4 w-4" />
+                  {selectMode ? t('equipment.cancelSelection') : t('equipment.selectItems')}
+                </Button>
+                <Button variant="outline">
+                  <Package className="me-2 h-4 w-4" />
+                  {t('reports.equipmentAudit')}
+                </Button>
+                <Button variant="tactical" onClick={() => navigate('/equipment/add')}>
+                  <Plus className="me-2 h-4 w-4" />
+                  {t('common.add')} {t('nav.equipment')}
+                </Button>
               </div>
-            </header>
 
-            {/* Bulk Action Bar */}
-            {selectMode && selectedIds.size > 0 && (
-              <div className="mb-4 p-4 card-tactical rounded-lg flex items-center justify-between gap-4 animate-fade-in" dir={dir}>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium">
-                    {selectedIds.size} {t('equipment.selectItems')}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedIds(new Set())}
-                  >
-                    <X className="h-4 w-4 me-1" />
-                    {t('equipment.clearSelection')}
-                  </Button>
-                </div>
-                <div className="flex gap-2">
-                  <Button onClick={() => setBulkAssignOpen(true)}>
-                    {t('equipment.assignSelected')}
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Stats */}
-            <div className="mb-4 lg:mb-6">
-              <div className="card-tactical flex items-center gap-3 rounded-lg px-4 py-3 w-fit" dir={dir}>
-                <Package className="h-6 w-6 lg:h-8 lg:w-8 text-primary" />
-                <div>
-                  <p className="text-xl lg:text-2xl font-bold text-foreground">
-                    {new Set(equipment.map(e => e.id.split('--')[0])).size}
-                  </p>
-                  <p className="text-xs lg:text-xs text-muted-foreground whitespace-nowrap">{t('equipment.totalItems')}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Search Filter with Autocomplete */}
-            <div className="mb-4 lg:mb-6">
-              <Popover open={open} onOpenChange={setOpen} dir={dir}>
-                <PopoverTrigger asChild>
-                  <div className="relative max-w-md cursor-pointer" dir={dir}>
-                    <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
-                    <input
-                      placeholder={t('equipment.searchPlaceholder')}
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onClick={() => setOpen(true)}
-                      className="flex h-11 w-full rounded-md border border-border bg-card ps-10 pe-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    />
+              {/* Bulk Action Bar */}
+              {selectMode && selectedIds.size > 0 && (
+                <div className="p-4 card-tactical rounded-lg flex items-center justify-between gap-4 animate-fade-in" dir={dir}>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium">
+                      {selectedIds.size} {t('equipment.selectItems')}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedIds(new Set())}
+                    >
+                      <X className="h-4 w-4 me-1" />
+                      {t('equipment.clearSelection')}
+                    </Button>
                   </div>
-                </PopoverTrigger>
-                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 bg-popover border-border" align="start">
-                  <Command>
-                    <CommandList>
-                      <CommandEmpty>{t('equipment.noEquipmentFound')}</CommandEmpty>
-                      <CommandGroup>
-                        {equipment
-                          .filter((item) =>
-                            item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            (item.serialNumber || '').toLowerCase().includes(searchQuery.toLowerCase())
-                          )
-                          .slice(0, 8)
-                          .map((item) => (
-                            <CommandItem
-                              key={item.id}
-                              value={item.name}
-                              onSelect={(value) => {
-                                setSearchQuery(value);
-                                setOpen(false);
-                              }}
-                            >
-                              <Package className="me-2 h-4 w-4 text-muted-foreground" />
-                              <span>{item.name}</span>
-                              <span className="ms-auto text-xs text-muted-foreground">{item.serialNumber}</span>
-                            </CommandItem>
-                          ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Mobile Select Mode Toggle */}
-            <div className="mb-4 lg:hidden">
-              <Button
-                variant={selectMode ? 'default' : 'outline'}
-                size="sm"
-                onClick={handleToggleSelectMode}
-                className="w-full"
-              >
-                <CheckSquare className="me-2 h-4 w-4" />
-                {selectMode ? t('equipment.cancelSelection') : t('equipment.selectItems')}
-              </Button>
-            </div>
-
-            {/* Equipment Table */}
-            <div className="overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0">
-              <EquipmentTable
-                equipment={filteredEquipment}
-                selectable={selectMode}
-                selectedIds={selectedIds}
-                onSelectionChange={setSelectedIds}
-              />
-            </div>
-
-            {filteredEquipment.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-12">
-                <Package className="h-12 w-12 text-muted-foreground/50" />
-                <p className="mt-4 text-lg font-medium text-muted-foreground">
-                  {t('equipment.noEquipmentFound')}
-                </p>
-              </div>
-            )}
-
-            {/* Mobile FAB - show Assign button when items selected, otherwise Add */}
-            <div className="lg:hidden fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] end-4 z-40">
-              {selectMode && selectedIds.size > 0 ? (
-                <Button
-                  variant="tactical"
-                  size="lg"
-                  className="h-14 px-6 rounded-full shadow-lg"
-                  onClick={() => setBulkAssignOpen(true)}
-                >
-                  {t('equipment.assignSelected')} ({selectedIds.size})
-                </Button>
-              ) : (
-                <Button
-                  variant="tactical"
-                  size="lg"
-                  className="h-14 w-14 rounded-full shadow-lg"
-                  onClick={() => navigate('/equipment/add')}
-                >
-                  <Plus className="h-6 w-6" />
-                </Button>
+                  <div className="flex gap-2">
+                    <Button onClick={() => setBulkAssignOpen(true)}>
+                      {t('equipment.assignSelected')}
+                    </Button>
+                  </div>
+                </div>
               )}
-            </div>
-          </div>
-        </TabsContent>
 
-        <TabsContent value="transfers" className="p-4 lg:p-6">
-          <TransfersList />
-        </TabsContent>
-      </Tabs>
+              {/* Stats */}
+              <div>
+                <div className="card-tactical flex items-center gap-3 rounded-lg px-4 py-3 w-fit" dir={dir}>
+                  <Package className="h-6 w-6 lg:h-8 lg:w-8 text-primary" />
+                  <div>
+                    <p className="text-xl lg:text-2xl font-bold text-foreground">
+                      {new Set(equipment.map(e => e.id.split('--')[0])).size}
+                    </p>
+                    <p className="text-xs lg:text-xs text-muted-foreground whitespace-nowrap">{t('equipment.totalItems')}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Search Filter with Autocomplete */}
+              <div>
+                <Popover open={open} onOpenChange={setOpen} dir={dir}>
+                  <PopoverTrigger asChild>
+                    <div className="relative max-w-md cursor-pointer" dir={dir}>
+                      <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
+                      <input
+                        placeholder={t('equipment.searchPlaceholder')}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onClick={() => setOpen(true)}
+                        className="flex h-11 w-full rounded-md border border-border bg-card ps-10 pe-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 bg-popover border-border" align="start">
+                    <Command>
+                      <CommandList>
+                        <CommandEmpty>{t('equipment.noEquipmentFound')}</CommandEmpty>
+                        <CommandGroup>
+                          {equipment
+                            .filter((item) =>
+                              item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                              (item.serialNumber || '').toLowerCase().includes(searchQuery.toLowerCase())
+                            )
+                            .slice(0, 8)
+                            .map((item) => (
+                              <CommandItem
+                                key={item.id}
+                                value={item.name}
+                                onSelect={(value) => {
+                                  setSearchQuery(value);
+                                  setOpen(false);
+                                }}
+                              >
+                                <Package className="me-2 h-4 w-4 text-muted-foreground" />
+                                <span>{item.name}</span>
+                                <span className="ms-auto text-xs text-muted-foreground">{item.serialNumber}</span>
+                              </CommandItem>
+                            ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* Mobile Select Mode Toggle */}
+              <div className="lg:hidden">
+                <Button
+                  variant={selectMode ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={handleToggleSelectMode}
+                  className="w-full"
+                >
+                  <CheckSquare className="me-2 h-4 w-4" />
+                  {selectMode ? t('equipment.cancelSelection') : t('equipment.selectItems')}
+                </Button>
+              </div>
+
+              {/* Equipment Table */}
+              <div className="overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0">
+                <EquipmentTable
+                  equipment={filteredEquipment}
+                  selectable={selectMode}
+                  selectedIds={selectedIds}
+                  onSelectionChange={setSelectedIds}
+                />
+              </div>
+
+              {filteredEquipment.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <Package className="h-12 w-12 text-muted-foreground/50" />
+                  <p className="mt-4 text-lg font-medium text-muted-foreground">
+                    {t('equipment.noEquipmentFound')}
+                  </p>
+                </div>
+              )}
+
+              {/* Mobile FAB - show Assign button when items selected, otherwise Add */}
+              <div className="lg:hidden fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] end-4 z-40">
+                {selectMode && selectedIds.size > 0 ? (
+                  <Button
+                    variant="tactical"
+                    size="lg"
+                    className="h-14 px-6 rounded-full shadow-lg"
+                    onClick={() => setBulkAssignOpen(true)}
+                  >
+                    {t('equipment.assignSelected')} ({selectedIds.size})
+                  </Button>
+                ) : (
+                  <Button
+                    variant="tactical"
+                    size="lg"
+                    className="h-14 w-14 rounded-full shadow-lg"
+                    onClick={() => navigate('/equipment/add')}
+                  >
+                    <Plus className="h-6 w-6" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="transfers">
+            <TransfersList />
+          </TabsContent>
+        </Tabs>
+      </div>
 
       {/* Bulk Assign Dialog */}
       <BulkAssignDialog
