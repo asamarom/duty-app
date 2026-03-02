@@ -22,6 +22,13 @@ test.describe('Transfers RTL Layout', () => {
   });
 
   test('[RTL-TABS] tabs should have RTL direction attribute', async ({ page }) => {
+    // Listen to console messages from the browser
+    page.on('console', msg => {
+      if (msg.text().includes('[EquipmentPage]') || msg.text().includes('[TransfersList]')) {
+        console.log('Browser console:', msg.text());
+      }
+    });
+
     // Navigate to Equipment page
     await page.goto('/equipment');
     await page.waitForLoadState('domcontentloaded');
