@@ -148,7 +148,7 @@ export function TransfersList() {
     <>
       <Tabs defaultValue="incoming" dir={dir}>
         <div className="flex mb-4" dir={dir}>
-        <TabsList dir={language === 'he' ? 'rtl' : 'ltr'}>
+        <TabsList dir={dir}>
           <TabsTrigger value="incoming" className="gap-2">
             <Inbox className="h-4 w-4" />
             {t('transfers.incoming')}
