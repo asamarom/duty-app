@@ -25,6 +25,13 @@ test.describe('Transfers RTL Layout', () => {
     // Navigate to Equipment page
     await page.goto('/equipment');
     await page.waitForLoadState('domcontentloaded');
+
+    // Wait for language context to initialize by waiting for HTML dir attribute
+    // Default language is Hebrew, so we should see dir="rtl" on the html element
+    await page.waitForFunction(() => {
+      return document.documentElement.dir === 'rtl' || document.documentElement.dir === 'ltr';
+    }, { timeout: 5000 });
+
     await page.waitForTimeout(1000);
 
     // Click on Transfers tab
@@ -49,9 +56,13 @@ test.describe('Transfers RTL Layout', () => {
     const grandParent = tabsParent.locator('xpath=..').first();
     const grandParentDir = await grandParent.getAttribute('dir');
 
+    // Check HTML element dir
+    const htmlDir = await page.evaluate(() => document.documentElement.dir);
+
     // At least one parent should have dir="rtl" for Hebrew UI
     const hasRtl = dirAttribute === 'rtl' || grandParentDir === 'rtl';
 
+    console.log(`HTML dir attribute: ${htmlDir}`);
     console.log(`Tabs dir attribute: ${dirAttribute}`);
     console.log(`Tabs grandparent dir: ${grandParentDir}`);
 
