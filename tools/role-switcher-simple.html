@@ -112,6 +112,29 @@
       </div>
     </div>
 
+    <!-- Personnel Record Section -->
+    <div class="group" id="personnel-section">
+      <div class="section-label">Personnel Record</div>
+      <div id="personnel-status" style="font-size: 13px; color: #64748b; margin-bottom: 12px;"></div>
+      <div id="personnel-form" style="display:none;">
+        <div class="field">
+          <label for="first-name">First Name</label>
+          <input type="text" id="first-name" placeholder="Enter first name">
+        </div>
+        <div class="field">
+          <label for="last-name">Last Name</label>
+          <input type="text" id="last-name" placeholder="Enter last name">
+        </div>
+        <div class="field">
+          <label for="service-number">Service Number</label>
+          <input type="text" id="service-number" placeholder="Enter service number">
+        </div>
+        <button class="btn btn-primary" onclick="savePersonnel()">
+          <span id="save-personnel-text">Create Personnel Record</span>
+        </button>
+      </div>
+    </div>
+
     <div class="group">
       <div class="section-label">Roles (click to toggle)</div>
       <div class="btn-row" id="role-buttons"></div>
@@ -220,6 +243,34 @@
         ? `${currentUnit.name} (${currentUnit.unitType})`
         : (currentUnitId || 'none');
 
+      // Handle personnel record
+      const personnelStatus = document.getElementById('personnel-status');
+      const personnelForm = document.getElementById('personnel-form');
+      const saveBtn = document.getElementById('save-personnel-text');
+
+      if (userData.hasPersonnel && userData.personnel) {
+        // Personnel record exists - show current data
+        personnelStatus.innerHTML = `✓ Personnel record exists`;
+        personnelStatus.style.color = '#4ade80';
+        personnelForm.style.display = 'block';
+        document.getElementById('first-name').value = userData.personnel.firstName || '';
+        document.getElementById('last-name').value = userData.personnel.lastName || '';
+        document.getElementById('service-number').value = userData.personnel.serviceNumber || '';
+        saveBtn.textContent = 'Update Personnel Record';
+      } else {
+        // No personnel record - show create form
+        personnelStatus.innerHTML = `⚠ No personnel record found`;
+        personnelStatus.style.color = '#f59e0b';
+        personnelForm.style.display = 'block';
+
+        // Try to pre-fill from fullName
+        const nameParts = name.split(' ');
+        document.getElementById('first-name').value = nameParts[0] || '';
+        document.getElementById('last-name').value = nameParts.slice(1).join(' ') || '';
+        document.getElementById('service-number').value = '';
+        saveBtn.textContent = 'Create Personnel Record';
+      }
+
       renderRoleButtons();
       renderUnitButtons();
 
@@ -312,6 +363,40 @@
       showStatus(`✓ Unit changed to ${unitName}`, true);
     } catch (err) {
       showStatus(`✗ ${err.message}`, false);
+    }
+  }
+
+  // ── Personnel ─────────────────────────────────────────────────────────────────
+  async function savePersonnel() {
+    try {
+      const firstName = document.getElementById('first-name').value.trim();
+      const lastName = document.getElementById('last-name').value.trim();
+      const serviceNumber = document.getElementById('service-number').value.trim();
+
+      if (!firstName || !lastName || !serviceNumber) {
+        showStatus('✗ Please fill in all fields', false);
+        return;
+      }
+
+      const saveBtn = document.getElementById('save-personnel-text');
+      const originalText = saveBtn.textContent;
+      saveBtn.textContent = 'Saving...';
+
+      const res = await fetch(`${API_BASE}/user/${currentUid}/personnel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName, lastName, serviceNumber }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Personnel update failed');
+
+      showStatus(`✓ Personnel record ${data.created ? 'created' : 'updated'} successfully`, true);
+
+      // Reload user to refresh personnel status
+      await loadUser();
+    } catch (err) {
+      showStatus(`✗ ${err.message}`, false);
+      document.getElementById('save-personnel-text').textContent = originalText;
     }
   }
 

@@ -41,13 +41,28 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
-// GET /api/user/:uid — read user doc
+// GET /api/user/:uid — read user doc + personnel record
 app.get('/api/user/:uid', async (req, res) => {
   try {
     const doc = await db.collection('users').doc(req.params.uid).get();
     if (!doc.exists) return res.status(404).json({ error: 'User not found' });
     const { fullName, roles, unitId } = doc.data();
-    res.json({ fullName, roles, unitId });
+
+    // Check if personnel record exists
+    const personnelSnap = await db.collection('personnel').where('userId', '==', req.params.uid).get();
+    const hasPersonnel = !personnelSnap.empty;
+    let personnelData = null;
+    if (hasPersonnel) {
+      const personnelDoc = personnelSnap.docs[0];
+      personnelData = {
+        id: personnelDoc.id,
+        firstName: personnelDoc.data().firstName,
+        lastName: personnelDoc.data().lastName,
+        serviceNumber: personnelDoc.data().serviceNumber,
+      };
+    }
+
+    res.json({ fullName, roles, unitId, hasPersonnel, personnel: personnelData });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -69,7 +84,13 @@ app.post('/api/user/:uid/role', async (req, res) => {
   try {
     const { roles } = req.body;
     if (!Array.isArray(roles) || roles.length === 0) return res.status(400).json({ error: 'roles array is required' });
+
+    // Update user document
     await db.collection('users').doc(req.params.uid).update({ roles });
+
+    // No need to update personnel record for role changes
+    // Roles are stored in users collection only
+
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -81,8 +102,90 @@ app.post('/api/user/:uid/unit', async (req, res) => {
   try {
     const { unitId } = req.body;
     if (!unitId) return res.status(400).json({ error: 'unitId is required' });
+
+    // Update user document
     await db.collection('users').doc(req.params.uid).update({ unitId });
+
+    // Update personnel record if it exists
+    const personnelSnap = await db.collection('personnel').where('userId', '==', req.params.uid).get();
+    if (!personnelSnap.empty) {
+      const personnelDoc = personnelSnap.docs[0];
+
+      // Get battalion ID from unit
+      const unitDoc = await db.collection('units').doc(unitId).get();
+      const battalionId = unitDoc.exists ? unitDoc.data().battalionId : null;
+
+      await personnelDoc.ref.update({
+        unitId,
+        ...(battalionId ? { battalionId } : {}),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+
     res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/user/:uid/personnel — create or update personnel record
+app.post('/api/user/:uid/personnel', async (req, res) => {
+  try {
+    const { firstName, lastName, serviceNumber } = req.body;
+
+    // Get user data
+    const userDoc = await db.collection('users').doc(req.params.uid).get();
+    if (!userDoc.exists) return res.status(404).json({ error: 'User not found' });
+
+    const userData = userDoc.data();
+    const unitId = userData.unitId || null;
+
+    // Get battalion ID from unit
+    let battalionId = null;
+    if (unitId) {
+      const unitDoc = await db.collection('units').doc(unitId).get();
+      if (unitDoc.exists) {
+        battalionId = unitDoc.data().battalionId || unitId;
+      }
+    }
+
+    // Check if personnel record exists
+    const personnelSnap = await db.collection('personnel').where('userId', '==', req.params.uid).get();
+
+    if (personnelSnap.empty) {
+      // Create new personnel record
+      const personnelData = {
+        userId: req.params.uid,
+        firstName: firstName || '',
+        lastName: lastName || '',
+        email: userData.email || null,
+        serviceNumber: serviceNumber || '',
+        unitId,
+        rank: 'טוראי', // Default rank
+        locationStatus: 'on_duty',
+        readinessStatus: 'ready',
+        isSignatureApproved: false,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        ...(battalionId ? { battalionId } : {}),
+      };
+      await db.collection('personnel').add(personnelData);
+      res.json({ ok: true, created: true });
+    } else {
+      // Update existing personnel record
+      const personnelDoc = personnelSnap.docs[0];
+      const updateData = {
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      };
+      if (firstName) updateData.firstName = firstName;
+      if (lastName) updateData.lastName = lastName;
+      if (serviceNumber) updateData.serviceNumber = serviceNumber;
+      if (unitId) updateData.unitId = unitId;
+      if (battalionId) updateData.battalionId = battalionId;
+
+      await personnelDoc.ref.update(updateData);
+      res.json({ ok: true, updated: true });
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
