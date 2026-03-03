@@ -214,16 +214,19 @@ service cloud.firestore {
 
       // Admins and leaders can create equipment
       // HIGH FIX: Validate required fields, positive quantity, valid status
-      // MIGRATION: battalionId is optional during migration
+      // CRITICAL: battalionId is required on create for ALL users (including admins)
+      // Admins can create in any battalion, leaders must match their battalion
       allow create: if isAdminOrLeader() &&
-        request.resource.data.keys().hasAll(['name', 'quantity', 'status', 'createdAt', 'updatedAt']) &&
+        request.resource.data.keys().hasAll(['name', 'quantity', 'status', 'createdAt', 'updatedAt', 'battalionId']) &&
         request.resource.data.name is string &&
         request.resource.data.name.size() > 0 &&
         request.resource.data.name.size() <= 200 &&
         request.resource.data.quantity is int &&
         request.resource.data.quantity > 0 &&
         request.resource.data.status in ['serviceable', 'unserviceable', 'in_maintenance', 'missing', 'pending_transfer'] &&
-        (isAdmin() || !request.resource.data.keys().hasAny(['battalionId']) || isSameBattalionCreate(request.resource.data.battalionId));
+        request.resource.data.battalionId is string &&
+        request.resource.data.battalionId.size() > 0 &&
+        (isAdmin() || isSameBattalionCreate(request.resource.data.battalionId));
 
       // Admins and leaders can update equipment
       // NOTE: Validation that quantity >= assigned quantity requires Cloud Functions

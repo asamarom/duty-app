@@ -64,12 +64,12 @@ export default function AddEquipmentPage() {
 
   const loading = personnelLoading || equipmentLoading || unitsLoading || battalionLoading;
 
-  // Auto-set battalion from user's profile
+  // Auto-set battalion from user's profile (but not for admins - they should choose)
   useEffect(() => {
-    if (userBattalionId && !selectedBattalionId) {
+    if (userBattalionId && !selectedBattalionId && !isAdmin) {
       setSelectedBattalionId(userBattalionId);
     }
-  }, [userBattalionId, selectedBattalionId]);
+  }, [userBattalionId, selectedBattalionId, isAdmin]);
 
   // Serialized items must be assigned to individuals
   useEffect(() => {
@@ -388,8 +388,8 @@ export default function AddEquipmentPage() {
 
             {/* Hierarchical Selection */}
             <div className="space-y-3">
-              {/* Battalion - auto-set from user profile; admins with admin mode on can pick */}
-              {selectedBattalionId && (
+              {/* Battalion - auto-set from user profile for non-admins; admins can always pick */}
+              {selectedBattalionId && !isAdmin && (
                 <div className="space-y-2">
                   <Label className="text-xs text-muted-foreground">{t('units.battalion')}</Label>
                   <div className="flex items-center gap-2 h-12 px-3 rounded-md border border-input bg-muted/50">
@@ -398,7 +398,7 @@ export default function AddEquipmentPage() {
                   </div>
                 </div>
               )}
-              {!selectedBattalionId && !battalionLoading && isAdmin && (
+              {!battalionLoading && isAdmin && (
                 <div className="space-y-2">
                   <Label className="text-xs text-muted-foreground">{t('units.battalion')}</Label>
                   <Select value={selectedBattalionId} onValueChange={(val) => { setSelectedBattalionId(val); setSelectedCompanyId(''); setSelectedPlatoonId(''); }}>

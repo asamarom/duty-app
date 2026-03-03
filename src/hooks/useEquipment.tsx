@@ -25,6 +25,7 @@ import type {
 } from '@/integrations/firebase/types';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserBattalion } from '@/hooks/useUserBattalion';
+import { useUserRole } from '@/hooks/useUserRole';
 
 export type AssignmentLevel = 'battalion' | 'company' | 'platoon' | 'individual' | 'unassigned';
 
@@ -51,6 +52,7 @@ interface UseEquipmentReturn {
   error: Error | null;
   refetch: () => Promise<void>;
   addEquipment: (item: Omit<Equipment, 'id'>, assignment?: AssignmentData) => Promise<void>;
+  updateEquipment: (id: string, updates: { quantity?: number; status?: string; description?: string }) => Promise<void>;
   deleteEquipment: (id: string) => Promise<void>;
   assignEquipment: (equipmentId: string, assignment: AssignmentData, quantity?: number) => Promise<void>;
   unassignEquipment: (equipmentId: string) => Promise<void>;
@@ -65,6 +67,7 @@ export function useEquipment(): UseEquipmentReturn {
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
   const { battalionId, unitId } = useUserBattalion();
+  const { isAdmin } = useUserRole();
   const [currentUserPersonnelId, setCurrentUserPersonnelId] = useState<string | null>(null);
 
   const equipmentDocsRef = useRef<QueryDocumentSnapshot[]>([]);
@@ -246,6 +249,7 @@ export function useEquipment(): UseEquipmentReturn {
       // visibility to unit/personal level.
       //
       // Filter rules:
+      // - ADMIN BYPASS: Admins see ALL equipment without any restrictions
       // - Show unassigned equipment (available to all for assignment)
       // - Show equipment assigned to the current user's unit (BUT NOT if pending transfer OUT)
       // - Show equipment assigned to the current user personally
@@ -253,6 +257,11 @@ export function useEquipment(): UseEquipmentReturn {
       // - Hide equipment with pending transfers OUT from user's unit
       const filteredEquipment = mappedEquipment
         .filter((item) => {
+          // ADMIN BYPASS: Admins see all equipment without restrictions
+          if (isAdmin) {
+            return true;
+          }
+
           const baseEquipmentId = item.id.split('--')[0];
 
           // Always show unassigned equipment
@@ -326,7 +335,29 @@ export function useEquipment(): UseEquipmentReturn {
     } finally {
       rebuildingRef.current = false;
     }
-  }, [unitId, currentUserPersonnelId]);
+  }, [unitId, currentUserPersonnelId, isAdmin]);
+
+  const updateEquipment = useCallback(
+    async (id: string, updates: { quantity?: number; status?: string; description?: string }) => {
+      const equipmentId = getBaseId(id);
+      const updateData: Record<string, unknown> = {
+        updatedAt: serverTimestamp(),
+      };
+
+      if (updates.quantity !== undefined) {
+        updateData.quantity = updates.quantity;
+      }
+      if (updates.status !== undefined) {
+        updateData.status = updates.status;
+      }
+      if (updates.description !== undefined) {
+        updateData.description = updates.description;
+      }
+
+      await updateDoc(doc(db, 'equipment', equipmentId), updateData);
+    },
+    []
+  );
 
   const addEquipment = useCallback(
     async (item: Omit<Equipment, 'id'>, assignment?: AssignmentData) => {
@@ -619,6 +650,7 @@ export function useEquipment(): UseEquipmentReturn {
     error,
     refetch: rebuild,
     addEquipment,
+    updateEquipment,
     deleteEquipment,
     assignEquipment,
     unassignEquipment,
