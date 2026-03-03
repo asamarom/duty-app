@@ -1,0 +1,135 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJQZHJXC7NASGF1J31C98R59",
+  "taskId": "implement-2",
+  "invocationKey": "transfer-tabs-feature:S000008:implement-2",
+  "stepId": "S000008",
+  "kind": "agent",
+  "title": "Implement transfer tabs (iteration 2)",
+  "io": {
+    "outputJsonPath": "tasks/01KJQZHJXC7NASGF1J31C98R59/impl-result.json"
+  },
+  "inputs": {
+    "plan": {
+      "approach": "The current TransfersList component already has an 'incoming' tab and 'history' tab, but lacks an 'outgoing' tab. The implementation will follow a TDD approach by: (1) adding E2E tests for the outgoing tab and permission checks, (2) extending the useAssignmentRequests hook to return an 'outgoingTransfers' array filtered by requestedBy === current user, (3) adding the outgoing tab to the UI with cancel functionality, (4) adding translation keys for the outgoing tab, (5) implementing cancel transfer functionality in the hook with proper status rollback, and (6) ensuring RTL support using logical CSS properties. The incoming tab logic needs verification to ensure it properly filters by unit signature_approved status vs personal transfers.",
+      "dataChanges": [
+        "AssignmentRequestDoc already has requestedBy field - no schema changes needed",
+        "Add cancelRequest function to useAssignmentRequests hook returning Promise<void>",
+        "Add outgoingTransfers array to useAssignmentRequests return type: AssignmentRequest[]",
+        "Modify incoming filter to check currentPersonnel.isSignatureApproved when filtering unit transfers (toUnitId !== null)",
+        "Update history filter to include transfers where user is sender, recipient (unit or personnel), ensuring full transfer lifecycle visibility",
+        "Cancel operation updates assignmentRequests document: status='rejected', processedBy=userId, processedAt=serverTimestamp()",
+        "Cancel operation updates equipment document: status='serviceable', updatedAt=serverTimestamp()",
+        "useAssignmentRequests needs to fetch currentPersonnel.isSignatureApproved in addition to currentPersonnelId and currentUnitId for proper permission checks"
+      ],
+      "implementationSteps": [
+        "Step 1: Add translation keys - Add 'transfers.outgoing', 'transfers.outgoingTransfers', 'transfers.noOutgoing', 'transfers.cancelTransfer', 'transfers.cancelConfirm', 'transfers.transferCanceled', 'transfers.transferCanceledDesc' for both English and Hebrew in src/i18n/translations.ts",
+        "Step 2: Write E2E test - Create e2e/transfers-tabs.spec.ts with test cases for outgoing tab visibility, cancel functionality, and permission checks (XFER-OUTGOING-1 through XFER-OUTGOING-4)",
+        "Step 3: Write E2E test - Add incoming tab permission tests to verify signature_approved filtering for unit transfers and personnel-specific filtering for personal transfers (XFER-INCOMING-5 and XFER-INCOMING-6)",
+        "Step 4: Write E2E test - Add history tab test to verify completed transfers display (XFER-HISTORY-7)",
+        "Step 5: Write E2E test - Add RTL layout test for all tabs in Hebrew mode (XFER-RTL-8)",
+        "Step 6: Run E2E tests - Execute npm run test:e2e to verify all tests fail as expected (Red phase of TDD)",
+        "Step 7: Extend useAssignmentRequests hook - Add outgoingTransfers state filtered by requests.filter(r => r.requested_by === user?.uid), expose in return interface",
+        "Step 8: Add cancelRequest function - Implement in useAssignmentRequests to update request status to 'rejected', add processedBy/processedAt fields, reset equipment status to 'serviceable', use batch write for atomicity",
+        "Step 9: Update TransfersList component - Import Send/ArrowUpRight icon from lucide-react, add outgoing tab trigger between incoming and history tabs",
+        "Step 10: Add outgoing tab content - Create TabsContent for outgoing with outgoingTransfers.map, display TransferCard with showActions={false} since outgoing transfers show cancel instead of accept/reject",
+        "Step 11: Add cancel button to TransferCard - Conditionally render cancel button for outgoing pending transfers, create new prop 'showCancel' on TransferCard component",
+        "Step 12: Create cancel dialog - Add state for cancelRequest, create Dialog with confirmation message showing equipment name and recipient, add textarea for optional cancellation notes",
+        "Step 13: Wire cancel handler - Implement handleCancel to call cancelRequest from hook, show success toast, close dialog on completion",
+        "Step 14: Add outgoing badge count - Display badge with outgoingTransfers.length on outgoing tab trigger when count > 0, use logical CSS (ms-1 in LTR, me-1 in RTL)",
+        "Step 15: Review incoming filter logic - Verify useAssignmentRequests correctly filters incoming by (toUnitId === currentUnitId OR toPersonnelId === currentPersonnelId) AND status === 'pending'",
+        "Step 16: Add signature_approved check - Update incoming filter to check if current user has isSignatureApproved=true when toUnitId is set, keep personnel transfers unaffected",
+        "Step 17: Update history filter - Change processedRequests to filter by (requested_by === user?.uid OR toPersonnelId === currentPersonnelId OR toUnitId === currentUnitId) to show all relevant completed transfers",
+        "Step 18: Test RTL layout - Verify all tabs use logical CSS properties: replace ml-/mr- with ms-/me-, text-left/text-right with text-start/text-end, ensure arrow icons flip based on dir",
+        "Step 19: Run E2E tests - Execute npm run test:e2e to verify all tests pass (Green phase of TDD)",
+        "Step 20: Refactor - Extract reusable dialog components if needed, optimize filter logic, add comments for complex permission rules, ensure consistent error handling",
+        "Step 21: Manual testing - Test with different user roles (admin, leader, user) to verify permission boundaries, test cancel flow end-to-end, verify signature_approved attribute controls unit transfer visibility",
+        "Step 22: Cross-browser testing - Verify RTL layout in Hebrew mode across browsers, ensure tab navigation works correctly, verify dialogs render properly"
+      ],
+      "risks": [
+        "Risk 1: The incoming filter may show unit transfers to non-signature_approved users - Need to add isSignatureApproved check when toUnitId is set, otherwise unauthorized users could see/accept unit equipment transfers",
+        "Risk 2: Concurrent cancellation - If sender cancels while recipient accepts, race condition could occur - Mitigate with Firestore transaction or check current status before update",
+        "Risk 3: History tab may not show all relevant transfers - Current filter only checks status !== 'pending', need to add user participation filter (requested_by OR to_personnel_id OR to_unit_id matches current user context)",
+        "Risk 4: RTL layout may break with existing CSS - Need thorough testing of badge positioning, button alignment, arrow directions in Hebrew mode, ensure all components use logical properties",
+        "Risk 5: Equipment status rollback may conflict with other workflows - When canceling, ensure equipment is not in maintenance or missing status, only revert if status is still 'pending_transfer'",
+        "Risk 6: Missing translation keys could break UI in Hebrew - Ensure all new keys (outgoing, cancel, etc.) are added to both en and he translations before implementation",
+        "Risk 7: Module-level cache in useAssignmentRequests may not update outgoing array - Need to ensure _requestsCache includes outgoing in addition to requests and incoming",
+        "Risk 8: Cancel permission check - Need to verify requestedBy === user?.uid before allowing cancel, prevent unauthorized cancellation attempts",
+        "Risk 9: Signature requirement on cancel - Canceled transfers should not require signature verification, ensure cancel flow bypasses signature dialog",
+        "Risk 10: Badge count reactivity - Outgoing badge count must update in real-time via onSnapshot, verify cache update includes outgoingTransfers length"
+      ],
+      "testCases": [
+        {
+          "description": "Verifies that the outgoing tab shows only transfers initiated by the current user",
+          "name": "[XFER-OUTGOING-1] Outgoing tab displays user's initiated transfers",
+          "scenario": "Login as admin, navigate to /equipment?tab=transfers, click outgoing tab, verify that only transfers where requestedBy matches current user are displayed, verify outgoing tab shows badge count when transfers exist"
+        },
+        {
+          "description": "Verifies that pending outgoing transfers display a cancel action button",
+          "name": "[XFER-OUTGOING-2] Outgoing tab shows cancel button for pending transfers",
+          "scenario": "Login as admin with pending outgoing transfer, navigate to outgoing tab, verify cancel (X) button is visible on pending transfers, verify approved/rejected transfers do not show cancel button"
+        },
+        {
+          "description": "Verifies that canceling a transfer sets request status to rejected and equipment status back to serviceable",
+          "name": "[XFER-OUTGOING-3] Cancel transfer reverts equipment status",
+          "scenario": "Login as admin, navigate to outgoing tab, click cancel on pending transfer, confirm cancellation in dialog, verify transfer moves to history tab with rejected status, verify equipment status reverted to serviceable"
+        },
+        {
+          "description": "Verifies permission check that only the user who initiated the transfer can cancel it",
+          "name": "[XFER-OUTGOING-4] Only sender can cancel their outgoing transfers",
+          "scenario": "Create transfer as admin user, login as different user (leader), navigate to transfers page, verify the transfer does not appear in their outgoing tab, verify they cannot cancel it"
+        },
+        {
+          "description": "Verifies that unit equipment transfers only appear in incoming tab for signature_approved users of the target unit",
+          "name": "[XFER-INCOMING-5] Incoming tab filters by signature_approved for unit transfers",
+          "scenario": "Create unit equipment transfer to platoon A, login as signature_approved user in platoon A, verify transfer appears in incoming tab, login as non-signature_approved user in platoon A, verify transfer does NOT appear in their incoming tab"
+        },
+        {
+          "description": "Verifies that personal equipment transfers only appear for the specific recipient personnel",
+          "name": "[XFER-INCOMING-6] Incoming tab shows personal transfers to specific personnel",
+          "scenario": "Create personal equipment transfer to specific personnel (test-user), login as test-user, verify transfer appears in incoming tab, login as different user in same unit, verify transfer does NOT appear in their incoming tab"
+        },
+        {
+          "description": "Verifies that history tab displays both approved and rejected transfers that the user participated in",
+          "name": "[XFER-HISTORY-7] History tab shows all completed transfers",
+          "scenario": "Login as admin with completed transfers (approved and rejected), navigate to history tab, verify both approved and rejected transfers are visible with correct status badges, verify pending transfers do not appear in history"
+        },
+        {
+          "description": "Verifies RTL layout for incoming/outgoing/history tabs using logical CSS properties",
+          "name": "[XFER-RTL-8] All tabs render correctly in Hebrew RTL mode",
+          "scenario": "Switch language to Hebrew, navigate to transfers page, verify tab triggers render RTL with proper badge positioning using logical CSS (ms-/me-), verify transfer cards show arrows in correct direction (ArrowLeft for RTL), verify action buttons align correctly"
+        },
+        {
+          "description": "Verifies that the cancel confirmation dialog shows equipment name and recipient details",
+          "name": "[XFER-CANCEL-9] Cancel dialog displays equipment details",
+          "scenario": "Navigate to outgoing tab, click cancel on transfer, verify dialog opens with equipment name, recipient name, and confirmation message, verify dialog has cancel and confirm buttons"
+        },
+        {
+          "description": "Verifies appropriate empty state messages when no transfers exist in each tab",
+          "name": "[XFER-EMPTY-10] Empty states display for all tabs",
+          "scenario": "Login as new user with no transfers, verify incoming tab shows 'No incoming transfers', navigate to outgoing tab and verify 'No outgoing transfers', navigate to history tab and verify 'No processed requests'"
+        }
+      ]
+    },
+    "requirements": [
+      "Show incoming, outgoing and history tabs in the transfers section",
+      "Incoming tab should show transfers for signature_approved users to their unit",
+      "Incoming tab should show transfers for personal users to themselves",
+      "Incoming transfers can only be accepted by the recipient",
+      "Outgoing tab should show transfers initiated by the current user",
+      "Outgoing requests can only be cancelled by the sender",
+      "History tab shows all completed (approved/rejected) transfers",
+      "All tabs must support RTL (Hebrew) layout using logical CSS properties",
+      "Follow existing UI patterns and component structure",
+      "Maintain bilingual support (English and Hebrew)",
+      "Use existing hooks and Firebase integration patterns"
+    ],
+    "testResult": {
+      "summary": "Added 3 comprehensive E2E tests for transfer tabs iteration 2: [XFER-OUTGOING-3] tests full end-to-end cancel functionality including equipment status revert verification, [XFER-OUTGOING-4] verifies permission checks ensuring only the sender can cancel their outgoing transfers while recipients cannot, and [XFER-OUTGOING-5] validates that approved or rejected transfers cannot be cancelled and only pending transfers show cancel buttons. These tests address the gaps identified in iteration 1 by providing comprehensive coverage of cancel functionality, permission boundaries, and status validation rules.",
+      "testFiles": [
+        "e2e/transfers.spec.ts"
+      ],
+      "testsAdded": 3
+    }
+  }
+}

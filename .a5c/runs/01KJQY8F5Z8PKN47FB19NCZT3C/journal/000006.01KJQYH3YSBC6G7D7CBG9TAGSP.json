@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-02T18:56:19.929Z",
+  "data": {
+    "effectId": "01KJQYH3YATG7SSHG5DB1P7W9C",
+    "invocationKey": "transfer-tabs-feature:S000003:write-tests-1",
+    "invocationHash": "83d4977d608decea494305082fe536b505a0f1b8d092fc68f1ff196507f921b9",
+    "stepId": "S000003",
+    "taskId": "write-tests-1",
+    "kind": "agent",
+    "label": "Write E2E tests for iteration 1",
+    "taskDefRef": "tasks/01KJQYH3YATG7SSHG5DB1P7W9C/task.json"
+  },
+  "checksum": "3addd7ff8f5655d209e387584d912ce0300c66a626277de244e60e3a13d6698f"
+}

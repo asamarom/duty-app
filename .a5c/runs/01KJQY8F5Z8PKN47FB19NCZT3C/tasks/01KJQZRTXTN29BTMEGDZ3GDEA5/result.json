@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KJQZRTXTN29BTMEGDZ3GDEA5",
+  "taskId": "implement-3",
+  "invocationKey": "transfer-tabs-feature:S000012:implement-3",
+  "status": "ok",
+  "result": {
+    "changesSummary": "Added self-cancellation rule for assignment requests allowing users to reject their own pending requests",
+    "filesModified": [
+      "firestore.rules"
+    ],
+    "summary": "Updated Firestore security rules for the assignmentRequests collection to allow users to cancel their own pending transfer requests. The new rule permits authenticated users to update their own requests from 'pending' to 'rejected' status by checking that: (1) the user is authenticated, (2) the requestedBy field matches the current user's UID, (3) the current status is 'pending', and (4) the new status is 'rejected'. This change maintains existing admin/leader approval permissions while enabling self-service cancellation functionality."
+  },
+  "startedAt": "2026-03-02T19:18:52.425Z",
+  "finishedAt": "2026-03-02T19:18:52.425Z",
+  "value": {
+    "changesSummary": "Added self-cancellation rule for assignment requests allowing users to reject their own pending requests",
+    "filesModified": [
+      "firestore.rules"
+    ],
+    "summary": "Updated Firestore security rules for the assignmentRequests collection to allow users to cancel their own pending transfer requests. The new rule permits authenticated users to update their own requests from 'pending' to 'rejected' status by checking that: (1) the user is authenticated, (2) the requestedBy field matches the current user's UID, (3) the current status is 'pending', and (4) the new status is 'rejected'. This change maintains existing admin/leader approval permissions while enabling self-service cancellation functionality."
+  }
+}

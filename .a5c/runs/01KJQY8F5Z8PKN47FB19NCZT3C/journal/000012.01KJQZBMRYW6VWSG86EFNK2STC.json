@@ -1,0 +1,18 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-02T19:10:49.119Z",
+  "data": {
+    "effectId": "01KJQZBMRDS55439WXHT7EH5FV",
+    "invocationKey": "transfer-tabs-feature:S000006:__sdk.breakpoint",
+    "invocationHash": "14db9f05edb47bab6d2f7197f7d48a231ea2e258e7e31e7e1d09a16821263596",
+    "stepId": "S000006",
+    "taskId": "__sdk.breakpoint",
+    "kind": "breakpoint",
+    "label": "breakpoint",
+    "taskDefRef": "tasks/01KJQZBMRDS55439WXHT7EH5FV/task.json",
+    "labels": [
+      "breakpoint"
+    ]
+  },
+  "checksum": "195fdf64f3be9a8672aab14e12dc6f379ef558bb3051b593180f72d4619a6e43"
+}

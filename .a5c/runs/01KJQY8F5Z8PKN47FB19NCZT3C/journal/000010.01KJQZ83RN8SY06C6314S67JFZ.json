@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-02T19:08:53.397Z",
+  "data": {
+    "effectId": "01KJQZ83PERG8NF0TFYT4NAN49",
+    "invocationKey": "transfer-tabs-feature:S000005:quality-score-1",
+    "invocationHash": "7bfad0d02967006e5b663554f63084affe35b279cb63a58f98a7411b5b812b67",
+    "stepId": "S000005",
+    "taskId": "quality-score-1",
+    "kind": "agent",
+    "label": "Assess quality (iteration 1)",
+    "taskDefRef": "tasks/01KJQZ83PERG8NF0TFYT4NAN49/task.json"
+  },
+  "checksum": "421682df77b421f0044aadf8192a75367a27633adad9a4c574a1efbfbeaaa22d"
+}

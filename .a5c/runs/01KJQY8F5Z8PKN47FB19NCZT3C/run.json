@@ -1,0 +1,13 @@
+{
+  "runId": "01KJQY8F5Z8PKN47FB19NCZT3C",
+  "request": "transfer-tabs-feature",
+  "processId": "transfer-tabs-feature",
+  "entrypoint": {
+    "importPath": "../../processes/transfer-tabs-feature.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/transfer-tabs-feature.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-03-02T18:51:36.521Z",
+  "completionSecret": "c5065c06dfc0f02b8473e689ebb66dd5"
+}

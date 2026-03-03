@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJQY9DF7FBQBRCNA64KB7BB7",
+  "taskId": "analyze-and-plan",
+  "invocationKey": "transfer-tabs-feature:S000001:analyze-and-plan",
+  "stepId": "S000001",
+  "kind": "agent",
+  "title": "Analyze codebase and create implementation plan",
+  "io": {
+    "inputJsonPath": "tasks/01KJQY9DF7FBQBRCNA64KB7BB7/input.json",
+    "outputJsonPath": "tasks/01KJQY9DF7FBQBRCNA64KB7BB7/plan.json"
+  },
+  "inputs": {
+    "feature": "Transfer Tabs with Incoming, Outgoing, and History",
+    "requirements": [
+      "Show incoming, outgoing and history tabs in the transfers section",
+      "Incoming tab should show transfers for signature_approved users to their unit",
+      "Incoming tab should show transfers for personal users to themselves",
+      "Incoming transfers can only be accepted by the recipient",
+      "Outgoing tab should show transfers initiated by the current user",
+      "Outgoing requests can only be cancelled by the sender",
+      "History tab shows all completed (approved/rejected) transfers",
+      "All tabs must support RTL (Hebrew) layout using logical CSS properties",
+      "Follow existing UI patterns and component structure",
+      "Maintain bilingual support (English and Hebrew)",
+      "Use existing hooks and Firebase integration patterns"
+    ]
+  }
+}

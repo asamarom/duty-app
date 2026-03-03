@@ -1,0 +1,5 @@
+{
+  "testsAdded": 3,
+  "testFiles": ["e2e/transfers.spec.ts"],
+  "summary": "Added 3 E2E tests for transfer tabs feature iteration 1: [XFER-OUTGOING-1] tests that outgoing tab displays user's initiated transfers with graceful fallback when tab doesn't exist yet, [XFER-OUTGOING-2] tests that outgoing tab shows cancel button for pending transfers with confirmation dialog, and [XFER-RTL-8] comprehensive RTL layout test for all tabs including Hebrew text rendering, dir attributes, arrow direction, and badge alignment using logical CSS properties. Tests follow existing patterns from transfers.spec.ts and transfers-rtl.spec.ts, use proper login helpers from test-auth.ts, and include graceful degradation for features not yet implemented."
+}

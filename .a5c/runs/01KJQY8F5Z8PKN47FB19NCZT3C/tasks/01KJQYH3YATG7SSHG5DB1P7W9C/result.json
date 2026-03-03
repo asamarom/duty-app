@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KJQYH3YATG7SSHG5DB1P7W9C",
+  "taskId": "write-tests-1",
+  "invocationKey": "transfer-tabs-feature:S000003:write-tests-1",
+  "status": "ok",
+  "result": {
+    "summary": "Added 3 E2E tests for transfer tabs feature iteration 1: [XFER-OUTGOING-1] tests that outgoing tab displays user's initiated transfers with graceful fallback when tab doesn't exist yet, [XFER-OUTGOING-2] tests that outgoing tab shows cancel button for pending transfers with confirmation dialog, and [XFER-RTL-8] comprehensive RTL layout test for all tabs including Hebrew text rendering, dir attributes, arrow direction, and badge alignment using logical CSS properties. Tests follow existing patterns from transfers.spec.ts and transfers-rtl.spec.ts, use proper login helpers from test-auth.ts, and include graceful degradation for features not yet implemented.",
+    "testFiles": [
+      "e2e/transfers.spec.ts"
+    ],
+    "testsAdded": 3
+  },
+  "startedAt": "2026-03-02T19:00:56.037Z",
+  "finishedAt": "2026-03-02T19:00:56.037Z",
+  "value": {
+    "summary": "Added 3 E2E tests for transfer tabs feature iteration 1: [XFER-OUTGOING-1] tests that outgoing tab displays user's initiated transfers with graceful fallback when tab doesn't exist yet, [XFER-OUTGOING-2] tests that outgoing tab shows cancel button for pending transfers with confirmation dialog, and [XFER-RTL-8] comprehensive RTL layout test for all tabs including Hebrew text rendering, dir attributes, arrow direction, and badge alignment using logical CSS properties. Tests follow existing patterns from transfers.spec.ts and transfers-rtl.spec.ts, use proper login helpers from test-auth.ts, and include graceful degradation for features not yet implemented.",
+    "testFiles": [
+      "e2e/transfers.spec.ts"
+    ],
+    "testsAdded": 3
+  }
+}

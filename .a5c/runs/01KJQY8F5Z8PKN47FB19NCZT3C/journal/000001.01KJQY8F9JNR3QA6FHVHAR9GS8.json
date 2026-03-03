@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-03-02T18:51:36.626Z",
+  "data": {
+    "runId": "01KJQY8F5Z8PKN47FB19NCZT3C",
+    "processId": "transfer-tabs-feature",
+    "entrypoint": {
+      "importPath": "../../processes/transfer-tabs-feature.js",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json"
+  },
+  "checksum": "b47713122087343a8f953c528c7174008b34068e75fbd87d81cb63da476f6f8f"
+}

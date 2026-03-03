@@ -1,0 +1,12 @@
+{
+  "type": "RUN_FAILED",
+  "recordedAt": "2026-03-02T19:21:54.620Z",
+  "data": {
+    "error": {
+      "name": "TypeError",
+      "message": "ctx.shell is not a function",
+      "stack": "TypeError: ctx.shell is not a function\n    at process (file:///home/ubuntu/duty-app/.a5c/processes/transfer-tabs-feature.js:362:13)\n    at async /usr/lib/node_modules/@a5c-ai/babysitter-sdk/dist/runtime/orchestrateIteration.js:86:28\n    at async withRunLock (/usr/lib/node_modules/@a5c-ai/babysitter-sdk/dist/storage/lock.js:69:16)\n    at async orchestrateIteration (/usr/lib/node_modules/@a5c-ai/babysitter-sdk/dist/runtime/orchestrateIteration.js:61:12)\n    at async runIterate (/usr/lib/node_modules/@a5c-ai/babysitter-sdk/dist/cli/commands/runIterate.js:67:29)\n    at async handleRunIterate (/usr/lib/node_modules/@a5c-ai/babysitter-sdk/dist/cli/main.js:651:24)\n    at async Object.run (/usr/lib/node_modules/@a5c-ai/babysitter-sdk/dist/cli/main.js:1392:28)"
+    }
+  },
+  "checksum": "af1565d83b43ba5db1f849e3289827a897fac5bebc21c20744799b49bf4bca08"
+}

@@ -1,0 +1,18 @@
+{
+  "feature": "Transfer Tabs with Incoming, Outgoing, and History",
+  "requirements": [
+    "Show incoming, outgoing and history tabs in the transfers section",
+    "Incoming tab should show transfers for signature_approved users to their unit",
+    "Incoming tab should show transfers for personal users to themselves",
+    "Incoming transfers can only be accepted by the recipient",
+    "Outgoing tab should show transfers initiated by the current user",
+    "Outgoing requests can only be cancelled by the sender",
+    "History tab shows all completed (approved/rejected) transfers",
+    "All tabs must support RTL (Hebrew) layout using logical CSS properties",
+    "Follow existing UI patterns and component structure",
+    "Maintain bilingual support (English and Hebrew)",
+    "Use existing hooks and Firebase integration patterns"
+  ],
+  "targetQuality": 90,
+  "maxIterations": 3
+}

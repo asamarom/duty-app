@@ -176,31 +176,35 @@ export function TransfersList() {
   return (
     <>
       <Tabs defaultValue="incoming" dir={dir} key={`tabs-${dir}`}>
-        <div className="overflow-x-auto -mx-4 px-4 mb-4" dir={dir} key={`wrapper-${dir}`}>
-        <TabsList dir={dir} key={`tabslist-${dir}`}>
-          <TabsTrigger value="incoming" className="gap-2">
-            <Inbox className="h-4 w-4" />
-            {t('transfers.incoming')}
-            {incomingTransfers.length > 0 && (
-              <Badge variant="secondary" className={dir === 'rtl' ? 'me-1' : 'ms-1'}>{incomingTransfers.length}</Badge>
-            )}
+        <div className="mb-4" dir={dir} key={`wrapper-${dir}`}>
+        <TabsList dir={dir} key={`tabslist-${dir}`} className={`w-full h-auto p-0.5 ${isAdmin ? 'grid grid-cols-4' : 'grid grid-cols-3'}`}>
+          <TabsTrigger value="incoming" className="flex-col gap-0.5 py-2 px-1 h-auto text-xs">
+            <div className="flex items-center gap-1">
+              <Inbox className="h-3.5 w-3.5" />
+              {incomingTransfers.length > 0 && (
+                <Badge variant="secondary" className="h-4 min-w-4 px-1 text-[10px]">{incomingTransfers.length}</Badge>
+              )}
+            </div>
+            <span className="leading-tight truncate max-w-full">{t('transfers.incoming')}</span>
           </TabsTrigger>
-          <TabsTrigger value="outgoing" className="gap-2">
-            <Send className="h-4 w-4" />
-            {t('transfers.outgoing')}
-            {outgoingTransfers.length > 0 && (
-              <Badge variant="secondary" className={dir === 'rtl' ? 'me-1' : 'ms-1'}>{outgoingTransfers.length}</Badge>
-            )}
+          <TabsTrigger value="outgoing" className="flex-col gap-0.5 py-2 px-1 h-auto text-xs">
+            <div className="flex items-center gap-1">
+              <Send className="h-3.5 w-3.5" />
+              {outgoingTransfers.length > 0 && (
+                <Badge variant="secondary" className="h-4 min-w-4 px-1 text-[10px]">{outgoingTransfers.length}</Badge>
+              )}
+            </div>
+            <span className="leading-tight truncate max-w-full">{t('transfers.outgoing')}</span>
           </TabsTrigger>
           {isAdmin && (
-            <TabsTrigger value="pending" className="gap-2">
-              <Clock className="h-4 w-4" />
-              {t('transfers.allPending')}
+            <TabsTrigger value="pending" className="flex-col gap-0.5 py-2 px-1 h-auto text-xs">
+              <Clock className="h-3.5 w-3.5" />
+              <span className="leading-tight truncate max-w-full">{t('transfers.allPending')}</span>
             </TabsTrigger>
           )}
-          <TabsTrigger value="history" className="gap-2">
-            <History className="h-4 w-4" />
-            {t('transfers.history')}
+          <TabsTrigger value="history" className="flex-col gap-0.5 py-2 px-1 h-auto text-xs">
+            <History className="h-3.5 w-3.5" />
+            <span className="leading-tight truncate max-w-full">{t('transfers.history')}</span>
           </TabsTrigger>
         </TabsList>
         </div>

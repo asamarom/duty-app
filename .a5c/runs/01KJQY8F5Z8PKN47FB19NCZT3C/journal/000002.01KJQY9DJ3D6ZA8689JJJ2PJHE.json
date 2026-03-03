@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-02T18:52:07.619Z",
+  "data": {
+    "effectId": "01KJQY9DF7FBQBRCNA64KB7BB7",
+    "invocationKey": "transfer-tabs-feature:S000001:analyze-and-plan",
+    "invocationHash": "c27a53a4aea2396eb3f47c798ec0320186b3a83692d6f8891b01d0840b0a38c4",
+    "stepId": "S000001",
+    "taskId": "analyze-and-plan",
+    "kind": "agent",
+    "label": "Analyze codebase and create implementation plan",
+    "taskDefRef": "tasks/01KJQY9DF7FBQBRCNA64KB7BB7/task.json"
+  },
+  "checksum": "ba93fb8db1881fdf86c54273988fbe51895d2c98dfc976b28fb6729e442d9c9d"
+}
