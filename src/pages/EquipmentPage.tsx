@@ -295,27 +295,29 @@ export default function EquipmentPage() {
               )}
 
               {/* Mobile FAB - show Assign button when items selected, otherwise Add */}
-              <div className="lg:hidden fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] end-4 z-40">
-                {selectMode && selectedIds.size > 0 ? (
-                  <Button
-                    variant="tactical"
-                    size="lg"
-                    className="h-14 px-6 rounded-full shadow-lg"
-                    onClick={() => setBulkAssignOpen(true)}
-                  >
-                    {t('equipment.assignSelected')} ({selectedIds.size})
-                  </Button>
-                ) : (
-                  <Button
-                    variant="tactical"
-                    size="lg"
-                    className="h-14 w-14 rounded-full shadow-lg"
-                    onClick={() => navigate('/equipment/add')}
-                  >
-                    <Plus className="h-6 w-6" />
-                  </Button>
-                )}
-              </div>
+              {activeTab === 'equipment' && (
+                <div className="lg:hidden fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] end-4 z-40">
+                  {selectMode && selectedIds.size > 0 ? (
+                    <Button
+                      variant="tactical"
+                      size="lg"
+                      className="h-14 px-6 rounded-full shadow-lg"
+                      onClick={() => setBulkAssignOpen(true)}
+                    >
+                      {t('equipment.assignSelected')} ({selectedIds.size})
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="tactical"
+                      size="lg"
+                      className="h-14 w-14 rounded-full shadow-lg"
+                      onClick={() => navigate('/equipment/add')}
+                    >
+                      <Plus className="h-6 w-6" />
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
           </TabsContent>
 

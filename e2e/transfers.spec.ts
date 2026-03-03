@@ -915,3 +915,135 @@ test.describe('Transfer Tabs Feature [XFER-TABS]', () => {
     }
   });
 });
+
+test.describe('Mobile Layout [XFER-MOBILE]', () => {
+  test.beforeEach(async ({ page }) => {
+    if (!isStagingTest()) {
+      await clearAuthState(page);
+    }
+  });
+
+  test('[XFER-MOBILE-1] Mobile layout should not have horizontal scroll on transfers tab', async ({ page }) => {
+    // Set mobile viewport
+    await page.setViewportSize({ width: 375, height: 667 });
+
+    await loginAsTestUser(page, 'admin');
+    await page.goto('/equipment?tab=transfers');
+    await page.waitForLoadState('domcontentloaded');
+
+    // Wait for tabs to load
+    await page.waitForSelector('[role="tablist"]', { timeout: 10000 });
+    await page.waitForTimeout(1000);
+
+    // Check that document width matches viewport (no horizontal overflow)
+    const documentWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+    const viewportWidth = await page.evaluate(() => document.documentElement.clientWidth);
+
+    // Document should not be wider than viewport
+    expect(documentWidth).toBeLessThanOrEqual(viewportWidth + 1); // Allow 1px tolerance
+
+    // Verify all transfer tabs are visible without scrolling
+    const incomingTab = page.locator('[role="tab"]').first();
+    await expect(incomingTab).toBeVisible({ timeout: 8000 });
+
+    // Check each sub-tab for horizontal overflow
+    const tabs = ['incoming', 'outgoing', 'history'];
+
+    for (const tabValue of tabs) {
+      const tab = page.locator(`[role="tab"][value="${tabValue}"]`).or(
+        page.locator(`[role="tab"]:has-text("${tabValue}")`)
+      ).first();
+
+      const isVisible = await tab.isVisible().catch(() => false);
+      if (isVisible) {
+        await tab.click();
+        await page.waitForTimeout(300);
+
+        // Check for horizontal overflow in tab content
+        const contentWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+        const viewWidth = await page.evaluate(() => document.documentElement.clientWidth);
+
+        expect(contentWidth).toBeLessThanOrEqual(viewWidth + 1);
+      }
+    }
+  });
+
+  test('[XFER-MOBILE-2] FAB should not be visible on transfers tab', async ({ page }) => {
+    // Set mobile viewport
+    await page.setViewportSize({ width: 375, height: 667 });
+
+    await loginAsTestUser(page, 'admin');
+    await page.goto('/equipment?tab=transfers');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
+
+    // The green plus FAB should not be visible on transfers tab
+    const fab = page.locator('button.rounded-full:has-text("+")').or(
+      page.locator('button.rounded-full').filter({ has: page.locator('svg') })
+    );
+
+    const fabCount = await fab.count();
+
+    // FAB should either not exist or not be visible on transfers tab
+    if (fabCount > 0) {
+      const isVisible = await fab.first().isVisible().catch(() => false);
+      expect(isVisible).toBe(false);
+    }
+
+    // Switch to equipment tab and verify FAB appears
+    const equipmentTab = page.getByRole('tab', { name: /equipment|ציוד/i }).first();
+    if (await equipmentTab.isVisible()) {
+      await equipmentTab.click();
+      await page.waitForTimeout(500);
+
+      // Now FAB should be visible on equipment tab
+      const fabOnEquipment = page.locator('button.rounded-full').filter({ has: page.locator('[class*="Plus"]') }).first();
+      const isFabVisible = await fabOnEquipment.isVisible().catch(() => false);
+      expect(isFabVisible).toBe(true);
+    }
+  });
+
+  test('[XFER-MOBILE-3] Tabs should be responsive and not overflow on small screens', async ({ page }) => {
+    // Test on very small mobile viewport
+    await page.setViewportSize({ width: 320, height: 568 });
+
+    await loginAsTestUser(page, 'admin');
+    await page.goto('/equipment?tab=transfers');
+    await page.waitForLoadState('domcontentloaded');
+
+    // Wait for tabs to load
+    await page.waitForSelector('[role="tablist"]', { timeout: 10000 });
+    await page.waitForTimeout(1000);
+
+    // Check tabs list container
+    const tabsList = page.locator('[role="tablist"]').first();
+    await expect(tabsList).toBeVisible({ timeout: 8000 });
+
+    // On mobile, tab text should be hidden and only icons visible
+    const tabTriggers = page.locator('[role="tab"]');
+    const tabCount = await tabTriggers.count();
+
+    // Verify tabs fit within viewport
+    const tabsListBox = await tabsList.boundingBox();
+    const viewportWidth = 320;
+
+    if (tabsListBox) {
+      expect(tabsListBox.width).toBeLessThanOrEqual(viewportWidth);
+    }
+
+    // Verify each tab is clickable
+    for (let i = 0; i < Math.min(tabCount, 4); i++) {
+      const tab = tabTriggers.nth(i);
+      const isVisible = await tab.isVisible().catch(() => false);
+
+      if (isVisible) {
+        // Tab should be within viewport bounds
+        const tabBox = await tab.boundingBox();
+        if (tabBox) {
+          expect(tabBox.x).toBeGreaterThanOrEqual(0);
+          expect(tabBox.x + tabBox.width).toBeLessThanOrEqual(viewportWidth + 20); // Small tolerance for padding
+        }
+      }
+    }
+  });
+});

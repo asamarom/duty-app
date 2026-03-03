@@ -176,31 +176,31 @@ export function TransfersList() {
   return (
     <>
       <Tabs defaultValue="incoming" dir={dir} key={`tabs-${dir}`}>
-        <div className="flex mb-4" dir={dir} key={`wrapper-${dir}`}>
-        <TabsList dir={dir} key={`tabslist-${dir}`}>
-          <TabsTrigger value="incoming" className="gap-2">
+        <div className="overflow-x-auto -mx-4 px-4 mb-4" dir={dir} key={`wrapper-${dir}`}>
+        <TabsList dir={dir} key={`tabslist-${dir}`} className="w-full lg:w-auto">
+          <TabsTrigger value="incoming" className="gap-2 flex-1 lg:flex-none">
             <Inbox className="h-4 w-4" />
-            {t('transfers.incoming')}
+            <span className="hidden sm:inline">{t('transfers.incoming')}</span>
             {incomingTransfers.length > 0 && (
               <Badge variant="secondary" className={dir === 'rtl' ? 'me-1' : 'ms-1'}>{incomingTransfers.length}</Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="outgoing" className="gap-2">
+          <TabsTrigger value="outgoing" className="gap-2 flex-1 lg:flex-none">
             <Send className="h-4 w-4" />
-            {t('transfers.outgoing')}
+            <span className="hidden sm:inline">{t('transfers.outgoing')}</span>
             {outgoingTransfers.length > 0 && (
               <Badge variant="secondary" className={dir === 'rtl' ? 'me-1' : 'ms-1'}>{outgoingTransfers.length}</Badge>
             )}
           </TabsTrigger>
           {isAdmin && (
-            <TabsTrigger value="pending" className="gap-2">
+            <TabsTrigger value="pending" className="gap-2 flex-1 lg:flex-none">
               <Clock className="h-4 w-4" />
-              {t('transfers.allPending')}
+              <span className="hidden sm:inline">{t('transfers.allPending')}</span>
             </TabsTrigger>
           )}
-          <TabsTrigger value="history" className="gap-2">
+          <TabsTrigger value="history" className="gap-2 flex-1 lg:flex-none">
             <History className="h-4 w-4" />
-            {t('transfers.history')}
+            <span className="hidden sm:inline">{t('transfers.history')}</span>
           </TabsTrigger>
         </TabsList>
         </div>
