@@ -261,9 +261,33 @@ service cloud.firestore {
     // ASSIGNMENT REQUESTS COLLECTION - Equipment transfer requests
     // ============================================================================
     match /assignmentRequests/{requestId} {
-      // CRITICAL FIX: Battalion-based access control
-      // Admins can read all, others can only read requests in their battalion
-      allow read: if hasAnyRole() && (isAdmin() || isSameBattalion(resource.data.battalionId));
+      // CRITICAL FIX: Battalion-based access control + transfer visibility
+      //
+      // Defense-in-depth strategy for transfer visibility:
+      // 1. Rules (server-side): Enforce battalion-level access + personal transfer recipient check
+      // 2. Client-side (useAssignmentRequests hook): Additional filtering for unit transfers based on isSignatureApproved
+      //
+      // Firestore rules limitations:
+      // - Cannot query personnel collection by userId to check isSignatureApproved
+      // - Cannot efficiently join across collections
+      //
+      // Rule enforcement:
+      // - Admins can read all requests in any battalion
+      // - Personal transfers (to_personnel_id): Only the recipient can read
+      // - Unit transfers (to_unit_id): Battalion members can read, client filters by signature approval
+      // - Users can read requests they created (for outgoing transfers)
+      allow read: if hasAnyRole() && (
+        isAdmin() ||
+        // Personal transfer to me - check if to_personnel_id.userId == request.auth.uid
+        (resource.data.keys().hasAny(['to_personnel_id']) &&
+         exists(/databases/$(database)/documents/personnel/$(resource.data.to_personnel_id)) &&
+         get(/databases/$(database)/documents/personnel/$(resource.data.to_personnel_id)).data.userId == request.auth.uid) ||
+        // Unit transfer to my battalion (client-side will filter by unit + signature approval)
+        (resource.data.keys().hasAny(['to_unit_id']) &&
+         isSameBattalion(resource.data.battalionId)) ||
+        // Request I created (for outgoing transfers)
+        (resource.data.requestedBy == request.auth.uid && isSameBattalion(resource.data.battalionId))
+      );
 
       // Any authenticated user with a role can create requests
       // CRITICAL FIX: Validate all fields, enforce status='pending', verify requestedBy
