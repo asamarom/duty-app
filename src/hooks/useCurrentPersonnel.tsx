@@ -7,6 +7,10 @@ import type { PersonnelDoc } from '@/integrations/firebase/types';
 interface CurrentPersonnel {
   id: string;
   signature?: string;
+  firstName?: string;
+  lastName?: string;
+  serviceNumber?: string;
+  unitId?: string | null;
 }
 
 interface UseCurrentPersonnelReturn {
@@ -28,7 +32,14 @@ export function useCurrentPersonnel(): UseCurrentPersonnelReturn {
       if (snap.docs.length > 0) {
         const d = snap.docs[0];
         const data = d.data() as PersonnelDoc;
-        setCurrentPersonnel({ id: d.id, signature: data.signature || undefined });
+        setCurrentPersonnel({
+          id: d.id,
+          signature: data.signature || undefined,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          serviceNumber: data.serviceNumber,
+          unitId: data.unitId,
+        });
       } else {
         setCurrentPersonnel(null);
       }

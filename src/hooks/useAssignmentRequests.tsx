@@ -176,9 +176,10 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
   }, []);
 
   // Fetch the current user's personnel record so we can scope incoming transfers.
-  // We store just the two IDs we need for filtering.
+  // We store the IDs and signature approval status we need for filtering.
   const [currentPersonnelId, setCurrentPersonnelId] = useState<string | null>(null);
   const [currentUnitId, setCurrentUnitId] = useState<string | null>(null);
+  const [isSignatureApproved, setIsSignatureApproved] = useState<boolean>(false);
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -192,9 +193,11 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
         setCurrentPersonnelId(persDoc.id);
         const data = persDoc.data() as PersonnelDoc;
         setCurrentUnitId(data.unitId || null);
+        setIsSignatureApproved(data.isSignatureApproved || false);
       } else {
         setCurrentPersonnelId(null);
         setCurrentUnitId(null);
+        setIsSignatureApproved(false);
       }
     });
 
@@ -209,14 +212,18 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
       try {
         setError(null);
         const mappedRequests = await mapSnapshot(snapshot);
-        // Only show incoming transfers that target the current user's unit or
-        // their own personnel record — not every pending transfer system-wide.
+
+        // Only show incoming transfers that the user has permission to accept:
+        // - Signature-approved users can see transfers to their unit OR themselves
+        // - Non-signature-approved users can ONLY see transfers to themselves personally
         const incoming = mappedRequests.filter(r =>
           r.status === 'pending' &&
           !r.recipient_approved &&
           (
-            (r.to_unit_id != null && r.to_unit_id === currentUnitId) ||
-            (r.to_personnel_id != null && r.to_personnel_id === currentPersonnelId)
+            // Personal transfers - everyone can see these
+            (r.to_personnel_id != null && r.to_personnel_id === currentPersonnelId) ||
+            // Unit transfers - only signature-approved users can see these
+            (isSignatureApproved && r.to_unit_id != null && r.to_unit_id === currentUnitId)
           )
         );
         // Only show outgoing transfers that were initiated by the current user
@@ -245,7 +252,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     });
 
     return unsubscribe;
-  }, [mapSnapshot, currentPersonnelId, currentUnitId]);
+  }, [mapSnapshot, currentPersonnelId, currentUnitId, isSignatureApproved]);
 
   const refetch = useCallback(async () => {
     // With onSnapshot, data is kept live — nothing to do manually
