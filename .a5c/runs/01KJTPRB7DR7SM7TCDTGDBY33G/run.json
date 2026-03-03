@@ -1,0 +1,13 @@
+{
+  "runId": "01KJTPRB7DR7SM7TCDTGDBY33G",
+  "request": "equipment-access-rules-implementation",
+  "processId": "equipment-access-rules-implementation",
+  "entrypoint": {
+    "importPath": "../../processes/equipment-access-rules-implementation.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/equipment-access-rules-implementation.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-03-03T20:38:11.499Z",
+  "completionSecret": "894e3486c3ccc5051533a130a5265f8d"
+}

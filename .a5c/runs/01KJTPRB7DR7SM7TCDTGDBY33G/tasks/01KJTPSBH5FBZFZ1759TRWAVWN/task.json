@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJTPSBH5FBZFZ1759TRWAVWN",
+  "taskId": "analyze-current-state",
+  "invocationKey": "equipment-access-rules-implementation:S000001:analyze-current-state",
+  "stepId": "S000001",
+  "kind": "agent",
+  "title": "Analyze current equipment access implementation vs EQUIPMENT_ACCESS_RULES.md",
+  "io": {
+    "inputJsonPath": "tasks/01KJTPSBH5FBZFZ1759TRWAVWN/input.json",
+    "outputJsonPath": "tasks/01KJTPSBH5FBZFZ1759TRWAVWN/output.json"
+  },
+  "inputs": {
+    "clientCode": "src/hooks/useEquipment.tsx",
+    "firestoreRules": "firestore.rules",
+    "rulesDoc": "EQUIPMENT_ACCESS_RULES.md"
+  }
+}

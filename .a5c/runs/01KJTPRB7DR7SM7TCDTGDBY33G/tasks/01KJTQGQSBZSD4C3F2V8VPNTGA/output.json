@@ -1,0 +1,22 @@
+{
+  "success": false,
+  "allPassed": false,
+  "viewport": "desktop",
+  "testResults": {
+    "adminTests": {
+      "passed": 6,
+      "failed": 1,
+      "details": {
+        "ADMIN-EQUIP-1": "passed",
+        "ADMIN-EQUIP-2": "passed",
+        "ADMIN-EQUIP-3": "passed",
+        "ADMIN-EQUIP-4": "failed",
+        "ADMIN-EQUIP-5": "passed",
+        "ADMIN-EQUIP-6": "passed",
+        "ADMIN-EQUIP-7": "passed"
+      }
+    },
+    "reason": "Tests terminated after 30+ minutes. 6/7 admin equipment tests passed. [ADMIN-EQUIP-4] failed - needs debugging."
+  },
+  "error": "Test suite terminated due to timeout. Most admin tests passed but [ADMIN-EQUIP-4] (create equipment in any battalion) requires investigation."
+}

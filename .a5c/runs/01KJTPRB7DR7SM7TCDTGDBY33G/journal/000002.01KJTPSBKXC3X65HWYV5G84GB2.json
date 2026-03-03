@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-03T20:38:44.606Z",
+  "data": {
+    "effectId": "01KJTPSBH5FBZFZ1759TRWAVWN",
+    "invocationKey": "equipment-access-rules-implementation:S000001:analyze-current-state",
+    "invocationHash": "9e9b318adf0eb436d0d00b5c7632ccdba08bcd70b076f096ab0469dda7d9ca88",
+    "stepId": "S000001",
+    "taskId": "analyze-current-state",
+    "kind": "agent",
+    "label": "Analyze current equipment access implementation vs EQUIPMENT_ACCESS_RULES.md",
+    "taskDefRef": "tasks/01KJTPSBH5FBZFZ1759TRWAVWN/task.json"
+  },
+  "checksum": "8f673f6eb5151a74ba6db0989c0a306a8b273298ffe83455b56f0482c81e932d"
+}

@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-03-03T20:38:11.508Z",
+  "data": {
+    "runId": "01KJTPRB7DR7SM7TCDTGDBY33G",
+    "processId": "equipment-access-rules-implementation",
+    "entrypoint": {
+      "importPath": "../../processes/equipment-access-rules-implementation.js",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json"
+  },
+  "checksum": "cff1f8c27c13b1fe9c84e2afb4693b15aa27f4aa91facede8faa7e30b6d541c8"
+}

@@ -1,0 +1,16 @@
+{
+  "success": true,
+  "changes": [
+    "Added import for useUserRole hook to access isAdmin flag",
+    "Added updateEquipment function to the UseEquipmentReturn interface for admin-level equipment field updates (quantity, status, description)",
+    "Added isAdmin flag from useUserRole hook to useEquipment component state",
+    "Implemented updateEquipment callback function that allows modification of equipment quantity, status, and description fields with proper timestamp tracking",
+    "Added admin bypass to visibility filter - admins now see ALL equipment without any unit/personal restrictions (line 258-260)",
+    "Updated filter documentation to reflect admin bypass as the first filter rule checked",
+    "Added isAdmin to rebuild function dependencies array to ensure filter updates when admin status changes",
+    "Exported updateEquipment function in the hook's return object to make it available to components"
+  ],
+  "filesModified": [
+    "/home/ubuntu/duty-app/src/hooks/useEquipment.tsx"
+  ]
+}

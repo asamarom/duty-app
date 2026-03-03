@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Personnel Access</title>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getFirestore, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBNW0ch_fiFyJbgnuMxgxjOVaWe3RZ1H1E",
+      authDomain: "duty-82f42.firebaseapp.com",
+      projectId: "duty-82f42",
+      storageBucket: "duty-82f42.firebasestorage.app",
+      messagingSenderId: "711710842301",
+      appId: "1:711710842301:web:8d82a0c476e11e06737f8e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    window.testPersonnel = async function() {
+      const output = document.getElementById('output');
+      output.innerHTML = 'Testing...\n';
+      
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          output.innerHTML += '❌ Not logged in\n';
+          return;
+        }
+        
+        output.innerHTML += `✓ Logged in as: ${user.uid}\n\n`;
+        
+        // Test personnel query
+        output.innerHTML += 'Querying personnel collection...\n';
+        const q = query(collection(db, 'personnel'), where('userId', '==', user.uid));
+        const snap = await getDocs(q);
+        
+        output.innerHTML += `Query returned ${snap.docs.length} documents\n\n`;
+        
+        if (snap.docs.length > 0) {
+          const doc = snap.docs[0];
+          const data = doc.data();
+          output.innerHTML += '✓ Personnel record found:\n';
+          output.innerHTML += `  ID: ${doc.id}\n`;
+          output.innerHTML += `  firstName: ${data.firstName}\n`;
+          output.innerHTML += `  lastName: ${data.lastName}\n`;
+          output.innerHTML += `  serviceNumber: ${data.serviceNumber}\n`;
+          output.innerHTML += `  userId: ${data.userId}\n`;
+          output.innerHTML += `  unitId: ${data.unitId}\n`;
+          output.innerHTML += `  battalionId: ${data.battalionId}\n`;
+        } else {
+          output.innerHTML += '❌ No personnel record found\n';
+        }
+      } catch (err) {
+        output.innerHTML += `\n❌ Error: ${err.message}\n`;
+        output.innerHTML += `Code: ${err.code}\n`;
+        console.error(err);
+      }
+    };
+
+    window.login = async function() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const output = document.getElementById('output');
+      
+      try {
+        output.innerHTML = 'Logging in...\n';
+        await signInWithEmailAndPassword(auth, email, password);
+        output.innerHTML = '✓ Logged in successfully\n';
+        await testPersonnel();
+      } catch (err) {
+        output.innerHTML = `❌ Login failed: ${err.message}\n`;
+      }
+    };
+  </script>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #eee; }
+    input, button { padding: 8px; margin: 5px; font-size: 14px; }
+    #output { background: #000; padding: 15px; margin-top: 20px; white-space: pre-wrap; border: 1px solid #333; }
+  </style>
+</head>
+<body>
+  <h2>Personnel Access Test</h2>
+  <div>
+    <input type="email" id="email" placeholder="Email" value="asa.marom@gmail.com">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login & Test</button>
+  </div>
+  <div id="output">Not logged in yet...</div>
+</body>
+</html>

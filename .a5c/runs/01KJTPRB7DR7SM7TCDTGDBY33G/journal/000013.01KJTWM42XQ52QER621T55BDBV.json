@@ -1,0 +1,38 @@
+{
+  "type": "EFFECT_RESOLVED",
+  "recordedAt": "2026-03-03T22:20:44.510Z",
+  "data": {
+    "effectId": "01KJTQGQSBZSD4C3F2V8VPNTGA",
+    "status": "error",
+    "resultRef": "tasks/01KJTQGQSBZSD4C3F2V8VPNTGA/result.json",
+    "error": {
+      "name": "Object",
+      "message": "{\"success\":false,\"allPassed\":false,\"viewport\":\"desktop\",\"testResults\":{\"adminTests\":{\"passed\":6,\"failed\":1,\"details\":{\"ADMIN-EQUIP-1\":\"passed\",\"ADMIN-EQUIP-2\":\"passed\",\"ADMIN-EQUIP-3\":\"passed\",\"ADMIN-EQUIP-4\":\"failed\",\"ADMIN-EQUIP-5\":\"passed\",\"ADMIN-EQUIP-6\":\"passed\",\"ADMIN-EQUIP-7\":\"passed\"}},\"reason\":\"Tests terminated after 30+ minutes. 6/7 admin equipment tests passed. [ADMIN-EQUIP-4] failed - needs debugging.\"},\"error\":\"Test suite terminated due to timeout. Most admin tests passed but [ADMIN-EQUIP-4] (create equipment in any battalion) requires investigation.\"}",
+      "data": {
+        "success": false,
+        "allPassed": false,
+        "viewport": "desktop",
+        "testResults": {
+          "adminTests": {
+            "passed": 6,
+            "failed": 1,
+            "details": {
+              "ADMIN-EQUIP-1": "passed",
+              "ADMIN-EQUIP-2": "passed",
+              "ADMIN-EQUIP-3": "passed",
+              "ADMIN-EQUIP-4": "failed",
+              "ADMIN-EQUIP-5": "passed",
+              "ADMIN-EQUIP-6": "passed",
+              "ADMIN-EQUIP-7": "passed"
+            }
+          },
+          "reason": "Tests terminated after 30+ minutes. 6/7 admin equipment tests passed. [ADMIN-EQUIP-4] failed - needs debugging."
+        },
+        "error": "Test suite terminated due to timeout. Most admin tests passed but [ADMIN-EQUIP-4] (create equipment in any battalion) requires investigation."
+      }
+    },
+    "startedAt": "2026-03-03T22:20:44.417Z",
+    "finishedAt": "2026-03-03T22:20:44.417Z"
+  },
+  "checksum": "fa866f256dee321f3a4bcbea45f367b25d67f5e951f573db10745c4f50445673"
+}

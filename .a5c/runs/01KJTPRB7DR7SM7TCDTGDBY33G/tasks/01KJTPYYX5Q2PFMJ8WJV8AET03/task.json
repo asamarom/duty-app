@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJTPYYX5Q2PFMJ8WJV8AET03",
+  "taskId": "implement-firestore-rules",
+  "invocationKey": "equipment-access-rules-implementation:S000003:implement-firestore-rules",
+  "stepId": "S000003",
+  "kind": "agent",
+  "title": "Implement Firestore rules for admin role",
+  "io": {
+    "inputJsonPath": "tasks/01KJTPYYX5Q2PFMJ8WJV8AET03/input.json",
+    "outputJsonPath": "tasks/01KJTPYYX5Q2PFMJ8WJV8AET03/output.json"
+  },
+  "inputs": {
+    "attempt": 1,
+    "currentRules": "firestore.rules",
+    "role": "admin",
+    "rulesDoc": "EQUIPMENT_ACCESS_RULES.md"
+  }
+}

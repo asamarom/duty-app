@@ -166,8 +166,14 @@ export function useEquipment(): UseEquipmentReturn {
       // Build map of equipment with pending transfers OUT from user's unit
       // Key: equipmentId, Value: { fromUnitId, toUnitId, quantity }
       const pendingTransfersOut = new Map<string, Array<{ fromUnitId: string | null; toUnitId: string | null; quantity?: number }>>();
+
+      // Build set of equipment with pending transfers TO the current user personally
+      const pendingTransfersToUser = new Set<string>();
+
       pendingDocsRef.current.forEach((d) => {
         const data = d.data() as AssignmentRequestDoc;
+
+        // Track transfers OUT from user's unit
         if (!pendingTransfersOut.has(data.equipmentId)) {
           pendingTransfersOut.set(data.equipmentId, []);
         }
@@ -176,6 +182,11 @@ export function useEquipment(): UseEquipmentReturn {
           toUnitId: data.toUnitId,
           quantity: data.quantity
         });
+
+        // Track transfers TO current user personally (to_personnel_id matches current user's personnel ID)
+        if (data.to_personnel_id && data.to_personnel_id === currentUserPersonnelId) {
+          pendingTransfersToUser.add(data.equipmentId);
+        }
       });
 
       // Build mapped equipment
@@ -300,6 +311,11 @@ export function useEquipment(): UseEquipmentReturn {
 
           // Show equipment assigned to the current user personally
           if (currentUserPersonnelId && item.currentPersonnelId === currentUserPersonnelId) {
+            return true;
+          }
+
+          // Show equipment with pending transfer TO the current user (for approval)
+          if (pendingTransfersToUser.has(baseEquipmentId)) {
             return true;
           }
 
@@ -630,6 +646,16 @@ export function useEquipment(): UseEquipmentReturn {
     async (id: string, assignment: AssignmentData, notes?: string, quantity?: number) => {
       const equipmentId = getBaseId(id);
 
+      // User role validation: Regular users can only transfer equipment assigned to them personally
+      // Find the equipment item to check ownership
+      const equipmentItem = equipment.find(e => e.id.startsWith(equipmentId));
+      if (equipmentItem && !isAdmin && !isLeader && !isSignatureApproved) {
+        // Regular user - must own the equipment personally
+        if (equipmentItem.currentPersonnelId !== currentUserPersonnelId) {
+          throw new Error('You can only transfer equipment assigned to you personally');
+        }
+      }
+
       await _initiateTransferLocally(
         equipmentId,
         assignment.personnelId || undefined,
@@ -638,7 +664,7 @@ export function useEquipment(): UseEquipmentReturn {
         quantity || undefined,
       );
     },
-    [_initiateTransferLocally]
+    [_initiateTransferLocally, equipment, isAdmin, isLeader, isSignatureApproved, currentUserPersonnelId]
   );
 
   useEffect(() => {

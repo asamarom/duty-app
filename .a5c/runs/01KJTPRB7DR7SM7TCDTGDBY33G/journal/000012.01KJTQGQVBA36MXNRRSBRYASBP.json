@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-03T20:51:30.796Z",
+  "data": {
+    "effectId": "01KJTQGQSBZSD4C3F2V8VPNTGA",
+    "invocationKey": "equipment-access-rules-implementation:S000006:run-full-test-suite",
+    "invocationHash": "e1fe586a970bc5c9797aa8d9d2d195dceffeae0b6adc8e79ca450d6f42fe9eee",
+    "stepId": "S000006",
+    "taskId": "run-full-test-suite",
+    "kind": "shell",
+    "label": "Run full E2E test suite for admin role verification",
+    "taskDefRef": "tasks/01KJTQGQSBZSD4C3F2V8VPNTGA/task.json"
+  },
+  "checksum": "0fbaf1942fc0c902b1d54611e84b0a6330da4da806eaaa99bf0fa9b3dd7196c0"
+}

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJTQ14E9G6X64AMFTGJDDXKT",
+  "taskId": "implement-client-code",
+  "invocationKey": "equipment-access-rules-implementation:S000004:implement-client-code",
+  "stepId": "S000004",
+  "kind": "agent",
+  "title": "Implement client-side code for admin role",
+  "io": {
+    "inputJsonPath": "tasks/01KJTQ14E9G6X64AMFTGJDDXKT/input.json",
+    "outputJsonPath": "tasks/01KJTQ14E9G6X64AMFTGJDDXKT/output.json"
+  },
+  "inputs": {
+    "attempt": 1,
+    "files": [
+      "src/hooks/useEquipment.tsx",
+      "src/hooks/useAssignmentRequests.tsx",
+      "src/components/equipment/**/*.tsx"
+    ],
+    "role": "admin",
+    "rulesDoc": "EQUIPMENT_ACCESS_RULES.md"
+  }
+}

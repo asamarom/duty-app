@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJTQGQSBZSD4C3F2V8VPNTGA",
+  "taskId": "run-full-test-suite",
+  "invocationKey": "equipment-access-rules-implementation:S000006:run-full-test-suite",
+  "stepId": "S000006",
+  "kind": "shell",
+  "title": "Run full E2E test suite for admin role verification",
+  "io": {
+    "outputJsonPath": "tasks/01KJTQGQSBZSD4C3F2V8VPNTGA/output.json",
+    "stderrPath": "tasks/01KJTQGQSBZSD4C3F2V8VPNTGA/stderr.txt",
+    "stdoutPath": "tasks/01KJTQGQSBZSD4C3F2V8VPNTGA/stdout.txt"
+  },
+  "inputs": {
+    "command": "npm run test:e2e",
+    "expectSuccess": true,
+    "role": "admin",
+    "viewport": "desktop"
+  }
+}

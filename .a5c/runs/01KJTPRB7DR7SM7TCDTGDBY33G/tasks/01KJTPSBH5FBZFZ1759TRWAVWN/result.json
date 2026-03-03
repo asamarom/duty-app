@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KJTPSBH5FBZFZ1759TRWAVWN",
+  "taskId": "analyze-current-state",
+  "invocationKey": "equipment-access-rules-implementation:S000001:analyze-current-state",
+  "status": "ok",
+  "result": {
+    "analysisFile": "/home/ubuntu/duty-app/.a5c/runs/01KJTPRB7DR7SM7TCDTGDBY33G/tasks/01KJTPSBH5FBZFZ1759TRWAVWN/analysis.md",
+    "gaps": {
+      "admin": [
+        "Missing updateEquipment function in client hook to modify quantity, status, description fields",
+        "No approval mechanism implemented for transfer requests (documented self-approval capability)",
+        "Firestore rules do not enforce battalionId requirement on equipment creation",
+        "Client-side visibility filter does not check admin role before applying restrictions",
+        "Transfer approval functions not exposed in equipment hook"
+      ],
+      "leader": [
+        "Equipment creation does not validate unit-level restriction client-side (only battalion checked)",
+        "Firestore rules allow leaders to update equipment fields (should be completely blocked)",
+        "Equipment deletion rules too permissive - allows deleting any equipment in battalion instead of only equipment created by and assigned to leader's unit",
+        "Transfer requests missing 'one level up or down' organizational hierarchy validation",
+        "Transfer to personnel does not validate that personnel belongs to leader's unit",
+        "Equipment filter does not check equipment.status === 'pending_transfer' directly",
+        "Equipment hook does not integrate assignment request visibility for incoming/outgoing transfers",
+        "Client filtering does not check isSignatureApproved field for signature-approved users"
+      ],
+      "user": [
+        "Cannot see equipment with pending transfer TO user (before approval)",
+        "requestAssignment function does not validate that equipment is assigned to user before creating transfer request",
+        "Equipment filter correctly hides pending transfers OUT (no gap)",
+        "Server-side enforcement correctly blocks create/update/delete operations (no gap)"
+      ]
+    },
+    "summary": "Gap analysis complete. Identified 17 gaps across all roles with 5 critical security issues. Admin role has 5 gaps (missing update function, no approval mechanism, battalion requirement not enforced, visibility filter issues). Leader role has 8 gaps (no unit restriction on create, update permissions incorrectly allowed, deletion scope too broad, missing transfer level restrictions, missing personnel unit validation, pending status filter incomplete, no signature-approved user support). User role has 4 gaps (cannot see pending transfers TO them, missing ownership validation on transfers, but creation/update/delete correctly blocked). High severity issues include leaders able to update equipment when they should be blocked, leaders able to delete any equipment in battalion instead of just their unit's equipment, and no enforcement of organizational hierarchy limits on transfers."
+  },
+  "startedAt": "2026-03-03T20:40:49.925Z",
+  "finishedAt": "2026-03-03T20:40:49.925Z",
+  "value": {
+    "analysisFile": "/home/ubuntu/duty-app/.a5c/runs/01KJTPRB7DR7SM7TCDTGDBY33G/tasks/01KJTPSBH5FBZFZ1759TRWAVWN/analysis.md",
+    "gaps": {
+      "admin": [
+        "Missing updateEquipment function in client hook to modify quantity, status, description fields",
+        "No approval mechanism implemented for transfer requests (documented self-approval capability)",
+        "Firestore rules do not enforce battalionId requirement on equipment creation",
+        "Client-side visibility filter does not check admin role before applying restrictions",
+        "Transfer approval functions not exposed in equipment hook"
+      ],
+      "leader": [
+        "Equipment creation does not validate unit-level restriction client-side (only battalion checked)",
+        "Firestore rules allow leaders to update equipment fields (should be completely blocked)",
+        "Equipment deletion rules too permissive - allows deleting any equipment in battalion instead of only equipment created by and assigned to leader's unit",
+        "Transfer requests missing 'one level up or down' organizational hierarchy validation",
+        "Transfer to personnel does not validate that personnel belongs to leader's unit",
+        "Equipment filter does not check equipment.status === 'pending_transfer' directly",
+        "Equipment hook does not integrate assignment request visibility for incoming/outgoing transfers",
+        "Client filtering does not check isSignatureApproved field for signature-approved users"
+      ],
+      "user": [
+        "Cannot see equipment with pending transfer TO user (before approval)",
+        "requestAssignment function does not validate that equipment is assigned to user before creating transfer request",
+        "Equipment filter correctly hides pending transfers OUT (no gap)",
+        "Server-side enforcement correctly blocks create/update/delete operations (no gap)"
+      ]
+    },
+    "summary": "Gap analysis complete. Identified 17 gaps across all roles with 5 critical security issues. Admin role has 5 gaps (missing update function, no approval mechanism, battalion requirement not enforced, visibility filter issues). Leader role has 8 gaps (no unit restriction on create, update permissions incorrectly allowed, deletion scope too broad, missing transfer level restrictions, missing personnel unit validation, pending status filter incomplete, no signature-approved user support). User role has 4 gaps (cannot see pending transfers TO them, missing ownership validation on transfers, but creation/update/delete correctly blocked). High severity issues include leaders able to update equipment when they should be blocked, leaders able to delete any equipment in battalion instead of just their unit's equipment, and no enforcement of organizational hierarchy limits on transfers."
+  }
+}

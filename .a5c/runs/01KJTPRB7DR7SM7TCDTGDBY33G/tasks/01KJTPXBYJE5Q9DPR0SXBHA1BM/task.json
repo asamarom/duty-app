@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KJTPXBYJE5Q9DPR0SXBHA1BM",
+  "taskId": "__sdk.breakpoint",
+  "invocationKey": "equipment-access-rules-implementation:S000002:__sdk.breakpoint",
+  "stepId": "S000002",
+  "kind": "breakpoint",
+  "title": "breakpoint",
+  "metadata": {
+    "label": "breakpoint",
+    "payload": {
+      "context": {
+        "files": [
+          {
+            "format": "markdown",
+            "label": "Gap Analysis",
+            "path": "tasks/undefined/analysis.md"
+          }
+        ]
+      },
+      "question": "Review the gap analysis between current implementation and EQUIPMENT_ACCESS_RULES.md. Approve to proceed with implementation?",
+      "title": "Gap Analysis Review"
+    },
+    "requestedAt": "2026-03-03T20:40:56.018Z"
+  },
+  "inputs": {
+    "label": "breakpoint",
+    "payload": {
+      "context": {
+        "files": [
+          {
+            "format": "markdown",
+            "label": "Gap Analysis",
+            "path": "tasks/undefined/analysis.md"
+          }
+        ]
+      },
+      "question": "Review the gap analysis between current implementation and EQUIPMENT_ACCESS_RULES.md. Approve to proceed with implementation?",
+      "title": "Gap Analysis Review"
+    },
+    "requestedAt": "2026-03-03T20:40:56.018Z"
+  }
+}

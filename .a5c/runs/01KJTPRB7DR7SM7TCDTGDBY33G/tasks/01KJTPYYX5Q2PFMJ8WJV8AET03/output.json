@@ -1,0 +1,13 @@
+{
+  "success": true,
+  "changes": [
+    "Added battalionId as a required field in equipment creation for all users including admins (line 220: added 'battalionId' to hasAll() check)",
+    "Added battalionId string validation on equipment creation: must be non-empty string (lines 227-228)",
+    "Updated create rule logic: admins can create equipment in any battalion, leaders must create in their own battalion only (line 229)",
+    "Updated comment to reflect CRITICAL requirement: battalionId is now mandatory on create for ALL users (line 217)",
+    "Preserved admin read access: admins can read all equipment across all battalions without battalion restrictions (line 213)",
+    "Preserved admin update access: admins can update any equipment fields in any battalion (lines 234-239)",
+    "Preserved admin delete access: only admins can delete any equipment in the system (line 242)"
+  ],
+  "rulesFile": "firestore.rules"
+}

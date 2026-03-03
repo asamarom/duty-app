@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-03T20:42:59.416Z",
+  "data": {
+    "effectId": "01KJTQ14E9G6X64AMFTGJDDXKT",
+    "invocationKey": "equipment-access-rules-implementation:S000004:implement-client-code",
+    "invocationHash": "c69663ecb2daa8219e254b8965f9f5fa1b354c3bba1f284de2a25d09b240a2d2",
+    "stepId": "S000004",
+    "taskId": "implement-client-code",
+    "kind": "agent",
+    "label": "Implement client-side code for admin role",
+    "taskDefRef": "tasks/01KJTQ14E9G6X64AMFTGJDDXKT/task.json"
+  },
+  "checksum": "f892212150d1a68cf146dce8b46a518ff3f2f959b5cacdb0c556dc936fb2f340"
+}

@@ -1,0 +1,22 @@
+{
+  "success": true,
+  "changes": [
+    "Added [ADMIN-EQUIP-1] test: Verifies admin can see ALL equipment including unassigned equipment across all battalions",
+    "Added [ADMIN-EQUIP-2] test: Verifies admin can update equipment fields (quantity, status, description) with edit button access",
+    "Added [ADMIN-EQUIP-3] test: Verifies admin must provide battalionId when creating equipment (field is required)",
+    "Added [ADMIN-EQUIP-4] test: Verifies admin can create equipment in any battalion (not restricted to own battalion)",
+    "Added [ADMIN-EQUIP-5] test: Verifies admin can delete any equipment in the system with delete button access",
+    "Added [ADMIN-EQUIP-6] test: Verifies admin can create transfer requests and also approve them (not auto-approved)",
+    "Added [ADMIN-EQUIP-7] test: Verifies admin can transfer equipment to any unit or personnel in any battalion",
+    "Added [ADMIN-XFER-1] test: Verifies admin can initiate transfer to any battalion with access to all units/personnel",
+    "Added [ADMIN-XFER-2] test: Verifies admin can approve incoming transfer requests with accept button enabled",
+    "Added [ADMIN-XFER-3] test: Verifies admin can reject incoming transfer requests with reject button enabled",
+    "Added [ADMIN-XFER-4] test: Verifies admin transfer requests require approval workflow (not auto-approved)",
+    "Added [ADMIN-XFER-5] test: Verifies admin can see transfer history across all battalions"
+  ],
+  "testFilesModified": [
+    "/home/ubuntu/duty-app/e2e/equipment.spec.ts",
+    "/home/ubuntu/duty-app/e2e/transfers.spec.ts"
+  ],
+  "newTestCount": 12
+}

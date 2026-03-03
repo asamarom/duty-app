@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-03T20:41:48.219Z",
+  "data": {
+    "effectId": "01KJTPYYX5Q2PFMJ8WJV8AET03",
+    "invocationKey": "equipment-access-rules-implementation:S000003:implement-firestore-rules",
+    "invocationHash": "d261778136c51e98a613ee1d43942f4f2cbe51db4db734d0d1509714d29212ee",
+    "stepId": "S000003",
+    "taskId": "implement-firestore-rules",
+    "kind": "agent",
+    "label": "Implement Firestore rules for admin role",
+    "taskDefRef": "tasks/01KJTPYYX5Q2PFMJ8WJV8AET03/task.json"
+  },
+  "checksum": "b7945f04e98782cc026114f57dd174a847505583e43cdb4173403cee10a08d15"
+}

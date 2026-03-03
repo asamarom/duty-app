@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-03T20:46:35.003Z",
+  "data": {
+    "effectId": "01KJTQ7PSRN5JC8MGA20QH7KJ7",
+    "invocationKey": "equipment-access-rules-implementation:S000005:update-e2e-tests",
+    "invocationHash": "9f63db57fb2e485a56c7739c736ef71a1f34e2f0f7c3ea7cda7f8bb49d4618a7",
+    "stepId": "S000005",
+    "taskId": "update-e2e-tests",
+    "kind": "agent",
+    "label": "Update E2E tests for admin role",
+    "taskDefRef": "tasks/01KJTQ7PSRN5JC8MGA20QH7KJ7/task.json"
+  },
+  "checksum": "df8be806b9a363eea64479b70b1eeb27e39e26630b799877484d947ad543ca47"
+}
