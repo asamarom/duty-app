@@ -15,13 +15,9 @@ This document defines who can see and act on equipment in the DTMS system.
 - Equipment in any battalion
 - `battalionId` field is required on create
 
-**I can assign:**
-- Equipment to any unit or personnel in any battalion
-- Assignments are auto-approved (no transfer request needed)
-
 **I can transfer:**
-- Equipment anywhere across battalions
-- Transfers are auto-approved
+- Equipment to any unit or personnel in any battalion
+- Assignments are not auto-approved, but I can also approve the request myself (transfer request needed)
 
 **I can delete:**
 - Any equipment in the system
@@ -32,38 +28,33 @@ This document defines who can see and act on equipment in the DTMS system.
 
 ---
 
-### As a Leader
+### As a Leader or as signature approved user
 
 **I can see:**
 - **Server-side (Firestore rules):** All equipment where `battalionId` matches my battalion
 - **Client-side (filtered in UI):**
-  - Unassigned equipment in my battalion
   - Equipment assigned to my unit
   - Equipment assigned to me personally
+  - Requests of equipment transfer into and out of my unit
+- Requests of equipment transfer into and out of my personal user
   - **NOT** equipment assigned to other units (even within my battalion)
-  - **NOT** equipment with pending transfer OUT from my unit
+  - Equipment in pending status will not be counted in my equipment view
 
 **I can create:**
-- Equipment in my battalion only
+- Equipment in my unit only
 - `battalionId` must match my battalion
 - Fields required: `name`, `quantity > 0`, `status`
 
-**I can assign:**
-- Equipment within my battalion to any unit or personnel
-- Creates a transfer request that requires approval
+**I can request transfer:**
+- Creates a transfer request that requires approval of Equipment within my unit to any unit or personnel under or above my unit level (one level up or down only)
+- Creates a transfer request that requires approval of Equipment within my unit to any personnel in my unit
 
-**I can transfer:**
-- Equipment within my battalion
-- Creates a transfer request (status: `pending`)
-- Requires approval from admin or another leader
+**I can not update:**
+- Can not modify quantity, status, description of equipment.
+- Can not modify `battalionId`
 
-**I can update:**
-- Equipment in my battalion only
-- Can modify quantity, status, description
-- Cannot modify `battalionId`
-
-**I cannot delete:**
-- Any equipment (admin-only action)
+**I can delete:**
+- only equipment that was created by my unit and only when it's assigned to my unit.
 
 ---
 
@@ -72,53 +63,39 @@ This document defines who can see and act on equipment in the DTMS system.
 **I can see:**
 - **Server-side (Firestore rules):** All equipment where `battalionId` matches my battalion
 - **Client-side (filtered in UI):**
-  - Unassigned equipment in my battalion (available for request)
+  - equipment pending transfer approval by me personally (transfered to me)
   - Equipment assigned to my unit
   - Equipment assigned to me personally
   - **NOT** equipment assigned to other units
   - **NOT** equipment with pending transfer OUT from my unit
 
 **I can request transfer:**
-- For any equipment I can see
-- Creates a transfer request (status: `pending`)
-- Requires approval from admin or leader
-
-**I can delete:**
-- Equipment I created (`createdBy` matches my `userId`)
-- **AND** equipment is currently assigned to me personally (`currentPersonnelId` matches my personnel record)
-- Both conditions must be true
+- For equipment assigned to me personally 
 
 **I cannot:**
-- Create equipment directly (must request from leader/admin)
-- Assign equipment directly (must submit transfer request)
+- Create equipment directly
 - Update equipment fields
-- Delete equipment not meeting the conditions above
+- Delete equipment
 
 ---
 
 ## Equipment Visibility Rules
 
 ### Rule 1: Battalion Boundary (Server-Side)
-**Enforced by:** Firestore security rules (`firestore.rules:213`)
-
-```
-allow read: if hasAnyRole() && (isAdmin() || isSameBattalion(resource.data.battalionId))
-```
+**Enforced by:** Firestore security rules (`firestore.rules:213')
 
 - Admins bypass this check and see all equipment
 - All other users can only read equipment where their battalion matches the equipment's `battalionId`
-- If `battalionId` is missing (migration mode), access is allowed
+- If `battalionId` is missing (migration mode), access is not allowed
 
 **Why:** Firestore cannot efficiently join across collections to check unit ownership, so we restrict at battalion level and filter further on client
 
 ---
 
 ### Rule 2: Unit/Personal Filter (Client-Side)
-**Enforced by:** `src/hooks/useEquipment.tsx:254-294`
 
 After Firestore returns battalion-level equipment, client-side code filters to show:
 
-1. **ALWAYS show:** Unassigned equipment (available for assignment requests)
 2. **ALWAYS show:** Equipment assigned to my unit (`currentUnitId === userUnitId`)
 3. **ALWAYS show:** Equipment assigned to me personally (`currentPersonnelId === myPersonnelId`)
 4. **HIDE:** Equipment assigned to other units (even within my battalion)
@@ -134,7 +111,6 @@ After Firestore returns battalion-level equipment, client-side code filters to s
 ---
 
 ### Rule 3: Pending Transfers
-**Enforced by:** `src/hooks/useEquipment.tsx:266-280`
 
 When equipment has a pending transfer **OUT** from your unit:
 - If **all** items are pending transfer → **hide** the entire row
@@ -149,59 +125,19 @@ Example:
 
 ---
 
-## Permission Checks Summary
-
-| Action | Admin | Leader | User |
-|--------|-------|--------|------|
-| **View all battalion equipment** | ✓ | ✓ (server) | ✓ (server) |
-| **View unit/personal equipment** | ✓ | ✓ (client filtered) | ✓ (client filtered) |
-| **Create equipment** | ✓ Any battalion | ✓ Own battalion | ✗ |
-| **Assign/Transfer equipment** | ✓ Auto-approved | ✓ Needs approval | ✗ |
-| **Request transfer** | N/A | ✓ | ✓ |
-| **Update equipment** | ✓ Any | ✓ Own battalion | ✗ |
-| **Delete equipment** | ✓ Any | ✗ | ✓ Own created + assigned to self |
-| **Approve transfer requests** | ✓ | ✓ | ✗ |
-| **Cancel own pending request** | ✓ | ✓ | ✓ |
-
----
-
 ## Special Cases
 
 ### Unassigned Equipment
-- **Visible to:** All users in the battalion (after client filtering)
+- **Visible to:** Admins only
 - **Purpose:** Shows available equipment that can be requested for assignment
-- **Quantity:** Shows unassigned quantity (`equipment.quantity - sum(assignments.quantity)`)
+- **Quantity:** Shows unassigned quantity 
 
-### Equipment Created by User
-- Regular users can **delete** equipment they created, but only if:
-  1. They created it (`createdBy === userId`)
-  2. It's currently assigned to them personally
-  3. Both conditions are checked in `canDeleteEquipment()` function
-
-### Migration Mode
-- If `battalionId` is missing/null on equipment documents (migration period)
-- `isSameBattalion()` returns `true` to allow access
-- This is temporary during data migration
 
 ### Bulk Equipment vs Serialized
 - **Bulk equipment** (no serial number): Can have multiple assignments with quantities
-- **Serialized equipment** (has serial number): One assignment per item
+- **Serialized equipment** (has serial number): One assignment per item and only assigen to a person and not to a unit
 - Pending transfer logic accounts for both (partial quantities for bulk, full item for serialized)
 
----
-
-## Code Locations
-
-| Rule | Location | Type |
-|------|----------|------|
-| Battalion-level read access | `firestore.rules:196-213` | Server (Firestore) |
-| Equipment create validation | `firestore.rules:215-226` | Server (Firestore) |
-| Equipment update validation | `firestore.rules:228-236` | Server (Firestore) |
-| Equipment delete validation | `firestore.rules:238-239` | Server (Firestore) |
-| Client-side visibility filter | `src/hooks/useEquipment.tsx:254-294` | Client (React) |
-| Pending transfer filter | `src/hooks/useEquipment.tsx:266-280` | Client (React) |
-| Quantity adjustment | `src/hooks/useEquipment.tsx:296-317` | Client (React) |
-| Delete permission check | `src/hooks/useEquipment.tsx:405-416` | Client (React) |
 
 ---
 
