@@ -276,20 +276,27 @@ service cloud.firestore {
       // - Personal transfers (to_personnel_id): Only the recipient can read
       // - Unit transfers (to_unit_id): Battalion members can read, client filters by signature approval
       // - Users can read requests they created (for outgoing transfers)
-      allow read: if hasAnyRole() && (
-        isAdmin() ||
-        // Personal transfer to me - check if to_personnel_id.userId == request.auth.uid
-        (resource.data.keys().hasAny(['to_personnel_id']) &&
-         resource.data.to_personnel_id != null &&
-         exists(/databases/$(database)/documents/personnel/$(resource.data.to_personnel_id)) &&
-         get(/databases/$(database)/documents/personnel/$(resource.data.to_personnel_id)).data.userId == request.auth.uid) ||
-        // Unit transfer to my battalion (client-side will filter by unit + signature approval)
-        (resource.data.keys().hasAny(['to_unit_id']) &&
-         resource.data.to_unit_id != null &&
-         isSameBattalion(resource.data.battalionId)) ||
-        // Request I created (for outgoing transfers)
-        (resource.data.requestedBy == request.auth.uid && isSameBattalion(resource.data.battalionId))
-      );
+      // Read access based on user role and transfer type
+      // 1. Admins can read all
+      allow read: if isAdmin();
+
+      // 2. Personal transfer recipient (check if to_personnel_id points to my userId)
+      allow read: if hasAnyRole() &&
+        resource.data.keys().hasAny(['to_personnel_id']) &&
+        resource.data.to_personnel_id != null &&
+        exists(/databases/$(database)/documents/personnel/$(resource.data.to_personnel_id)) &&
+        get(/databases/$(database)/documents/personnel/$(resource.data.to_personnel_id)).data.userId == request.auth.uid;
+
+      // 3. Unit transfer in my battalion (client filters by signature approval + unit match)
+      allow read: if hasAnyRole() &&
+        resource.data.keys().hasAny(['to_unit_id']) &&
+        resource.data.to_unit_id != null &&
+        isSameBattalion(resource.data.battalionId);
+
+      // 4. Request I created (outgoing transfers)
+      allow read: if hasAnyRole() &&
+        resource.data.requestedBy == request.auth.uid &&
+        isSameBattalion(resource.data.battalionId);
 
       // Any authenticated user with a role can create requests
       // CRITICAL FIX: Validate all fields, enforce status='pending', verify requestedBy
