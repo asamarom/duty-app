@@ -25,6 +25,11 @@ app.get('/role-switcher-simple', (req, res) => {
   res.sendFile(path.join(__dirname, 'role-switcher-simple.html'));
 });
 
+// Serve debug-personnel-google.html
+app.get('/debug-personnel', (req, res) => {
+  res.sendFile(path.join(__dirname, 'debug-personnel-google.html'));
+});
+
 // Default to simple version
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'role-switcher-simple.html'));
@@ -74,6 +79,43 @@ app.get('/api/units', async (req, res) => {
     const snap = await db.collection('units').orderBy('name').get();
     const units = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     res.json(units);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/personnel/:personnelId — get full personnel record (debug)
+app.get('/api/personnel/:personnelId', async (req, res) => {
+  try {
+    const doc = await db.collection('personnel').doc(req.params.personnelId).get();
+    if (!doc.exists) return res.status(404).json({ error: 'Personnel not found' });
+    res.json({ id: doc.id, ...doc.data() });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/debug/personnel-by-uid/:uid — debug personnel query
+app.get('/api/debug/personnel-by-uid/:uid', async (req, res) => {
+  try {
+    const snap = await db.collection('personnel').where('userId', '==', req.params.uid).get();
+    if (snap.empty) {
+      return res.json({ found: false, message: 'No personnel record found for this userId' });
+    }
+    const doc = snap.docs[0];
+    const data = doc.data();
+    res.json({
+      found: true,
+      personnel: {
+        id: doc.id,
+        userId: data.userId,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        serviceNumber: data.serviceNumber,
+        unitId: data.unitId,
+        battalionId: data.battalionId,
+      }
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

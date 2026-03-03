@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug Personnel - Google Auth</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    .status {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+    .status.loading {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffc107;
+    }
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #28a745;
+    }
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #dc3545;
+    }
+    .info-group {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .info-label {
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 5px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .info-value {
+      color: #212529;
+      font-size: 16px;
+      margin-bottom: 15px;
+      word-break: break-all;
+    }
+    .info-value:last-child {
+      margin-bottom: 0;
+    }
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      transition: background 0.3s;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      background: #5568d3;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .console-output {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 20px;
+    }
+    .console-line {
+      margin-bottom: 5px;
+      padding: 3px 0;
+    }
+    .console-error {
+      color: #f48771;
+    }
+    .console-success {
+      color: #4ec9b0;
+    }
+    .console-info {
+      color: #9cdcfe;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 Personnel Debug Tool (Google Auth)</h1>
+    <p class="subtitle">This tool helps debug why personnel data might not be showing in your profile</p>
+
+    <div id="status" class="status loading">
+      Initializing Firebase...
+    </div>
+
+    <div id="auth-section" style="display: none;">
+      <button id="sign-in-btn">Sign In with Google</button>
+    </div>
+
+    <div id="user-info" style="display: none;">
+      <div class="info-group">
+        <div class="info-label">Current User</div>
+        <div class="info-value" id="user-email"></div>
+
+        <div class="info-label">User ID (UID)</div>
+        <div class="info-value" id="user-uid"></div>
+      </div>
+
+      <button id="query-personnel-btn">Query Personnel Collection</button>
+      <button id="check-rules-btn">Check Security Rules</button>
+      <button id="sign-out-btn">Sign Out</button>
+    </div>
+
+    <div id="console" class="console-output"></div>
+  </div>
+
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    import { getFirestore, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAJ9vTZ2f0Rn_izFbbPGx-gB7z7Y6Bdjqo",
+      authDomain: "duty-82f42.firebaseapp.com",
+      projectId: "duty-82f42",
+      storageBucket: "duty-82f42.firebasestorage.app",
+      messagingSenderId: "1042175095890",
+      appId: "1:1042175095890:web:e89878fea01b95f5a9a1e0"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // UI Elements
+    const statusEl = document.getElementById('status');
+    const authSection = document.getElementById('auth-section');
+    const userInfoSection = document.getElementById('user-info');
+    const signInBtn = document.getElementById('sign-in-btn');
+    const signOutBtn = document.getElementById('sign-out-btn');
+    const queryBtn = document.getElementById('query-personnel-btn');
+    const checkRulesBtn = document.getElementById('check-rules-btn');
+    const consoleEl = document.getElementById('console');
+
+    // Console logging
+    function log(message, type = 'info') {
+      const line = document.createElement('div');
+      line.className = `console-line console-${type}`;
+      line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      consoleEl.appendChild(line);
+      consoleEl.scrollTop = consoleEl.scrollHeight;
+    }
+
+    // Update status
+    function updateStatus(message, type) {
+      statusEl.textContent = message;
+      statusEl.className = `status ${type}`;
+    }
+
+    // Handle auth state changes
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        log('User signed in: ' + user.email, 'success');
+        updateStatus('✓ Signed in as ' + user.email, 'success');
+
+        authSection.style.display = 'none';
+        userInfoSection.style.display = 'block';
+
+        document.getElementById('user-email').textContent = user.email;
+        document.getElementById('user-uid').textContent = user.uid;
+
+        log('User UID: ' + user.uid, 'info');
+      } else {
+        log('No user signed in', 'info');
+        updateStatus('Please sign in with Google', 'loading');
+
+        authSection.style.display = 'block';
+        userInfoSection.style.display = 'none';
+      }
+    });
+
+    // Sign in with Google
+    signInBtn.addEventListener('click', async () => {
+      try {
+        log('Initiating Google sign-in...', 'info');
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        log('Sign-in successful!', 'success');
+      } catch (error) {
+        log('Sign-in error: ' + error.message, 'error');
+        updateStatus('Sign-in failed: ' + error.message, 'error');
+      }
+    });
+
+    // Sign out
+    signOutBtn.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+        log('Signed out successfully', 'success');
+      } catch (error) {
+        log('Sign-out error: ' + error.message, 'error');
+      }
+    });
+
+    // Query personnel collection
+    queryBtn.addEventListener('click', async () => {
+      const user = auth.currentUser;
+      if (!user) {
+        log('No user signed in', 'error');
+        return;
+      }
+
+      try {
+        log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+        log('Querying personnel collection...', 'info');
+        log(`WHERE userId == "${user.uid}"`, 'info');
+
+        const q = query(collection(db, 'personnel'), where('userId', '==', user.uid));
+
+        log('Executing query...', 'info');
+        const snapshot = await getDocs(q);
+
+        log(`Query complete! Found ${snapshot.docs.length} document(s)`, snapshot.docs.length > 0 ? 'success' : 'error');
+
+        if (snapshot.docs.length > 0) {
+          snapshot.docs.forEach((doc, index) => {
+            log(`━━━━ Document ${index + 1} ━━━━`, 'success');
+            log(`Document ID: ${doc.id}`, 'info');
+
+            const data = doc.data();
+            log(`Data:`, 'info');
+            log(JSON.stringify(data, null, 2), 'success');
+
+            log(`firstName: ${data.firstName || 'NOT SET'}`, 'info');
+            log(`lastName: ${data.lastName || 'NOT SET'}`, 'info');
+            log(`serviceNumber: ${data.serviceNumber || 'NOT SET'}`, 'info');
+            log(`unitId: ${data.unitId || 'NOT SET'}`, 'info');
+            log(`battalionId: ${data.battalionId || 'NOT SET'}`, 'info');
+            log(`userId: ${data.userId || 'NOT SET'}`, 'info');
+          });
+
+          updateStatus('✓ Personnel data found!', 'success');
+        } else {
+          log('⚠ No personnel record found for this user', 'error');
+          updateStatus('No personnel record found', 'error');
+        }
+      } catch (error) {
+        log('❌ Query failed!', 'error');
+        log(`Error: ${error.message}`, 'error');
+        log(`Error code: ${error.code || 'N/A'}`, 'error');
+
+        if (error.code === 'permission-denied') {
+          log('⚠ SECURITY RULES BLOCKED THIS QUERY', 'error');
+          log('This means Firestore security rules are preventing access', 'error');
+        }
+
+        updateStatus('Query failed: ' + error.message, 'error');
+      }
+    });
+
+    // Check security rules (by attempting to read users collection)
+    checkRulesBtn.addEventListener('click', async () => {
+      const user = auth.currentUser;
+      if (!user) {
+        log('No user signed in', 'error');
+        return;
+      }
+
+      log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+      log('Testing security rules access...', 'info');
+
+      // Test 1: Read own user document
+      try {
+        log('Test 1: Reading own user document...', 'info');
+        const userQuery = query(collection(db, 'users'), where('__name__', '==', user.uid));
+        const userSnap = await getDocs(userQuery);
+        log('✓ User document access: ALLOWED', 'success');
+        if (userSnap.docs.length > 0) {
+          const userData = userSnap.docs[0].data();
+          log(`User data: ${JSON.stringify(userData, null, 2)}`, 'info');
+        }
+      } catch (error) {
+        log(`✗ User document access: DENIED (${error.message})`, 'error');
+      }
+
+      // Test 2: Read personnel collection
+      try {
+        log('Test 2: Reading personnel collection...', 'info');
+        const personnelQuery = query(collection(db, 'personnel'), where('userId', '==', user.uid));
+        const personnelSnap = await getDocs(personnelQuery);
+        log('✓ Personnel collection access: ALLOWED', 'success');
+        log(`Found ${personnelSnap.docs.length} personnel record(s)`, 'info');
+      } catch (error) {
+        log(`✗ Personnel collection access: DENIED (${error.message})`, 'error');
+      }
+    });
+
+    // Initialize
+    updateStatus('Ready to debug', 'success');
+    log('Debug tool initialized', 'success');
+    log('Click "Sign In with Google" to start debugging', 'info');
+  </script>
+</body>
+</html>

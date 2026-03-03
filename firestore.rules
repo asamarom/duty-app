@@ -45,10 +45,17 @@ service cloud.firestore {
         getUserDoc().data.roles.size() > 0;
     }
 
+    // Check if user has a unitId assigned
+    function hasUnitId() {
+      let userData = getUserDoc().data;
+      return 'unitId' in userData && userData.unitId != null;
+    }
+
     // Get the user's battalion ID by resolving through the units hierarchy.
     // Users are assigned to any unit level (battalion/company/platoon).
     // All unit documents store a battalionId field pointing to their root battalion.
     // We look up the user's unit document to get the correct battalion ID.
+    // NOTE: This function should only be called after checking hasUnitId()
     function getUserBattalionId() {
       let userUnitId = getUserDoc().data.unitId;
       let unitDoc = get(/databases/$(database)/documents/units/$(userUnitId));
@@ -59,13 +66,14 @@ service cloud.firestore {
 
     // Check if a document belongs to the same battalion as the user
     // MIGRATION: Returns true if battalionId is missing (allows during migration)
+    // Returns false if user has no unitId assigned
     function isSameBattalion(docBattalionId) {
-      return docBattalionId == null || getUserBattalionId() == docBattalionId;
+      return docBattalionId == null || (hasUnitId() && getUserBattalionId() == docBattalionId);
     }
 
     // Check battalion for create operations (battalion ID required on create)
     function isSameBattalionCreate(docBattalionId) {
-      return getUserBattalionId() == docBattalionId;
+      return hasUnitId() && getUserBattalionId() == docBattalionId;
     }
 
     // Check if user has access to a specific unit (admin or assigned leader)
@@ -142,7 +150,12 @@ service cloud.firestore {
     match /personnel/{personnelId} {
       // CRITICAL FIX: Battalion-based access control
       // Admins can read all, others can only read personnel in their battalion
-      allow read: if hasAnyRole() && (isAdmin() || isSameBattalion(resource.data.battalionId));
+      // ADDITIONAL: Users can always read their own personnel record (by userId)
+      allow read: if hasAnyRole() && (
+        isAdmin() ||
+        isSameBattalion(resource.data.battalionId) ||
+        (resource.data.keys().hasAny(['userId']) && resource.data.userId == request.auth.uid)
+      );
 
       // Admins and leaders can create personnel
       // HIGH FIX: Comprehensive field validation
