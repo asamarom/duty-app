@@ -178,33 +178,37 @@ export function TransfersList() {
       <Tabs defaultValue="incoming" dir={dir} key={`tabs-${dir}`}>
         <div className="mb-4" dir={dir} key={`wrapper-${dir}`}>
         <TabsList dir={dir} key={`tabslist-${dir}`} className={`w-full h-auto p-0.5 ${isAdmin ? 'grid grid-cols-4' : 'grid grid-cols-3'}`}>
-          <TabsTrigger value="incoming" className="flex-col gap-0.5 py-2 px-1 h-auto text-xs">
-            <div className="flex items-center gap-1">
-              <Inbox className="h-3.5 w-3.5" />
+          <TabsTrigger value="incoming" className="relative flex-col gap-1 py-2 px-2 h-auto text-xs">
+            <div className="relative">
+              <Inbox className="h-5 w-5" />
               {incomingTransfers.length > 0 && (
-                <Badge variant="secondary" className="h-4 min-w-4 px-1 text-[10px]">{incomingTransfers.length}</Badge>
+                <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-success text-[10px] font-semibold text-white px-1">
+                  {incomingTransfers.length}
+                </span>
               )}
             </div>
-            <span className="leading-tight truncate max-w-full">{t('transfers.incoming')}</span>
+            <span className="leading-tight text-[11px]">{t('transfers.incoming')}</span>
           </TabsTrigger>
-          <TabsTrigger value="outgoing" className="flex-col gap-0.5 py-2 px-1 h-auto text-xs">
-            <div className="flex items-center gap-1">
-              <Send className="h-3.5 w-3.5" />
+          <TabsTrigger value="outgoing" className="relative flex-col gap-1 py-2 px-2 h-auto text-xs">
+            <div className="relative">
+              <Send className="h-5 w-5" />
               {outgoingTransfers.length > 0 && (
-                <Badge variant="secondary" className="h-4 min-w-4 px-1 text-[10px]">{outgoingTransfers.length}</Badge>
+                <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-success text-[10px] font-semibold text-white px-1">
+                  {outgoingTransfers.length}
+                </span>
               )}
             </div>
-            <span className="leading-tight truncate max-w-full">{t('transfers.outgoing')}</span>
+            <span className="leading-tight text-[11px]">{t('transfers.outgoing')}</span>
           </TabsTrigger>
           {isAdmin && (
-            <TabsTrigger value="pending" className="flex-col gap-0.5 py-2 px-1 h-auto text-xs">
-              <Clock className="h-3.5 w-3.5" />
-              <span className="leading-tight truncate max-w-full">{t('transfers.allPending')}</span>
+            <TabsTrigger value="pending" className="relative flex-col gap-1 py-2 px-2 h-auto text-xs">
+              <Clock className="h-5 w-5" />
+              <span className="leading-tight text-[11px]">{t('transfers.allPending')}</span>
             </TabsTrigger>
           )}
-          <TabsTrigger value="history" className="flex-col gap-0.5 py-2 px-1 h-auto text-xs">
-            <History className="h-3.5 w-3.5" />
-            <span className="leading-tight truncate max-w-full">{t('transfers.history')}</span>
+          <TabsTrigger value="history" className="relative flex-col gap-1 py-2 px-2 h-auto text-xs">
+            <History className="h-5 w-5" />
+            <span className="leading-tight text-[11px]">{t('transfers.history')}</span>
           </TabsTrigger>
         </TabsList>
         </div>
