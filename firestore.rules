@@ -280,10 +280,12 @@ service cloud.firestore {
         isAdmin() ||
         // Personal transfer to me - check if to_personnel_id.userId == request.auth.uid
         (resource.data.keys().hasAny(['to_personnel_id']) &&
+         resource.data.to_personnel_id != null &&
          exists(/databases/$(database)/documents/personnel/$(resource.data.to_personnel_id)) &&
          get(/databases/$(database)/documents/personnel/$(resource.data.to_personnel_id)).data.userId == request.auth.uid) ||
         // Unit transfer to my battalion (client-side will filter by unit + signature approval)
         (resource.data.keys().hasAny(['to_unit_id']) &&
+         resource.data.to_unit_id != null &&
          isSameBattalion(resource.data.battalionId)) ||
         // Request I created (for outgoing transfers)
         (resource.data.requestedBy == request.auth.uid && isSameBattalion(resource.data.battalionId))
