@@ -296,7 +296,7 @@ export default function EquipmentPage() {
 
               {/* Mobile FAB - show Assign button when items selected, otherwise Add */}
               {activeTab === 'equipment' && (
-                <div className="lg:hidden fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] end-4 z-40">
+                <div className="lg:hidden fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] end-4 z-40">
                   {selectMode && selectedIds.size > 0 ? (
                     <Button
                       variant="tactical"

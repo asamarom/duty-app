@@ -177,30 +177,30 @@ export function TransfersList() {
     <>
       <Tabs defaultValue="incoming" dir={dir} key={`tabs-${dir}`}>
         <div className="overflow-x-auto -mx-4 px-4 mb-4" dir={dir} key={`wrapper-${dir}`}>
-        <TabsList dir={dir} key={`tabslist-${dir}`} className="w-full lg:w-auto">
-          <TabsTrigger value="incoming" className="gap-2 flex-1 lg:flex-none">
+        <TabsList dir={dir} key={`tabslist-${dir}`}>
+          <TabsTrigger value="incoming" className="gap-2">
             <Inbox className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('transfers.incoming')}</span>
+            {t('transfers.incoming')}
             {incomingTransfers.length > 0 && (
               <Badge variant="secondary" className={dir === 'rtl' ? 'me-1' : 'ms-1'}>{incomingTransfers.length}</Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="outgoing" className="gap-2 flex-1 lg:flex-none">
+          <TabsTrigger value="outgoing" className="gap-2">
             <Send className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('transfers.outgoing')}</span>
+            {t('transfers.outgoing')}
             {outgoingTransfers.length > 0 && (
               <Badge variant="secondary" className={dir === 'rtl' ? 'me-1' : 'ms-1'}>{outgoingTransfers.length}</Badge>
             )}
           </TabsTrigger>
           {isAdmin && (
-            <TabsTrigger value="pending" className="gap-2 flex-1 lg:flex-none">
+            <TabsTrigger value="pending" className="gap-2">
               <Clock className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('transfers.allPending')}</span>
+              {t('transfers.allPending')}
             </TabsTrigger>
           )}
-          <TabsTrigger value="history" className="gap-2 flex-1 lg:flex-none">
+          <TabsTrigger value="history" className="gap-2">
             <History className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('transfers.history')}</span>
+            {t('transfers.history')}
           </TabsTrigger>
         </TabsList>
         </div>
