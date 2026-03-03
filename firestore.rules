@@ -280,31 +280,31 @@ service cloud.firestore {
       // 1. Admins can read all requests
       allow read: if isAdmin();
 
-      // 2. Personal transfer to me (check if to_personnel_id points to my userId)
+      // 2. Request I created (outgoing transfers)
+      allow read: if hasAnyRole() &&
+        resource.data.requestedBy == request.auth.uid &&
+        isSameBattalion(resource.data.battalionId);
+
+      // 3. Personal transfer to me (check if to_personnel_id points to my userId)
       allow read: if hasAnyRole() &&
         resource.data.keys().hasAny(['to_personnel_id']) &&
         resource.data.to_personnel_id != null &&
         exists(/databases/$(database)/documents/personnel/$(resource.data.to_personnel_id)) &&
         get(/databases/$(database)/documents/personnel/$(resource.data.to_personnel_id)).data.userId == request.auth.uid;
 
-      // 3. Unit transfer TO my unit (signature approval checked client-side)
+      // 4. Unit transfer TO my unit (signature approval checked client-side)
       allow read: if hasAnyRole() &&
         resource.data.keys().hasAny(['to_unit_id']) &&
         resource.data.to_unit_id != null &&
         getUserDoc().data.keys().hasAny(['unitId']) &&
         resource.data.to_unit_id == getUserDoc().data.unitId;
 
-      // 4. Unit transfer FROM my unit (I can see outgoing transfers from my unit)
+      // 5. Unit transfer FROM my unit (I can see outgoing transfers from my unit)
       allow read: if hasAnyRole() &&
         resource.data.keys().hasAny(['from_unit_id']) &&
         resource.data.from_unit_id != null &&
         getUserDoc().data.keys().hasAny(['unitId']) &&
         resource.data.from_unit_id == getUserDoc().data.unitId;
-
-      // 5. Request I created (outgoing transfers)
-      allow read: if hasAnyRole() &&
-        resource.data.requestedBy == request.auth.uid &&
-        isSameBattalion(resource.data.battalionId);
 
       // Any authenticated user with a role can create requests
       // CRITICAL FIX: Validate all fields, enforce status='pending', verify requestedBy
