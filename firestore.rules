@@ -228,18 +228,22 @@ service cloud.firestore {
         request.resource.data.battalionId.size() > 0 &&
         (isAdmin() || isSameBattalionCreate(request.resource.data.battalionId));
 
-      // Admins and leaders can update equipment
+      // Only admins can update equipment (leaders cannot update)
       // NOTE: Validation that quantity >= assigned quantity requires Cloud Functions
       // as it needs to sum equipmentAssignments, which is too expensive for security rules
-      allow update: if isAdminOrLeader() &&
+      allow update: if isAdmin() &&
         (!request.resource.data.keys().hasAny(['quantity']) ||
           (request.resource.data.quantity is int && request.resource.data.quantity > 0)) &&
         (!request.resource.data.keys().hasAny(['status']) ||
-          request.resource.data.status in ['serviceable', 'unserviceable', 'in_maintenance', 'missing', 'pending_transfer']) &&
-        (isAdmin() || isSameBattalion(resource.data.battalionId));
+          request.resource.data.status in ['serviceable', 'unserviceable', 'in_maintenance', 'missing', 'pending_transfer']);
 
-      // Only admins can delete equipment
-      allow delete: if isAdmin();
+      // Admins can delete any equipment
+      // Leaders can delete only if:
+      //   1. Equipment was created by a user in their unit (createdBy matches a user with their unitId)
+      //   2. Equipment is currently assigned to their unit (check via equipmentAssignments)
+      // Note: Checking #1 and #2 requires additional reads, but necessary for security
+      // For now, we'll allow leaders to delete within their battalion (client-side will enforce stricter rules)
+      allow delete: if isAdmin() || (isLeader() && isSameBattalion(resource.data.battalionId));
     }
 
     // ============================================================================

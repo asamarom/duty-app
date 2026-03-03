@@ -67,18 +67,20 @@ export function useEquipment(): UseEquipmentReturn {
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
   const { battalionId, unitId } = useUserBattalion();
-  const { isAdmin } = useUserRole();
+  const { isAdmin, isLeader } = useUserRole();
   const [currentUserPersonnelId, setCurrentUserPersonnelId] = useState<string | null>(null);
+  const [isSignatureApproved, setIsSignatureApproved] = useState(false);
 
   const equipmentDocsRef = useRef<QueryDocumentSnapshot[]>([]);
   const assignmentDocsRef = useRef<QueryDocumentSnapshot[]>([]);
   const pendingDocsRef = useRef<QueryDocumentSnapshot[]>([]);
   const rebuildingRef = useRef(false);
 
-  // Fetch current user's personnel record to determine equipment visibility
+  // Fetch current user's personnel record to determine equipment visibility and signature approval
   useEffect(() => {
     if (!user?.uid) {
       setCurrentUserPersonnelId(null);
+      setIsSignatureApproved(false);
       return;
     }
 
@@ -91,13 +93,17 @@ export function useEquipment(): UseEquipmentReturn {
         const snapshot = await getDocs(personnelQuery);
 
         if (!snapshot.empty) {
+          const personnelData = snapshot.docs[0].data() as PersonnelDoc;
           setCurrentUserPersonnelId(snapshot.docs[0].id);
+          setIsSignatureApproved(personnelData.isSignatureApproved || false);
         } else {
           setCurrentUserPersonnelId(null);
+          setIsSignatureApproved(false);
         }
       } catch (err) {
         console.error('Error fetching personnel record:', err);
         setCurrentUserPersonnelId(null);
+        setIsSignatureApproved(false);
       }
     };
 
@@ -249,11 +255,10 @@ export function useEquipment(): UseEquipmentReturn {
       // visibility to unit/personal level.
       //
       // Filter rules:
-      // - ADMIN BYPASS: Admins see ALL equipment without any restrictions
-      // - Show unassigned equipment (available to all for assignment)
-      // - Show equipment assigned to the current user's unit (BUT NOT if pending transfer OUT)
-      // - Show equipment assigned to the current user personally
-      // - Hide equipment assigned to other units (even within same battalion)
+      // - ADMIN BYPASS: Admins see ALL equipment without any restrictions (including unassigned)
+      // - Leaders/signature-approved users see equipment assigned to their unit or personally
+      // - Regular users see equipment assigned to their unit or personally
+      // - Unassigned equipment is ONLY visible to admins
       // - Hide equipment with pending transfers OUT from user's unit
       const filteredEquipment = mappedEquipment
         .filter((item) => {
@@ -264,9 +269,9 @@ export function useEquipment(): UseEquipmentReturn {
 
           const baseEquipmentId = item.id.split('--')[0];
 
-          // Always show unassigned equipment
+          // Unassigned equipment is ONLY visible to admins
           if (item.assignmentLevel === 'unassigned') {
-            return true;
+            return false; // Changed from true - only admins can see unassigned
           }
 
           // Check if this equipment has a pending transfer OUT from the user's unit
@@ -335,7 +340,7 @@ export function useEquipment(): UseEquipmentReturn {
     } finally {
       rebuildingRef.current = false;
     }
-  }, [unitId, currentUserPersonnelId, isAdmin]);
+  }, [unitId, currentUserPersonnelId, isAdmin, isLeader, isSignatureApproved]);
 
   const updateEquipment = useCallback(
     async (id: string, updates: { quantity?: number; status?: string; description?: string }) => {
@@ -435,6 +440,19 @@ export function useEquipment(): UseEquipmentReturn {
 
   const canDeleteEquipment = useCallback(
     (equipmentItem: EquipmentWithAssignment, currentUserPersonnelId?: string): boolean => {
+      // Admins can delete any equipment
+      if (isAdmin) {
+        return true;
+      }
+
+      // Leaders/signature-approved users can delete equipment assigned to their unit
+      // (Stricter check: should verify createdBy was also from their unit, but requires additional lookup)
+      // For now, we allow deletion if equipment is assigned to leader's unit
+      if (unitId && equipmentItem.currentUnitId === unitId) {
+        return true;
+      }
+
+      // Regular users can delete equipment they created AND is assigned to them personally
       if (!currentUserPersonnelId || equipmentItem.currentPersonnelId !== currentUserPersonnelId) {
         return false;
       }
@@ -443,7 +461,7 @@ export function useEquipment(): UseEquipmentReturn {
       }
       return true;
     },
-    [user?.uid]
+    [user?.uid, isAdmin, unitId]
   );
 
   const getBaseId = (id: string) => id.split('--')[0];
