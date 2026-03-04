@@ -9,12 +9,8 @@ import { loginAsTestUser, isStagingTest, clearAuthState } from './utils/test-aut
  */
 
 test.describe('User Equipment Access Rules [USER-EQUIP]', () => {
-  test.beforeEach(async ({ page }) => {
-    if (!isStagingTest()) {
-      await clearAuthState(page);
-    }
-    await loginAsTestUser(page, 'user');
-  });
+  // Tests run under staging project with staging-user.json auth
+  // No need to call loginAsTestUser - already authenticated via storageState
 
   test('[USER-EQUIP-1] user can see equipment assigned to their unit and personally', async ({ page }) => {
     // User role requirement: Users see equipment assigned to their unit or personally

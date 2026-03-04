@@ -9,12 +9,8 @@ import { loginAsTestUser, isStagingTest, clearAuthState } from './utils/test-aut
  */
 
 test.describe('Leader Equipment Access Rules [LEADER-EQUIP]', () => {
-  test.beforeEach(async ({ page }) => {
-    if (!isStagingTest()) {
-      await clearAuthState(page);
-    }
-    await loginAsTestUser(page, 'leader');
-  });
+  // Tests run under staging-leader project with staging-leader.json auth
+  // No need to call loginAsTestUser - already authenticated via storageState
 
   test('[LEADER-EQUIP-1] leader can see equipment assigned to their unit and personally', async ({ page }) => {
     // Leader role requirement: Leaders see equipment assigned to their unit or personally
