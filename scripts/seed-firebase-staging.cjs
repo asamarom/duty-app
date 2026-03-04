@@ -90,11 +90,16 @@ const TEST_PERSONNEL_IDS = {
 const TEST_EQUIPMENT_IDS = {
   bulk: '00000000-0000-0000-0000-300000000001',
   serialized: '00000000-0000-0000-0000-300000000002',
+  companyEquipment: '00000000-0000-0000-0000-300000000003',
+  platoonEquipment: '00000000-0000-0000-0000-300000000004',
+  unassignedEquipment: '00000000-0000-0000-0000-300000000005',
 };
 
 const TEST_ASSIGNMENT_IDS = {
   bulkToBattalion: '00000000-0000-0000-0000-400000000001',
   serializedToUser: '00000000-0000-0000-0000-400000000002',
+  companyAssignment: '00000000-0000-0000-0000-400000000003',
+  platoonAssignment: '00000000-0000-0000-0000-400000000004',
 };
 
 // Store UIDs after creating auth users
@@ -646,6 +651,45 @@ async function seedEquipment() {
   });
   console.log('   Created serialized equipment: M4 Carbine (SN: E2E-SN-001)');
 
+  await db.collection('equipment').doc(TEST_EQUIPMENT_IDS.companyEquipment).set({
+    name: 'Company Helmet',
+    serialNumber: null,
+    description: 'Helmets assigned to Company unit (Leader should see, User should NOT)',
+    quantity: 3,
+    status: 'serviceable',
+    createdBy: null,
+    battalionId: TEST_UNIT_IDS.battalion,
+    createdAt: now,
+    updatedAt: now,
+  });
+  console.log('   Created company equipment: Company Helmet (qty: 3)');
+
+  await db.collection('equipment').doc(TEST_EQUIPMENT_IDS.platoonEquipment).set({
+    name: 'Platoon Vest',
+    serialNumber: null,
+    description: 'Vests assigned to Platoon unit (User should see, Leader should NOT)',
+    quantity: 2,
+    status: 'serviceable',
+    createdBy: null,
+    battalionId: TEST_UNIT_IDS.battalion,
+    createdAt: now,
+    updatedAt: now,
+  });
+  console.log('   Created platoon equipment: Platoon Vest (qty: 2)');
+
+  await db.collection('equipment').doc(TEST_EQUIPMENT_IDS.unassignedEquipment).set({
+    name: 'Unassigned Binoculars',
+    serialNumber: null,
+    description: 'Unassigned equipment (Admin only should see)',
+    quantity: 4,
+    status: 'serviceable',
+    createdBy: null,
+    battalionId: TEST_UNIT_IDS.battalion,
+    createdAt: now,
+    updatedAt: now,
+  });
+  console.log('   Created unassigned equipment: Unassigned Binoculars (qty: 4)');
+
   // Assignments
   await db.collection('equipmentAssignments').doc(TEST_ASSIGNMENT_IDS.bulkToBattalion).set({
     equipmentId: TEST_EQUIPMENT_IDS.bulk,
@@ -674,12 +718,42 @@ async function seedEquipment() {
     createdAt: now,
   });
   console.log('   Created assignment: M4 Carbine → Test User');
+
+  await db.collection('equipmentAssignments').doc(TEST_ASSIGNMENT_IDS.companyAssignment).set({
+    equipmentId: TEST_EQUIPMENT_IDS.companyEquipment,
+    personnelId: null,
+    unitId: TEST_UNIT_IDS.company,
+    quantity: 3,
+    assignedBy: null,
+    assignedAt: now,
+    returnedAt: null,
+    notes: 'Assigned to Company unit',
+    battalionId: TEST_UNIT_IDS.battalion,
+    createdAt: now,
+  });
+  console.log('   Created assignment: Company Helmet (3) → Company unit');
+
+  await db.collection('equipmentAssignments').doc(TEST_ASSIGNMENT_IDS.platoonAssignment).set({
+    equipmentId: TEST_EQUIPMENT_IDS.platoonEquipment,
+    personnelId: null,
+    unitId: TEST_UNIT_IDS.platoon,
+    quantity: 2,
+    assignedBy: null,
+    assignedAt: now,
+    returnedAt: null,
+    notes: 'Assigned to Platoon unit',
+    battalionId: TEST_UNIT_IDS.battalion,
+    createdAt: now,
+  });
+  console.log('   Created assignment: Platoon Vest (2) → Platoon unit');
+
+  // Note: unassignedEquipment has NO assignment - only admins should see it
 }
 
 // ── Main ───────────────────────────────────────────────────────────
 
 // Version of the test data structure - increment when schema changes
-const SEED_DATA_VERSION = 1;
+const SEED_DATA_VERSION = 2;
 
 /**
  * Check if valid test data already exists in staging.

@@ -230,42 +230,24 @@ test.describe('Admin Equipment Access Rules [ADMIN-EQUIP]', () => {
 
     await page.goto('/equipment');
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
 
-    // Check that equipment list is visible
-    const equipmentTable = page.locator('table tbody tr, [data-testid="equipment-list"] > *').first();
-    const hasEquipment = await equipmentTable.isVisible().catch(() => false);
+    const pageContent = await page.textContent('body');
 
-    if (hasEquipment) {
-      // Admin should see seeded equipment (Radio Set and M4 Carbine)
-      // Use more flexible locators that work with table cells containing additional info
-      const pageContent = await page.textContent('body');
-      const hasRadioSet = pageContent?.includes('Radio Set') || false;
-      const hasM4 = pageContent?.includes('M4 Carbine') || false;
+    // Admin should see all seeded equipment
+    const seesRadioSet = pageContent?.includes('Radio Set');
+    const seesM4Carbine = pageContent?.includes('M4 Carbine');
+    const seesCompanyHelmet = pageContent?.includes('Company Helmet');
+    const seesPlatoonVest = pageContent?.includes('Platoon Vest');
+    const seesUnassigned = pageContent?.includes('Unassigned Binoculars');
 
-      console.log(`Admin equipment visibility: hasRadioSet=${hasRadioSet}, hasM4=${hasM4}`);
+    console.log(`Admin visibility: Radio=${seesRadioSet}, M4=${seesM4Carbine}, Company=${seesCompanyHelmet}, Platoon=${seesPlatoonVest}, Unassigned=${seesUnassigned}`);
 
-      // Admin should see at least one of the seeded equipment
-      expect(hasRadioSet || hasM4).toBe(true);
+    // Admin MUST see equipment from all units
+    expect(seesRadioSet || seesM4Carbine || seesCompanyHelmet || seesPlatoonVest).toBe(true);
 
-      // Verify admin can see equipment from all battalions (not filtered by battalion)
-      const equipmentRows = await page.locator('table tbody tr, [data-testid="equipment-item"]').count();
-      console.log(`Admin sees ${equipmentRows} equipment items`);
-
-      // Admin should see at least 1 item (seeded data)
-      expect(equipmentRows).toBeGreaterThanOrEqual(1);
-    } else {
-      // If no equipment visible, this is a test failure - admin should always see equipment
-      const emptyState = page.getByText(/no equipment|אין ציוד|empty/i);
-      const hasEmptyState = await emptyState.isVisible().catch(() => false);
-
-      // Log page content for debugging
-      const bodyText = await page.textContent('body');
-      console.log(`Admin sees no equipment. Page contains: ${bodyText?.substring(0, 500)}`);
-
-      // Admin should see equipment - if we're here, something is wrong
-      expect(hasEquipment).toBe(true);
-    }
+    // Admin MUST see unassigned equipment (critical test)
+    expect(seesUnassigned).toBe(true);
   });
 
   test('[ADMIN-EQUIP-2] admin can update equipment fields (quantity, status, description)', async ({ page }) => {
@@ -644,25 +626,24 @@ test.describe('Leader Equipment Access Rules [LEADER-EQUIP]', () => {
 
     await page.goto('/equipment');
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
 
-    const equipmentTable = page.locator('table tbody tr, [data-testid="equipment-list"] > *').first();
-    const hasEquipment = await equipmentTable.isVisible().catch(() => false);
+    const pageContent = await page.textContent('body');
 
-    if (hasEquipment) {
-      const equipmentRows = await page.locator('table tbody tr, [data-testid="equipment-item"]').count();
-      console.log(`Leader sees ${equipmentRows} equipment items`);
+    // Leader is in Company unit - should see Company Helmet
+    const seesCompanyEquipment = pageContent?.includes('Company Helmet');
+    console.log(`Leader sees Company Helmet (their unit): ${seesCompanyEquipment}`);
+    expect(seesCompanyEquipment).toBe(true);
 
-      // Leader should see at least their unit's equipment
-      expect(equipmentRows).toBeGreaterThanOrEqual(0);
-    }
+    // Leader should NOT see Platoon Vest (different unit in same battalion)
+    const seesPlatoonEquipment = pageContent?.includes('Platoon Vest');
+    console.log(`Leader sees Platoon Vest (other unit): ${seesPlatoonEquipment} (should be false)`);
+    expect(seesPlatoonEquipment).toBe(false);
 
     // Leader should NOT see unassigned equipment (admin only)
-    const pageContent = await page.textContent('body');
-    const hasUnassignedText = pageContent?.toLowerCase().includes('unassigned') || false;
-    
-    // If we see "unassigned" in filters/labels, that's OK, but not in equipment list
-    console.log(`Leader page has unassigned text: ${hasUnassignedText}`);
+    const seesUnassigned = pageContent?.includes('Unassigned Binoculars');
+    console.log(`Leader sees Unassigned Binoculars: ${seesUnassigned} (should be false)`);
+    expect(seesUnassigned).toBe(false);
   });
 
   test('[LEADER-EQUIP-2] leader can create equipment in their unit only', async ({ page }) => {
@@ -787,23 +768,29 @@ test.describe('User Equipment Access Rules [USER-EQUIP]', () => {
 
     await page.goto('/equipment');
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
 
-    const equipmentTable = page.locator('table tbody tr, [data-testid="equipment-list"] > *').first();
-    const hasEquipment = await equipmentTable.isVisible().catch(() => false);
+    const pageContent = await page.textContent('body');
 
-    if (hasEquipment) {
-      const equipmentRows = await page.locator('table tbody tr, [data-testid="equipment-item"]').count();
-      console.log(`User sees ${equipmentRows} equipment items`);
+    // User is in Platoon unit - should see Platoon Vest
+    const seesPlatoonEquipment = pageContent?.includes('Platoon Vest');
+    console.log(`User sees Platoon Vest (their unit): ${seesPlatoonEquipment}`);
+    expect(seesPlatoonEquipment).toBe(true);
 
-      // User should see at least their unit's/personal equipment
-      expect(equipmentRows).toBeGreaterThanOrEqual(0);
-    }
+    // User should see M4 Carbine (assigned to them personally)
+    const seesPersonalEquipment = pageContent?.includes('M4 Carbine');
+    console.log(`User sees M4 Carbine (personal): ${seesPersonalEquipment}`);
+    expect(seesPersonalEquipment).toBe(true);
+
+    // User should NOT see Company Helmet (different unit)
+    const seesCompanyEquipment = pageContent?.includes('Company Helmet');
+    console.log(`User sees Company Helmet (other unit): ${seesCompanyEquipment} (should be false)`);
+    expect(seesCompanyEquipment).toBe(false);
 
     // User should NOT see unassigned equipment (admin only)
-    const pageContent = await page.textContent('body');
-    const hasUnassignedText = pageContent?.toLowerCase().includes('unassigned') || false;
-    console.log(`User page has unassigned text: ${hasUnassignedText}`);
+    const seesUnassigned = pageContent?.includes('Unassigned Binoculars');
+    console.log(`User sees Unassigned Binoculars: ${seesUnassigned} (should be false)`);
+    expect(seesUnassigned).toBe(false);
   });
 
   test('[USER-EQUIP-2] user cannot create equipment', async ({ page }) => {
