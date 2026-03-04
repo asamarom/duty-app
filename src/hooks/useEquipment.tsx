@@ -271,6 +271,20 @@ export function useEquipment(): UseEquipmentReturn {
       // - Regular users see equipment assigned to their unit or personally
       // - Unassigned equipment is ONLY visible to admins
       // - Hide equipment with pending transfers OUT from user's unit
+
+      // DEBUG: Log filtering context
+      console.log('[useEquipment] Filtering equipment:', {
+        totalEquipment: mappedEquipment.length,
+        userUnitId: unitId,
+        isAdmin,
+        isLeader,
+        sampleEquipment: mappedEquipment.slice(0, 3).map(e => ({
+          name: e.name,
+          currentUnitId: e.currentUnitId,
+          currentPersonnelId: e.currentPersonnelId
+        }))
+      });
+
       const filteredEquipment = mappedEquipment
         .filter((item) => {
           // ADMIN BYPASS: Admins see all equipment without restrictions
@@ -306,6 +320,7 @@ export function useEquipment(): UseEquipmentReturn {
 
           // Show equipment assigned to the current user's unit
           if (unitId && item.currentUnitId === unitId) {
+            console.log('[useEquipment] Showing unit equipment:', item.name, 'unitId match:', unitId);
             return true;
           }
 
@@ -345,6 +360,11 @@ export function useEquipment(): UseEquipmentReturn {
 
           return item;
         });
+
+      console.log('[useEquipment] After filtering:', {
+        filteredCount: filteredEquipment.length,
+        items: filteredEquipment.map(e => e.name)
+      });
 
       setEquipment(filteredEquipment);
       setLoading(false);
