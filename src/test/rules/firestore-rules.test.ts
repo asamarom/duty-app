@@ -392,6 +392,7 @@ describe('Equipment Collection', () => {
       addDoc(collection(ctx.firestore(), 'equipment'), {
         name: 'Valid Equipment', quantity: 3,
         status: 'serviceable', createdAt: '2024-01-01', updatedAt: '2024-01-01',
+        battalionId: 'battalion-a', // Required for ALL equipment creation
       })
     );
   });
@@ -658,9 +659,11 @@ describe('Equipment — Leader Access', () => {
     );
   });
 
-  it('leader can update equipment in own battalion', async () => {
+  it('leader cannot update equipment in own battalion', async () => {
     const ctx = testEnv.authenticatedContext(UIDs.leader);
-    await assertSucceeds(
+    // Leaders can no longer update equipment fields (per EQUIPMENT_ACCESS_RULES.md)
+    // Only admins can update quantity, status, description, etc.
+    await assertFails(
       updateDoc(doc(ctx.firestore(), 'equipment', 'equip-a-001'), {
         quantity: 10, updatedAt: '2024-06-01',
       })
