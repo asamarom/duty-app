@@ -158,7 +158,7 @@ export default defineConfig({
         // Use dynamic baseURL from top-level config (respects STAGING_URL env var)
       },
       testMatch: /(admin|performance|dashboard|equipment|personnel|i18n|units|transfers|user-lifecycle|rtl|settings-navigation-admin).*\.spec\.ts/,
-      testIgnore: [/.*\.mobile\.spec\.ts/, /auth\.spec\.ts/], // Exclude mobile and auth tests
+      testIgnore: [/.*\.mobile\.spec\.ts/, /auth\.spec\.ts/, /battalion.*\.spec\.ts/, /user-equipment\.spec\.ts/], // Exclude mobile, auth, leader, and user tests
     },
     // Staging leader tests (requires leader role)
     {
