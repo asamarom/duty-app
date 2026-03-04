@@ -14,14 +14,27 @@ const mockDocFn = vi.fn((...args: unknown[]) => {
 });
 
 // onSnapshot mock: immediately calls the callback with the provided snapshot,
-// returns a no-op unsubscribe. Defaults to empty docs; individual tests can
-// override by calling mockOnSnapshot.mockImplementationOnce(...).
+// returns a no-op unsubscribe. Handles both collection queries and document references.
+// For collection queries: provides { docs: [] }
+// For document references: provides { exists: () => false, data: () => undefined }
 const mockOnSnapshot = vi.fn((
-    _query: unknown,
-    callback: (snap: { docs: unknown[] }) => void,
+    query: unknown,
+    callback: (snap: unknown) => void,
     _onError?: (err: Error) => void,
 ) => {
-    callback({ docs: [] });
+    // Check if this is a document reference (has 'path' property) or collection query
+    const isDocRef = query && typeof query === 'object' && 'path' in query;
+
+    if (isDocRef) {
+        // Document snapshot
+        callback({
+            exists: () => false,
+            data: () => undefined,
+        });
+    } else {
+        // Collection query snapshot
+        callback({ docs: [] });
+    }
     return () => {};
 });
 
@@ -46,25 +59,58 @@ vi.mock('firebase/functions', () => ({
     httpsCallable: (...args: unknown[]) => mockHttpsCallable(...args),
 }));
 
+// Mock dependent hooks to avoid complex onSnapshot tracking
+vi.mock('@/hooks/useAuth', () => ({
+    useAuth: () => ({ user: { uid: 'test-user-id' }, loading: false }),
+}));
+
+vi.mock('@/hooks/useUserBattalion', () => ({
+    useUserBattalion: () => ({ battalionId: 'battalion-a', unitId: 'unit-a', loading: false }),
+}));
+
+// Mock useUserRole with default non-admin user, can be overridden in individual tests
+const mockUseUserRole = vi.fn(() => ({ isAdmin: false, isLeader: false, loading: false, roles: [] }));
+
+vi.mock('@/hooks/useUserRole', () => ({
+    useUserRole: () => mockUseUserRole(),
+}));
+
 describe('useEquipment Hook', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        // Reset mockUseUserRole to default non-admin user
+        mockUseUserRole.mockReturnValue({ isAdmin: false, isLeader: false, loading: false, roles: [] });
         // Default: return empty results for all queries
         mockGetDocs.mockResolvedValue({ docs: [] });
         // Default: httpsCallable returns a no-op callable
         mockHttpsCallable.mockReturnValue(vi.fn().mockResolvedValue({ data: { success: true } }));
         // Restore default onSnapshot implementation after vi.clearAllMocks() wipes it
         mockOnSnapshot.mockImplementation((
-            _query: unknown,
-            callback: (snap: { docs: unknown[] }) => void,
+            query: unknown,
+            callback: (snap: unknown) => void,
             _onError?: (err: Error) => void,
         ) => {
-            callback({ docs: [] });
+            // Check if this is a document reference (has 'path' property) or collection query
+            const isDocRef = query && typeof query === 'object' && 'path' in query;
+
+            if (isDocRef) {
+                // Document snapshot
+                callback({
+                    exists: () => false,
+                    data: () => undefined,
+                });
+            } else {
+                // Collection query snapshot
+                callback({ docs: [] });
+            }
             return () => {};
         });
     });
 
     it('fetches equipment data on mount', async () => {
+        // Mock admin user so they can see all equipment (including unassigned)
+        mockUseUserRole.mockReturnValue({ isAdmin: true, isLeader: false, loading: false, roles: ['admin'] });
+
         const mockEquipmentDocs = [
             {
                 id: 'eq-1',
@@ -80,18 +126,18 @@ describe('useEquipment Hook', () => {
         ];
 
         // The hook registers 3 onSnapshot listeners: equipment, assignments, pending.
-        // Override so the first call (equipment) fires with mockEquipmentDocs,
-        // the second and third (assignments, pending) fire with empty docs.
+        // First call (equipment) should return mockEquipmentDocs,
+        // second and third (assignments, pending) return empty docs.
         mockOnSnapshot
-            .mockImplementationOnce((_q: unknown, cb: (snap: { docs: unknown[] }) => void) => {
+            .mockImplementationOnce((query: unknown, cb: (snap: unknown) => void) => {
                 cb({ docs: mockEquipmentDocs });
                 return () => {};
             })
-            .mockImplementationOnce((_q: unknown, cb: (snap: { docs: unknown[] }) => void) => {
+            .mockImplementationOnce((query: unknown, cb: (snap: unknown) => void) => {
                 cb({ docs: [] });
                 return () => {};
             })
-            .mockImplementationOnce((_q: unknown, cb: (snap: { docs: unknown[] }) => void) => {
+            .mockImplementationOnce((query: unknown, cb: (snap: unknown) => void) => {
                 cb({ docs: [] });
                 return () => {};
             });
