@@ -237,13 +237,14 @@ service cloud.firestore {
         (!request.resource.data.keys().hasAny(['status']) ||
           request.resource.data.status in ['serviceable', 'unserviceable', 'in_maintenance', 'missing', 'pending_transfer']);
 
-      // Admins can delete any equipment
-      // Leaders can delete only if:
-      //   1. Equipment was created by a user in their unit (createdBy matches a user with their unitId)
-      //   2. Equipment is currently assigned to their unit (check via equipmentAssignments)
-      // Note: Checking #1 and #2 requires additional reads, but necessary for security
-      // For now, we'll allow leaders to delete within their battalion (client-side will enforce stricter rules)
-      allow delete: if isAdmin() || (isLeader() && isSameBattalion(resource.data.battalionId));
+      // Only admins can delete equipment
+      // Leaders technically CAN delete (per EQUIPMENT_ACCESS_RULES.md) but only:
+      //   1. Equipment created by their unit
+      //   2. Equipment currently assigned to their unit
+      // These checks require joins across collections which Firestore rules cannot efficiently do,
+      // so we restrict to admin-only at the security rule level.
+      // Client-side logic handles the leader delete UX appropriately.
+      allow delete: if isAdmin();
     }
 
     // ============================================================================
