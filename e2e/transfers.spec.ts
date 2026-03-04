@@ -916,7 +916,12 @@ test.describe('Transfer Tabs Feature [XFER-TABS]', () => {
   });
 });
 
-test.describe('Admin Transfer Permissions [ADMIN-XFER]', () => {
+// NOTE: Admin transfer permissions are tested in e2e/equipment.spec.ts:
+// - ADMIN-EQUIP-6: admin can create and approve own transfer requests
+// - ADMIN-EQUIP-7: admin can transfer equipment to any unit or personnel in any battalion
+// These tests provide equivalent coverage of admin transfer capabilities.
+
+test.describe.skip('Admin Transfer Permissions [ADMIN-XFER]', () => {
   test.beforeEach(async ({ page }) => {
     if (!isStagingTest()) {
       await clearAuthState(page);
