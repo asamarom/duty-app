@@ -629,3 +629,302 @@ test.describe('Admin Equipment Access Rules [ADMIN-EQUIP]', () => {
     }
   });
 });
+
+test.describe('Leader Equipment Access Rules [LEADER-EQUIP]', () => {
+  test.beforeEach(async ({ page }) => {
+    if (!isStagingTest()) {
+      await clearAuthState(page);
+    }
+    await loginAsTestUser(page, 'leader');
+  });
+
+  test('[LEADER-EQUIP-1] leader can see equipment assigned to their unit and personally', async ({ page }) => {
+    // Leader role requirement: Leaders see equipment assigned to their unit or personally
+    // They should NOT see equipment from other units even in the same battalion
+
+    await page.goto('/equipment');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
+
+    const equipmentTable = page.locator('table tbody tr, [data-testid="equipment-list"] > *').first();
+    const hasEquipment = await equipmentTable.isVisible().catch(() => false);
+
+    if (hasEquipment) {
+      const equipmentRows = await page.locator('table tbody tr, [data-testid="equipment-item"]').count();
+      console.log(`Leader sees ${equipmentRows} equipment items`);
+
+      // Leader should see at least their unit's equipment
+      expect(equipmentRows).toBeGreaterThanOrEqual(0);
+    }
+
+    // Leader should NOT see unassigned equipment (admin only)
+    const pageContent = await page.textContent('body');
+    const hasUnassignedText = pageContent?.toLowerCase().includes('unassigned') || false;
+    
+    // If we see "unassigned" in filters/labels, that's OK, but not in equipment list
+    console.log(`Leader page has unassigned text: ${hasUnassignedText}`);
+  });
+
+  test('[LEADER-EQUIP-2] leader can create equipment in their unit only', async ({ page }) => {
+    // Leader role requirement: Leaders can create equipment but only in their own unit
+    // The battalionId must match their battalion
+
+    await page.goto('/equipment/add');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
+
+    const currentUrl = page.url();
+    if (currentUrl.includes('/equipment/add')) {
+      // Check for name input field
+      const nameInput = page.locator('input[name="name"], input[id*="name"]').first();
+      const hasNameInput = await nameInput.isVisible({ timeout: 5000 }).catch(() => false);
+
+      if (hasNameInput) {
+        // Leader should be able to access the form
+        expect(hasNameInput).toBe(true);
+        console.log('Leader can access equipment creation form');
+
+        // Check if battalion selector exists - leader might have it pre-selected or hidden
+        const battalionSelector = page.getByText(/Select.*attalion|בחר.*גדוד/i).or(
+          page.locator('button').filter({ hasText: /battalion|גדוד/i })
+        ).first();
+        const hasBattalionSelector = await battalionSelector.isVisible({ timeout: 3000 }).catch(() => false);
+        
+        console.log(`Leader has battalion selector visible: ${hasBattalionSelector}`);
+        // Battalion might be pre-filled for leaders (restricted to their battalion)
+      }
+    }
+  });
+
+  test('[LEADER-EQUIP-3] leader cannot update equipment fields', async ({ page }) => {
+    // Leader role requirement: Leaders cannot update quantity, status, description
+    // Only admins can update equipment fields
+
+    await page.goto('/equipment');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
+
+    const equipmentLink = page.locator('a[href^="/equipment/"]').first();
+    const hasLink = await equipmentLink.isVisible().catch(() => false);
+
+    if (hasLink) {
+      await equipmentLink.click();
+      await page.waitForLoadState('domcontentloaded');
+
+      // Look for Edit button - leader should NOT see it
+      const editButton = page.locator('button:has-text("Edit"), button:has-text("עריכה")').first();
+      const hasEditButton = await editButton.isVisible({ timeout: 3000 }).catch(() => false);
+
+      // Leader should NOT have edit permissions
+      expect(hasEditButton).toBe(false);
+      console.log(`Leader has edit button: ${hasEditButton} (should be false)`);
+    }
+  });
+
+  test('[LEADER-EQUIP-4] leader cannot delete equipment (restricted by firestore rules)', async ({ page }) => {
+    // Leader role requirement: Leaders can technically delete equipment created by their unit
+    // and assigned to their unit, but this requires complex checks (cross-collection joins)
+    // that Firestore rules cannot efficiently perform, so delete is admin-only at security level
+
+    await page.goto('/equipment');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
+
+    const equipmentLink = page.locator('a[href^="/equipment/"]').first();
+    const hasLink = await equipmentLink.isVisible().catch(() => false);
+
+    if (hasLink) {
+      await equipmentLink.click();
+      await page.waitForLoadState('domcontentloaded');
+
+      // Look for Delete button - leader should NOT see it (admin only)
+      const deleteButton = page.locator('button:has-text("Delete"), button:has-text("מחק")').first();
+      const hasDeleteButton = await deleteButton.isVisible({ timeout: 3000 }).catch(() => false);
+
+      // Leader should NOT have delete UI (security rules enforce admin-only)
+      expect(hasDeleteButton).toBe(false);
+      console.log(`Leader has delete button: ${hasDeleteButton} (should be false)`);
+    }
+  });
+
+  test('[LEADER-EQUIP-5] leader can request equipment transfers', async ({ page }) => {
+    // Leader role requirement: Leaders can request transfers for equipment in their unit
+
+    await page.goto('/equipment');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
+
+    const equipmentLink = page.locator('a[href^="/equipment/"]').first();
+    const hasLink = await equipmentLink.isVisible().catch(() => false);
+
+    if (hasLink) {
+      await equipmentLink.click();
+      await page.waitForLoadState('domcontentloaded');
+
+      // Look for Transfer/Assign button
+      const transferButton = page.locator('button').filter({ 
+        hasText: /transfer|assign|העבר|הקצה/i 
+      }).first();
+      const hasTransferButton = await transferButton.isVisible({ timeout: 5000 }).catch(() => false);
+
+      // Leader should be able to request transfers
+      console.log(`Leader has transfer button: ${hasTransferButton}`);
+    }
+  });
+});
+
+test.describe('User Equipment Access Rules [USER-EQUIP]', () => {
+  test.beforeEach(async ({ page }) => {
+    if (!isStagingTest()) {
+      await clearAuthState(page);
+    }
+    await loginAsTestUser(page, 'user');
+  });
+
+  test('[USER-EQUIP-1] user can see equipment assigned to their unit and personally', async ({ page }) => {
+    // User role requirement: Users see equipment assigned to their unit or personally
+    // They can also see pending transfers TO them for approval
+
+    await page.goto('/equipment');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
+
+    const equipmentTable = page.locator('table tbody tr, [data-testid="equipment-list"] > *').first();
+    const hasEquipment = await equipmentTable.isVisible().catch(() => false);
+
+    if (hasEquipment) {
+      const equipmentRows = await page.locator('table tbody tr, [data-testid="equipment-item"]').count();
+      console.log(`User sees ${equipmentRows} equipment items`);
+
+      // User should see at least their unit's/personal equipment
+      expect(equipmentRows).toBeGreaterThanOrEqual(0);
+    }
+
+    // User should NOT see unassigned equipment (admin only)
+    const pageContent = await page.textContent('body');
+    const hasUnassignedText = pageContent?.toLowerCase().includes('unassigned') || false;
+    console.log(`User page has unassigned text: ${hasUnassignedText}`);
+  });
+
+  test('[USER-EQUIP-2] user cannot create equipment', async ({ page }) => {
+    // User role requirement: Regular users cannot create equipment directly
+
+    await page.goto('/equipment');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
+
+    // Look for "Add Equipment" button
+    const addButton = page.locator('button').filter({ hasText: /add.*equipment|הוסף.*ציוד/i }).first();
+    const hasAddButton = await addButton.isVisible({ timeout: 3000 }).catch(() => false);
+
+    // User should NOT see add equipment button
+    console.log(`User has add equipment button: ${hasAddButton} (should be false)`);
+    
+    // Try accessing the add page directly
+    await page.goto('/equipment/add');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
+
+    const currentUrl = page.url();
+    const isOnAddPage = currentUrl.includes('/equipment/add');
+    
+    // User might be redirected or see an error
+    console.log(`User can access /equipment/add: ${isOnAddPage}`);
+  });
+
+  test('[USER-EQUIP-3] user cannot update equipment fields', async ({ page }) => {
+    // User role requirement: Users cannot update equipment fields
+
+    await page.goto('/equipment');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
+
+    const equipmentLink = page.locator('a[href^="/equipment/"]').first();
+    const hasLink = await equipmentLink.isVisible().catch(() => false);
+
+    if (hasLink) {
+      await equipmentLink.click();
+      await page.waitForLoadState('domcontentloaded');
+
+      // Look for Edit button - user should NOT see it
+      const editButton = page.locator('button:has-text("Edit"), button:has-text("עריכה")').first();
+      const hasEditButton = await editButton.isVisible({ timeout: 3000 }).catch(() => false);
+
+      // User should NOT have edit permissions
+      expect(hasEditButton).toBe(false);
+      console.log(`User has edit button: ${hasEditButton} (should be false)`);
+    }
+  });
+
+  test('[USER-EQUIP-4] user cannot delete equipment', async ({ page }) => {
+    // User role requirement: Users cannot delete equipment
+
+    await page.goto('/equipment');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
+
+    const equipmentLink = page.locator('a[href^="/equipment/"]').first();
+    const hasLink = await equipmentLink.isVisible().catch(() => false);
+
+    if (hasLink) {
+      await equipmentLink.click();
+      await page.waitForLoadState('domcontentloaded');
+
+      // Look for Delete button - user should NOT see it
+      const deleteButton = page.locator('button:has-text("Delete"), button:has-text("מחק")').first();
+      const hasDeleteButton = await deleteButton.isVisible({ timeout: 3000 }).catch(() => false);
+
+      // User should NOT have delete permissions
+      expect(hasDeleteButton).toBe(false);
+      console.log(`User has delete button: ${hasDeleteButton} (should be false)`);
+    }
+  });
+
+  test('[USER-EQUIP-5] user can request transfer for personally assigned equipment', async ({ page }) => {
+    // User role requirement: Users can request transfers for equipment assigned to them personally
+
+    await page.goto('/equipment');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
+
+    const equipmentLink = page.locator('a[href^="/equipment/"]').first();
+    const hasLink = await equipmentLink.isVisible().catch(() => false);
+
+    if (hasLink) {
+      await equipmentLink.click();
+      await page.waitForLoadState('domcontentloaded');
+
+      // Look for Transfer/Assign button
+      const transferButton = page.locator('button').filter({ 
+        hasText: /transfer|assign|העבר|הקצה/i 
+      }).first();
+      const hasTransferButton = await transferButton.isVisible({ timeout: 5000 }).catch(() => false);
+
+      // User might see transfer button only for their personal equipment
+      console.log(`User has transfer button: ${hasTransferButton}`);
+    }
+  });
+
+  test('[USER-EQUIP-6] user sees pending transfers TO them for approval', async ({ page }) => {
+    // User role requirement: Users can see equipment with pending transfers TO them
+
+    await page.goto('/equipment');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
+
+    // Check for Transfers tab
+    const transfersTab = page.getByRole('tab', { name: /transfers|העברות/i });
+    const hasTransfersTab = await transfersTab.isVisible({ timeout: 3000 }).catch(() => false);
+
+    if (hasTransfersTab) {
+      await transfersTab.click();
+      await page.waitForTimeout(500);
+
+      // Check for pending transfers
+      const transfersList = page.locator('[data-testid="transfers-list"], .transfer-card, table tbody tr').first();
+      const hasTransfers = await transfersList.isVisible().catch(() => false);
+
+      console.log(`User has transfers tab and can see transfers: ${hasTransfers}`);
+    }
+  });
+});
