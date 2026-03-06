@@ -31,6 +31,11 @@ export function useUserBattalion(): UseUserUnitReturn {
       setLoading(true);
       setError(null);
 
+      // OPTIMIZATION: Check Auth custom claims for battalionId first (instant, no DB lookup)
+      // This matches the Firestore rules optimization and avoids expensive document fetches
+      const idTokenResult = await user.getIdTokenResult();
+      const claimsBattalionId = idTokenResult.claims.battalionId as string | undefined;
+
       const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(() => reject(new Error('Firestore query timeout after 10s')), 10000);
       });
@@ -41,7 +46,7 @@ export function useUserBattalion(): UseUserUnitReturn {
 
       if (!userSnap.exists()) {
         setUnitId(null);
-        setBattalionId(null);
+        setBattalionId(claimsBattalionId || null);
         return;
       }
 
@@ -49,21 +54,24 @@ export function useUserBattalion(): UseUserUnitReturn {
       const userUnitId = userData.unitId || null;
       setUnitId(userUnitId);
 
+      // Step 2: Use battalionId from custom claims if available (fast path)
+      if (claimsBattalionId) {
+        setBattalionId(claimsBattalionId);
+        return;
+      }
+
+      // Step 3: Fallback - resolve battalionId by looking up the unit document (slow path)
+      // This provides backward compatibility for users without custom claims set
       if (!userUnitId) {
         setBattalionId(null);
         return;
       }
 
-      // Step 2: resolve battalionId by looking up the unit document.
-      // Units store a `battalionId` field (self-referential for battalions,
-      // inherited for companies/platoons) — mirrors getUserBattalionId() in firestore.rules.
       const unitDocRef = doc(db, 'units', userUnitId);
       const unitSnap = await Promise.race([getDoc(unitDocRef), timeoutPromise]);
 
       if (unitSnap.exists()) {
         const unitData = unitSnap.data() as UnitDoc;
-        // battalionId on the unit doc points to the root battalion.
-        // Fall back to userUnitId in case the field is missing (legacy data).
         setBattalionId(unitData.battalionId || userUnitId);
       } else {
         // Unit doc not found — fall back to userUnitId
