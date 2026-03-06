@@ -290,14 +290,14 @@ describe('Battalion-Based Access Control', () => {
   });
 
   it('allows user to read personnel in their own battalion', async () => {
-    const ctx = testEnv.authenticatedContext(UIDs.user);
+    const ctx = testEnv.authenticatedContext(UIDs.user, { battalionId: BATTALION_A });
     await assertSucceeds(
       getDoc(doc(ctx.firestore(), 'personnel', 'personnel-a-001'))
     );
   });
 
   it('allows user to read equipment in their own battalion', async () => {
-    const ctx = testEnv.authenticatedContext(UIDs.user);
+    const ctx = testEnv.authenticatedContext(UIDs.user, { battalionId: BATTALION_A });
     await assertSucceeds(
       getDoc(doc(ctx.firestore(), 'equipment', 'equip-a-001'))
     );
@@ -616,7 +616,7 @@ describe('Units Collection', () => {
 
 describe('Equipment — Leader Access', () => {
   it('leader can create equipment in same battalion', async () => {
-    const ctx = testEnv.authenticatedContext(UIDs.leader);
+    const ctx = testEnv.authenticatedContext(UIDs.leader, { battalionId: BATTALION_A });
     await assertSucceeds(
       addDoc(collection(ctx.firestore(), 'equipment'), {
         name: 'Leader Radio', quantity: 3,
@@ -717,7 +717,7 @@ describe('Equipment Assignments', () => {
   });
 
   it('leader can create assignment', async () => {
-    const ctx = testEnv.authenticatedContext(UIDs.leader);
+    const ctx = testEnv.authenticatedContext(UIDs.leader, { battalionId: BATTALION_A });
     await assertSucceeds(
       addDoc(collection(ctx.firestore(), 'equipmentAssignments'), {
         equipmentId: 'equip-a-001', unitId: 'unit-a-001',
@@ -779,7 +779,7 @@ describe('Equipment Assignments', () => {
   });
 
   it('leader can update assignment in own battalion', async () => {
-    const ctx = testEnv.authenticatedContext(UIDs.leader);
+    const ctx = testEnv.authenticatedContext(UIDs.leader, { battalionId: BATTALION_A });
     await assertSucceeds(
       updateDoc(doc(ctx.firestore(), 'equipmentAssignments', 'assign-a-001'), {
         quantity: 3,
@@ -860,7 +860,7 @@ describe('Assignment Requests — extended', () => {
   });
 
   it('user can read requests from own battalion', async () => {
-    const ctx = testEnv.authenticatedContext(UIDs.user); // UIDs.user is in BATTALION_A
+    const ctx = testEnv.authenticatedContext(UIDs.user, { battalionId: BATTALION_A });
     await assertSucceeds(
       getDoc(doc(ctx.firestore(), 'assignmentRequests', 'areq-a-001'))
     );
@@ -874,7 +874,7 @@ describe('Assignment Requests — extended', () => {
   });
 
   it('leader can approve a pending request in own battalion', async () => {
-    const ctx = testEnv.authenticatedContext(UIDs.leader); // UIDs.leader is in BATTALION_A
+    const ctx = testEnv.authenticatedContext(UIDs.leader, { battalionId: BATTALION_A });
     await assertSucceeds(
       updateDoc(doc(ctx.firestore(), 'assignmentRequests', 'areq-a-001'), {
         status: 'approved',
