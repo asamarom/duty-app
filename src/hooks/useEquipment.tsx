@@ -354,6 +354,11 @@ export function useEquipment(): UseEquipmentReturn {
           return item;
         });
 
+      console.log(`[useEquipment] Final filtered equipment count: ${filteredEquipment.length}`);
+      filteredEquipment.forEach(item => {
+        console.log(`  - ${item.name}: visible`);
+      });
+
       setEquipment(filteredEquipment);
       setLoading(false);
     } catch (err) {
