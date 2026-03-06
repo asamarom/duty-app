@@ -57,22 +57,24 @@ service cloud.firestore {
     // We look up the user's unit document to get the correct battalion ID.
     // NOTE: This function should only be called after checking hasUnitId()
     // Get the user's battalion ID.
-    // SIMPLIFIED: Due to Firestore Rules limitations with property access in ternary expressions,
-    // we use custom claims when available (fast path) or fall back to unitId (slow path).
-    // This means company/platoon-level users MUST have battalionId in their Auth custom claims.
+    // Uses custom claims when available (instant, no document lookup).
+    // Falls back to unitId for users assigned directly to battalions.
     function getUserBattalionId() {
-      // Check custom claims first (instant, no document lookup needed)
       return request.auth.token.battalionId != null
         ? request.auth.token.battalionId
-        : getUserDoc().data.unitId;  // Fallback to unitId (works if user is assigned directly to battalion)
+        : getUserDoc().data.unitId;
     }
 
     // Check if a document belongs to the same battalion as the user
     // MIGRATION: Returns true if battalionId is missing (allows during migration)
-    // Returns false if user has no unitId assigned
-    // OPTIMIZATION: Uses custom claims when available to avoid document lookups
     function isSameBattalion(docBattalionId) {
       return docBattalionId == null || (hasUnitId() && getUserBattalionId() == docBattalionId);
+    }
+
+    // Helper: Check battalion access for a resource
+    // Assumes battalionId field always exists (required in production)
+    function canAccessResourceBattalion(resourceData) {
+      return isSameBattalion(resourceData.battalionId);
     }
 
     // Check battalion for create operations (battalion ID required on create)
@@ -158,7 +160,7 @@ service cloud.firestore {
       // MIGRATION: Allow documents without battalionId during migration
       allow read: if hasAnyRole() && (
         isAdmin() ||
-        (!resource.data.keys().hasAll(['battalionId']) || isSameBattalion(resource.data.battalionId)) ||
+        canAccessResourceBattalion(resource.data) ||
         (resource.data.keys().hasAny(['userId']) && resource.data.userId == request.auth.uid)
       );
 

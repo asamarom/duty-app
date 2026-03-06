@@ -1049,28 +1049,30 @@ describe('Battalion-Based Access — Company/Platoon Unit Leaders (regression)',
   // So getUserBattalionId() should resolve to BATTALION_A
 
   it('[REGRESSION] company-level leader can read personnel in their battalion', async () => {
-    const ctx = testEnv.authenticatedContext(UIDs.leaderCompany);
+    // Company leader has unitId=COMPANY_A but documents have battalionId=BATTALION_A
+    // So we need to set battalionId in custom claims for this to work
+    const ctx = testEnv.authenticatedContext(UIDs.leaderCompany, { battalionId: BATTALION_A });
     await assertSucceeds(
       getDoc(doc(ctx.firestore(), 'personnel', 'personnel-a-001'))
     );
   });
 
   it('[REGRESSION] company-level leader can read equipment in their battalion', async () => {
-    const ctx = testEnv.authenticatedContext(UIDs.leaderCompany);
+    const ctx = testEnv.authenticatedContext(UIDs.leaderCompany, { battalionId: BATTALION_A });
     await assertSucceeds(
       getDoc(doc(ctx.firestore(), 'equipment', 'equip-a-001'))
     );
   });
 
   it('[REGRESSION] company-level leader can read assignment requests in their battalion', async () => {
-    const ctx = testEnv.authenticatedContext(UIDs.leaderCompany);
+    const ctx = testEnv.authenticatedContext(UIDs.leaderCompany, { battalionId: BATTALION_A });
     await assertSucceeds(
       getDoc(doc(ctx.firestore(), 'assignmentRequests', 'areq-a-001'))
     );
   });
 
   it('[REGRESSION] company-level leader can read equipment assignments in their battalion', async () => {
-    const ctx = testEnv.authenticatedContext(UIDs.leaderCompany);
+    const ctx = testEnv.authenticatedContext(UIDs.leaderCompany, { battalionId: BATTALION_A });
     await assertSucceeds(
       getDoc(doc(ctx.firestore(), 'equipmentAssignments', 'assign-a-001'))
     );
@@ -1091,7 +1093,7 @@ describe('Battalion-Based Access — Company/Platoon Unit Leaders (regression)',
   });
 
   it('[REGRESSION] company-level leader can approve a pending request in their battalion', async () => {
-    const ctx = testEnv.authenticatedContext(UIDs.leaderCompany);
+    const ctx = testEnv.authenticatedContext(UIDs.leaderCompany, { battalionId: BATTALION_A });
     await assertSucceeds(
       updateDoc(doc(ctx.firestore(), 'assignmentRequests', 'areq-a-001'), {
         status: 'approved',
@@ -1100,7 +1102,7 @@ describe('Battalion-Based Access — Company/Platoon Unit Leaders (regression)',
   });
 
   it('[REGRESSION] company-level leader cannot approve a request in a different battalion', async () => {
-    const ctx = testEnv.authenticatedContext(UIDs.leaderCompany);
+    const ctx = testEnv.authenticatedContext(UIDs.leaderCompany, { battalionId: BATTALION_A });
     await assertFails(
       updateDoc(doc(ctx.firestore(), 'assignmentRequests', 'areq-b-001'), {
         status: 'approved',
