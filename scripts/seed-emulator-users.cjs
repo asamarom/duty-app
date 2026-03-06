@@ -479,10 +479,15 @@ async function seedEquipment() {
     status: toStringValue('serviceable'),
     createdBy: { nullValue: null },
     battalionId: toStringValue(TEST_UNIT_IDS.battalion),
+    // Denormalized current assignment
+    currentUnitId: toStringValue(TEST_UNIT_IDS.battalion),
+    currentPersonnelId: { nullValue: null },
+    currentQuantityAssigned: toIntegerValue(5),
+    lastAssignedAt: toTimestampValue(),
     createdAt: toTimestampValue(),
     updatedAt: toTimestampValue(),
   });
-  console.log('   Created bulk equipment: Radio Set (qty: 5)');
+  console.log('   Created bulk equipment: Radio Set (qty: 5) → Battalion');
 
   // Serialized item assigned to test-user personnel
   await createFirestoreDoc('equipment', TEST_EQUIPMENT_IDS.serialized, {
@@ -493,10 +498,15 @@ async function seedEquipment() {
     status: toStringValue('serviceable'),
     createdBy: { nullValue: null },
     battalionId: toStringValue(TEST_UNIT_IDS.battalion),
+    // Denormalized current assignment
+    currentUnitId: { nullValue: null },
+    currentPersonnelId: toStringValue(TEST_PERSONNEL_IDS.user),
+    currentQuantityAssigned: toIntegerValue(1),
+    lastAssignedAt: toTimestampValue(),
     createdAt: toTimestampValue(),
     updatedAt: toTimestampValue(),
   });
-  console.log('   Created serialized equipment: M4 Carbine (SN: E2E-SN-001)');
+  console.log('   Created serialized equipment: M4 Carbine (SN: E2E-SN-001) → User');
 
   // Bulk assignment: Radio Set → Test Battalion (all 5 units)
   await createFirestoreDoc('equipmentAssignments', TEST_ASSIGNMENT_IDS.bulkToBattalion, {
@@ -537,10 +547,15 @@ async function seedEquipment() {
     status: toStringValue('serviceable'),
     createdBy: { nullValue: null },
     battalionId: toStringValue(TEST_UNIT_IDS.battalion),
+    // Denormalized current assignment
+    currentUnitId: toStringValue(TEST_UNIT_IDS.company),
+    currentPersonnelId: { nullValue: null },
+    currentQuantityAssigned: toIntegerValue(10),
+    lastAssignedAt: toTimestampValue(),
     createdAt: toTimestampValue(),
     updatedAt: toTimestampValue(),
   });
-  console.log('   Created equipment: Company Helmet (qty: 10)');
+  console.log('   Created equipment: Company Helmet (qty: 10) → Company');
 
   await createFirestoreDoc('equipmentAssignments', TEST_ASSIGNMENT_IDS.helmetToCompany, {
     equipmentId: toStringValue(TEST_EQUIPMENT_IDS.companyHelmet),
@@ -565,10 +580,15 @@ async function seedEquipment() {
     status: toStringValue('serviceable'),
     createdBy: { nullValue: null },
     battalionId: toStringValue(TEST_UNIT_IDS.battalion),
+    // Denormalized current assignment
+    currentUnitId: toStringValue(TEST_UNIT_IDS.platoon),
+    currentPersonnelId: { nullValue: null },
+    currentQuantityAssigned: toIntegerValue(15),
+    lastAssignedAt: toTimestampValue(),
     createdAt: toTimestampValue(),
     updatedAt: toTimestampValue(),
   });
-  console.log('   Created equipment: Platoon Vest (qty: 15)');
+  console.log('   Created equipment: Platoon Vest (qty: 15) → Platoon');
 
   await createFirestoreDoc('equipmentAssignments', TEST_ASSIGNMENT_IDS.vestToPlatoon, {
     equipmentId: toStringValue(TEST_EQUIPMENT_IDS.platoonVest),
@@ -593,10 +613,15 @@ async function seedEquipment() {
     status: toStringValue('serviceable'),
     createdBy: { nullValue: null },
     battalionId: toStringValue(TEST_UNIT_IDS.battalion),
+    // Denormalized current assignment (unassigned)
+    currentUnitId: { nullValue: null },
+    currentPersonnelId: { nullValue: null },
+    currentQuantityAssigned: toIntegerValue(0),
+    lastAssignedAt: { nullValue: null },
     createdAt: toTimestampValue(),
     updatedAt: toTimestampValue(),
   });
-  console.log('   Created unassigned equipment: Unassigned Binoculars (qty: 3)');
+  console.log('   Created unassigned equipment: Unassigned Binoculars (qty: 3) → Unassigned');
 }
 
 async function seedAdminUnitAssignments() {

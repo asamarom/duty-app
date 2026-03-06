@@ -633,10 +633,15 @@ async function seedEquipment() {
     status: 'serviceable',
     createdBy: null,
     battalionId: TEST_UNIT_IDS.battalion,
+    // Denormalized current assignment
+    currentUnitId: TEST_UNIT_IDS.battalion,
+    currentPersonnelId: null,
+    currentQuantityAssigned: 5,
+    lastAssignedAt: now,
     createdAt: now,
     updatedAt: now,
   });
-  console.log('   Created bulk equipment: Radio Set (qty: 5)');
+  console.log('   Created bulk equipment: Radio Set (qty: 5) → Battalion');
 
   await db.collection('equipment').doc(TEST_EQUIPMENT_IDS.serialized).set({
     name: 'M4 Carbine',
@@ -646,10 +651,15 @@ async function seedEquipment() {
     status: 'serviceable',
     createdBy: null,
     battalionId: TEST_UNIT_IDS.battalion,
+    // Denormalized current assignment
+    currentUnitId: null,
+    currentPersonnelId: TEST_PERSONNEL_IDS.user,
+    currentQuantityAssigned: 1,
+    lastAssignedAt: now,
     createdAt: now,
     updatedAt: now,
   });
-  console.log('   Created serialized equipment: M4 Carbine (SN: E2E-SN-001)');
+  console.log('   Created serialized equipment: M4 Carbine (SN: E2E-SN-001) → User personnel');
 
   await db.collection('equipment').doc(TEST_EQUIPMENT_IDS.companyEquipment).set({
     name: 'Company Helmet',
@@ -659,10 +669,15 @@ async function seedEquipment() {
     status: 'serviceable',
     createdBy: null,
     battalionId: TEST_UNIT_IDS.battalion,
+    // Denormalized current assignment
+    currentUnitId: TEST_UNIT_IDS.company,
+    currentPersonnelId: null,
+    currentQuantityAssigned: 3,
+    lastAssignedAt: now,
     createdAt: now,
     updatedAt: now,
   });
-  console.log('   Created company equipment: Company Helmet (qty: 3)');
+  console.log('   Created company equipment: Company Helmet (qty: 3) → Company unit');
 
   await db.collection('equipment').doc(TEST_EQUIPMENT_IDS.platoonEquipment).set({
     name: 'Platoon Vest',
@@ -672,10 +687,15 @@ async function seedEquipment() {
     status: 'serviceable',
     createdBy: null,
     battalionId: TEST_UNIT_IDS.battalion,
+    // Denormalized current assignment
+    currentUnitId: TEST_UNIT_IDS.platoon,
+    currentPersonnelId: null,
+    currentQuantityAssigned: 2,
+    lastAssignedAt: now,
     createdAt: now,
     updatedAt: now,
   });
-  console.log('   Created platoon equipment: Platoon Vest (qty: 2)');
+  console.log('   Created platoon equipment: Platoon Vest (qty: 2) → Platoon unit');
 
   await db.collection('equipment').doc(TEST_EQUIPMENT_IDS.unassignedEquipment).set({
     name: 'Unassigned Binoculars',
@@ -685,10 +705,15 @@ async function seedEquipment() {
     status: 'serviceable',
     createdBy: null,
     battalionId: TEST_UNIT_IDS.battalion,
+    // Denormalized current assignment (unassigned)
+    currentUnitId: null,
+    currentPersonnelId: null,
+    currentQuantityAssigned: 0,
+    lastAssignedAt: null,
     createdAt: now,
     updatedAt: now,
   });
-  console.log('   Created unassigned equipment: Unassigned Binoculars (qty: 4)');
+  console.log('   Created unassigned equipment: Unassigned Binoculars (qty: 4) → Unassigned');
 
   // Assignments
   await db.collection('equipmentAssignments').doc(TEST_ASSIGNMENT_IDS.bulkToBattalion).set({

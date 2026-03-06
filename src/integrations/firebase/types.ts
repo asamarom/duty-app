@@ -64,6 +64,12 @@ export interface EquipmentDoc {
   quantity: number;
   status: EquipmentStatus;
   createdBy: string | null;
+  battalionId: string;
+  // Denormalized current assignment (for performance - see docs/DATABASE_OPTIMIZATION.md)
+  currentUnitId: string | null;
+  currentPersonnelId: string | null;
+  currentQuantityAssigned: number;
+  lastAssignedAt: Timestamp | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
