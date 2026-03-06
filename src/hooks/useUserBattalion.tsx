@@ -39,9 +39,12 @@ export function useUserBattalion(): UseUserUnitReturn {
         try {
           const idTokenResult = await user.getIdTokenResult();
           claimsBattalionId = idTokenResult.claims.battalionId as string | undefined;
+          console.log(`useUserBattalion: Got custom claims battalionId="${claimsBattalionId}" for user ${user.uid}`);
         } catch (err) {
           console.warn('useUserBattalion: Could not get ID token claims, falling back to document lookup', err);
         }
+      } else {
+        console.log('useUserBattalion: getIdTokenResult not available, will fall back to document lookup');
       }
 
       const timeoutPromise = new Promise<never>((_, reject) => {
@@ -61,11 +64,15 @@ export function useUserBattalion(): UseUserUnitReturn {
       const userData = userSnap.data() as UserDoc;
       const userUnitId = userData.unitId || null;
       setUnitId(userUnitId);
+      console.log(`useUserBattalion: User ${user.uid} has unitId="${userUnitId}"`);
 
       // Step 2: Use battalionId from custom claims if available (fast path)
       if (claimsBattalionId) {
+        console.log(`useUserBattalion: Using battalionId from custom claims: "${claimsBattalionId}"`);
         setBattalionId(claimsBattalionId);
         return;
+      } else {
+        console.log('useUserBattalion: No battalionId in custom claims, falling back to document lookup');
       }
 
       // Step 3: Fallback - resolve battalionId by looking up the unit document (slow path)
@@ -80,9 +87,12 @@ export function useUserBattalion(): UseUserUnitReturn {
 
       if (unitSnap.exists()) {
         const unitData = unitSnap.data() as UnitDoc;
-        setBattalionId(unitData.battalionId || userUnitId);
+        const resolvedBattalionId = unitData.battalionId || userUnitId;
+        console.log(`useUserBattalion: Resolved battalionId from unit doc: "${resolvedBattalionId}"`);
+        setBattalionId(resolvedBattalionId);
       } else {
         // Unit doc not found — fall back to userUnitId
+        console.log(`useUserBattalion: Unit doc not found, using unitId as battalionId: "${userUnitId}"`);
         setBattalionId(userUnitId);
       }
     } catch (err) {
