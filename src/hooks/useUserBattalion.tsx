@@ -33,8 +33,16 @@ export function useUserBattalion(): UseUserUnitReturn {
 
       // OPTIMIZATION: Check Auth custom claims for battalionId first (instant, no DB lookup)
       // This matches the Firestore rules optimization and avoids expensive document fetches
-      const idTokenResult = await user.getIdTokenResult();
-      const claimsBattalionId = idTokenResult.claims.battalionId as string | undefined;
+      // Note: getIdTokenResult() may not exist in test environments or emulator
+      let claimsBattalionId: string | undefined;
+      if (typeof user.getIdTokenResult === 'function') {
+        try {
+          const idTokenResult = await user.getIdTokenResult();
+          claimsBattalionId = idTokenResult.claims.battalionId as string | undefined;
+        } catch (err) {
+          console.warn('useUserBattalion: Could not get ID token claims, falling back to document lookup', err);
+        }
+      }
 
       const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(() => reject(new Error('Firestore query timeout after 10s')), 10000);
