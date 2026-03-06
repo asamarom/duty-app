@@ -66,7 +66,7 @@ export function useEquipment(): UseEquipmentReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
-  const { battalionId, unitId } = useUserBattalion();
+  const { battalionId, unitId, loading: battalionLoading } = useUserBattalion();
   const { isAdmin, isLeader } = useUserRole();
   const [currentUserPersonnelId, setCurrentUserPersonnelId] = useState<string | null>(null);
   const [isSignatureApproved, setIsSignatureApproved] = useState(false);
@@ -676,9 +676,17 @@ export function useEquipment(): UseEquipmentReturn {
   );
 
   useEffect(() => {
+    // Wait for battalionId to load before setting up query (unless admin)
+    // This prevents querying with battalionId=null which returns empty results
+    if (!isAdmin && battalionLoading) {
+      console.log(`[useEquipment] Waiting for battalionId to load...`);
+      setLoading(true);
+      return;
+    }
+
     setLoading(true);
 
-    console.log(`[useEquipment] Setting up query with isAdmin=${isAdmin}, battalionId="${battalionId}"`);
+    console.log(`[useEquipment] Setting up query with isAdmin=${isAdmin}, battalionId="${battalionId}", battalionLoading=${battalionLoading}`);
 
     // Admin: fetch all equipment
     // Non-admin: filter by battalionId to match Firestore security rules
@@ -704,7 +712,7 @@ export function useEquipment(): UseEquipmentReturn {
     const u3 = onSnapshot(pendingQuery, snap => { pendingDocsRef.current = snap.docs; rebuild(); }, err => { console.error('[useEquipment] pending error', err); setLoading(false); });
 
     return () => { u1(); u2(); u3(); };
-  }, [rebuild, isAdmin, battalionId]);
+  }, [rebuild, isAdmin, battalionId, battalionLoading]);
 
   const isWithinSameUnit = useCallback(
     (_currentLevel: AssignmentLevel, _targetLevel: AssignmentLevel, item: EquipmentWithAssignment, assignment: AssignmentData): boolean => {
