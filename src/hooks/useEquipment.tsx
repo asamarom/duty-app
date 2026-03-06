@@ -274,6 +274,9 @@ export function useEquipment(): UseEquipmentReturn {
 
       console.log(`[useEquipment] Filtering equipment: isAdmin=${isAdmin}, unitId="${unitId}", personnelId="${currentUserPersonnelId}"`);
       console.log(`[useEquipment] Total items before filter: ${mappedEquipment.length}`);
+      mappedEquipment.forEach(item => {
+        console.log(`[useEquipment] BEFORE FILTER: ${item.name}, currentUnitId="${item.currentUnitId}", currentPersonnelId="${item.currentPersonnelId}", assignmentLevel="${item.assignmentLevel}"`);
+      });
 
       const filteredEquipment = mappedEquipment
         .filter((item) => {
