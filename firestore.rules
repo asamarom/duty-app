@@ -56,7 +56,14 @@ service cloud.firestore {
     // All unit documents store a battalionId field pointing to their root battalion.
     // We look up the user's unit document to get the correct battalion ID.
     // NOTE: This function should only be called after checking hasUnitId()
+    // OPTIMIZATION: Try custom claims first (fast), fallback to document lookup (slow)
     function getUserBattalionId() {
+      // Fast path: Use battalionId from custom claims if available
+      if (request.auth.token.battalionId != null) {
+        return request.auth.token.battalionId;
+      }
+
+      // Slow path: Fallback to document lookup (for backward compatibility)
       let userUnitId = getUserDoc().data.unitId;
       let unitDoc = get(/databases/$(database)/documents/units/$(userUnitId));
       return (unitDoc != null && unitDoc.data != null && 'battalionId' in unitDoc.data && unitDoc.data.battalionId != null)
@@ -67,6 +74,7 @@ service cloud.firestore {
     // Check if a document belongs to the same battalion as the user
     // MIGRATION: Returns true if battalionId is missing (allows during migration)
     // Returns false if user has no unitId assigned
+    // OPTIMIZATION: Uses custom claims when available to avoid document lookups
     function isSameBattalion(docBattalionId) {
       return docBattalionId == null || (hasUnitId() && getUserBattalionId() == docBattalionId);
     }

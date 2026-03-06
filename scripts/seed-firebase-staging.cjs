@@ -106,12 +106,12 @@ const TEST_ASSIGNMENT_IDS = {
 const userUIDs = {};
 
 const authUsers = [
-  { key: 'admin', email: 'test-admin@e2e.local', displayName: 'Test Admin', role: 'admin' },
-  { key: 'leader', email: 'test-leader@e2e.local', displayName: 'Test Leader', role: 'leader' },
-  { key: 'user', email: 'test-user@e2e.local', displayName: 'Test User', role: 'user' },
-  { key: 'new', email: 'test-new@e2e.local', displayName: 'Test New User', role: null },
-  { key: 'pending', email: 'test-pending@e2e.local', displayName: 'Test Pending User', role: null },
-  { key: 'declined', email: 'test-declined@e2e.local', displayName: 'Test Declined User', role: null },
+  { key: 'admin', email: 'test-admin@e2e.local', displayName: 'Test Admin', role: 'admin', battalionId: TEST_UNIT_IDS.battalion },
+  { key: 'leader', email: 'test-leader@e2e.local', displayName: 'Test Leader', role: 'leader', battalionId: TEST_UNIT_IDS.battalion },
+  { key: 'user', email: 'test-user@e2e.local', displayName: 'Test User', role: 'user', battalionId: TEST_UNIT_IDS.battalion },
+  { key: 'new', email: 'test-new@e2e.local', displayName: 'Test New User', role: null, battalionId: null },
+  { key: 'pending', email: 'test-pending@e2e.local', displayName: 'Test Pending User', role: null, battalionId: null },
+  { key: 'declined', email: 'test-declined@e2e.local', displayName: 'Test Declined User', role: null, battalionId: null },
 ];
 
 // ── Helper Functions ───────────────────────────────────────────────
@@ -164,10 +164,15 @@ async function createAuthUser(user) {
     // Create new user
     const userRecord = await auth.createUser(createUserOptions);
 
-    // Set custom claims for role
-    if (user.role) {
-      await auth.setCustomUserClaims(userRecord.uid, { role: user.role });
-      console.log(`   Created: ${user.email} (uid: ${userRecord.uid}, role: ${user.role})`);
+    // Set custom claims for role and battalionId
+    // battalionId in claims enables fast Firestore rule evaluation without document lookups
+    if (user.role || user.battalionId) {
+      const claims = {};
+      if (user.role) claims.role = user.role;
+      if (user.battalionId) claims.battalionId = user.battalionId;
+
+      await auth.setCustomUserClaims(userRecord.uid, claims);
+      console.log(`   Created: ${user.email} (uid: ${userRecord.uid}, role: ${user.role || 'none'}, battalion: ${user.battalionId || 'none'})`);
     } else {
       console.log(`   Created: ${user.email} (uid: ${userRecord.uid})`);
     }
