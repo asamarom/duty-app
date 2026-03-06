@@ -154,7 +154,7 @@ jobs:
       - name: Seed Staging Database
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        run: node scripts/seed-firebase-staging.cjs
+        run: node scripts/seed-firebase-staging.cjs --force
 
       - name: Generate Custom Tokens
         env:
