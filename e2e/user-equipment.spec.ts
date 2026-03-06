@@ -16,6 +16,13 @@ test.describe('User Equipment Access Rules [USER-EQUIP]', () => {
     // User role requirement: Users see equipment assigned to their unit or personally
     // They can also see pending transfers TO them for approval
 
+    // Capture browser console logs
+    page.on('console', msg => {
+      if (msg.text().includes('useUserBattalion') || msg.text().includes('battalionId')) {
+        console.log(`[BROWSER] ${msg.text()}`);
+      }
+    });
+
     await page.goto('/equipment');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(2000);
