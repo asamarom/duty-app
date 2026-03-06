@@ -56,22 +56,15 @@ service cloud.firestore {
     // All unit documents store a battalionId field pointing to their root battalion.
     // We look up the user's unit document to get the correct battalion ID.
     // NOTE: This function should only be called after checking hasUnitId()
-    // OPTIMIZATION: Try custom claims first (fast), fallback to document lookup (slow)
+    // Get the user's battalion ID.
+    // SIMPLIFIED: Due to Firestore Rules limitations with property access in ternary expressions,
+    // we use custom claims when available (fast path) or fall back to unitId (slow path).
+    // This means company/platoon-level users MUST have battalionId in their Auth custom claims.
     function getUserBattalionId() {
-      // Fast path: Use battalionId from custom claims if available (instant, no document lookup)
-      // Slow path: Fallback to document lookup (for backward compatibility)
-      return (request.auth.token.battalionId != null)
+      // Check custom claims first (instant, no document lookup needed)
+      return request.auth.token.battalionId != null
         ? request.auth.token.battalionId
-        : getUserBattalionIdFromDocs();
-    }
-
-    // Helper function: Get battalion ID from user/unit documents (slow path with get() operations)
-    function getUserBattalionIdFromDocs() {
-      let userUnitId = getUserDoc().data.unitId;
-      let unitDoc = get(/databases/$(database)/documents/units/$(userUnitId));
-      return (unitDoc != null && unitDoc.data != null && 'battalionId' in unitDoc.data && unitDoc.data.battalionId != null)
-        ? unitDoc.data.battalionId
-        : userUnitId;
+        : getUserDoc().data.unitId;  // Fallback to unitId (works if user is assigned directly to battalion)
     }
 
     // Check if a document belongs to the same battalion as the user
@@ -162,9 +155,10 @@ service cloud.firestore {
       // CRITICAL FIX: Battalion-based access control
       // Admins can read all, others can only read personnel in their battalion
       // ADDITIONAL: Users can always read their own personnel record (by userId)
+      // MIGRATION: Allow documents without battalionId during migration
       allow read: if hasAnyRole() && (
         isAdmin() ||
-        isSameBattalion(resource.data.battalionId) ||
+        (!resource.data.keys().hasAll(['battalionId']) || isSameBattalion(resource.data.battalionId)) ||
         (resource.data.keys().hasAny(['userId']) && resource.data.userId == request.auth.uid)
       );
 
@@ -195,7 +189,7 @@ service cloud.firestore {
           request.resource.data.locationStatus in ['home', 'on_duty', 'off_duty', 'active_mission', 'leave', 'tdy']) &&
         (!request.resource.data.keys().hasAny(['readinessStatus']) ||
           request.resource.data.readinessStatus in ['ready', 'warning', 'critical']) &&
-        (isAdmin() || isSameBattalion(resource.data.battalionId));
+        (isAdmin() || !resource.data.keys().hasAll(['battalionId']) || isSameBattalion(resource.data.battalionId));
 
       // Only admins can delete personnel
       allow delete: if isAdmin();
@@ -221,7 +215,8 @@ service cloud.firestore {
       //
       // Future improvement: Denormalize assignedUnitId onto equipment documents
       // to enable unit-level filtering in Firestore rules.
-      allow read: if hasAnyRole() && (isAdmin() || isSameBattalion(resource.data.battalionId));
+      // MIGRATION: Allow documents without battalionId during migration
+      allow read: if hasAnyRole() && (isAdmin() || !resource.data.keys().hasAll(['battalionId']) || isSameBattalion(resource.data.battalionId));
 
       // Admins and leaders can create equipment
       // HIGH FIX: Validate required fields, positive quantity, valid status
@@ -264,7 +259,8 @@ service cloud.firestore {
     match /equipmentAssignments/{assignmentId} {
       // CRITICAL FIX: Battalion-based access control
       // Admins can read all, others can only read assignments in their battalion
-      allow read: if hasAnyRole() && (isAdmin() || isSameBattalion(resource.data.battalionId));
+      // MIGRATION: Allow documents without battalionId during migration
+      allow read: if hasAnyRole() && (isAdmin() || !resource.data.keys().hasAll(['battalionId']) || isSameBattalion(resource.data.battalionId));
 
       // Admins and leaders can create assignments
       // HIGH FIX: Validate positive quantity, require either personnelId or unitId
@@ -283,7 +279,7 @@ service cloud.firestore {
         (!resource.data.keys().hasAny(['returnedAt']) ||
          resource.data.returnedAt == null ||
          request.resource.data.returnedAt != null) &&
-        (isAdmin() || isSameBattalion(resource.data.battalionId));
+        (isAdmin() || !resource.data.keys().hasAll(['battalionId']) || isSameBattalion(resource.data.battalionId));
 
       // Admins and leaders can delete assignments
       allow delete: if isAdminOrLeader();
@@ -313,12 +309,14 @@ service cloud.firestore {
       allow read: if isAdmin();
 
       // 2. Leaders can read all requests in their battalion (for management oversight)
-      allow read: if isLeader() && isSameBattalion(resource.data.battalionId);
+      // MIGRATION: Allow documents without battalionId during migration
+      allow read: if isLeader() && (!resource.data.keys().hasAll(['battalionId']) || isSameBattalion(resource.data.battalionId));
 
       // 3. Request I created (outgoing transfers)
+      // MIGRATION: Allow documents without battalionId during migration
       allow read: if hasAnyRole() &&
         resource.data.requestedBy == request.auth.uid &&
-        isSameBattalion(resource.data.battalionId);
+        (!resource.data.keys().hasAll(['battalionId']) || isSameBattalion(resource.data.battalionId));
 
       // 4. Personal transfer to me (check if to_personnel_id points to my userId)
       allow read: if hasAnyRole() &&
@@ -357,10 +355,11 @@ service cloud.firestore {
       // Admins and leaders can update requests (approve/reject)
       // Users can cancel their own pending requests (self-cancellation)
       // HIGH FIX: Validate status transitions (pending → approved/rejected only)
+      // MIGRATION: Allow documents without battalionId during migration
       allow update: if (isAdminOrLeader() &&
         resource.data.status == 'pending' &&
         request.resource.data.status in ['approved', 'rejected'] &&
-        (isAdmin() || isSameBattalion(resource.data.battalionId))) ||
+        (isAdmin() || !resource.data.keys().hasAll(['battalionId']) || isSameBattalion(resource.data.battalionId))) ||
         // Self-cancellation: users can reject their own pending requests
         (isAuthenticated() &&
         resource.data.requestedBy == request.auth.uid &&
