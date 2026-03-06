@@ -31,11 +31,16 @@ const TEST_PERSONNEL_IDS = {
 const TEST_EQUIPMENT_IDS = {
   bulk: '00000000-0000-0000-0000-300000000001',
   serialized: '00000000-0000-0000-0000-300000000002',
+  companyHelmet: '00000000-0000-0000-0000-300000000003',
+  platoonVest: '00000000-0000-0000-0000-300000000004',
+  unassignedBinoculars: '00000000-0000-0000-0000-300000000005',
 };
 
 const TEST_ASSIGNMENT_IDS = {
   bulkToBattalion: '00000000-0000-0000-0000-400000000001',
   serializedToUser: '00000000-0000-0000-0000-400000000002',
+  helmetToCompany: '00000000-0000-0000-0000-400000000003',
+  vestToPlatoon: '00000000-0000-0000-0000-400000000004',
 };
 
 const authUsers = [
@@ -522,6 +527,76 @@ async function seedEquipment() {
     createdAt: toTimestampValue(),
   });
   console.log('   Created assignment: M4 Carbine → Test User');
+
+  // Company Helmet - assigned to Company unit
+  await createFirestoreDoc('equipment', TEST_EQUIPMENT_IDS.companyHelmet, {
+    name: toStringValue('Company Helmet'),
+    serialNumber: { nullValue: null },
+    description: toStringValue('Helmet for company unit testing'),
+    quantity: toIntegerValue(10),
+    status: toStringValue('serviceable'),
+    createdBy: { nullValue: null },
+    battalionId: toStringValue(TEST_UNIT_IDS.battalion),
+    createdAt: toTimestampValue(),
+    updatedAt: toTimestampValue(),
+  });
+  console.log('   Created equipment: Company Helmet (qty: 10)');
+
+  await createFirestoreDoc('equipmentAssignments', TEST_ASSIGNMENT_IDS.helmetToCompany, {
+    equipmentId: toStringValue(TEST_EQUIPMENT_IDS.companyHelmet),
+    personnelId: { nullValue: null },
+    unitId: toStringValue(TEST_UNIT_IDS.company),
+    quantity: toIntegerValue(10),
+    assignedBy: { nullValue: null },
+    assignedAt: toTimestampValue(),
+    returnedAt: { nullValue: null },
+    notes: { nullValue: null },
+    battalionId: toStringValue(TEST_UNIT_IDS.battalion),
+    createdAt: toTimestampValue(),
+  });
+  console.log('   Created assignment: Company Helmet (10) → Alpha Company');
+
+  // Platoon Vest - assigned to Platoon unit
+  await createFirestoreDoc('equipment', TEST_EQUIPMENT_IDS.platoonVest, {
+    name: toStringValue('Platoon Vest'),
+    serialNumber: { nullValue: null },
+    description: toStringValue('Vest for platoon unit testing'),
+    quantity: toIntegerValue(15),
+    status: toStringValue('serviceable'),
+    createdBy: { nullValue: null },
+    battalionId: toStringValue(TEST_UNIT_IDS.battalion),
+    createdAt: toTimestampValue(),
+    updatedAt: toTimestampValue(),
+  });
+  console.log('   Created equipment: Platoon Vest (qty: 15)');
+
+  await createFirestoreDoc('equipmentAssignments', TEST_ASSIGNMENT_IDS.vestToPlatoon, {
+    equipmentId: toStringValue(TEST_EQUIPMENT_IDS.platoonVest),
+    personnelId: { nullValue: null },
+    unitId: toStringValue(TEST_UNIT_IDS.platoon),
+    quantity: toIntegerValue(15),
+    assignedBy: { nullValue: null },
+    assignedAt: toTimestampValue(),
+    returnedAt: { nullValue: null },
+    notes: { nullValue: null },
+    battalionId: toStringValue(TEST_UNIT_IDS.battalion),
+    createdAt: toTimestampValue(),
+  });
+  console.log('   Created assignment: Platoon Vest (15) → First Platoon');
+
+  // Unassigned Binoculars - no assignment (admin only)
+  await createFirestoreDoc('equipment', TEST_EQUIPMENT_IDS.unassignedBinoculars, {
+    name: toStringValue('Unassigned Binoculars'),
+    serialNumber: { nullValue: null },
+    description: toStringValue('Binoculars with no assignment for admin testing'),
+    quantity: toIntegerValue(3),
+    status: toStringValue('serviceable'),
+    createdBy: { nullValue: null },
+    battalionId: toStringValue(TEST_UNIT_IDS.battalion),
+    createdAt: toTimestampValue(),
+    updatedAt: toTimestampValue(),
+  });
+  console.log('   Created unassigned equipment: Unassigned Binoculars (qty: 3)');
 }
 
 async function seedAdminUnitAssignments() {
