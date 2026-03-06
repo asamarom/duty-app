@@ -18,7 +18,7 @@ test.describe('User Equipment Access Rules [USER-EQUIP]', () => {
 
     // Capture browser console logs
     page.on('console', msg => {
-      if (msg.text().includes('useUserBattalion') || msg.text().includes('battalionId')) {
+      if (msg.text().includes('useUserBattalion') || msg.text().includes('battalionId') || msg.text().includes('useEquipment')) {
         console.log(`[BROWSER] ${msg.text()}`);
       }
     });
