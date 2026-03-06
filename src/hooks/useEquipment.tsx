@@ -272,19 +272,6 @@ export function useEquipment(): UseEquipmentReturn {
       // - Unassigned equipment is ONLY visible to admins
       // - Hide equipment with pending transfers OUT from user's unit
 
-      // DEBUG: Log filtering context
-      console.log('[useEquipment] Filtering equipment:', {
-        totalEquipment: mappedEquipment.length,
-        userUnitId: unitId,
-        isAdmin,
-        isLeader,
-        sampleEquipment: mappedEquipment.slice(0, 3).map(e => ({
-          name: e.name,
-          currentUnitId: e.currentUnitId,
-          currentPersonnelId: e.currentPersonnelId
-        }))
-      });
-
       const filteredEquipment = mappedEquipment
         .filter((item) => {
           // ADMIN BYPASS: Admins see all equipment without restrictions
@@ -320,7 +307,6 @@ export function useEquipment(): UseEquipmentReturn {
 
           // Show equipment assigned to the current user's unit
           if (unitId && item.currentUnitId === unitId) {
-            console.log('[useEquipment] Showing unit equipment:', item.name, 'unitId match:', unitId);
             return true;
           }
 
@@ -360,11 +346,6 @@ export function useEquipment(): UseEquipmentReturn {
 
           return item;
         });
-
-      console.log('[useEquipment] After filtering:', {
-        filteredCount: filteredEquipment.length,
-        items: filteredEquipment.map(e => e.name)
-      });
 
       setEquipment(filteredEquipment);
       setLoading(false);
@@ -689,7 +670,15 @@ export function useEquipment(): UseEquipmentReturn {
 
   useEffect(() => {
     setLoading(true);
-    const equipQuery = query(collection(db, 'equipment'), orderBy('name'));
+
+    // Admin: fetch all equipment
+    // Non-admin: filter by battalionId to match Firestore security rules
+    const equipQuery = isAdmin
+      ? query(collection(db, 'equipment'), orderBy('name'))
+      : battalionId
+        ? query(collection(db, 'equipment'), where('battalionId', '==', battalionId), orderBy('name'))
+        : query(collection(db, 'equipment'), where('battalionId', '==', '__NO_BATTALION__'), orderBy('name')); // Return empty results if no battalion
+
     const assignQuery = query(collection(db, 'equipmentAssignments'), where('returnedAt', '==', null));
     const pendingQuery = query(collection(db, 'assignmentRequests'), where('status', '==', 'pending'));
 
@@ -698,7 +687,7 @@ export function useEquipment(): UseEquipmentReturn {
     const u3 = onSnapshot(pendingQuery, snap => { pendingDocsRef.current = snap.docs; rebuild(); }, err => { console.error('[useEquipment] pending error', err); setLoading(false); });
 
     return () => { u1(); u2(); u3(); };
-  }, [rebuild]);
+  }, [rebuild, isAdmin, battalionId]);
 
   const isWithinSameUnit = useCallback(
     (_currentLevel: AssignmentLevel, _targetLevel: AssignmentLevel, item: EquipmentWithAssignment, assignment: AssignmentData): boolean => {
