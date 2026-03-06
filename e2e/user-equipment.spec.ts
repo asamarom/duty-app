@@ -18,14 +18,22 @@ test.describe('User Equipment Access Rules [USER-EQUIP]', () => {
 
     // Capture browser console logs
     page.on('console', msg => {
-      if (msg.text().includes('useUserBattalion') || msg.text().includes('battalionId') || msg.text().includes('useEquipment')) {
-        console.log(`[BROWSER] ${msg.text()}`);
+      const text = msg.text();
+      // Capture all equipment, battalion, and filtering related logs
+      if (text.includes('useUserBattalion') ||
+          text.includes('battalionId') ||
+          text.includes('useEquipment') ||
+          text.includes('SHOW') ||
+          text.includes('HIDE') ||
+          text.includes('Platoon Vest')) {
+        console.log(`[BROWSER] ${text}`);
       }
     });
 
     await page.goto('/equipment');
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(2000);
+    // Wait longer for equipment to load and filter
+    await page.waitForTimeout(5000);
 
     const pageContent = await page.textContent('body');
 
