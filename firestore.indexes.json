@@ -18,11 +18,27 @@
       ]
     },
     {
+      "collectionGroup": "assignmentRequests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "battalionId", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "equipmentAssignments",
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "equipmentId", "order": "ASCENDING" },
         { "fieldPath": "returnedAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "equipmentAssignments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "returnedAt", "order": "ASCENDING" },
+        { "fieldPath": "battalionId", "order": "ASCENDING" }
       ]
     },
     {

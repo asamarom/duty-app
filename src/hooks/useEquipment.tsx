@@ -704,8 +704,19 @@ export function useEquipment(): UseEquipmentReturn {
         ? query(collection(db, 'equipment'), where('battalionId', '==', battalionId), orderBy('name'))
         : query(collection(db, 'equipment'), where('battalionId', '==', '__NO_BATTALION__'), orderBy('name')); // Return empty results if no battalion
 
-    const assignQuery = query(collection(db, 'equipmentAssignments'), where('returnedAt', '==', null));
-    const pendingQuery = query(collection(db, 'assignmentRequests'), where('status', '==', 'pending'));
+    // CRITICAL: Also filter assignments and requests by battalionId for non-admins
+    // Without this filter, Firestore rules block the query with "Missing or insufficient permissions"
+    const assignQuery = isAdmin
+      ? query(collection(db, 'equipmentAssignments'), where('returnedAt', '==', null))
+      : battalionId
+        ? query(collection(db, 'equipmentAssignments'), where('returnedAt', '==', null), where('battalionId', '==', battalionId))
+        : query(collection(db, 'equipmentAssignments'), where('returnedAt', '==', null), where('battalionId', '==', '__NO_BATTALION__'));
+
+    const pendingQuery = isAdmin
+      ? query(collection(db, 'assignmentRequests'), where('status', '==', 'pending'))
+      : battalionId
+        ? query(collection(db, 'assignmentRequests'), where('status', '==', 'pending'), where('battalionId', '==', battalionId))
+        : query(collection(db, 'assignmentRequests'), where('status', '==', 'pending'), where('battalionId', '==', '__NO_BATTALION__'));
 
     const u1 = onSnapshot(equipQuery, snap => {
       console.log(`[useEquipment] Received ${snap.docs.length} equipment docs from Firestore`);
