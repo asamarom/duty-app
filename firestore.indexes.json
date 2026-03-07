@@ -1,6 +1,22 @@
 {
   "indexes": [
     {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "battalionId", "order": "ASCENDING" },
+        { "fieldPath": "lastName", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "unitId", "order": "ASCENDING" },
+        { "fieldPath": "lastName", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "assignmentRequests",
       "queryScope": "COLLECTION",
       "fields": [
@@ -42,6 +58,40 @@
       ]
     },
     {
+      "collectionGroup": "equipmentAssignments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "equipmentId", "order": "ASCENDING" },
+        { "fieldPath": "isReturned", "order": "ASCENDING" },
+        { "fieldPath": "assignedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "equipmentAssignments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "battalionId", "order": "ASCENDING" },
+        { "fieldPath": "isReturned", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "equipmentAssignments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "personnelId", "order": "ASCENDING" },
+        { "fieldPath": "isReturned", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "assignmentRequests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "battalionId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "requestedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "signupRequests",
       "queryScope": "COLLECTION",
       "fields": [
@@ -79,6 +129,15 @@
       "fields": [
         { "fieldPath": "battalionId", "order": "ASCENDING" },
         { "fieldPath": "currentUnitId", "order": "ASCENDING" },
+        { "fieldPath": "name", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "equipment",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "battalionId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "name", "order": "ASCENDING" }
       ]
     }
