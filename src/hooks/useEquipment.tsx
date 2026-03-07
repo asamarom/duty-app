@@ -272,11 +272,6 @@ export function useEquipment(): UseEquipmentReturn {
       // - Unassigned equipment is ONLY visible to admins
       // - Hide equipment with pending transfers OUT from user's unit
 
-      console.log(`[useEquipment] Filtering equipment: isAdmin=${isAdmin}, unitId="${unitId}", personnelId="${currentUserPersonnelId}"`);
-      console.log(`[useEquipment] Total items before filter: ${mappedEquipment.length}`);
-      mappedEquipment.forEach(item => {
-        console.log(`[useEquipment] BEFORE FILTER: ${item.name}, currentUnitId="${item.currentUnitId}", currentPersonnelId="${item.currentPersonnelId}", assignmentLevel="${item.assignmentLevel}"`);
-      });
 
       const filteredEquipment = mappedEquipment
         .filter((item) => {
@@ -313,24 +308,20 @@ export function useEquipment(): UseEquipmentReturn {
 
           // Show equipment assigned to the current user's unit
           if (unitId && item.currentUnitId === unitId) {
-            console.log(`[useEquipment] SHOW ${item.name}: matches user's unitId="${unitId}"`);
             return true;
           }
 
           // Show equipment assigned to the current user personally
           if (currentUserPersonnelId && item.currentPersonnelId === currentUserPersonnelId) {
-            console.log(`[useEquipment] SHOW ${item.name}: matches user's personnelId="${currentUserPersonnelId}"`);
             return true;
           }
 
           // Show equipment with pending transfer TO the current user (for approval)
           if (pendingTransfersToUser.has(baseEquipmentId)) {
-            console.log(`[useEquipment] SHOW ${item.name}: has pending transfer to user`);
             return true;
           }
 
           // Hide all other equipment
-          console.log(`[useEquipment] HIDE ${item.name}: unitId="${unitId}", currentUnitId="${item.currentUnitId}", personnelId="${currentUserPersonnelId}", currentPersonnelId="${item.currentPersonnelId}"`);
           return false;
         })
         .map((item) => {
@@ -356,11 +347,6 @@ export function useEquipment(): UseEquipmentReturn {
 
           return item;
         });
-
-      console.log(`[useEquipment] Final filtered equipment count: ${filteredEquipment.length}`);
-      filteredEquipment.forEach(item => {
-        console.log(`  - ${item.name}: visible`);
-      });
 
       setEquipment(filteredEquipment);
       setLoading(false);
@@ -687,14 +673,11 @@ export function useEquipment(): UseEquipmentReturn {
     // Wait for battalionId to load before setting up query (unless admin)
     // This prevents querying with battalionId=null which returns empty results
     if (!isAdmin && battalionLoading) {
-      console.log(`[useEquipment] Waiting for battalionId to load...`);
       setLoading(true);
       return;
     }
 
     setLoading(true);
-
-    console.log(`[useEquipment] Setting up query with isAdmin=${isAdmin}, battalionId="${battalionId}", battalionLoading=${battalionLoading}`);
 
     // Admin: fetch all equipment
     // Non-admin: filter by battalionId to match Firestore security rules
@@ -719,11 +702,6 @@ export function useEquipment(): UseEquipmentReturn {
         : query(collection(db, 'assignmentRequests'), where('status', '==', 'pending'), where('battalionId', '==', '__NO_BATTALION__'));
 
     const u1 = onSnapshot(equipQuery, snap => {
-      console.log(`[useEquipment] Received ${snap.docs.length} equipment docs from Firestore`);
-      snap.docs.forEach(doc => {
-        const data = doc.data();
-        console.log(`  - ${data.name}: battalionId="${data.battalionId}", currentUnitId="${data.currentUnitId}"`);
-      });
       equipmentDocsRef.current = snap.docs;
       rebuild();
     }, err => { console.error('[useEquipment] equipment error', err); setLoading(false); });
