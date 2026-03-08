@@ -64,23 +64,24 @@ beforeEach(async () => {
 
     // Users — roles MUST be arrays because hasRole() uses `role in array`
     // battalionId is required for battalion-based access control
+    // firstName/lastName required (personnel data merged into users)
     await setDoc(doc(db, 'users', UIDs.admin), {
-      fullName: 'Admin User', email: 'admin@test.com',
+      firstName: 'Admin', lastName: 'User', email: 'admin@test.com',
       unitId: BATTALION_A, battalionId: BATTALION_A, roles: ['admin'],
       createdAt: '2024-01-01', updatedAt: '2024-01-01',
     });
     await setDoc(doc(db, 'users', UIDs.leader), {
-      fullName: 'Leader User', email: 'leader@test.com',
+      firstName: 'Leader', lastName: 'User', email: 'leader@test.com',
       unitId: BATTALION_A, battalionId: BATTALION_A, roles: ['leader'],
       createdAt: '2024-01-01', updatedAt: '2024-01-01',
     });
     await setDoc(doc(db, 'users', UIDs.user), {
-      fullName: 'Regular User', email: 'user@test.com',
+      firstName: 'Regular', lastName: 'User', email: 'user@test.com',
       unitId: BATTALION_A, battalionId: BATTALION_A, roles: ['user'],
       createdAt: '2024-01-01', updatedAt: '2024-01-01',
     });
     await setDoc(doc(db, 'users', UIDs.userB), {
-      fullName: 'User in Battalion B', email: 'userb@test.com',
+      firstName: 'Battalion B', lastName: 'User', email: 'userb@test.com',
       unitId: BATTALION_B, battalionId: BATTALION_B, roles: ['user'],
       createdAt: '2024-01-01', updatedAt: '2024-01-01',
     });
@@ -101,8 +102,8 @@ beforeEach(async () => {
 
     // Signup requests
     await setDoc(doc(db, 'signupRequests', 'req-001'), {
-      userId: UIDs.newUser, fullName: 'New User', email: 'new@test.com',
-      serviceNumber: 'SN003', status: 'pending', createdAt: '2024-01-01',
+      userId: UIDs.newUser, firstName: 'New', lastName: 'User', email: 'new@test.com',
+      serviceNumber: 'SN003', rank: 'Private', status: 'pending', createdAt: '2024-01-01',
     });
 
     // Units
@@ -231,7 +232,7 @@ describe('Users Collection', () => {
     const ctx = testEnv.authenticatedContext(UIDs.newUser);
     await assertSucceeds(
       setDoc(doc(ctx.firestore(), 'users', UIDs.newUser), {
-        fullName: 'New User', email: 'new@test.com',
+        firstName: 'New', lastName: 'User', email: 'new@test.com',
         createdAt: '2024-01-01', updatedAt: '2024-01-01',
       })
     );
@@ -246,11 +247,11 @@ describe('Users Collection', () => {
     );
   });
 
-  it('allows a user to update their own fullName', async () => {
+  it('allows a user to update their own firstName/lastName', async () => {
     const ctx = testEnv.authenticatedContext(UIDs.user);
     await assertSucceeds(
       updateDoc(doc(ctx.firestore(), 'users', UIDs.user), {
-        fullName: 'Updated Name', updatedAt: '2024-01-02',
+        firstName: 'Updated', lastName: 'Name', updatedAt: '2024-01-02',
       })
     );
   });
@@ -376,8 +377,8 @@ describe('Signup Requests', () => {
     const ctx = testEnv.authenticatedContext(UIDs.newUser);
     await assertSucceeds(
       setDoc(doc(ctx.firestore(), 'signupRequests', 'req-new'), {
-        userId: UIDs.newUser, fullName: 'New User', email: 'new@test.com',
-        serviceNumber: 'SN-NEW', status: 'pending', createdAt: '2024-01-01',
+        userId: UIDs.newUser, firstName: 'New', lastName: 'User', email: 'new@test.com',
+        serviceNumber: 'SN-NEW', rank: 'Private', status: 'pending', createdAt: '2024-01-01',
       })
     );
   });
