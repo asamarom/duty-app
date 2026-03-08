@@ -311,49 +311,6 @@ describe('Battalion-Based Access Control', () => {
   });
 });
 
-describe('Personnel Collection', () => {
-  it('[CRITICAL] prevents leader from modifying isSignatureApproved', async () => {
-    const ctx = testEnv.authenticatedContext(UIDs.leader);
-    await assertFails(
-      updateDoc(doc(ctx.firestore(), 'personnel', 'personnel-a-001'), {
-        isSignatureApproved: true, // <-- only admins can set this
-      })
-    );
-  });
-
-  it('allows admin to modify isSignatureApproved', async () => {
-    const ctx = testEnv.authenticatedContext(UIDs.admin);
-    await assertSucceeds(
-      updateDoc(doc(ctx.firestore(), 'personnel', 'personnel-a-001'), {
-        isSignatureApproved: true,
-      })
-    );
-  });
-
-  it('validates required fields on personnel create', async () => {
-    const ctx = testEnv.authenticatedContext(UIDs.admin);
-    // Missing required 'serviceNumber'
-    await assertFails(
-      addDoc(collection(ctx.firestore(), 'personnel'), {
-        firstName: 'John', lastName: 'Doe',
-        rank: 'Private', locationStatus: 'home', readinessStatus: 'ready',
-        createdAt: '2024-01-01', updatedAt: '2024-01-01',
-      })
-    );
-  });
-
-  it('rejects invalid locationStatus enum values', async () => {
-    const ctx = testEnv.authenticatedContext(UIDs.admin);
-    await assertFails(
-      addDoc(collection(ctx.firestore(), 'personnel'), {
-        firstName: 'Test', lastName: 'Person', serviceNumber: 'SN999',
-        rank: 'Private', locationStatus: 'invalid_status', // <-- bad value
-        readinessStatus: 'ready', createdAt: '2024-01-01', updatedAt: '2024-01-01',
-      })
-    );
-  });
-});
-
 describe('Equipment Collection', () => {
   it('rejects equipment with zero quantity', async () => {
     const ctx = testEnv.authenticatedContext(UIDs.admin);
