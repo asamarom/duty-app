@@ -85,17 +85,8 @@ beforeEach(async () => {
     });
     // UIDs.newUser intentionally has no user doc (not yet registered)
 
-    // Personnel records
-    await setDoc(doc(db, 'personnel', 'personnel-a-001'), {
-      firstName: 'John', lastName: 'Doe', serviceNumber: 'SN001',
-      rank: 'Private', locationStatus: 'home', readinessStatus: 'ready',
-      battalionId: BATTALION_A, createdAt: '2024-01-01', updatedAt: '2024-01-01',
-    });
-    await setDoc(doc(db, 'personnel', 'personnel-b-001'), {
-      firstName: 'Jane', lastName: 'Smith', serviceNumber: 'SN002',
-      rank: 'Corporal', locationStatus: 'home', readinessStatus: 'ready',
-      battalionId: BATTALION_B, createdAt: '2024-01-01', updatedAt: '2024-01-01',
-    });
+    // Note: Personnel data is now merged into users collection
+    // Users already have battalion info via unitId and battalionId fields
 
     // Equipment in battalion A
     await setDoc(doc(db, 'equipment', 'equip-a-001'), {
@@ -190,9 +181,9 @@ describe('Unauthenticated Access', () => {
     await assertFails(getDoc(doc(ctx.firestore(), 'users', UIDs.admin)));
   });
 
-  it('denies read on personnel collection', async () => {
+  it('denies read on users collection', async () => {
     const ctx = testEnv.unauthenticatedContext();
-    await assertFails(getDoc(doc(ctx.firestore(), 'personnel', 'personnel-a-001')));
+    await assertFails(getDoc(doc(ctx.firestore(), 'users', UIDs.user)));
   });
 
   it('denies read on equipment collection', async () => {
@@ -275,10 +266,10 @@ describe('Users Collection', () => {
 });
 
 describe('Battalion-Based Access Control', () => {
-  it('[CRITICAL] denies user from Battalion A reading Battalion B personnel', async () => {
+  it('[CRITICAL] denies user from Battalion A reading Battalion B users', async () => {
     const ctx = testEnv.authenticatedContext(UIDs.user);
     await assertFails(
-      getDoc(doc(ctx.firestore(), 'personnel', 'personnel-b-001'))
+      getDoc(doc(ctx.firestore(), 'users', UIDs.userB))
     );
   });
 
@@ -289,10 +280,11 @@ describe('Battalion-Based Access Control', () => {
     );
   });
 
-  it('allows user to read personnel in their own battalion', async () => {
+  it('allows user to read users in their own battalion', async () => {
     const ctx = testEnv.authenticatedContext(UIDs.user, { battalionId: BATTALION_A });
+    // User can read other users in the same battalion
     await assertSucceeds(
-      getDoc(doc(ctx.firestore(), 'personnel', 'personnel-a-001'))
+      getDoc(doc(ctx.firestore(), 'users', UIDs.leader))
     );
   });
 
@@ -303,10 +295,11 @@ describe('Battalion-Based Access Control', () => {
     );
   });
 
-  it('allows admin to read personnel from any battalion', async () => {
+  it('allows admin to read users from any battalion', async () => {
     const ctx = testEnv.authenticatedContext(UIDs.admin);
+    // Admin can read users from any battalion
     await assertSucceeds(
-      getDoc(doc(ctx.firestore(), 'personnel', 'personnel-b-001'))
+      getDoc(doc(ctx.firestore(), 'users', UIDs.userB))
     );
   });
 });
@@ -1005,12 +998,12 @@ describe('Battalion-Based Access — Company/Platoon Unit Leaders (regression)',
   // COMPANY_A has battalionId: BATTALION_A
   // So getUserBattalionId() should resolve to BATTALION_A
 
-  it('[REGRESSION] company-level leader can read personnel in their battalion', async () => {
+  it('[REGRESSION] company-level leader can read users in their battalion', async () => {
     // Company leader has unitId=COMPANY_A but documents have battalionId=BATTALION_A
     // So we need to set battalionId in custom claims for this to work
     const ctx = testEnv.authenticatedContext(UIDs.leaderCompany, { battalionId: BATTALION_A });
     await assertSucceeds(
-      getDoc(doc(ctx.firestore(), 'personnel', 'personnel-a-001'))
+      getDoc(doc(ctx.firestore(), 'users', UIDs.user))
     );
   });
 
@@ -1035,10 +1028,10 @@ describe('Battalion-Based Access — Company/Platoon Unit Leaders (regression)',
     );
   });
 
-  it('[REGRESSION] company-level leader CANNOT read personnel in a different battalion', async () => {
+  it('[REGRESSION] company-level leader CANNOT read users in a different battalion', async () => {
     const ctx = testEnv.authenticatedContext(UIDs.leaderCompany);
     await assertFails(
-      getDoc(doc(ctx.firestore(), 'personnel', 'personnel-b-001'))
+      getDoc(doc(ctx.firestore(), 'users', UIDs.userB))
     );
   });
 
