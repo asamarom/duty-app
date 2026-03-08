@@ -63,24 +63,25 @@ beforeEach(async () => {
     const db = ctx.firestore();
 
     // Users — roles MUST be arrays because hasRole() uses `role in array`
+    // battalionId is required for battalion-based access control
     await setDoc(doc(db, 'users', UIDs.admin), {
       fullName: 'Admin User', email: 'admin@test.com',
-      unitId: BATTALION_A, roles: ['admin'],
+      unitId: BATTALION_A, battalionId: BATTALION_A, roles: ['admin'],
       createdAt: '2024-01-01', updatedAt: '2024-01-01',
     });
     await setDoc(doc(db, 'users', UIDs.leader), {
       fullName: 'Leader User', email: 'leader@test.com',
-      unitId: BATTALION_A, roles: ['leader'],
+      unitId: BATTALION_A, battalionId: BATTALION_A, roles: ['leader'],
       createdAt: '2024-01-01', updatedAt: '2024-01-01',
     });
     await setDoc(doc(db, 'users', UIDs.user), {
       fullName: 'Regular User', email: 'user@test.com',
-      unitId: BATTALION_A, roles: ['user'],
+      unitId: BATTALION_A, battalionId: BATTALION_A, roles: ['user'],
       createdAt: '2024-01-01', updatedAt: '2024-01-01',
     });
     await setDoc(doc(db, 'users', UIDs.userB), {
       fullName: 'User in Battalion B', email: 'userb@test.com',
-      unitId: BATTALION_B, roles: ['user'],
+      unitId: BATTALION_B, battalionId: BATTALION_B, roles: ['user'],
       createdAt: '2024-01-01', updatedAt: '2024-01-01',
     });
     // UIDs.newUser intentionally has no user doc (not yet registered)
