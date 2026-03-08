@@ -534,7 +534,7 @@ async function seedEquipment() {
     battalionId: TEST_UNIT_IDS.battalion,
     // Denormalized current assignment
     currentUnitId: null,
-    currentPersonnelId: TEST_PERSONNEL_IDS.user,
+    currentPersonnelId: userUIDs.user, // Phase 3: References user UID directly
     currentQuantityAssigned: 1,
     lastAssignedAt: now,
     createdAt: now,
