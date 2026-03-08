@@ -21,7 +21,16 @@ const mockWriteBatch = vi.fn((..._args: unknown[]) => ({
 const mockGetDocs = vi.fn();
 const mockAddDoc = vi.fn();
 const mockUpdateDoc = vi.fn();
-const mockDoc = vi.fn((...args: unknown[]) => { const segs = args.slice(1) as string[]; return { id: segs[segs.length - 1] ?? 'mock-doc-id', path: segs.join('/') }; });
+const mockDoc = vi.fn((...args: unknown[]) => {
+    const segs = args.slice(1) as string[];
+    const path = segs.join('/');
+    return {
+        id: segs[segs.length - 1] ?? 'mock-doc-id',
+        path,
+        // Mark as doc ref for onSnapshot mock detection
+        _isDocRef: true,
+    };
+});
 const mockCollection = vi.fn((...args: unknown[]) => ({ id: args[1] as string }));
 const mockQuery = vi.fn((...args: unknown[]) => args[0]);
 const mockOrderBy = vi.fn();
@@ -90,6 +99,31 @@ function makeRequestDoc(overrides: Record<string, unknown> = {}) {
     };
 }
 
+/**
+ * Helper to create onSnapshot mock that handles both doc refs and query refs.
+ * - Doc refs (users collection): returns DocumentSnapshot
+ * - Query refs (assignmentRequests): returns QuerySnapshot with provided docs
+ */
+function makeOnSnapshotMock(queryDocs: unknown[] = []) {
+    return (ref: unknown, onNext: (snap: unknown) => void) => {
+        const isDocRef = (ref as { _isDocRef?: boolean })._isDocRef;
+        const refPath = (ref as { path?: string }).path;
+
+        if (isDocRef && refPath?.startsWith('users/')) {
+            // Return DocumentSnapshot for user doc
+            onNext({
+                exists: () => true,
+                id: 'test-user-id',
+                data: () => ({ unitId: null, roles: ['user'] }),
+            });
+        } else {
+            // Return QuerySnapshot for assignment requests query
+            onNext({ docs: queryDocs });
+        }
+        return () => {}; // unsubscribe no-op
+    };
+}
+
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('useAssignmentRequests Hook', () => {
@@ -98,11 +132,8 @@ describe('useAssignmentRequests Hook', () => {
         // Reset the module-level cache so each test starts with a clean slate
         // and the hook always starts with loading:true (not pre-populated state).
         _resetCacheForTesting();
-        // Default: onSnapshot immediately fires with an empty snapshot
-        mockOnSnapshot.mockImplementation((_query: unknown, onNext: (snap: unknown) => void) => {
-            onNext({ docs: [] });
-            return () => {}; // unsubscribe no-op
-        });
+        // Default: onSnapshot immediately fires with appropriate snapshot based on the ref type
+        mockOnSnapshot.mockImplementation(makeOnSnapshotMock([]));
         // Default: all getDocs queries (enrichment fetches) return empty snapshots
         mockGetDocs.mockResolvedValue(emptySnapshot);
         mockGetDoc.mockResolvedValue({ exists: () => false });
@@ -125,6 +156,7 @@ describe('useAssignmentRequests Hook', () => {
     // =========================================================================
 
     it('loads with empty requests when Firestore returns empty snapshot', async () => {
+        mockOnSnapshot.mockImplementation(makeOnSnapshotMock([]));
         const { result } = renderHook(() => useAssignmentRequests());
 
         await waitFor(() => expect(result.current.loading).toBe(false));
@@ -142,10 +174,7 @@ describe('useAssignmentRequests Hook', () => {
     describe('approveRequest — client-side batch (TDD red phase)', () => {
         it('approveRequest updates request status to approved via batch', async () => {
             // Seed the hook with one pending request so we have context
-            mockOnSnapshot.mockImplementation((_query: unknown, onNext: (snap: unknown) => void) => {
-                onNext({ docs: [makeRequestDoc()] });
-                return () => {};
-            });
+            mockOnSnapshot.mockImplementation(makeOnSnapshotMock([makeRequestDoc()]));
 
             const { result } = renderHook(() => useAssignmentRequests());
             await waitFor(() => expect(result.current.loading).toBe(false));
@@ -168,10 +197,7 @@ describe('useAssignmentRequests Hook', () => {
         });
 
         it('approveRequest marks old assignment returnedAt via batch', async () => {
-            mockOnSnapshot.mockImplementation((_query: unknown, onNext: (snap: unknown) => void) => {
-                onNext({ docs: [makeRequestDoc()] });
-                return () => {};
-            });
+            mockOnSnapshot.mockImplementation(makeOnSnapshotMock([makeRequestDoc()]));
 
             const { result } = renderHook(() => useAssignmentRequests());
             await waitFor(() => expect(result.current.loading).toBe(false));
@@ -196,10 +222,7 @@ describe('useAssignmentRequests Hook', () => {
         });
 
         it('approveRequest creates new equipmentAssignment via batch.set', async () => {
-            mockOnSnapshot.mockImplementation((_query: unknown, onNext: (snap: unknown) => void) => {
-                onNext({ docs: [makeRequestDoc()] });
-                return () => {};
-            });
+            mockOnSnapshot.mockImplementation(makeOnSnapshotMock([makeRequestDoc()]));
 
             const { result } = renderHook(() => useAssignmentRequests());
             await waitFor(() => expect(result.current.loading).toBe(false));
@@ -220,10 +243,7 @@ describe('useAssignmentRequests Hook', () => {
         });
 
         it('approveRequest sets equipment status to assigned via batch', async () => {
-            mockOnSnapshot.mockImplementation((_query: unknown, onNext: (snap: unknown) => void) => {
-                onNext({ docs: [makeRequestDoc()] });
-                return () => {};
-            });
+            mockOnSnapshot.mockImplementation(makeOnSnapshotMock([makeRequestDoc()]));
 
             const { result } = renderHook(() => useAssignmentRequests());
             await waitFor(() => expect(result.current.loading).toBe(false));
@@ -248,10 +268,7 @@ describe('useAssignmentRequests Hook', () => {
 
     describe('rejectRequest — client-side batch (TDD red phase)', () => {
         it('rejectRequest updates request status to rejected via batch', async () => {
-            mockOnSnapshot.mockImplementation((_query: unknown, onNext: (snap: unknown) => void) => {
-                onNext({ docs: [makeRequestDoc()] });
-                return () => {};
-            });
+            mockOnSnapshot.mockImplementation(makeOnSnapshotMock([makeRequestDoc()]));
 
             const { result } = renderHook(() => useAssignmentRequests());
             await waitFor(() => expect(result.current.loading).toBe(false));
@@ -271,10 +288,7 @@ describe('useAssignmentRequests Hook', () => {
             // NOTE: The Cloud Function (incorrectly) sets status:'available' on rejection,
             // but the Firestore rules do NOT allow 'available' as a valid status.
             // The client-side implementation must use 'serviceable' instead.
-            mockOnSnapshot.mockImplementation((_query: unknown, onNext: (snap: unknown) => void) => {
-                onNext({ docs: [makeRequestDoc()] });
-                return () => {};
-            });
+            mockOnSnapshot.mockImplementation(makeOnSnapshotMock([makeRequestDoc()]));
 
             const { result } = renderHook(() => useAssignmentRequests());
             await waitFor(() => expect(result.current.loading).toBe(false));
@@ -331,10 +345,7 @@ describe('useAssignmentRequests Hook', () => {
 
     describe('httpsCallable is never used (TDD red phase)', () => {
         it('approveRequest does NOT call httpsCallable', async () => {
-            mockOnSnapshot.mockImplementation((_query: unknown, onNext: (snap: unknown) => void) => {
-                onNext({ docs: [makeRequestDoc()] });
-                return () => {};
-            });
+            mockOnSnapshot.mockImplementation(makeOnSnapshotMock([makeRequestDoc()]));
 
             const { result } = renderHook(() => useAssignmentRequests());
             await waitFor(() => expect(result.current.loading).toBe(false));
@@ -350,10 +361,7 @@ describe('useAssignmentRequests Hook', () => {
         });
 
         it('rejectRequest does NOT call httpsCallable', async () => {
-            mockOnSnapshot.mockImplementation((_query: unknown, onNext: (snap: unknown) => void) => {
-                onNext({ docs: [makeRequestDoc()] });
-                return () => {};
-            });
+            mockOnSnapshot.mockImplementation(makeOnSnapshotMock([makeRequestDoc()]));
 
             const { result } = renderHook(() => useAssignmentRequests());
             await waitFor(() => expect(result.current.loading).toBe(false));

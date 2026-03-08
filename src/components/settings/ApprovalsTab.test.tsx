@@ -61,15 +61,31 @@ vi.mock('@/lib/firebase', () => ({
 
 vi.mock('firebase/firestore', () => ({
   collection: vi.fn(),
+  doc: vi.fn((db, path, id) => ({ id, path: `${path}/${id}` })),
+  getDoc: vi.fn(() => Promise.resolve({
+    exists: () => true,
+    data: () => ({ unitId: 'unit-1', roles: ['admin'] })
+  })),
+  getDocs: vi.fn(() => Promise.resolve({ size: 0, docs: [], empty: true })),
+  setDoc: vi.fn(),
+  updateDoc: vi.fn(),
+  deleteDoc: vi.fn(),
+  addDoc: vi.fn(),
   query: vi.fn(),
   where: vi.fn(),
   orderBy: vi.fn(),
-  getDocs: vi.fn(() => Promise.resolve({ size: 0, docs: [], empty: true })),
+  limit: vi.fn(),
   onSnapshot: vi.fn((q, callback) => {
     // Call callback with empty snapshot immediately
     callback({ docs: [], empty: true });
     return vi.fn(); // Return unsubscribe function
   }),
+  serverTimestamp: vi.fn(() => ({ seconds: Date.now() / 1000, nanoseconds: 0 })),
+  Timestamp: {
+    now: vi.fn(() => ({ seconds: Date.now() / 1000, nanoseconds: 0 })),
+    fromDate: vi.fn((date) => ({ seconds: date.getTime() / 1000, nanoseconds: 0 })),
+  },
+  documentId: vi.fn(() => '__name__'),
 }));
 
 // Helper to render with all required providers
