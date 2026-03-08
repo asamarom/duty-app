@@ -31,9 +31,9 @@ async function testQueries() {
       console.log(`     - ${doc.id}: ${doc.data().name}`);
     });
 
-    console.log('\n📋 Test 2: Query equipmentAssignments by isReturned and battalionId');
+    console.log('\n📋 Test 2: Query equipmentAssignments by returnedAt and battalionId');
     const assignmentsQuery = db.collection('equipmentAssignments')
-      .where('isReturned', '==', false)
+      .where('returnedAt', '==', null)
       .where('battalionId', '==', battalionId);
 
     const assignmentsSnapshot = await assignmentsQuery.get();

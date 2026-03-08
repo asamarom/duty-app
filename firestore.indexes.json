@@ -71,7 +71,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "battalionId", "order": "ASCENDING" },
-        { "fieldPath": "isReturned", "order": "ASCENDING" }
+        { "fieldPath": "returnedAt", "order": "ASCENDING" }
       ]
     },
     {
