@@ -81,11 +81,7 @@ const TEST_UNIT_IDS = {
   platoon: '00000000-0000-0000-0000-100000000003',
 };
 
-const TEST_PERSONNEL_IDS = {
-  admin: '00000000-0000-0000-0000-200000000001',
-  leader: '00000000-0000-0000-0000-200000000002',
-  user: '00000000-0000-0000-0000-200000000003',
-};
+// Phase 3: TEST_PERSONNEL_IDS removed - personnel merged into users collection
 
 const TEST_EQUIPMENT_IDS = {
   bulk: '00000000-0000-0000-0000-300000000001',
@@ -360,168 +356,8 @@ async function seedUnits() {
   await batch.commit();
 }
 
-async function seedPersonnel() {
-  console.log('\n4️⃣  Seeding personnel collection...');
-  await clearCollection('personnel');
-
-  const batch = db.batch();
-  const now = admin.firestore.Timestamp.now();
-
-  const personnel = [
-    {
-      id: TEST_PERSONNEL_IDS.admin,
-      data: {
-        userId: userUIDs.admin,
-        unitId: TEST_UNIT_IDS.battalion,
-        battalionId: TEST_UNIT_IDS.battalion,
-        serviceNumber: 'E2E-ADMIN-001',
-        rank: 'COL',
-        firstName: 'Test',
-        lastName: 'Admin',
-        dutyPosition: 'System Administrator',
-        phone: '+1-555-0101',
-        email: 'test-admin@e2e.local',
-        localAddress: null,
-        profileImage: null,
-        locationStatus: 'home',
-        readinessStatus: 'ready',
-        skills: [],
-        driverLicenses: [],
-        isSignatureApproved: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-    },
-    {
-      id: TEST_PERSONNEL_IDS.leader,
-      data: {
-        userId: userUIDs.leader,
-        unitId: TEST_UNIT_IDS.company,
-        battalionId: TEST_UNIT_IDS.battalion,
-        serviceNumber: 'E2E-LEADER-002',
-        rank: 'CPT',
-        firstName: 'Test',
-        lastName: 'Leader',
-        dutyPosition: 'Company Commander',
-        phone: '+1-555-0102',
-        email: 'test-leader@e2e.local',
-        localAddress: null,
-        profileImage: null,
-        locationStatus: 'home',
-        readinessStatus: 'ready',
-        skills: [],
-        driverLicenses: [],
-        isSignatureApproved: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-    },
-    {
-      id: TEST_PERSONNEL_IDS.user,
-      data: {
-        userId: userUIDs.user,
-        unitId: TEST_UNIT_IDS.platoon,
-        battalionId: TEST_UNIT_IDS.battalion,
-        serviceNumber: 'E2E-USER-003',
-        rank: 'SGT',
-        firstName: 'Test',
-        lastName: 'User',
-        dutyPosition: 'Squad Leader',
-        phone: '+1-555-0103',
-        email: 'test-user@e2e.local',
-        localAddress: null,
-        profileImage: null,
-        locationStatus: 'home',
-        readinessStatus: 'ready',
-        skills: [],
-        driverLicenses: [],
-        isSignatureApproved: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-    },
-    // Additional personnel for battalion scoping tests
-    {
-      id: '00000000-0000-0000-0000-200000000004',
-      data: {
-        userId: null, // Not linked to auth user
-        unitId: TEST_UNIT_IDS.company,
-        battalionId: TEST_UNIT_IDS.battalion,
-        serviceNumber: 'E2E-SGT-004',
-        rank: 'SGT',
-        firstName: 'John',
-        lastName: 'Doe',
-        dutyPosition: 'Squad Leader',
-        phone: '+1-555-0104',
-        email: 'john.doe@e2e.local',
-        localAddress: null,
-        profileImage: null,
-        locationStatus: 'home',
-        readinessStatus: 'ready',
-        skills: [],
-        driverLicenses: [],
-        isSignatureApproved: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-    },
-    {
-      id: '00000000-0000-0000-0000-200000000005',
-      data: {
-        userId: null,
-        unitId: TEST_UNIT_IDS.platoon,
-        battalionId: TEST_UNIT_IDS.battalion,
-        serviceNumber: 'E2E-CPL-005',
-        rank: 'CPL',
-        firstName: 'Jane',
-        lastName: 'Smith',
-        dutyPosition: 'Team Leader',
-        phone: '+1-555-0105',
-        email: 'jane.smith@e2e.local',
-        localAddress: null,
-        profileImage: null,
-        locationStatus: 'home',
-        readinessStatus: 'ready',
-        skills: [],
-        driverLicenses: [],
-        isSignatureApproved: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-    },
-    {
-      id: '00000000-0000-0000-0000-200000000006',
-      data: {
-        userId: null,
-        unitId: TEST_UNIT_IDS.battalion,
-        battalionId: TEST_UNIT_IDS.battalion,
-        serviceNumber: 'E2E-PFC-006',
-        rank: 'PFC',
-        firstName: 'Bob',
-        lastName: 'Johnson',
-        dutyPosition: 'Rifleman',
-        phone: '+1-555-0106',
-        email: 'bob.johnson@e2e.local',
-        localAddress: null,
-        profileImage: null,
-        locationStatus: 'home',
-        readinessStatus: 'ready',
-        skills: [],
-        driverLicenses: [],
-        isSignatureApproved: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-    },
-  ];
-
-  for (const p of personnel) {
-    batch.set(db.collection('personnel').doc(p.id), p.data);
-    console.log(`   Created personnel: ${p.data.firstName} ${p.data.lastName}`);
-  }
-
-  await batch.commit();
-}
+// Phase 3: Personnel collection removed - data merged into users collection
+// Personnel fields are now part of user documents with approved_user role
 
 async function seedSignupRequests() {
   console.log('\n5️⃣  Seeding signupRequests collection...');
@@ -778,7 +614,7 @@ async function seedEquipment() {
 
   await db.collection('equipmentAssignments').doc(TEST_ASSIGNMENT_IDS.serializedToUser).set({
     equipmentId: TEST_EQUIPMENT_IDS.serialized,
-    personnelId: TEST_PERSONNEL_IDS.user,
+    personnelId: userUIDs.user, // Phase 3: personnelId now references user UID directly
     unitId: null,
     quantity: 1,
     assignedBy: null,
