@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/integrations/firebase/client';
-import type { PersonnelDoc } from '@/integrations/firebase/types';
+import type { UserDoc } from '@/integrations/firebase/types';
 
 interface PersonnelSuggestions {
   dutyPositions: string[];
@@ -19,19 +19,18 @@ export function usePersonnelSuggestions(): PersonnelSuggestions {
   useEffect(() => {
     const fetchSuggestions = async () => {
       try {
-        const personnelRef = collection(db, 'personnel');
-        const snapshot = await getDocs(personnelRef);
+        // Phase 3: Query users collection instead of personnel
+        const usersRef = collection(db, 'users');
+        const snapshot = await getDocs(usersRef);
 
         const uniqueDutyPositions = new Set<string>();
         const uniqueSkills = new Set<string>();
         const uniqueLicenses = new Set<string>();
 
         snapshot.docs.forEach((doc) => {
-          const data = doc.data() as PersonnelDoc;
+          const data = doc.data() as UserDoc;
 
-          if (data.dutyPosition) {
-            uniqueDutyPositions.add(data.dutyPosition);
-          }
+          // dutyPosition removed in Phase 2, no longer available
 
           if (data.skills && Array.isArray(data.skills)) {
             data.skills.forEach((skill: string) => {

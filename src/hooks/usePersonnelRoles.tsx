@@ -2,11 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { collection, getDocs, query, where, documentId } from 'firebase/firestore';
 import { db } from '@/integrations/firebase/client';
 import type { AppRole } from './useUserRole';
-import type { PersonnelDoc, UserDoc } from '@/integrations/firebase/types';
+import type { UserDoc } from '@/integrations/firebase/types';
 
 interface PersonnelWithRole {
-  personnelId: string;
-  userId: string | null;
+  personnelId: string; // Now userId (same as document ID)
+  userId: string | null; // Kept for backward compatibility, always same as personnelId
   roles: AppRole[];
 }
 
@@ -29,14 +29,9 @@ export function usePersonnelRoles(personnelIds?: string[]): UsePersonnelRolesRet
       setLoading(true);
       setError(null);
 
-      // Create a timeout promise
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Firestore query timeout after 10s')), 10000);
-      });
-
-      // Fetch personnel with their user_ids
-      const personnelRef = collection(db, 'personnel');
-      let personnelQuery;
+      // Phase 3: Users collection now contains personnel data
+      // personnelId = userId = document ID in users collection
+      const usersRef = collection(db, 'users');
 
       if (personnelIds && personnelIds.length > 0) {
         // Firestore 'in' query limited to 30 items at a time
@@ -46,78 +41,31 @@ export function usePersonnelRoles(personnelIds?: string[]): UsePersonnelRolesRet
           batches.push(batch);
         }
 
-        const allPersonnelData: { id: string; userId: string | null }[] = [];
-        for (const batch of batches) {
-          const q = query(personnelRef, where(documentId(), 'in', batch));
-          const snapshot = await Promise.race([getDocs(q), timeoutPromise]);
-          snapshot.docs.forEach((doc) => {
-            const data = doc.data() as PersonnelDoc;
-            allPersonnelData.push({ id: doc.id, userId: data.userId });
-          });
-        }
-
-        // Get unique user_ids that are not null
-        const userIds = [...new Set(allPersonnelData.filter(p => p.userId).map(p => p.userId!))];
-
-        // Fetch roles from users collection
-        const userRolesMap = new Map<string, AppRole[]>();
-        if (userIds.length > 0) {
-          for (let i = 0; i < userIds.length; i += 30) {
-            const batch = userIds.slice(i, i + 30);
-            const usersRef = collection(db, 'users');
-            const q = query(usersRef, where(documentId(), 'in', batch));
-            const snapshot = await getDocs(q);
-            snapshot.docs.forEach((doc) => {
-              const data = doc.data() as UserDoc;
-              userRolesMap.set(doc.id, data.roles || []);
-            });
-          }
-        }
-
-        // Build the personnel roles map
         const result = new Map<string, PersonnelWithRole>();
-        allPersonnelData.forEach(p => {
-          result.set(p.id, {
-            personnelId: p.id,
-            userId: p.userId,
-            roles: p.userId ? (userRolesMap.get(p.userId) || []) : [],
+        for (const batch of batches) {
+          const q = query(usersRef, where(documentId(), 'in', batch));
+          const snapshot = await getDocs(q);
+          snapshot.docs.forEach((doc) => {
+            const data = doc.data() as UserDoc;
+            result.set(doc.id, {
+              personnelId: doc.id,
+              userId: doc.id, // Same as personnelId now
+              roles: data.roles || [],
+            });
           });
-        });
+        }
 
         setPersonnelRoles(result);
       } else {
-        // Fetch all personnel
-        const snapshot = await getDocs(personnelRef);
-        const allPersonnelData = snapshot.docs.map((doc) => {
-          const data = doc.data() as PersonnelDoc;
-          return { id: doc.id, userId: data.userId };
-        });
-
-        // Get unique user_ids
-        const userIds = [...new Set(allPersonnelData.filter(p => p.userId).map(p => p.userId!))];
-
-        // Fetch roles from users collection
-        const userRolesMap = new Map<string, AppRole[]>();
-        if (userIds.length > 0) {
-          for (let i = 0; i < userIds.length; i += 30) {
-            const batch = userIds.slice(i, i + 30);
-            const usersRef = collection(db, 'users');
-            const q = query(usersRef, where(documentId(), 'in', batch));
-            const usersSnapshot = await getDocs(q);
-            usersSnapshot.docs.forEach((doc) => {
-              const data = doc.data() as UserDoc;
-              userRolesMap.set(doc.id, data.roles || []);
-            });
-          }
-        }
-
-        // Build the personnel roles map
+        // Fetch all users
+        const snapshot = await getDocs(usersRef);
         const result = new Map<string, PersonnelWithRole>();
-        allPersonnelData.forEach(p => {
-          result.set(p.id, {
-            personnelId: p.id,
-            userId: p.userId,
-            roles: p.userId ? (userRolesMap.get(p.userId) || []) : [],
+        snapshot.docs.forEach((doc) => {
+          const data = doc.data() as UserDoc;
+          result.set(doc.id, {
+            personnelId: doc.id,
+            userId: doc.id, // Same as personnelId now
+            roles: data.roles || [],
           });
         });
 

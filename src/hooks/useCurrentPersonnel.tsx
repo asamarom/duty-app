@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { collection, query, where, onSnapshot, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/integrations/firebase/client';
 import { useAuth } from '@/hooks/useAuth';
-import type { PersonnelDoc } from '@/integrations/firebase/types';
+import type { UserDoc } from '@/integrations/firebase/types';
 
 interface CurrentPersonnel {
   id: string;
@@ -27,31 +27,34 @@ export function useCurrentPersonnel(): UseCurrentPersonnelReturn {
   useEffect(() => {
     if (!user?.uid) { setLoading(false); return; }
 
-    const q = query(collection(db, 'personnel'), where('userId', '==', user.uid));
-    const unsubscribe = onSnapshot(q, (snap) => {
-      if (snap.docs.length > 0) {
-        const d = snap.docs[0];
-        const data = d.data() as PersonnelDoc;
-        setCurrentPersonnel({
-          id: d.id,
-          signature: data.signature || undefined,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          serviceNumber: data.serviceNumber,
-          unitId: data.unitId,
-        });
-      } else {
-        setCurrentPersonnel(null);
-      }
-      setLoading(false);
-    }, () => setLoading(false));
+    // Phase 3: Users collection now contains personnel data, userId is the document ID
+    const unsubscribe = onSnapshot(
+      doc(db, 'users', user.uid),
+      (snap) => {
+        if (snap.exists()) {
+          const data = snap.data() as UserDoc;
+          setCurrentPersonnel({
+            id: snap.id,
+            signature: data.signature || undefined,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            serviceNumber: data.serviceNumber,
+            unitId: data.unitId,
+          });
+        } else {
+          setCurrentPersonnel(null);
+        }
+        setLoading(false);
+      },
+      () => setLoading(false)
+    );
 
     return unsubscribe;
   }, [user?.uid]);
 
   const saveSignature = async (svgString: string) => {
-    if (!currentPersonnel) throw new Error('No personnel record found');
-    await updateDoc(doc(db, 'personnel', currentPersonnel.id), {
+    if (!currentPersonnel) throw new Error('No user record found');
+    await updateDoc(doc(db, 'users', currentPersonnel.id), {
       signature: svgString,
       updatedAt: serverTimestamp(),
     });
