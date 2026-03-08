@@ -673,7 +673,8 @@ export function useEquipment(): UseEquipmentReturn {
   useEffect(() => {
     // Wait for battalionId to load before setting up query (unless admin)
     // This prevents querying with battalionId=null which returns empty results
-    if (!isAdmin && battalionLoading) {
+    // CRITICAL: Check both loading state AND null battalionId to avoid race conditions
+    if (!isAdmin && (battalionLoading || battalionId === null)) {
       setLoading(true);
       return;
     }
