@@ -151,19 +151,19 @@ export const canManageUnit = onCall(async (request) => {
     return { canManage: false };
   }
 
-  // Get the personnel's unit
-  const personnelDoc = await db.collection('personnel').doc(personnelId).get();
-  if (!personnelDoc.exists) {
+  // Phase 3: Get the user's unit (personnel merged into users collection)
+  const userDoc = await db.collection('users').doc(personnelId).get();
+  if (!userDoc.exists) {
     return { canManage: false };
   }
 
-  const personnelData = personnelDoc.data() as PersonnelDoc;
-  if (!personnelData.unitId) {
+  const userData = userDoc.data() as UserDoc;
+  if (!userData.unitId) {
     return { canManage: false };
   }
 
   // Check if leader can manage this unit
-  const canManage = await canLeaderManageUnit(uid, personnelData.unitId);
+  const canManage = await canLeaderManageUnit(uid, userData.unitId);
   return { canManage };
 });
 
@@ -224,10 +224,11 @@ export const initiateTransfer = onCall(async (request) => {
     fromUnitId = assignment.unitId;
 
     if (fromPersonnelId) {
-      const persDoc = await db.collection('personnel').doc(fromPersonnelId).get();
-      if (persDoc.exists) {
-        const persData = persDoc.data() as PersonnelDoc;
-        fromName = `${persData.firstName} ${persData.lastName}`;
+      // Phase 3: Query users collection instead of personnel
+      const userDoc = await db.collection('users').doc(fromPersonnelId).get();
+      if (userDoc.exists) {
+        const userData = userDoc.data() as UserDoc;
+        fromName = `${userData.firstName} ${userData.lastName}`;
       }
     } else if (fromUnitId) {
       const unitDoc = await db.collection('units').doc(fromUnitId).get();
@@ -244,10 +245,11 @@ export const initiateTransfer = onCall(async (request) => {
   let toUnitType: string | undefined;
 
   if (toPersonnelId) {
-    const persDoc = await db.collection('personnel').doc(toPersonnelId).get();
-    if (persDoc.exists) {
-      const persData = persDoc.data() as PersonnelDoc;
-      toName = `${persData.firstName} ${persData.lastName}`;
+    // Phase 3: Query users collection instead of personnel
+    const userDoc = await db.collection('users').doc(toPersonnelId).get();
+    if (userDoc.exists) {
+      const userData = userDoc.data() as UserDoc;
+      toName = `${userData.firstName} ${userData.lastName}`;
     }
   } else if (toUnitId) {
     const unitDoc = await db.collection('units').doc(toUnitId).get();
