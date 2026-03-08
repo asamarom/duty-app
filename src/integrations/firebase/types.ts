@@ -1,7 +1,7 @@
 import { Timestamp } from 'firebase/firestore';
 
 // Enums (matching the original PostgreSQL enums)
-export type AppRole = 'admin' | 'leader' | 'user';
+export type AppRole = 'admin' | 'leader' | 'user' | 'approved_user';
 export type UnitType = 'battalion' | 'company' | 'platoon';
 export type UnitStatus = 'active' | 'inactive' | 'deployed';
 export type EquipmentStatus = 'serviceable' | 'unserviceable' | 'in_maintenance' | 'missing' | 'pending_transfer';
@@ -13,10 +13,23 @@ export type SignupRequestStatus = 'pending' | 'approved' | 'declined';
 // Firestore document interfaces
 
 export interface UserDoc {
-  fullName: string | null;
-  avatarUrl: string | null;
+  // Personnel fields (merged from personnel collection)
+  firstName: string;
+  lastName: string;
+  email: string | null;
+  phone: string | null;
+  serviceNumber: string;
+  rank: string;
   unitId: string | null;
-  roles: AppRole[];
+  battalionId: string | null;
+  location: string | null; // Free text (converted from locationStatus enum)
+  skills: string[];
+  driverLicenses: string[];
+  signature: string | null;
+  avatarUrl: string | null;
+  profileImage: string | null;
+  // Auth fields
+  roles: AppRole[]; // 'approved_user' replaces isSignatureApproved
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -33,29 +46,6 @@ export interface UnitDoc {
   updatedAt: Timestamp;
 }
 
-export interface PersonnelDoc {
-  userId: string | null;
-  unitId: string | null;
-  battalionId: string | null;
-  serviceNumber: string;
-  rank: string;
-  firstName: string;
-  lastName: string;
-  dutyPosition: string | null;
-  phone: string | null;
-  email: string | null;
-  localAddress: string | null;
-  profileImage: string | null;
-  locationStatus: LocationStatus;
-  readinessStatus: ReadinessStatus;
-  skills: string[];
-  driverLicenses: string[];
-  isSignatureApproved: boolean;
-  signature?: string | null;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-}
-
 export interface EquipmentDoc {
   name: string;
   serialNumber: string | null;
@@ -67,7 +57,7 @@ export interface EquipmentDoc {
   battalionId: string;
   // Denormalized current assignment (for performance - see docs/DATABASE_OPTIMIZATION.md)
   currentUnitId: string | null;
-  currentPersonnelId: string | null;
+  currentPersonnelId: string | null; // TODO: Phase 3 - rename to currentUserId
   currentQuantityAssigned: number;
   lastAssignedAt: Timestamp | null;
   createdAt: Timestamp;
@@ -76,12 +66,14 @@ export interface EquipmentDoc {
 
 export interface EquipmentAssignmentDoc {
   equipmentId: string;
-  personnelId: string | null;
+  personnelId: string | null; // TODO: Phase 3 - rename to userId
   unitId: string | null;
   quantity: number;
   assignedBy: string | null;
   assignedAt: Timestamp;
   returnedAt: Timestamp | null;
+  isReturned: boolean;
+  battalionId: string;
   notes: string | null;
   createdAt: Timestamp;
 }
@@ -90,10 +82,10 @@ export interface AssignmentRequestDoc {
   equipmentId: string;
   fromUnitType: string;
   fromUnitId: string | null;
-  fromPersonnelId: string | null;
+  fromPersonnelId: string | null; // TODO: Phase 3 - rename to fromUserId
   toUnitType: string;
   toUnitId: string | null;
-  toPersonnelId: string | null;
+  toPersonnelId: string | null; // TODO: Phase 3 - rename to toUserId
   status: AssignmentRequestStatus;
   requestedBy: string | null;
   requestedAt: Timestamp;
@@ -102,6 +94,7 @@ export interface AssignmentRequestDoc {
   recipientApprovedAt: Timestamp | null;
   recipientApprovedBy: string | null;
   quantity?: number;
+  battalionId: string;
   // Denormalized display names
   equipmentName?: string;
   equipmentSerialNumber?: string | null;
@@ -114,10 +107,12 @@ export interface AssignmentRequestDoc {
 
 export interface SignupRequestDoc {
   userId: string;
-  fullName: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string | null;
   serviceNumber: string;
+  rank: string;
   requestedUnitId: string | null;
   status: SignupRequestStatus;
   reviewedBy: string | null;
@@ -138,7 +133,7 @@ export interface AdminUnitAssignmentDoc {
 export const Constants = {
   public: {
     Enums: {
-      app_role: ['admin', 'leader', 'user'],
+      app_role: ['admin', 'leader', 'user', 'approved_user'],
       assignment_request_status: ['pending', 'approved', 'rejected'],
       equipment_status: ['serviceable', 'unserviceable', 'in_maintenance', 'missing', 'pending_transfer'],
       location_status: ['home', 'on_duty', 'off_duty', 'active_mission', 'leave', 'tdy'],

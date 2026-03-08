@@ -89,32 +89,49 @@ service cloud.firestore {
     }
 
     // ============================================================================
-    // USERS COLLECTION - User profiles and roles
+    // USERS COLLECTION - User profiles, personnel data, and roles
+    // NOTE: Personnel collection has been merged into users collection
     // ============================================================================
     match /users/{userId} {
-      // Users can read their own doc, admins can read all
-      allow read: if isOwner(userId) || isAdmin();
+      // CRITICAL FIX: Battalion-based access control
+      // Admins can read all, users can read their own, battalion members can read each other
+      // MIGRATION: Allow documents without battalionId during migration
+      allow read: if isOwner(userId) || isAdmin() ||
+        (hasAnyRole() && (
+          !resource.data.keys().hasAll(['battalionId']) ||
+          isSameBattalion(resource.data.battalionId)
+        ));
 
       // Users can create their own doc on signup
       // CRITICAL FIX: Prevent self-assigning roles, validate required fields
       allow create: if isOwner(userId) &&
         !request.resource.data.keys().hasAny(['roles']) &&
-        request.resource.data.keys().hasAll(['fullName', 'email', 'createdAt', 'updatedAt']) &&
-        request.resource.data.fullName is string &&
-        request.resource.data.fullName.size() > 0 &&
-        request.resource.data.fullName.size() <= 200 &&
+        request.resource.data.keys().hasAll(['firstName', 'lastName', 'email', 'createdAt', 'updatedAt']) &&
+        request.resource.data.firstName is string &&
+        request.resource.data.firstName.size() > 0 &&
+        request.resource.data.firstName.size() <= 100 &&
+        request.resource.data.lastName is string &&
+        request.resource.data.lastName.size() > 0 &&
+        request.resource.data.lastName.size() <= 100 &&
         request.resource.data.email is string &&
         request.resource.data.email.size() > 0;
 
-      // Only admins can update roles
-      // MEDIUM FIX: Users can only update whitelisted fields
+      // CRITICAL FIX: Only admins can modify roles or signature
+      // Users can only update whitelisted fields
+      // Admins and leaders can update personnel fields
       allow update: if (isOwner(userId) &&
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['fullName', 'avatarUrl', 'updatedAt']) &&
-        (!request.resource.data.keys().hasAny(['fullName']) ||
-          (request.resource.data.fullName is string &&
-           request.resource.data.fullName.size() > 0 &&
-           request.resource.data.fullName.size() <= 200))) ||
-        isAdmin();
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['firstName', 'lastName', 'phone', 'avatarUrl', 'profileImage', 'updatedAt']) &&
+        (!request.resource.data.keys().hasAny(['firstName']) ||
+          (request.resource.data.firstName is string &&
+           request.resource.data.firstName.size() > 0 &&
+           request.resource.data.firstName.size() <= 100)) &&
+        (!request.resource.data.keys().hasAny(['lastName']) ||
+          (request.resource.data.lastName is string &&
+           request.resource.data.lastName.size() > 0 &&
+           request.resource.data.lastName.size() <= 100))) ||
+        (isAdminOrLeader() &&
+          (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['roles', 'signature']) || isAdmin()) &&
+          (isAdmin() || !resource.data.keys().hasAll(['battalionId']) || isSameBattalion(resource.data.battalionId)));
 
       // Only admins can delete users
       allow delete: if isAdmin();
@@ -151,50 +168,15 @@ service cloud.firestore {
     }
 
     // ============================================================================
-    // PERSONNEL COLLECTION - Personnel records
+    // PERSONNEL COLLECTION - DEPRECATED (merged into users collection)
     // ============================================================================
+    // This collection is no longer used. All personnel data is now in users collection.
+    // Rules kept for backward compatibility during migration.
     match /personnel/{personnelId} {
-      // CRITICAL FIX: Battalion-based access control
-      // Admins can read all, others can only read personnel in their battalion
-      // ADDITIONAL: Users can always read their own personnel record (by userId)
-      // MIGRATION: Allow documents without battalionId during migration
-      allow read: if hasAnyRole() && (
-        isAdmin() ||
-        canAccessResourceBattalion(resource.data) ||
-        (resource.data.keys().hasAny(['userId']) && resource.data.userId == request.auth.uid)
-      );
-
-      // Admins and leaders can create personnel
-      // HIGH FIX: Comprehensive field validation
-      // MIGRATION: battalionId is optional during migration
-      allow create: if isAdminOrLeader() &&
-        request.resource.data.keys().hasAll(['serviceNumber', 'rank', 'firstName', 'lastName', 'locationStatus', 'readinessStatus', 'createdAt', 'updatedAt']) &&
-        request.resource.data.serviceNumber is string &&
-        request.resource.data.serviceNumber.size() > 0 &&
-        request.resource.data.serviceNumber.size() <= 50 &&
-        request.resource.data.firstName is string &&
-        request.resource.data.firstName.size() > 0 &&
-        request.resource.data.firstName.size() <= 100 &&
-        request.resource.data.lastName is string &&
-        request.resource.data.lastName.size() > 0 &&
-        request.resource.data.lastName.size() <= 100 &&
-        request.resource.data.locationStatus in ['home', 'on_duty', 'off_duty', 'active_mission', 'leave', 'tdy'] &&
-        request.resource.data.readinessStatus in ['ready', 'warning', 'critical'] &&
-        (isAdmin() || !request.resource.data.keys().hasAny(['battalionId']) || isSameBattalionCreate(request.resource.data.battalionId));
-
-      // Admins and leaders can update personnel
-      // CRITICAL FIX: Only admins can modify isSignatureApproved
-      // MEDIUM FIX: Validate enum values
-      allow update: if isAdminOrLeader() &&
-        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['isSignatureApproved']) || isAdmin()) &&
-        (!request.resource.data.keys().hasAny(['locationStatus']) ||
-          request.resource.data.locationStatus in ['home', 'on_duty', 'off_duty', 'active_mission', 'leave', 'tdy']) &&
-        (!request.resource.data.keys().hasAny(['readinessStatus']) ||
-          request.resource.data.readinessStatus in ['ready', 'warning', 'critical']) &&
-        (isAdmin() || !resource.data.keys().hasAll(['battalionId']) || isSameBattalion(resource.data.battalionId));
-
-      // Only admins can delete personnel
-      allow delete: if isAdmin();
+      allow read: if false;
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
     }
 
     // ============================================================================
@@ -320,12 +302,11 @@ service cloud.firestore {
         resource.data.requestedBy == request.auth.uid &&
         (!resource.data.keys().hasAll(['battalionId']) || isSameBattalion(resource.data.battalionId));
 
-      // 4. Personal transfer to me (check if to_personnel_id points to my userId)
+      // 4. Personal transfer to me (to_personnel_id now directly refers to userId)
       allow read: if hasAnyRole() &&
         resource.data.keys().hasAny(['to_personnel_id']) &&
         resource.data.to_personnel_id != null &&
-        exists(/databases/$(database)/documents/personnel/$(resource.data.to_personnel_id)) &&
-        get(/databases/$(database)/documents/personnel/$(resource.data.to_personnel_id)).data.userId == request.auth.uid;
+        resource.data.to_personnel_id == request.auth.uid;
 
       // 5. Unit transfer TO my unit (signature approval checked client-side)
       allow read: if hasAnyRole() &&
@@ -383,14 +364,19 @@ service cloud.firestore {
       // CRITICAL FIX: Comprehensive field validation, enforce status='pending'
       allow create: if isAuthenticated() &&
         request.resource.data.userId == request.auth.uid &&
-        request.resource.data.keys().hasAll(['userId', 'fullName', 'email', 'serviceNumber', 'status', 'createdAt']) &&
+        request.resource.data.keys().hasAll(['userId', 'firstName', 'lastName', 'email', 'serviceNumber', 'rank', 'status', 'createdAt']) &&
         request.resource.data.status == 'pending' &&
         request.resource.data.serviceNumber is string &&
         request.resource.data.serviceNumber.size() > 0 &&
         request.resource.data.serviceNumber.size() <= 50 &&
-        request.resource.data.fullName is string &&
-        request.resource.data.fullName.size() > 0 &&
-        request.resource.data.fullName.size() <= 200 &&
+        request.resource.data.firstName is string &&
+        request.resource.data.firstName.size() > 0 &&
+        request.resource.data.firstName.size() <= 100 &&
+        request.resource.data.lastName is string &&
+        request.resource.data.lastName.size() > 0 &&
+        request.resource.data.lastName.size() <= 100 &&
+        request.resource.data.rank is string &&
+        request.resource.data.rank.size() > 0 &&
         request.resource.data.email is string &&
         request.resource.data.email.size() > 0;
 
