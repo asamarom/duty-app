@@ -691,10 +691,10 @@ export function useEquipment(): UseEquipmentReturn {
     // CRITICAL: Also filter assignments and requests by battalionId for non-admins
     // Without this filter, Firestore rules block the query with "Missing or insufficient permissions"
     const assignQuery = isAdmin
-      ? query(collection(db, 'equipmentAssignments'), where('isReturned', '==', false))
+      ? query(collection(db, 'equipmentAssignments'), where('returnedAt', '==', null))
       : battalionId
-        ? query(collection(db, 'equipmentAssignments'), where('isReturned', '==', false), where('battalionId', '==', battalionId))
-        : query(collection(db, 'equipmentAssignments'), where('isReturned', '==', false), where('battalionId', '==', '__NO_BATTALION__'));
+        ? query(collection(db, 'equipmentAssignments'), where('returnedAt', '==', null), where('battalionId', '==', battalionId))
+        : query(collection(db, 'equipmentAssignments'), where('returnedAt', '==', null), where('battalionId', '==', '__NO_BATTALION__'));
 
     const pendingQuery = isAdmin
       ? query(collection(db, 'assignmentRequests'), where('status', '==', 'pending'))
