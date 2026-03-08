@@ -7,9 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ApprovalsSheet } from './ApprovalsSheet';
 import { usePendingRequestsCount } from '@/hooks/usePendingRequestsCount';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/integrations/firebase/client';
 import { useAuth } from '@/hooks/useAuth';
+import type { UserDoc } from '@/integrations/firebase/types';
 
 export function ApprovalsTab() {
   const { t, language } = useLanguage();
@@ -31,17 +32,14 @@ export function ApprovalsTab() {
       try {
         setLoadingApproved(true);
 
-        // Get user's personnel record to find their unit
-        const personnelQuery = query(
-          collection(db, 'personnel'),
-          where('userId', '==', user.uid)
-        );
-        const personnelSnap = await getDocs(personnelQuery);
+        // Phase 3: Get user's record directly from users collection
+        const userDocRef = doc(db, 'users', user.uid);
+        const userSnap = await getDoc(userDocRef);
 
         let userUnitId = null;
-        if (!personnelSnap.empty) {
-          const personnelData = personnelSnap.docs[0].data();
-          userUnitId = personnelData.unitId || personnelData.battalionId;
+        if (userSnap.exists()) {
+          const userData = userSnap.data() as UserDoc;
+          userUnitId = userData.unitId || userData.battalionId;
         }
 
         // Get approved requests count

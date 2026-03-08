@@ -43,24 +43,25 @@ export default function AddPersonnelPage() {
     if (!isValid) return;
     setSaving(true);
     try {
-      await addDoc(collection(db, 'personnel'), {
+      // Phase 3: Create user in users collection (not personnel)
+      // Note: This creates a user WITHOUT a linked Firebase Auth account
+      // For proper user creation, use the signup flow instead
+      await addDoc(collection(db, 'users'), {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         serviceNumber: serviceNumber.trim(),
         rank,
         phone: phone.trim() || null,
         email: email.trim() || null,
-        userId: null,
         unitId: userUnitId || null,
         battalionId: userBattalionId || null,
-        dutyPosition: null,
-        localAddress: null,
+        location: null, // Free text now (was locationStatus enum)
         profileImage: null,
-        locationStatus: 'home',
-        readinessStatus: 'ready',
+        avatarUrl: null,
+        signature: null,
         skills: [],
         driverLicenses: [],
-        isSignatureApproved: false,
+        roles: ['user'], // Start with basic user role
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });

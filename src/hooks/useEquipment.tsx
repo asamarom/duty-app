@@ -84,30 +84,29 @@ export function useEquipment(): UseEquipmentReturn {
       return;
     }
 
-    const fetchPersonnel = async () => {
+    // Phase 3: Query users collection instead of personnel
+    const fetchUser = async () => {
       try {
-        const personnelQuery = query(
-          collection(db, 'personnel'),
-          where('userId', '==', user.uid)
-        );
-        const snapshot = await getDocs(personnelQuery);
+        const userDocRef = doc(db, 'users', user.uid);
+        const userSnap = await getDoc(userDocRef);
 
-        if (!snapshot.empty) {
-          const personnelData = snapshot.docs[0].data() as PersonnelDoc;
-          setCurrentUserPersonnelId(snapshot.docs[0].id);
-          setIsSignatureApproved(personnelData.isSignatureApproved || false);
+        if (userSnap.exists()) {
+          const userData = userSnap.data() as UserDoc;
+          setCurrentUserPersonnelId(user.uid); // userId = personnelId now
+          // Check if user has approved_user role (replaces isSignatureApproved)
+          setIsSignatureApproved(userData.roles?.includes('approved_user') || false);
         } else {
           setCurrentUserPersonnelId(null);
           setIsSignatureApproved(false);
         }
       } catch (err) {
-        console.error('Error fetching personnel record:', err);
+        console.error('Error fetching user record:', err);
         setCurrentUserPersonnelId(null);
         setIsSignatureApproved(false);
       }
     };
 
-    fetchPersonnel();
+    fetchUser();
   }, [user?.uid]);
 
   const rebuild = useCallback(async () => {
@@ -124,18 +123,18 @@ export function useEquipment(): UseEquipmentReturn {
         if (data.unitId) uniqueUnitIds.add(data.unitId);
       });
 
-      // Batch-fetch personnel and units in parallel
-      const [personnelDocs, unitDocs] = await Promise.all([
-        Promise.all([...uniquePersonnelIds].map(id => getDoc(doc(db, 'personnel', id)))),
+      // Phase 3: Batch-fetch users and units in parallel
+      const [userDocs, unitDocs] = await Promise.all([
+        Promise.all([...uniquePersonnelIds].map(id => getDoc(doc(db, 'users', id)))),
         Promise.all([...uniqueUnitIds].map(id => getDoc(doc(db, 'units', id)))),
       ]);
 
       // Build lookup maps
       const personnelNames = new Map<string, string>();
-      personnelDocs.forEach((pDoc) => {
-        if (pDoc.exists()) {
-          const pData = pDoc.data() as PersonnelDoc;
-          personnelNames.set(pDoc.id, `${pData.firstName} ${pData.lastName}`);
+      userDocs.forEach((uDoc) => {
+        if (uDoc.exists()) {
+          const uData = uDoc.data() as UserDoc;
+          personnelNames.set(uDoc.id, `${uData.firstName} ${uData.lastName}`);
         }
       });
 
@@ -524,10 +523,11 @@ export function useEquipment(): UseEquipmentReturn {
         fromUnitId = assignment.unitId || null;
 
         if (fromPersonnelId) {
-          const persDoc = await getDoc(doc(db, 'personnel', fromPersonnelId));
-          if (persDoc?.exists()) {
-            const persData = persDoc.data() as PersonnelDoc;
-            fromName = `${persData.firstName} ${persData.lastName}`;
+          // Phase 3: Query users collection instead of personnel
+          const userDoc = await getDoc(doc(db, 'users', fromPersonnelId));
+          if (userDoc?.exists()) {
+            const userData = userDoc.data() as UserDoc;
+            fromName = `${userData.firstName} ${userData.lastName}`;
           }
         } else if (fromUnitId) {
           const unitDoc = await getDoc(doc(db, 'units', fromUnitId));
@@ -544,10 +544,11 @@ export function useEquipment(): UseEquipmentReturn {
       let toUnitType: string | null = null;
 
       if (toPersonnelId) {
-        const persDoc = await getDoc(doc(db, 'personnel', toPersonnelId));
-        if (persDoc?.exists()) {
-          const persData = persDoc.data() as PersonnelDoc;
-          toName = `${persData.firstName} ${persData.lastName}`;
+        // Phase 3: Query users collection instead of personnel
+        const userDoc = await getDoc(doc(db, 'users', toPersonnelId));
+        if (userDoc?.exists()) {
+          const userData = userDoc.data() as UserDoc;
+          toName = `${userData.firstName} ${userData.lastName}`;
         }
       } else if (toUnitId) {
         const unitDoc = await getDoc(doc(db, 'units', toUnitId));

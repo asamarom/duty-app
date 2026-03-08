@@ -47,10 +47,11 @@ export function useTransferHistory(equipmentId: string | undefined): UseTransfer
 
           if (!data.fromName) {
             if (data.fromPersonnelId) {
-              const persDoc = await getDoc(doc(db, 'personnel', data.fromPersonnelId));
-              if (persDoc.exists()) {
-                const pers = persDoc.data() as PersonnelDoc;
-                fromName = `${pers.firstName} ${pers.lastName}`;
+              // Phase 3: Query users collection instead of personnel
+              const userDoc = await getDoc(doc(db, 'users', data.fromPersonnelId));
+              if (userDoc.exists()) {
+                const user = userDoc.data() as UserDoc;
+                fromName = `${user.firstName} ${user.lastName}`;
               }
             } else if (data.fromUnitId) {
               const unitDoc = await getDoc(doc(db, 'units', data.fromUnitId));
@@ -62,10 +63,11 @@ export function useTransferHistory(equipmentId: string | undefined): UseTransfer
 
           if (!data.toName) {
             if (data.toPersonnelId) {
-              const persDoc = await getDoc(doc(db, 'personnel', data.toPersonnelId));
-              if (persDoc.exists()) {
-                const pers = persDoc.data() as PersonnelDoc;
-                toName = `${pers.firstName} ${pers.lastName}`;
+              // Phase 3: Query users collection instead of personnel
+              const userDoc = await getDoc(doc(db, 'users', data.toPersonnelId));
+              if (userDoc.exists()) {
+                const user = userDoc.data() as UserDoc;
+                toName = `${user.firstName} ${user.lastName}`;
               }
             } else if (data.toUnitId) {
               const unitDoc = await getDoc(doc(db, 'units', data.toUnitId));

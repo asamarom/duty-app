@@ -113,10 +113,11 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
 
         if (!data.fromName) {
           if (data.fromPersonnelId) {
-            const persDoc = await getDoc(doc(db, 'personnel', data.fromPersonnelId));
-            if (persDoc.exists()) {
-              const pers = persDoc.data() as PersonnelDoc;
-              fromUnitName = `${pers.firstName} ${pers.lastName}`;
+            // Phase 3: Query users collection instead of personnel
+            const userDoc = await getDoc(doc(db, 'users', data.fromPersonnelId));
+            if (userDoc.exists()) {
+              const user = userDoc.data() as UserDoc;
+              fromUnitName = `${user.firstName} ${user.lastName}`;
             }
           } else if (data.fromUnitId) {
             const unitDoc = await getDoc(doc(db, 'units', data.fromUnitId));
@@ -128,10 +129,11 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
 
         if (!data.toName) {
           if (data.toPersonnelId) {
-            const persDoc = await getDoc(doc(db, 'personnel', data.toPersonnelId));
-            if (persDoc.exists()) {
-              const pers = persDoc.data() as PersonnelDoc;
-              toUnitName = `${pers.firstName} ${pers.lastName}`;
+            // Phase 3: Query users collection instead of personnel
+            const userDoc = await getDoc(doc(db, 'users', data.toPersonnelId));
+            if (userDoc.exists()) {
+              const user = userDoc.data() as UserDoc;
+              toUnitName = `${user.firstName} ${user.lastName}`;
             }
           } else if (data.toUnitId) {
             const unitDoc = await getDoc(doc(db, 'units', data.toUnitId));
@@ -175,7 +177,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     );
   }, []);
 
-  // Fetch the current user's personnel record so we can scope incoming transfers.
+  // Phase 3: Fetch the current user's record from users collection
   // We store the IDs and signature approval status we need for filtering.
   const [currentPersonnelId, setCurrentPersonnelId] = useState<string | null>(null);
   const [currentUnitId, setCurrentUnitId] = useState<string | null>(null);
@@ -184,16 +186,16 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
   useEffect(() => {
     if (!user?.uid) return;
 
-    const personnelRef = collection(db, 'personnel');
-    const q = query(personnelRef, where('userId', '==', user.uid));
+    // Phase 3: Query users collection directly by document ID
+    const userRef = doc(db, 'users', user.uid);
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      if (snapshot.docs.length > 0) {
-        const persDoc = snapshot.docs[0];
-        setCurrentPersonnelId(persDoc.id);
-        const data = persDoc.data() as PersonnelDoc;
+    const unsubscribe = onSnapshot(userRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data() as UserDoc;
+        setCurrentPersonnelId(docSnap.id); // userId = personnelId now
         setCurrentUnitId(data.unitId || null);
-        setIsSignatureApproved(data.isSignatureApproved || false);
+        // Check if user has approved_user role (replaces isSignatureApproved)
+        setIsSignatureApproved(data.roles?.includes('approved_user') || false);
       } else {
         setCurrentPersonnelId(null);
         setCurrentUnitId(null);
@@ -295,10 +297,11 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
       fromUnitId = assignment.unitId || null;
 
       if (fromPersonnelId) {
-        const persDoc = await getDoc(doc(db, 'personnel', fromPersonnelId));
-        if (persDoc?.exists()) {
-          const persData = persDoc.data() as PersonnelDoc;
-          fromName = `${persData.firstName} ${persData.lastName}`;
+        // Phase 3: Query users collection instead of personnel
+        const userDoc = await getDoc(doc(db, 'users', fromPersonnelId));
+        if (userDoc?.exists()) {
+          const userData = userDoc.data() as UserDoc;
+          fromName = `${userData.firstName} ${userData.lastName}`;
         }
       } else if (fromUnitId) {
         const unitDoc = await getDoc(doc(db, 'units', fromUnitId));
@@ -315,10 +318,11 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     let toUnitType: string | null = null;
 
     if (toPersonnelId) {
-      const persDoc = await getDoc(doc(db, 'personnel', toPersonnelId));
-      if (persDoc?.exists()) {
-        const persData = persDoc.data() as PersonnelDoc;
-        toName = `${persData.firstName} ${persData.lastName}`;
+      // Phase 3: Query users collection instead of personnel
+      const userDoc = await getDoc(doc(db, 'users', toPersonnelId));
+      if (userDoc?.exists()) {
+        const userData = userDoc.data() as UserDoc;
+        toName = `${userData.firstName} ${userData.lastName}`;
       }
     } else if (toUnitId) {
       const unitDoc = await getDoc(doc(db, 'units', toUnitId));

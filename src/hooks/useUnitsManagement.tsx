@@ -128,56 +128,32 @@ export function useUnitsManagement(): UseUnitsManagementReturn {
 
       await updateDoc(unitDocRef, updateData);
 
-      // When a commander (leader) is assigned to a unit, ensure they have a
-      // personnel record so they appear in the personnel list.
+      // Phase 3: When a commander (leader) is assigned to a unit, update their
+      // user record to reflect the assignment (unitId and battalionId).
       if (data.leader_id) {
         const leaderId = data.leader_id;
         try {
-          // Check if a personnel record already exists for this user.
-          const existingSnapshot = await getDocs(
-            query(collection(db, 'personnel'), where('userId', '==', leaderId))
-          );
+          // Check if the user exists in users collection
+          const userRef = doc(db, 'users', leaderId);
+          const userSnap = await getDoc(userRef);
 
-          if (existingSnapshot.empty) {
-            // Fetch the user's profile to populate the personnel record.
-            const userSnap = await getDoc(doc(db, 'users', leaderId));
-            const userData = userSnap.exists() ? (userSnap.data() as UserDoc) : null;
-
-            const fullName = userData?.fullName || '';
-            const nameParts = fullName.split(' ');
-            const firstName = nameParts[0] || '';
-            const lastName = nameParts.slice(1).join(' ') || '';
-
-            // Determine the battalionId for this unit.
+          if (userSnap.exists()) {
+            // Update the user's unitId and battalionId to reflect their assignment
             const battalionId = findBattalionId(id);
-
-            const personnelData: Record<string, unknown> = {
-              userId: leaderId,
-              firstName,
-              lastName,
-              email: null,
-              phone: null,
-              serviceNumber: leaderId,
+            const updateData: Record<string, unknown> = {
               unitId: id,
-              rank: 'מ"פ', // Default commander rank
-              dutyPosition: 'Commander',
-              locationStatus: 'on_duty',
-              readinessStatus: 'ready',
-              isSignatureApproved: false,
-              skills: [],
-              driverLicenses: [],
-              localAddress: null,
-              profileImage: null,
-              createdAt: serverTimestamp(),
+              updatedAt: serverTimestamp(),
             };
             if (battalionId) {
-              personnelData.battalionId = battalionId;
+              updateData.battalionId = battalionId;
             }
-            await addDoc(collection(db, 'personnel'), personnelData);
+            await updateDoc(userRef, updateData);
+          } else {
+            console.warn('[useUnitsManagement] Leader user not found:', leaderId);
           }
-        } catch (personnelErr) {
-          // Personnel record creation is best-effort; don't fail the unit update.
-          console.error('[useUnitsManagement] Failed to ensure personnel record for leader', personnelErr);
+        } catch (userErr) {
+          // User record update is best-effort; don't fail the unit update.
+          console.error('[useUnitsManagement] Failed to update user record for leader', userErr);
         }
       }
 

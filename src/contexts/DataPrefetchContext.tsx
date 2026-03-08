@@ -12,10 +12,11 @@ export function DataPrefetchProvider({ children }: { children: React.ReactNode }
     prefetchStarted.current = true;
     const unsubs: (() => void)[] = [];
 
+    // Phase 3: Prefetch users collection instead of personnel
     unsubs.push(onSnapshot(
-      query(collection(db, 'personnel'), orderBy('lastName')),
+      query(collection(db, 'users'), orderBy('lastName')),
       () => {},
-      (err) => console.warn('[prefetch] personnel', err)
+      (err) => console.warn('[prefetch] users', err)
     ));
 
     unsubs.push(onSnapshot(

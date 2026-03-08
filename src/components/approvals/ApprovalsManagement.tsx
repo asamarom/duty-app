@@ -133,16 +133,14 @@ export function ApprovalsManagement({ showHeader = true, className }: ApprovalsM
         });
       }
 
-      // Create personnel record linked to the user
+      // Phase 3: Update user record with personnel fields (merged collection)
       const nameParts = request.fullName.split(' ');
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
 
       const battalionId = getBattalionId(request.requestedUnitId);
-      const personnelRef = collection(db, 'personnel');
       try {
-        await addDoc(personnelRef, {
-          userId: request.userId,
+        await updateDoc(userDocRef, {
           firstName,
           lastName,
           email: request.email,
@@ -150,14 +148,17 @@ export function ApprovalsManagement({ showHeader = true, className }: ApprovalsM
           serviceNumber: request.serviceNumber,
           unitId: request.requestedUnitId || null,
           rank: 'טוראי', // Default rank
-          locationStatus: 'on_duty',
-          readinessStatus: 'ready',
-          isSignatureApproved: false,
-          createdAt: serverTimestamp(),
+          location: null, // Free text now (was locationStatus enum)
+          skills: [],
+          driverLicenses: [],
+          signature: null,
+          avatarUrl: null,
+          profileImage: null,
+          updatedAt: serverTimestamp(),
           ...(battalionId ? { battalionId } : {}),
         });
-      } catch (personnelError) {
-        console.error('Failed to create personnel record:', personnelError);
+      } catch (userUpdateError) {
+        console.error('Failed to update user record with personnel fields:', userUpdateError);
         // Don't throw - approval still succeeded
       }
 

@@ -11,7 +11,7 @@ import {
   documentId,
 } from 'firebase/firestore';
 import { db } from '@/integrations/firebase/client';
-import type { PersonnelDoc, UserDoc, AppRole } from '@/integrations/firebase/types';
+import type { UserDoc, AppRole } from '@/integrations/firebase/types';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { MobileHeader } from '@/components/layout/MobileHeader';
 import { Button } from '@/components/ui/button';
@@ -98,10 +98,11 @@ export default function PersonnelDetailPage() {
       try {
         setLoading(true);
 
-        const personRef = doc(db, 'personnel', id);
-        const personSnap = await getDoc(personRef);
+        // Phase 3: Query users collection instead of personnel
+        const userRef = doc(db, 'users', id);
+        const userSnap = await getDoc(userRef);
 
-        if (!personSnap.exists()) {
+        if (!userSnap.exists()) {
           toast({
             variant: 'destructive',
             title: t('common.error'),
@@ -111,35 +112,31 @@ export default function PersonnelDetailPage() {
           return;
         }
 
-        const person = personSnap.data() as PersonnelDoc;
+        const user = userSnap.data() as UserDoc;
 
-        // Store user_id for role management
-        setUserId(person.userId || null);
+        // userId is now the document ID
+        setUserId(id);
 
-        // Fetch roles for this personnel
-        await fetchRoles(person.userId || null);
+        // Fetch roles for this user
+        await fetchRoles(id);
 
-        // Parse duty_position - could be stored as string or already an array
-        const dutyPositions = person.dutyPosition
-          ? (Array.isArray(person.dutyPosition)
-            ? person.dutyPosition
-            : [person.dutyPosition])
-          : [];
+        // Check if user has approved_user role (replaces isSignatureApproved)
+        const isSignatureApproved = user.roles?.includes('approved_user') || false;
 
         setFormData({
-          service_number: person.serviceNumber,
-          rank: person.rank,
-          first_name: person.firstName,
-          last_name: person.lastName,
-          duty_positions: dutyPositions,
-          unit_id: person.unitId || null,
-          is_signature_approved: person.isSignatureApproved || false,
-          phone: person.phone || '',
-          email: person.email || '',
-          local_address: person.localAddress || '',
+          service_number: user.serviceNumber,
+          rank: user.rank,
+          first_name: user.firstName,
+          last_name: user.lastName,
+          duty_positions: [], // Removed in Phase 2
+          unit_id: user.unitId || null,
+          is_signature_approved: isSignatureApproved,
+          phone: user.phone || '',
+          email: user.email || '',
+          local_address: '', // Removed in Phase 2
         });
       } catch (error) {
-        console.error('Error fetching personnel:', error);
+        console.error('Error fetching user:', error);
         toast({
           variant: 'destructive',
           title: t('common.error'),
@@ -169,26 +166,34 @@ export default function PersonnelDetailPage() {
     try {
       setSaving(true);
 
-      // Store duty_positions as first item for backward compatibility
-      const primaryDutyPosition = formData.duty_positions.length > 0
-        ? formData.duty_positions[0]
-        : null;
-
       const battalionId = findBattalionId(formData.unit_id);
 
-      await updateDoc(doc(db, 'personnel', id), {
+      // Phase 3: Update users collection and manage approved_user role
+      const userRef = doc(db, 'users', id);
+      const userSnap = await getDoc(userRef);
+      const currentUser = userSnap.exists() ? (userSnap.data() as UserDoc) : null;
+      const currentRoles = currentUser?.roles || [];
+
+      // Update approved_user role based on is_signature_approved checkbox
+      const newRoles = currentRoles.filter(r => r !== 'approved_user');
+      if (formData.is_signature_approved) {
+        newRoles.push('approved_user');
+      }
+
+      await updateDoc(userRef, {
         serviceNumber: formData.service_number,
         rank: formData.rank,
         firstName: formData.first_name,
         lastName: formData.last_name,
-        dutyPosition: primaryDutyPosition,
         unitId: formData.unit_id || null,
-        isSignatureApproved: formData.is_signature_approved,
         phone: formData.phone || null,
         email: formData.email || null,
-        localAddress: formData.local_address || null,
+        roles: newRoles,
         ...(battalionId ? { battalionId } : {}),
       });
+
+      // Refresh roles display
+      await fetchRoles(id);
 
       toast({
         title: t('common.success'),
@@ -196,7 +201,7 @@ export default function PersonnelDetailPage() {
       });
       setIsEditing(false);
     } catch (error) {
-      console.error('Error updating personnel:', error);
+      console.error('Error updating user:', error);
       toast({
         variant: 'destructive',
         title: t('common.error'),

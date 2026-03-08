@@ -10,7 +10,7 @@ import {
 import { db } from '@/integrations/firebase/client';
 import { useAuth } from './useAuth';
 import { useEffectiveRole } from './useEffectiveRole';
-import type { PersonnelDoc, UnitDoc, AdminUnitAssignmentDoc } from '@/integrations/firebase/types';
+import type { UserDoc, UnitDoc, AdminUnitAssignmentDoc } from '@/integrations/firebase/types';
 
 interface UseCanManageRoleReturn {
   canManage: boolean;
@@ -52,18 +52,18 @@ export function useCanManageRole(personnelId: string | undefined): UseCanManageR
     try {
       setLoading(true);
 
-      // a. Get personnel doc
-      const personnelDoc = await getDoc(doc(db, 'personnel', personnelId));
+      // Phase 3: Get user doc instead of personnel doc
+      const userDoc = await getDoc(doc(db, 'users', personnelId));
 
-      // b. If personnel doesn't exist or has no unitId → cannot manage
-      if (!personnelDoc.exists()) {
+      // b. If user doesn't exist or has no unitId → cannot manage
+      if (!userDoc.exists()) {
         setCanManage(false);
         return;
       }
 
-      const personnelData = personnelDoc.data() as PersonnelDoc;
+      const userData = userDoc.data() as UserDoc;
 
-      if (!personnelData.unitId) {
+      if (!userData.unitId) {
         setCanManage(false);
         return;
       }
@@ -85,9 +85,9 @@ export function useCanManageRole(personnelId: string | undefined): UseCanManageR
         }
       });
 
-      // e. Walk unit ancestor chain starting at personnelData.unitId
+      // e. Walk unit ancestor chain starting at userData.unitId
       const ancestors: string[] = [];
-      let currentId: string | undefined = personnelData.unitId;
+      let currentId: string | undefined = userData.unitId;
 
       while (currentId) {
         ancestors.push(currentId);
