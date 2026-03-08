@@ -50,3 +50,4 @@ nul
 .vercel
 *firebase-adminsdk*.json
 firebase-staging-service-account.json
+backups/

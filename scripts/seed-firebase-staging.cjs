@@ -216,14 +216,28 @@ async function seedUsers() {
   const batch = db.batch();
   const now = admin.firestore.Timestamp.now();
 
+  // Phase 2: Users now include personnel fields (merged collection)
   const usersData = [
     {
       id: userUIDs.admin,
       data: {
-        fullName: 'Test Admin',
-        avatarUrl: null,
+        // Personnel fields
+        firstName: 'Test',
+        lastName: 'Admin',
+        email: 'test-admin@e2e.local',
+        phone: '+1-555-0101',
+        serviceNumber: 'E2E-ADMIN-001',
+        rank: 'COL',
         unitId: TEST_UNIT_IDS.battalion,
-        roles: ['admin'],
+        battalionId: TEST_UNIT_IDS.battalion,
+        location: 'Home',
+        skills: [],
+        driverLicenses: [],
+        signature: null,
+        avatarUrl: null,
+        profileImage: null,
+        // Auth fields
+        roles: ['admin', 'approved_user'], // isSignatureApproved → approved_user role
         createdAt: now,
         updatedAt: now,
       },
@@ -231,10 +245,23 @@ async function seedUsers() {
     {
       id: userUIDs.leader,
       data: {
-        fullName: 'Test Leader',
-        avatarUrl: null,
+        // Personnel fields
+        firstName: 'Test',
+        lastName: 'Leader',
+        email: 'test-leader@e2e.local',
+        phone: '+1-555-0102',
+        serviceNumber: 'E2E-LEADER-002',
+        rank: 'CPT',
         unitId: TEST_UNIT_IDS.company,
-        roles: ['leader'],
+        battalionId: TEST_UNIT_IDS.battalion,
+        location: 'Home',
+        skills: [],
+        driverLicenses: [],
+        signature: null,
+        avatarUrl: null,
+        profileImage: null,
+        // Auth fields
+        roles: ['leader', 'approved_user'],
         createdAt: now,
         updatedAt: now,
       },
@@ -242,10 +269,23 @@ async function seedUsers() {
     {
       id: userUIDs.user,
       data: {
-        fullName: 'Test User',
-        avatarUrl: null,
+        // Personnel fields
+        firstName: 'Test',
+        lastName: 'User',
+        email: 'test-user@e2e.local',
+        phone: '+1-555-0103',
+        serviceNumber: 'E2E-USER-003',
+        rank: 'SGT',
         unitId: TEST_UNIT_IDS.platoon,
-        roles: ['user'],
+        battalionId: TEST_UNIT_IDS.battalion,
+        location: 'Home',
+        skills: [],
+        driverLicenses: [],
+        signature: null,
+        avatarUrl: null,
+        profileImage: null,
+        // Auth fields
+        roles: ['user', 'approved_user'],
         createdAt: now,
         updatedAt: now,
       },
@@ -876,9 +916,9 @@ async function main() {
 
   try {
     await seedAuthUsers();
-    await seedUsers();
+    await seedUsers(); // Phase 2: Now includes personnel fields
     await seedUnits();
-    await seedPersonnel();
+    // await seedPersonnel(); // Phase 2: Merged into users collection
     await seedSignupRequests();
     await seedAdminUnitAssignments();
     await seedEquipment();
