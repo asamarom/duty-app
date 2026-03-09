@@ -175,7 +175,7 @@ describe('useEquipment Hook', () => {
         expect(result.current.equipment[0].name).toBe('M4 Carbine');
     });
 
-    it('checks if a user can delete equipment based on creator and assignment', () => {
+    it('checks if a user can delete equipment based on role and permissions', () => {
         const { result } = renderHook(() => useEquipment());
 
         const equipmentItem = {
@@ -183,23 +183,19 @@ describe('useEquipment Hook', () => {
             name: 'Test Item',
             createdBy: 'user-1',
             currentPersonnelId: 'pers-1',
+            currentUnitId: 'unit-1',
+            battalionId: 'battalion-test',
             assignmentLevel: 'individual' as any,
             quantity: 1,
         } as any;
 
-        // setup.ts mocks useAuth to return { user: { id: 'test-user-id' } }
-        // but useEquipment uses user?.uid, so we test with the mock value
+        // Regular users cannot delete equipment (per EQUIPMENT_ACCESS_RULES.md)
+        const regularUserItem = { ...equipmentItem, createdBy: 'test-user-id', currentPersonnelId: 'pers-1' };
+        expect(result.current.canDeleteEquipment(regularUserItem, 'pers-1')).toBe(false);
 
-        const validItem = { ...equipmentItem, createdBy: 'test-user-id', currentPersonnelId: 'pers-1' };
-        expect(result.current.canDeleteEquipment(validItem, 'pers-1')).toBe(true);
-
-        // Case 2: Different creator
-        const invalidCreator = { ...equipmentItem, createdBy: 'other-user', currentPersonnelId: 'pers-1' };
-        expect(result.current.canDeleteEquipment(invalidCreator, 'pers-1')).toBe(false);
-
-        // Case 3: Different assignment
-        const invalidAssignment = { ...equipmentItem, createdBy: 'test-user-id', currentPersonnelId: 'other-pers' };
-        expect(result.current.canDeleteEquipment(invalidAssignment, 'pers-1')).toBe(false);
+        // Non-admins cannot delete equipment not in their battalion
+        const differentBattalion = { ...equipmentItem, battalionId: 'other-battalion' };
+        expect(result.current.canDeleteEquipment(differentBattalion, 'pers-1')).toBe(false);
     });
 
     describe('isWithinSameUnit', () => {

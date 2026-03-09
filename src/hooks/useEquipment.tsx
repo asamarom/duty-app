@@ -264,12 +264,14 @@ export function useEquipment(): UseEquipmentReturn {
       // this client-side filter provides defense-in-depth by further restricting
       // visibility to unit/personal level.
       //
-      // Filter rules:
+      // Filter rules (from EQUIPMENT_ACCESS_RULES.md):
       // - ADMIN BYPASS: Admins see ALL equipment without any restrictions (including unassigned)
-      // - Leaders/signature-approved users see equipment assigned to their unit or personally
-      // - Regular users see equipment assigned to their unit or personally
-      // - Unassigned equipment is ONLY visible to admins
-      // - Hide equipment with pending transfers OUT from user's unit
+      // - Leaders/signature-approved users: See equipment in their unit + personally assigned + transfer requests
+      //   - NOT equipment assigned to other units (even within battalion)
+      //   - Equipment with pending transfer OUT is hidden (shown in Transfers tab)
+      // - Regular users: See equipment pending transfer TO them + personally assigned
+      //   - NOT equipment in their unit unless personally assigned
+      //   - NOT equipment with pending transfer OUT
 
 
       const filteredEquipment = mappedEquipment
@@ -283,11 +285,11 @@ export function useEquipment(): UseEquipmentReturn {
 
           // Unassigned equipment is ONLY visible to admins
           if (item.assignmentLevel === 'unassigned') {
-            return false; // Changed from true - only admins can see unassigned
+            return false;
           }
 
           // Check if this equipment has a pending transfer OUT from the user's unit
-          // Only hide if this is a serialized item (quantity=1 per row) OR if entire quantity is pending
+          // For leaders/signature-approved users: hide equipment with pending transfer OUT
           const pendingTransfers = pendingTransfersOut.get(baseEquipmentId);
           if (pendingTransfers && unitId && item.currentUnitId === unitId) {
             // Calculate total quantity pending transfer OUT from this unit
@@ -305,21 +307,22 @@ export function useEquipment(): UseEquipmentReturn {
             }
           }
 
-          // Show equipment assigned to the current user's unit
-          if (unitId && item.currentUnitId === unitId) {
-            return true;
-          }
-
-          // Show equipment assigned to the current user personally
+          // Show equipment assigned to the current user personally (for all user types)
           if (currentUserPersonnelId && item.currentPersonnelId === currentUserPersonnelId) {
             return true;
           }
 
-          // Show equipment with pending transfer TO the current user (for approval)
+          // Show equipment with pending transfer TO the current user (for all user types)
           if (pendingTransfersToUser.has(baseEquipmentId)) {
             return true;
           }
 
+          // Leaders and signature-approved users: Show equipment assigned to their unit
+          if ((isLeader || isSignatureApproved) && unitId && item.currentUnitId === unitId) {
+            return true;
+          }
+
+          // Regular users: Do NOT see unit equipment (only personal and pending TO them, handled above)
           // Hide all other equipment
           return false;
         })
@@ -361,6 +364,11 @@ export function useEquipment(): UseEquipmentReturn {
 
   const updateEquipment = useCallback(
     async (id: string, updates: { quantity?: number; status?: string; description?: string }) => {
+      // Only admins can update equipment
+      if (!isAdmin) {
+        throw new Error('Only admins can update equipment fields');
+      }
+
       const equipmentId = getBaseId(id);
       const updateData: Record<string, unknown> = {
         updatedAt: serverTimestamp(),
@@ -378,11 +386,21 @@ export function useEquipment(): UseEquipmentReturn {
 
       await updateDoc(doc(db, 'equipment', equipmentId), updateData);
     },
-    []
+    [isAdmin]
   );
 
   const addEquipment = useCallback(
     async (item: Omit<Equipment, 'id'>, assignment?: AssignmentData) => {
+      // Permission check: Only admins, leaders, and signature-approved users can create equipment
+      if (!isAdmin && !isLeader && !isSignatureApproved) {
+        throw new Error('You do not have permission to create equipment');
+      }
+
+      // Leaders/signature-approved users can only create equipment in their own unit
+      if (!isAdmin && assignment?.unitId && assignment.unitId !== unitId) {
+        throw new Error('You can only create equipment in your own unit');
+      }
+
       // For bulk items (no serial), check if equipment with same name exists at same assignment
       if (!item.serialNumber && assignment) {
         const assignmentKey = assignment.personnelId
@@ -452,7 +470,7 @@ export function useEquipment(): UseEquipmentReturn {
         });
       }
     },
-    [equipment, user?.uid, battalionId]
+    [equipment, user?.uid, battalionId, isAdmin, isLeader, isSignatureApproved, unitId]
   );
 
   const canDeleteEquipment = useCallback(
@@ -462,23 +480,22 @@ export function useEquipment(): UseEquipmentReturn {
         return true;
       }
 
-      // Leaders/signature-approved users can delete equipment assigned to their unit
-      // (Stricter check: should verify createdBy was also from their unit, but requires additional lookup)
-      // For now, we allow deletion if equipment is assigned to leader's unit
-      if (unitId && equipmentItem.currentUnitId === unitId) {
-        return true;
+      // Leaders/signature-approved users can delete equipment that:
+      // 1. Was created by their unit (createdBy exists and equipment is from their battalion)
+      // 2. Is currently assigned to their unit
+      if ((isLeader || isSignatureApproved) && unitId && equipmentItem.currentUnitId === unitId) {
+        // Check if equipment was created by someone in the same battalion
+        // Note: We don't verify the exact createdBy user's unit here, but rely on
+        // battalionId matching as a proxy for "created by my unit"
+        if (equipmentItem.battalionId === battalionId) {
+          return true;
+        }
       }
 
-      // Regular users can delete equipment they created AND is assigned to them personally
-      if (!currentUserPersonnelId || equipmentItem.currentPersonnelId !== currentUserPersonnelId) {
-        return false;
-      }
-      if (equipmentItem.createdBy !== user?.uid) {
-        return false;
-      }
-      return true;
+      // Regular users cannot delete equipment
+      return false;
     },
-    [user?.uid, isAdmin, unitId]
+    [user?.uid, isAdmin, isLeader, isSignatureApproved, unitId, battalionId]
   );
 
   const getBaseId = (id: string) => id.split('--')[0];
@@ -649,13 +666,23 @@ export function useEquipment(): UseEquipmentReturn {
     async (id: string, assignment: AssignmentData, notes?: string, quantity?: number) => {
       const equipmentId = getBaseId(id);
 
-      // User role validation: Regular users can only transfer equipment assigned to them personally
-      // Find the equipment item to check ownership
+      // Find the equipment item to check ownership and permissions (if available)
+      // Note: In some cases (like tests or initial load), equipment might not be in state yet
       const equipmentItem = equipment.find(e => e.id.startsWith(equipmentId));
-      if (equipmentItem && !isAdmin && !isLeader && !isSignatureApproved) {
-        // Regular user - must own the equipment personally
-        if (equipmentItem.currentPersonnelId !== currentUserPersonnelId) {
-          throw new Error('You can only transfer equipment assigned to you personally');
+
+      // Client-side permission checks (if equipment is found in state)
+      // This provides early validation for better UX, but Firestore rules are the ultimate authority
+      if (equipmentItem && !isAdmin) {
+        if (isLeader || isSignatureApproved) {
+          // Leaders/signature-approved users can only transfer equipment from their unit
+          if (equipmentItem.currentUnitId !== unitId) {
+            throw new Error('You can only transfer equipment assigned to your unit');
+          }
+        } else {
+          // Regular users can only transfer equipment assigned to them personally
+          if (equipmentItem.currentPersonnelId !== currentUserPersonnelId) {
+            throw new Error('You can only transfer equipment assigned to you personally');
+          }
         }
       }
 
@@ -667,7 +694,7 @@ export function useEquipment(): UseEquipmentReturn {
         quantity || undefined,
       );
     },
-    [_initiateTransferLocally, equipment, isAdmin, isLeader, isSignatureApproved, currentUserPersonnelId]
+    [_initiateTransferLocally, equipment, isAdmin, isLeader, isSignatureApproved, currentUserPersonnelId, unitId]
   );
 
   useEffect(() => {
