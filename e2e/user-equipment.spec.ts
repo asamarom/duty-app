@@ -31,9 +31,9 @@ test.describe('User Equipment Access Rules [USER-EQUIP]', () => {
     });
 
     await page.goto('/equipment');
-    await page.waitForLoadState('domcontentloaded');
-    // Wait longer for equipment to load and filter
-    await page.waitForTimeout(5000);
+    await page.waitForLoadState('networkidle');
+    // Wait for equipment to load
+    await page.locator('table tbody tr, [data-testid="equipment-item"]').first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
 
     const pageContent = await page.textContent('body');
 
@@ -185,8 +185,7 @@ test.describe('User Equipment Access Rules [USER-EQUIP]', () => {
     // When equipment from user's unit has a pending transfer OUT, it should be hidden from Equipment tab
 
     await page.goto('/equipment');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(3000);
+    await page.waitForLoadState('networkidle');
 
     // Count equipment items in Equipment tab
     const equipmentItems = page.locator('table tbody tr, [data-testid="equipment-item"]');

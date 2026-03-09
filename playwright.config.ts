@@ -40,9 +40,9 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
 
   // Parallel workers on CI
-  // For staging tests: 2 workers (no emulator conflicts, saves CI minutes)
+  // For staging tests: 4 workers (no emulator conflicts, faster CI)
   // For local with emulators: 1 worker (avoid conflicts)
-  workers: process.env.CI && process.env.TEST_ENV === 'staging' ? 2 :
+  workers: process.env.CI && process.env.TEST_ENV === 'staging' ? 4 :
            process.env.CI ? 1 : undefined,
 
   // Reporter to use
@@ -63,7 +63,13 @@ export default defineConfig({
 
     // Video on failure
     video: 'on-first-retry',
+
+    // Action timeout: Most tests finish actions in <5s
+    actionTimeout: 15 * 1000,
   },
+
+  // Global test timeout: Most tests finish in <5s, some take up to 10s
+  timeout: 20 * 1000,
 
   // Configure projects for major browsers
   projects: [
