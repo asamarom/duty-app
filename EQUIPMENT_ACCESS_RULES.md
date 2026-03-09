@@ -38,6 +38,7 @@ This document defines who can see and act on equipment in the DTMS system.
   - Requests of equipment transfer into and out of my unit
 - Requests of equipment transfer into and out of my personal user
   - **NOT** equipment assigned to other units (even within my battalion)
+  - **NOT** Requests of equipment transfer not into or out of my unit. also not in transfer history.
   - Equipment in pending status will not be counted in my equipment view
   - Requests of equipment transfer into my unit will be viewed in my incoming transfer requests only
   - Requests of equipment transfer out of my unit will be viewed in my outcoming transfer requests only
