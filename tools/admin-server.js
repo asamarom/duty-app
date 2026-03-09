@@ -46,28 +46,24 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
-// GET /api/user/:uid — read user doc + personnel record
+// GET /api/user/:uid — read user doc (Phase 3: personnel data merged into users)
 app.get('/api/user/:uid', async (req, res) => {
   try {
     const doc = await db.collection('users').doc(req.params.uid).get();
     if (!doc.exists) return res.status(404).json({ error: 'User not found' });
-    const { fullName, roles, unitId } = doc.data();
+    const userData = doc.data();
+    const { fullName, roles, unitId, firstName, lastName, serviceNumber } = userData;
 
-    // Check if personnel record exists
-    const personnelSnap = await db.collection('personnel').where('userId', '==', req.params.uid).get();
-    const hasPersonnel = !personnelSnap.empty;
-    let personnelData = null;
-    if (hasPersonnel) {
-      const personnelDoc = personnelSnap.docs[0];
-      personnelData = {
-        id: personnelDoc.id,
-        firstName: personnelDoc.data().firstName,
-        lastName: personnelDoc.data().lastName,
-        serviceNumber: personnelDoc.data().serviceNumber,
-      };
-    }
+    // Phase 3: Personnel data is now directly in user document
+    const hasPersonnel = !!(firstName || lastName || serviceNumber);
+    const personnelData = hasPersonnel ? {
+      id: req.params.uid, // userId is now the personnel ID
+      firstName: firstName || '',
+      lastName: lastName || '',
+      serviceNumber: serviceNumber || '',
+    } : null;
 
-    res.json({ fullName, roles, unitId, hasPersonnel, personnel: personnelData });
+    res.json({ fullName, roles, unitId, hasPersonnel, personnel: personnelData, firstName, lastName, serviceNumber });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -139,30 +135,22 @@ app.post('/api/user/:uid/role', async (req, res) => {
   }
 });
 
-// POST /api/user/:uid/unit — set unit
+// POST /api/user/:uid/unit — set unit (Phase 3: no separate personnel collection)
 app.post('/api/user/:uid/unit', async (req, res) => {
   try {
     const { unitId } = req.body;
     if (!unitId) return res.status(400).json({ error: 'unitId is required' });
 
-    // Update user document
-    await db.collection('users').doc(req.params.uid).update({ unitId });
+    // Get battalion ID from unit
+    const unitDoc = await db.collection('units').doc(unitId).get();
+    const battalionId = unitDoc.exists ? (unitDoc.data().battalionId || unitId) : unitId;
 
-    // Update personnel record if it exists
-    const personnelSnap = await db.collection('personnel').where('userId', '==', req.params.uid).get();
-    if (!personnelSnap.empty) {
-      const personnelDoc = personnelSnap.docs[0];
-
-      // Get battalion ID from unit
-      const unitDoc = await db.collection('units').doc(unitId).get();
-      const battalionId = unitDoc.exists ? unitDoc.data().battalionId : null;
-
-      await personnelDoc.ref.update({
-        unitId,
-        ...(battalionId ? { battalionId } : {}),
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      });
-    }
+    // Phase 3: Update user document directly (personnel data is merged in)
+    await db.collection('users').doc(req.params.uid).update({
+      unitId,
+      battalionId,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
 
     res.json({ ok: true });
   } catch (err) {
@@ -170,7 +158,7 @@ app.post('/api/user/:uid/unit', async (req, res) => {
   }
 });
 
-// POST /api/user/:uid/personnel — create or update personnel record
+// POST /api/user/:uid/personnel — update personnel data (Phase 3: merged into users)
 app.post('/api/user/:uid/personnel', async (req, res) => {
   try {
     const { firstName, lastName, serviceNumber } = req.body;
@@ -179,55 +167,16 @@ app.post('/api/user/:uid/personnel', async (req, res) => {
     const userDoc = await db.collection('users').doc(req.params.uid).get();
     if (!userDoc.exists) return res.status(404).json({ error: 'User not found' });
 
-    const userData = userDoc.data();
-    const unitId = userData.unitId || null;
+    // Phase 3: Update personnel data directly in user document
+    const updateData = {
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+    if (firstName !== undefined) updateData.firstName = firstName;
+    if (lastName !== undefined) updateData.lastName = lastName;
+    if (serviceNumber !== undefined) updateData.serviceNumber = serviceNumber;
 
-    // Get battalion ID from unit
-    let battalionId = null;
-    if (unitId) {
-      const unitDoc = await db.collection('units').doc(unitId).get();
-      if (unitDoc.exists) {
-        battalionId = unitDoc.data().battalionId || unitId;
-      }
-    }
-
-    // Check if personnel record exists
-    const personnelSnap = await db.collection('personnel').where('userId', '==', req.params.uid).get();
-
-    if (personnelSnap.empty) {
-      // Create new personnel record
-      const personnelData = {
-        userId: req.params.uid,
-        firstName: firstName || '',
-        lastName: lastName || '',
-        email: userData.email || null,
-        serviceNumber: serviceNumber || '',
-        unitId,
-        rank: 'טוראי', // Default rank
-        locationStatus: 'on_duty',
-        readinessStatus: 'ready',
-        isSignatureApproved: false,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        ...(battalionId ? { battalionId } : {}),
-      };
-      await db.collection('personnel').add(personnelData);
-      res.json({ ok: true, created: true });
-    } else {
-      // Update existing personnel record
-      const personnelDoc = personnelSnap.docs[0];
-      const updateData = {
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      };
-      if (firstName) updateData.firstName = firstName;
-      if (lastName) updateData.lastName = lastName;
-      if (serviceNumber) updateData.serviceNumber = serviceNumber;
-      if (unitId) updateData.unitId = unitId;
-      if (battalionId) updateData.battalionId = battalionId;
-
-      await personnelDoc.ref.update(updateData);
-      res.json({ ok: true, updated: true });
-    }
+    await db.collection('users').doc(req.params.uid).update(updateData);
+    res.json({ ok: true, updated: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

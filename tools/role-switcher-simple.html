@@ -244,21 +244,25 @@
         : (currentUnitId || 'none');
 
       // Handle personnel record
+      // Phase 3: Personnel data is now directly in user document
       const personnelStatus = document.getElementById('personnel-status');
       const personnelForm = document.getElementById('personnel-form');
       const saveBtn = document.getElementById('save-personnel-text');
 
-      if (userData.hasPersonnel && userData.personnel) {
-        // Personnel record exists - show current data
+      // Check if user has personnel data (firstName, lastName, serviceNumber)
+      const hasPersonnelData = userData.firstName || userData.lastName || userData.serviceNumber;
+
+      if (hasPersonnelData) {
+        // Personnel data exists - show current data
         personnelStatus.innerHTML = `✓ Personnel record exists`;
         personnelStatus.style.color = '#4ade80';
         personnelForm.style.display = 'block';
-        document.getElementById('first-name').value = userData.personnel.firstName || '';
-        document.getElementById('last-name').value = userData.personnel.lastName || '';
-        document.getElementById('service-number').value = userData.personnel.serviceNumber || '';
+        document.getElementById('first-name').value = userData.firstName || '';
+        document.getElementById('last-name').value = userData.lastName || '';
+        document.getElementById('service-number').value = userData.serviceNumber || '';
         saveBtn.textContent = 'Update Personnel Record';
       } else {
-        // No personnel record - show create form
+        // No personnel data - show create form
         personnelStatus.innerHTML = `⚠ No personnel record found`;
         personnelStatus.style.color = '#f59e0b';
         personnelForm.style.display = 'block';
