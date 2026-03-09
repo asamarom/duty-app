@@ -38,6 +38,8 @@ const mockOnSnapshot = vi.fn((
     return () => {};
 });
 
+const mockGetDoc = vi.fn();
+
 vi.mock('firebase/firestore', () => ({
     collection: (...args: unknown[]) => mockCollection(...args),
     getDocs: (...args: unknown[]) => mockGetDocs(...args),
@@ -48,7 +50,7 @@ vi.mock('firebase/firestore', () => ({
     updateDoc: vi.fn(),
     deleteDoc: vi.fn(),
     doc: (...args: unknown[]) => mockDocFn(...args),
-    getDoc: vi.fn(),
+    getDoc: (...args: unknown[]) => mockGetDoc(...args),
     serverTimestamp: vi.fn(),
     onSnapshot: (...args: unknown[]) => mockOnSnapshot(...(args as Parameters<typeof mockOnSnapshot>)),
 }));
@@ -84,6 +86,11 @@ describe('useEquipment Hook', () => {
         mockGetDocs.mockResolvedValue({ docs: [] });
         // Default: httpsCallable returns a no-op callable
         mockHttpsCallable.mockReturnValue(vi.fn().mockResolvedValue({ data: { success: true } }));
+        // Default: getDoc returns a document snapshot with exists() and data() methods
+        mockGetDoc.mockResolvedValue({
+            exists: () => true,
+            data: () => ({ roles: ['approved_user'] }),
+        });
         // Restore default onSnapshot implementation after vi.clearAllMocks() wipes it
         mockOnSnapshot.mockImplementation((
             query: unknown,
@@ -117,9 +124,18 @@ describe('useEquipment Hook', () => {
                 data: () => ({
                     name: 'M4 Carbine',
                     serialNumber: 'SN12345',
+                    description: 'Test rifle',
+                    category: 'weapon',
                     quantity: 1,
                     status: 'available',
                     createdBy: 'user-1',
+                    battalionId: 'battalion-a',
+                    currentUnitId: null,
+                    currentPersonnelId: null,
+                    currentQuantityAssigned: 0,
+                    lastAssignedAt: null,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
                 }),
                 exists: () => true,
             },
