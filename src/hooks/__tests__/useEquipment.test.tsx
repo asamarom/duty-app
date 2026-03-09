@@ -142,21 +142,28 @@ describe('useEquipment Hook', () => {
         ];
 
         // The hook registers 3 onSnapshot listeners: equipment, assignments, pending.
-        // First call (equipment) should return mockEquipmentDocs,
-        // second and third (assignments, pending) return empty docs.
+        // The useEffect that registers these listeners will fire twice:
+        // 1. Initially when component mounts
+        // 2. After fetchUser completes and currentUserPersonnelId changes
+        // So we need 6 mock implementations (3 for each registration)
+        const mockEquipmentSnapshot = (query: unknown, cb: (snap: unknown) => void) => {
+            cb({ docs: mockEquipmentDocs });
+            return () => {};
+        };
+        const mockEmptySnapshot = (query: unknown, cb: (snap: unknown) => void) => {
+            cb({ docs: [] });
+            return () => {};
+        };
+
         mockOnSnapshot
-            .mockImplementationOnce((query: unknown, cb: (snap: unknown) => void) => {
-                cb({ docs: mockEquipmentDocs });
-                return () => {};
-            })
-            .mockImplementationOnce((query: unknown, cb: (snap: unknown) => void) => {
-                cb({ docs: [] });
-                return () => {};
-            })
-            .mockImplementationOnce((query: unknown, cb: (snap: unknown) => void) => {
-                cb({ docs: [] });
-                return () => {};
-            });
+            // First registration (initial mount)
+            .mockImplementationOnce(mockEquipmentSnapshot)
+            .mockImplementationOnce(mockEmptySnapshot)
+            .mockImplementationOnce(mockEmptySnapshot)
+            // Second registration (after currentUserPersonnelId updates)
+            .mockImplementationOnce(mockEquipmentSnapshot)
+            .mockImplementationOnce(mockEmptySnapshot)
+            .mockImplementationOnce(mockEmptySnapshot);
 
         const { result } = renderHook(() => useEquipment());
 
