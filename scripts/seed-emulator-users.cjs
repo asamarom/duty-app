@@ -22,11 +22,8 @@ const TEST_UNIT_IDS = {
   platoon: '00000000-0000-0000-0000-100000000003',
 };
 
-const TEST_PERSONNEL_IDS = {
-  admin: '00000000-0000-0000-0000-200000000001',
-  leader: '00000000-0000-0000-0000-200000000002',
-  user: '00000000-0000-0000-0000-200000000003',
-};
+// Phase 3: TEST_PERSONNEL_IDS removed - personnel IDs now use userUIDs directly
+// (personnel collection merged into users collection)
 
 const TEST_EQUIPMENT_IDS = {
   bulk: '00000000-0000-0000-0000-300000000001',
@@ -182,7 +179,7 @@ async function seedAuthUsers() {
 }
 
 async function seedUsers() {
-  console.log('2. Seeding users collection (roles)...');
+  console.log('2. Seeding users collection (with personnel data merged - Phase 3)...');
   await clearFirestoreCollection('users');
 
   const usersData = [
@@ -192,7 +189,23 @@ async function seedUsers() {
         fullName: toStringValue('Test Admin'),
         avatarUrl: { nullValue: null },
         unitId: toStringValue(TEST_UNIT_IDS.battalion),
+        battalionId: toStringValue(TEST_UNIT_IDS.battalion),
         roles: toArrayValue(['admin']),
+        // Personnel data merged into user document
+        serviceNumber: toStringValue('E2E-ADMIN-001'),
+        rank: toStringValue('COL'),
+        firstName: toStringValue('Test'),
+        lastName: toStringValue('Admin'),
+        dutyPosition: toStringValue('System Administrator'),
+        phone: toStringValue('+1-555-0101'),
+        email: toStringValue('test-admin@e2e.local'),
+        localAddress: { nullValue: null },
+        profileImage: { nullValue: null },
+        locationStatus: toStringValue('home'),
+        readinessStatus: toStringValue('ready'),
+        skills: toArrayValue([]),
+        driverLicenses: toArrayValue([]),
+        isSignatureApproved: toBooleanValue(true),
         createdAt: toTimestampValue(),
         updatedAt: toTimestampValue(),
       },
@@ -203,7 +216,23 @@ async function seedUsers() {
         fullName: toStringValue('Test Leader'),
         avatarUrl: { nullValue: null },
         unitId: toStringValue(TEST_UNIT_IDS.company),
+        battalionId: toStringValue(TEST_UNIT_IDS.battalion),
         roles: toArrayValue(['leader']),
+        // Personnel data merged into user document
+        serviceNumber: toStringValue('E2E-LEADER-002'),
+        rank: toStringValue('CPT'),
+        firstName: toStringValue('Test'),
+        lastName: toStringValue('Leader'),
+        dutyPosition: toStringValue('Company Commander'),
+        phone: toStringValue('+1-555-0102'),
+        email: toStringValue('test-leader@e2e.local'),
+        localAddress: { nullValue: null },
+        profileImage: { nullValue: null },
+        locationStatus: toStringValue('home'),
+        readinessStatus: toStringValue('ready'),
+        skills: toArrayValue([]),
+        driverLicenses: toArrayValue([]),
+        isSignatureApproved: toBooleanValue(true),
         createdAt: toTimestampValue(),
         updatedAt: toTimestampValue(),
       },
@@ -214,7 +243,23 @@ async function seedUsers() {
         fullName: toStringValue('Test User'),
         avatarUrl: { nullValue: null },
         unitId: toStringValue(TEST_UNIT_IDS.platoon),
+        battalionId: toStringValue(TEST_UNIT_IDS.battalion),
         roles: toArrayValue(['user']),
+        // Personnel data merged into user document
+        serviceNumber: toStringValue('E2E-USER-003'),
+        rank: toStringValue('SGT'),
+        firstName: toStringValue('Test'),
+        lastName: toStringValue('User'),
+        dutyPosition: toStringValue('Squad Leader'),
+        phone: toStringValue('+1-555-0103'),
+        email: toStringValue('test-user@e2e.local'),
+        localAddress: { nullValue: null },
+        profileImage: { nullValue: null },
+        locationStatus: toStringValue('home'),
+        readinessStatus: toStringValue('ready'),
+        skills: toArrayValue([]),
+        driverLicenses: toArrayValue([]),
+        isSignatureApproved: toBooleanValue(true),
         createdAt: toTimestampValue(),
         updatedAt: toTimestampValue(),
       },
@@ -223,7 +268,7 @@ async function seedUsers() {
 
   for (const u of usersData) {
     await createFirestoreDoc('users', u.id, u.fields);
-    console.log(`   Created user doc: ${u.id}`);
+    console.log(`   Created user doc: ${u.id} (${u.fields.firstName.stringValue} ${u.fields.lastName.stringValue})`);
   }
 }
 
@@ -282,90 +327,9 @@ async function seedUnits() {
   }
 }
 
-async function seedPersonnel() {
-  console.log('4. Seeding personnel collection...');
-  await clearFirestoreCollection('personnel');
-
-  const personnel = [
-    {
-      id: TEST_PERSONNEL_IDS.admin,
-      fields: {
-        userId: toStringValue(userUIDs.admin),
-        unitId: toStringValue(TEST_UNIT_IDS.battalion),
-        battalionId: toStringValue(TEST_UNIT_IDS.battalion),
-        serviceNumber: toStringValue('E2E-ADMIN-001'),
-        rank: toStringValue('COL'),
-        firstName: toStringValue('Test'),
-        lastName: toStringValue('Admin'),
-        dutyPosition: toStringValue('System Administrator'),
-        phone: toStringValue('+1-555-0101'),
-        email: toStringValue('test-admin@e2e.local'),
-        localAddress: { nullValue: null },
-        profileImage: { nullValue: null },
-        locationStatus: toStringValue('home'),
-        readinessStatus: toStringValue('ready'),
-        skills: toArrayValue([]),
-        driverLicenses: toArrayValue([]),
-        isSignatureApproved: toBooleanValue(true),
-        createdAt: toTimestampValue(),
-        updatedAt: toTimestampValue(),
-      },
-    },
-    {
-      id: TEST_PERSONNEL_IDS.leader,
-      fields: {
-        userId: toStringValue(userUIDs.leader),
-        unitId: toStringValue(TEST_UNIT_IDS.company),
-        battalionId: toStringValue(TEST_UNIT_IDS.battalion),
-        serviceNumber: toStringValue('E2E-LEADER-002'),
-        rank: toStringValue('CPT'),
-        firstName: toStringValue('Test'),
-        lastName: toStringValue('Leader'),
-        dutyPosition: toStringValue('Company Commander'),
-        phone: toStringValue('+1-555-0102'),
-        email: toStringValue('test-leader@e2e.local'),
-        localAddress: { nullValue: null },
-        profileImage: { nullValue: null },
-        locationStatus: toStringValue('home'),
-        readinessStatus: toStringValue('ready'),
-        skills: toArrayValue([]),
-        driverLicenses: toArrayValue([]),
-        isSignatureApproved: toBooleanValue(true),
-        createdAt: toTimestampValue(),
-        updatedAt: toTimestampValue(),
-      },
-    },
-    {
-      id: TEST_PERSONNEL_IDS.user,
-      fields: {
-        userId: toStringValue(userUIDs.user),
-        unitId: toStringValue(TEST_UNIT_IDS.platoon),
-        battalionId: toStringValue(TEST_UNIT_IDS.battalion),
-        serviceNumber: toStringValue('E2E-USER-003'),
-        rank: toStringValue('SGT'),
-        firstName: toStringValue('Test'),
-        lastName: toStringValue('User'),
-        dutyPosition: toStringValue('Squad Leader'),
-        phone: toStringValue('+1-555-0103'),
-        email: toStringValue('test-user@e2e.local'),
-        localAddress: { nullValue: null },
-        profileImage: { nullValue: null },
-        locationStatus: toStringValue('home'),
-        readinessStatus: toStringValue('ready'),
-        skills: toArrayValue([]),
-        driverLicenses: toArrayValue([]),
-        isSignatureApproved: toBooleanValue(true),
-        createdAt: toTimestampValue(),
-        updatedAt: toTimestampValue(),
-      },
-    },
-  ];
-
-  for (const p of personnel) {
-    await createFirestoreDoc('personnel', p.id, p.fields);
-    console.log(`   Created personnel: ${p.fields.firstName.stringValue} ${p.fields.lastName.stringValue}`);
-  }
-}
+// Phase 3: Personnel data is now merged into users collection
+// No separate personnel collection needed
+// Personnel fields (firstName, lastName, serviceNumber, etc.) are now part of user documents
 
 async function seedSignupRequests() {
   console.log('5. Seeding signupRequests collection...');
@@ -489,7 +453,7 @@ async function seedEquipment() {
   });
   console.log('   Created bulk equipment: Radio Set (qty: 5) → Battalion');
 
-  // Serialized item assigned to test-user personnel
+  // Serialized item assigned to test-user (Phase 3: using user ID directly)
   await createFirestoreDoc('equipment', TEST_EQUIPMENT_IDS.serialized, {
     name: toStringValue('M4 Carbine'),
     serialNumber: toStringValue('E2E-SN-001'),
@@ -498,9 +462,9 @@ async function seedEquipment() {
     status: toStringValue('serviceable'),
     createdBy: { nullValue: null },
     battalionId: toStringValue(TEST_UNIT_IDS.battalion),
-    // Denormalized current assignment
+    // Denormalized current assignment (Phase 3: personnel ID = user ID)
     currentUnitId: { nullValue: null },
-    currentPersonnelId: toStringValue(TEST_PERSONNEL_IDS.user),
+    currentPersonnelId: toStringValue(userUIDs.user),
     currentQuantityAssigned: toIntegerValue(1),
     lastAssignedAt: toTimestampValue(),
     createdAt: toTimestampValue(),
@@ -523,10 +487,10 @@ async function seedEquipment() {
   });
   console.log('   Created assignment: Radio Set (5) → Test Battalion');
 
-  // Serialized assignment: M4 Carbine → test-user personnel
+  // Serialized assignment: M4 Carbine → test-user (Phase 3: using user ID)
   await createFirestoreDoc('equipmentAssignments', TEST_ASSIGNMENT_IDS.serializedToUser, {
     equipmentId: toStringValue(TEST_EQUIPMENT_IDS.serialized),
-    personnelId: toStringValue(TEST_PERSONNEL_IDS.user),
+    personnelId: toStringValue(userUIDs.user),
     unitId: { nullValue: null },
     quantity: toIntegerValue(1),
     assignedBy: { nullValue: null },
@@ -662,12 +626,11 @@ async function main() {
 
   await seedAuthUsers();
   console.log('');
-  await seedUsers();
+  await seedUsers(); // Phase 3: Personnel data merged into users
   console.log('');
   await seedUnits();
   console.log('');
-  await seedPersonnel();
-  console.log('');
+  // Phase 3: seedPersonnel() removed - personnel data now in users collection
   await seedSignupRequests();
   console.log('');
   await seedAdminUnitAssignments();
