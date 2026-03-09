@@ -15,6 +15,8 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/integrations/firebase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserBattalion } from '@/hooks/useUserBattalion';
+import { useUserRole } from '@/hooks/useUserRole';
 import type { AssignmentRequestDoc, EquipmentDoc, UnitDoc, PersonnelDoc, UserDoc } from '@/integrations/firebase/types';
 
 export type AssignmentRequestStatus = 'pending' | 'approved' | 'rejected';
@@ -86,6 +88,8 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
   const [loading, setLoading] = useState(_requestsCache === null);
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
+  const { battalionId, loading: battalionLoading } = useUserBattalion();
+  const { isAdmin } = useUserRole();
 
   // Keep a ref that always points at the latest requests array so that
   // approveRequest/rejectRequest can find requests even when the state
@@ -207,8 +211,21 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
   }, [user?.uid]);
 
   useEffect(() => {
+    // Wait for battalionId to load before setting up query (unless admin)
+    // This prevents permission denied errors for non-admin users
+    if (!isAdmin && (battalionLoading || battalionId === null)) {
+      setLoading(true);
+      return;
+    }
+
     const requestsRef = collection(db, 'assignmentRequests');
-    const q = query(requestsRef, orderBy('requestedAt', 'desc'));
+    // Admin: fetch all requests
+    // Non-admin: filter by battalionId to match Firestore security rules
+    const q = isAdmin
+      ? query(requestsRef, orderBy('requestedAt', 'desc'))
+      : battalionId
+        ? query(requestsRef, where('battalionId', '==', battalionId), orderBy('requestedAt', 'desc'))
+        : query(requestsRef, where('battalionId', '==', '__NO_BATTALION__'), orderBy('requestedAt', 'desc'));
 
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       try {
@@ -254,7 +271,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     });
 
     return unsubscribe;
-  }, [mapSnapshot, currentPersonnelId, currentUnitId, isSignatureApproved]);
+  }, [mapSnapshot, currentPersonnelId, currentUnitId, isSignatureApproved, isAdmin, battalionId, battalionLoading]);
 
   const refetch = useCallback(async () => {
     // With onSnapshot, data is kept live — nothing to do manually
