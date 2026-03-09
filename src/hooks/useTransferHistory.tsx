@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { collection, query, where, orderBy, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/integrations/firebase/client';
+import { useAuth } from '@/hooks/useAuth';
 import type { TransferHistoryRecord } from '@/types/pmtb';
 import type { AssignmentRequestDoc, UnitDoc, PersonnelDoc, UserDoc } from '@/integrations/firebase/types';
 
@@ -15,6 +16,28 @@ export function useTransferHistory(equipmentId: string | undefined): UseTransfer
   const [history, setHistory] = useState<TransferHistoryRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const { user } = useAuth();
+  const [currentPersonnelId, setCurrentPersonnelId] = useState<string | null>(null);
+  const [currentUnitId, setCurrentUnitId] = useState<string | null>(null);
+  const [isSignatureApproved, setIsSignatureApproved] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Fetch current user's unit and role info
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    const unsubscribe = getDoc(doc(db, 'users', user.uid)).then((docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data() as UserDoc;
+        setCurrentPersonnelId(user.uid);
+        setCurrentUnitId(data.unitId || null);
+        setIsSignatureApproved(data.roles?.includes('approved_user') || false);
+        setIsAdmin(data.roles?.includes('admin') || false);
+      }
+    });
+
+    return () => {};
+  }, [user?.uid]);
 
   const fetchHistory = useCallback(async () => {
     if (!equipmentId) {
@@ -102,7 +125,20 @@ export function useTransferHistory(equipmentId: string | undefined): UseTransfer
         })
       );
 
-      setHistory(mappedHistory);
+      // Filter history based on user role and unit
+      // Admins see all history; leaders see only transfers involving their unit; regular users see only their personal transfers
+      const filteredHistory = isAdmin
+        ? mappedHistory
+        : mappedHistory.filter(record =>
+            // Show if transfer involves me personally
+            (record.fromUnitId === currentPersonnelId || record.toUnitId === currentPersonnelId) ||
+            // Show if transfer involves my unit (for signature-approved users only)
+            (isSignatureApproved && (
+              record.fromUnitId === currentUnitId || record.toUnitId === currentUnitId
+            ))
+          );
+
+      setHistory(filteredHistory);
     } catch (err) {
       console.error('useTransferHistory: Firestore error', err);
       setError(err as Error);
@@ -110,7 +146,7 @@ export function useTransferHistory(equipmentId: string | undefined): UseTransfer
     } finally {
       setLoading(false);
     }
-  }, [equipmentId]);
+  }, [equipmentId, isAdmin, currentPersonnelId, currentUnitId, isSignatureApproved]);
 
   useEffect(() => {
     fetchHistory();

@@ -258,9 +258,23 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
             (isSignatureApproved && r.from_unit_id != null && r.from_unit_id === currentUnitId)
           )
         );
-        _requestsCache = { requests: mappedRequests, incoming, outgoing };
-        latestRequestsRef.current = mappedRequests;
-        setRequests(mappedRequests);
+
+        // Filter all requests to only show those involving the user's unit or themselves
+        // Admins see everything; leaders see only transfers involving their unit; regular users see only their personal transfers
+        const filteredRequests = isAdmin
+          ? mappedRequests
+          : mappedRequests.filter(r =>
+              // Show if transfer involves me personally
+              (r.from_personnel_id === currentPersonnelId || r.to_personnel_id === currentPersonnelId) ||
+              // Show if transfer involves my unit (for signature-approved users only)
+              (isSignatureApproved && (
+                r.from_unit_id === currentUnitId || r.to_unit_id === currentUnitId
+              ))
+            );
+
+        _requestsCache = { requests: filteredRequests, incoming, outgoing };
+        latestRequestsRef.current = filteredRequests;
+        setRequests(filteredRequests);
         setIncomingTransfers(incoming);
         setOutgoingTransfers(outgoing);
       } catch (err) {
