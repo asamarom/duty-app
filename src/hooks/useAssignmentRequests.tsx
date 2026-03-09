@@ -232,9 +232,9 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
         setError(null);
         const mappedRequests = await mapSnapshot(snapshot);
 
-        // Only show incoming transfers that the user has permission to accept:
-        // - Signature-approved users can see transfers to their unit OR themselves
-        // - Non-signature-approved users can ONLY see transfers to themselves personally
+        // Incoming transfers: Requests of equipment transfer INTO my unit
+        // - Signature-approved users can see transfers TO their unit OR themselves
+        // - Non-signature-approved users can ONLY see transfers TO themselves personally
         const incoming = mappedRequests.filter(r =>
           r.status === 'pending' &&
           !r.recipient_approved &&
@@ -245,10 +245,18 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
             (isSignatureApproved && r.to_unit_id != null && r.to_unit_id === currentUnitId)
           )
         );
-        // Only show outgoing transfers that were initiated by the current user
+
+        // Outgoing transfers: Requests of equipment transfer OUT OF my unit
+        // - Signature-approved users can see transfers FROM their unit
+        // - Regular users can see transfers FROM themselves personally
         const outgoing = mappedRequests.filter(r =>
           r.status === 'pending' &&
-          r.requested_by === user?.uid
+          (
+            // Personal transfers - everyone can see transfers from themselves
+            (r.from_personnel_id != null && r.from_personnel_id === currentPersonnelId) ||
+            // Unit transfers - only signature-approved users can see transfers from their unit
+            (isSignatureApproved && r.from_unit_id != null && r.from_unit_id === currentUnitId)
+          )
         );
         _requestsCache = { requests: mappedRequests, incoming, outgoing };
         latestRequestsRef.current = mappedRequests;
