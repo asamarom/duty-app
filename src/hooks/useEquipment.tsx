@@ -266,12 +266,13 @@ export function useEquipment(): UseEquipmentReturn {
       //
       // Filter rules (from EQUIPMENT_ACCESS_RULES.md):
       // - ADMIN BYPASS: Admins see ALL equipment without any restrictions (including unassigned)
-      // - Leaders/signature-approved users: See equipment in their unit + personally assigned + transfer requests
+      // - All non-admin users (leaders, signature-approved, regular users) see:
+      //   - Equipment assigned to their unit
+      //   - Equipment assigned to them personally
+      //   - Equipment with pending transfer TO them
       //   - NOT equipment assigned to other units (even within battalion)
-      //   - Equipment with pending transfer OUT is hidden (shown in Transfers tab)
-      // - Regular users: See equipment pending transfer TO them + personally assigned
-      //   - NOT equipment in their unit unless personally assigned
-      //   - NOT equipment with pending transfer OUT
+      //   - NOT equipment with pending transfer OUT (entire quantity - shown in Transfers tab instead)
+      //   - NOT unassigned equipment (admins only)
 
 
       const filteredEquipment = mappedEquipment
@@ -317,13 +318,13 @@ export function useEquipment(): UseEquipmentReturn {
             return true;
           }
 
-          // Leaders and signature-approved users: Show equipment assigned to their unit
-          if ((isLeader || isSignatureApproved) && unitId && item.currentUnitId === unitId) {
+          // Show equipment assigned to my unit (for all user types, per EQUIPMENT_ACCESS_RULES.md line 69 & decision tree)
+          // Both leaders/signature-approved AND regular users can see equipment in their unit
+          if (unitId && item.currentUnitId === unitId) {
             return true;
           }
 
-          // Regular users: Do NOT see unit equipment (only personal and pending TO them, handled above)
-          // Hide all other equipment
+          // Hide all other equipment (equipment in other units)
           return false;
         })
         .map((item) => {
