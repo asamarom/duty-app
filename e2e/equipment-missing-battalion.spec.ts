@@ -13,7 +13,7 @@ import { loginAsTestUser, clearAuthState } from './utils/test-auth';
  * This test documents the requirement and performs basic validation.
  */
 
-test.describe.skip('Equipment Missing BattalionId [BATTALION-MISSING]', () => {
+test.describe('Equipment Missing BattalionId [BATTALION-MISSING]', () => {
   test.beforeEach(async ({ page }) => {
     await clearAuthState(page);
   });

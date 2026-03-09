@@ -180,7 +180,7 @@ test.describe('User Equipment Access Rules [USER-EQUIP]', () => {
     }
   });
 
-  test.skip('[USER-EQUIP-7] user does NOT see equipment with pending transfer OUT from their unit', async ({ page }) => {
+  test('[USER-EQUIP-7] user does NOT see equipment with pending transfer OUT from their unit', async ({ page }) => {
     // This requirement from line 72: NOT equipment with pending transfer OUT from my unit
     // When equipment from user's unit has a pending transfer OUT, it should be hidden from Equipment tab
 

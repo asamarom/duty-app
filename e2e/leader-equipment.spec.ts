@@ -67,7 +67,7 @@ test.describe('Leader Equipment Access Rules [LEADER-EQUIP]', () => {
     }
   });
 
-  test.skip('[LEADER-EQUIP-2.5] leader create requires name, quantity > 0, and status fields', async ({ page }) => {
+  test('[LEADER-EQUIP-2.5] leader create requires name, quantity > 0, and status fields', async ({ page }) => {
     test.setTimeout(20000);
 
     // This tests line 48 requirement: Fields required: name, quantity > 0, status
@@ -143,7 +143,7 @@ test.describe('Leader Equipment Access Rules [LEADER-EQUIP]', () => {
     }
   });
 
-  test.skip('[LEADER-EQUIP-4] leader can delete equipment created by their battalion and assigned to their unit', async ({ page }) => {
+  test('[LEADER-EQUIP-4] leader can delete equipment created by their battalion and assigned to their unit', async ({ page }) => {
     test.setTimeout(20000);
 
     await page.goto('/equipment');
@@ -250,7 +250,7 @@ test.describe('Leader Equipment Access Rules [LEADER-EQUIP]', () => {
     }
   });
 
-  test.skip('[LEADER-EQUIP-7] equipment with pending transfer OUT is hidden from Equipment tab', async ({ page }) => {
+  test('[LEADER-EQUIP-7] equipment with pending transfer OUT is hidden from Equipment tab', async ({ page }) => {
     test.setTimeout(20000);
 
     await page.goto('/equipment');
