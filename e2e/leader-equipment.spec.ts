@@ -217,15 +217,15 @@ test.describe('Leader Equipment Access Rules [LEADER-EQUIP]', () => {
     await page.waitForLoadState('networkidle');
 
     // Navigate to Transfers tab
-    const transfersTab = page.locator('text=/Transfers|העברות/i, [data-testid="transfers-tab"]').first();
+    const transfersTab = page.locator('text=/Transfers|העברות/i').or(page.locator('[data-testid="transfers-tab"]')).first();
 
     if (await transfersTab.isVisible({ timeout: 5000 })) {
       await transfersTab.click();
       await page.waitForTimeout(1000);
 
       // Should see Incoming and All Pending tabs
-      const incomingTab = page.locator('text=/Incoming|נכנסות/i, [data-testid="incoming-tab"]').first();
-      const allPendingTab = page.locator('text=/All Pending|ממתינות/i, [data-testid="all-pending-tab"]').first();
+      const incomingTab = page.locator('text=/Incoming|נכנסות/i').or(page.locator('[data-testid="incoming-tab"]')).first();
+      const allPendingTab = page.locator('text=/All Pending|ממתינות/i').or(page.locator('[data-testid="all-pending-tab"]')).first();
 
       const hasIncoming = await incomingTab.isVisible({ timeout: 3000 }).catch(() => false);
       const hasAllPending = await allPendingTab.isVisible({ timeout: 3000 }).catch(() => false);
@@ -262,7 +262,7 @@ test.describe('Leader Equipment Access Rules [LEADER-EQUIP]', () => {
     console.log(`Equipment tab shows ${equipmentCount} items`);
 
     // Navigate to Transfers tab
-    const transfersTab = page.locator('text=/Transfers|העברות/i, [data-testid="transfers-tab"]').first();
+    const transfersTab = page.locator('text=/Transfers|העברות/i').or(page.locator('[data-testid="transfers-tab"]')).first();
 
     if (await transfersTab.isVisible({ timeout: 5000 })) {
       await transfersTab.click();

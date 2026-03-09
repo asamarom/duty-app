@@ -194,7 +194,7 @@ test.describe('User Equipment Access Rules [USER-EQUIP]', () => {
     console.log(`Equipment tab shows ${equipmentCount} items`);
 
     // Navigate to Transfers tab to see if there are outgoing transfers
-    const transfersTab = page.locator('text=/Transfers|העברות/i, [data-testid="transfers-tab"]').first();
+    const transfersTab = page.locator('text=/Transfers|העברות/i').or(page.locator('[data-testid="transfers-tab"]')).first();
 
     if (await transfersTab.isVisible({ timeout: 5000 })) {
       await transfersTab.click();
