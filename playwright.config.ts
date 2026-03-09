@@ -63,13 +63,7 @@ export default defineConfig({
 
     // Video on failure
     video: 'on-first-retry',
-
-    // Action timeout: Most tests finish actions in <5s
-    actionTimeout: 15 * 1000,
   },
-
-  // Global test timeout: Most tests finish in <5s, some take up to 10s
-  timeout: 20 * 1000,
 
   // Configure projects for major browsers
   projects: [
