@@ -71,6 +71,24 @@ vi.mock('@/hooks/useEffectiveRole', () => ({
     })),
 }));
 
+// ─── useUserBattalion and useUserRole mocks ───────────────────────────────────
+vi.mock('@/hooks/useUserBattalion', () => ({
+    useUserBattalion: vi.fn(() => ({
+        battalionId: 'battalion-test',
+        unitId: 'unit-test',
+        loading: false,
+    })),
+}));
+
+vi.mock('@/hooks/useUserRole', () => ({
+    useUserRole: vi.fn(() => ({
+        isAdmin: true,
+        isLeader: false,
+        loading: false,
+        roles: ['admin'],
+    })),
+}));
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /** An empty Firestore query snapshot */
