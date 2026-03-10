@@ -150,11 +150,11 @@ export default function EquipmentPage() {
               <Package className="h-4 w-4" />
               {t('nav.equipment')}
             </TabsTrigger>
-            <TabsTrigger value="transfers" className="gap-2">
+            <TabsTrigger value="transfers" className="gap-2 relative">
               <ArrowLeftRight className="h-4 w-4" />
               {t('nav.transfers')}
               {transfersCount > 0 && (
-                <Badge variant="secondary" className="ms-1">{transfersCount}</Badge>
+                <Badge variant="default" className="absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center p-0 text-xs bg-green-700 hover:bg-green-800">{transfersCount}</Badge>
               )}
             </TabsTrigger>
           </TabsList>
