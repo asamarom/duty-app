@@ -40,6 +40,17 @@ vi.mock('@/hooks/usePendingRequestsCount', () => ({
   usePendingRequestsCount: () => mockUsePendingRequestsCount(),
 }));
 
+// Mock usePendingTransfersCount hook
+const mockUsePendingTransfersCount = vi.fn(() => ({
+  incomingCount: 0,
+  outgoingCount: 0,
+  totalCount: 0,
+}));
+
+vi.mock('@/hooks/usePendingTransfersCount', () => ({
+  usePendingTransfersCount: () => mockUsePendingTransfersCount(),
+}));
+
 // Mock AdminModeContext
 const mockToggleAdminMode = vi.fn();
 
@@ -86,6 +97,11 @@ describe('MobileNav Component', () => {
       signOut: vi.fn(),
     });
     mockUsePendingRequestsCount.mockReturnValue(0);
+    mockUsePendingTransfersCount.mockReturnValue({
+      incomingCount: 0,
+      outgoingCount: 0,
+      totalCount: 0,
+    });
   });
 
   describe('Navigation Rendering', () => {
