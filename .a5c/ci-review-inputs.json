@@ -1,0 +1,6 @@
+{
+  "projectPath": "/home/ubuntu/duty-app",
+  "outputDir": "ci-test-review-output",
+  "targetCoverage": 85,
+  "stagingVerification": true
+}
