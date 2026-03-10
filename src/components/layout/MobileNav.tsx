@@ -1,6 +1,8 @@
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePendingTransfersCount } from '@/hooks/usePendingTransfersCount';
+import { Badge } from '@/components/ui/badge';
 import {
   LayoutDashboard,
   Users,
@@ -11,6 +13,7 @@ import {
 
 export function MobileNav() {
   const { t } = useLanguage();
+  const { totalCount: transfersCount } = usePendingTransfersCount();
 
   const navigation: { name: string; href: string; icon: typeof LayoutDashboard }[] = [
     { name: t('nav.dashboard'), href: '/', icon: LayoutDashboard },
@@ -39,10 +42,18 @@ export function MobileNav() {
             {({ isActive }) => (
               <>
                 <div className={cn(
-                  'p-3 rounded-xl transition-all',
+                  'p-3 rounded-xl transition-all relative',
                   isActive && 'bg-primary/20'
                 )}>
                   <item.icon className={cn('h-6 w-6', isActive && 'text-primary')} />
+                  {item.href === '/equipment' && transfersCount > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center p-0 text-xs"
+                    >
+                      {transfersCount}
+                    </Badge>
+                  )}
                 </div>
                 <span className={cn(
                   'text-xs font-medium',

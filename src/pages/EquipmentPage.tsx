@@ -8,6 +8,7 @@ import { BulkAssignDialog } from '@/components/equipment/BulkAssignDialog';
 import { TransfersList } from '@/components/equipment/TransfersList';
 import { useEquipment, EquipmentWithAssignment, AssignmentLevel } from '@/hooks/useEquipment';
 import { usePendingRequestsCount } from '@/hooks/usePendingRequestsCount';
+import { usePendingTransfersCount } from '@/hooks/usePendingTransfersCount';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -43,6 +44,7 @@ export default function EquipmentPage() {
   const handleTabChange = (val: string) => setSearchParams(val === 'equipment' ? {} : { tab: val });
 
   const incomingCount = usePendingRequestsCount();
+  const { totalCount: transfersCount } = usePendingTransfersCount();
 
   const filteredEquipment = equipment.filter((item) => {
     const matchesSearch =
@@ -151,8 +153,8 @@ export default function EquipmentPage() {
             <TabsTrigger value="transfers" className="gap-2">
               <ArrowLeftRight className="h-4 w-4" />
               {t('nav.transfers')}
-              {incomingCount > 0 && (
-                <Badge variant="secondary" className="ms-1">{incomingCount}</Badge>
+              {transfersCount > 0 && (
+                <Badge variant="secondary" className="ms-1">{transfersCount}</Badge>
               )}
             </TabsTrigger>
           </TabsList>
