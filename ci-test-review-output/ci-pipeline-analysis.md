@@ -719,3 +719,55 @@ The CI/CD pipeline demonstrates **strong quality engineering practices** with co
 ---
 
 **Report End**
+
+---
+
+## Recommended Improvements
+
+### Priority 1: Docker/Nix for CI Speed Optimization
+
+**Current Issue:** CI setup time is slow due to:
+- Java 21 installation (~30s)
+- Firebase CLI installation (~20s)
+- Firebase emulator download (~60s on cache miss)
+- Total overhead: ~2-3 minutes per run × 4 jobs = 8-12 minutes wasted
+
+**Recommended Solution: Nix (Fastest, Lightest)**
+
+Nix provides:
+- ✅ Declarative, reproducible environments
+- ✅ Binary cache (faster than Docker)
+- ✅ No container overhead
+- ✅ Incremental updates (only download what changed)
+- ✅ 7-8 minute time savings per CI run
+
+**Implementation Plan:**
+1. Create `flake.nix` with Node 20, Java 21, Firebase CLI, Playwright
+2. Set up Cachix for binary caching
+3. Update GitHub Actions workflows to use Nix
+4. Keep local development unchanged (optional Nix adoption)
+
+**Expected Results:**
+- CI setup time: ~10-15 seconds (vs current 2-3 minutes)
+- Total CI time reduction: ~6-8 minutes per run
+- Zero Docker complexity
+- Reproducible across all environments
+
+**Migration Phase:** Added as Phase 11 (final phase) of CI review process
+
+### Priority 2: Code Coverage Enforcement (GAP-001)
+
+Add coverage collection and minimum threshold enforcement to unit-tests job.
+
+### Priority 3: Security Scanning (ENH-004)
+
+Add npm audit or Snyk to Phase 1 quality checks.
+
+### Priority 4: Accessibility Testing (GAP-003)
+
+Integrate axe-core into E2E test suite.
+
+---
+
+**Report Generated:** Phase 1 - CI Pipeline Analysis  
+**Next Phase:** Phase 2 - Test Mapping & Inventory
