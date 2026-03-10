@@ -63,3 +63,27 @@ npm run build
 - Use Firebase hooks in `src/hooks/`
 - Translations in `src/i18n/translations.ts`
 - Bilingual support: English and Hebrew (RTL)
+
+## CI/CD Workflow
+
+### Required: Track CI After Every Push
+
+**CRITICAL**: After pushing commits to `main`, you MUST track the CI pipeline status:
+
+1. **Immediately after push**: Check CI status with `gh run list --limit 1`
+2. **Wait for completion**: Monitor until status shows `completed`
+3. **Verify result**: Check if conclusion is `success` or `failure`
+4. **Handle failures**: If CI fails, investigate logs with `gh run view <run-id> --log-failed`
+
+```bash
+# Check latest CI run
+gh run list --limit 1
+
+# Check detailed status
+gh run list --limit 1 --json status,conclusion,name
+
+# View failed logs
+gh run view <run-id> --log-failed
+```
+
+**Do not proceed with new work until CI passes or failures are addressed.**
