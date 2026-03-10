@@ -42,24 +42,21 @@ export function MobileNav() {
             {({ isActive }) => (
               <>
                 <div className={cn(
-                  'p-3 rounded-xl transition-all relative',
+                  'p-3 rounded-xl transition-all',
                   isActive && 'bg-primary/20'
                 )}>
                   <item.icon className={cn('h-6 w-6', isActive && 'text-primary')} />
-                  {item.href === '/equipment' && transfersCount > 0 && (
-                    <Badge
-                      variant="destructive"
-                      className="absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center p-0 text-xs"
-                    >
-                      {transfersCount}
-                    </Badge>
-                  )}
                 </div>
                 <span className={cn(
-                  'text-xs font-medium',
+                  'text-xs font-medium flex items-center gap-1',
                   isActive && 'text-primary'
                 )}>
                   {item.name}
+                  {item.href === '/equipment' && transfersCount > 0 && (
+                    <Badge variant="secondary" className="h-4 min-w-4 flex items-center justify-center p-0 text-[10px]">
+                      {transfersCount}
+                    </Badge>
+                  )}
                 </span>
               </>
             )}
