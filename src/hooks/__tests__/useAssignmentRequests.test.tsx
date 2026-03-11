@@ -406,4 +406,604 @@ describe('useAssignmentRequests Hook', () => {
             expect(mockHttpsCallable).not.toHaveBeenCalled();
         });
     });
+
+    // =========================================================================
+    // Error handling and edge cases
+    // =========================================================================
+
+    describe('Error handling', () => {
+        it('handles Firestore errors in onSnapshot', async () => {
+            const testError = new Error('Firestore connection failed');
+
+            mockOnSnapshot.mockImplementation((ref: unknown, onNext: (snap: unknown) => void, onError?: (err: Error) => void) => {
+                const isDocRef = (ref as { _isDocRef?: boolean })._isDocRef;
+                const refPath = (ref as { path?: string }).path;
+
+                if (isDocRef && refPath?.startsWith('users/')) {
+                    // User doc subscription succeeds
+                    onNext({
+                        exists: () => true,
+                        id: 'test-user-id',
+                        data: () => ({ unitId: null, roles: ['user'] }),
+                    });
+                } else {
+                    // Assignment requests query fails
+                    if (onError) {
+                        onError(testError);
+                    }
+                }
+                return () => {};
+            });
+
+            const { result } = renderHook(() => useAssignmentRequests());
+
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            expect(result.current.error).toBe(testError);
+            expect(result.current.requests).toHaveLength(0);
+            expect(result.current.incomingTransfers).toHaveLength(0);
+            expect(result.current.outgoingTransfers).toHaveLength(0);
+        });
+
+        it('handles errors during mapSnapshot processing', async () => {
+            const badDoc = {
+                id: 'bad-req-1',
+                data: () => {
+                    throw new Error('Data parsing failed');
+                },
+                ref: { id: 'bad-req-1', path: 'assignmentRequests/bad-req-1' },
+            };
+
+            mockOnSnapshot.mockImplementation((ref: unknown, onNext: (snap: unknown) => void) => {
+                const isDocRef = (ref as { _isDocRef?: boolean })._isDocRef;
+                const refPath = (ref as { path?: string }).path;
+
+                if (isDocRef && refPath?.startsWith('users/')) {
+                    onNext({
+                        exists: () => true,
+                        id: 'test-user-id',
+                        data: () => ({ unitId: null, roles: ['user'] }),
+                    });
+                } else {
+                    onNext({ docs: [badDoc] });
+                }
+                return () => {};
+            });
+
+            const { result } = renderHook(() => useAssignmentRequests());
+
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            expect(result.current.error).toBeTruthy();
+            expect(result.current.requests).toHaveLength(0);
+        });
+
+        it('throws error when approving non-existent request', async () => {
+            mockOnSnapshot.mockImplementation(makeOnSnapshotMock([]));
+
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            await expect(async () => {
+                await act(async () => {
+                    await result.current.approveRequest('non-existent-id');
+                });
+            }).rejects.toThrow('Assignment request non-existent-id not found');
+        });
+
+        it('throws error when rejecting non-existent request', async () => {
+            mockOnSnapshot.mockImplementation(makeOnSnapshotMock([]));
+
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            await expect(async () => {
+                await act(async () => {
+                    await result.current.rejectRequest('non-existent-id');
+                });
+            }).rejects.toThrow('Assignment request non-existent-id not found');
+        });
+
+        it('throws error when canceling non-existent request', async () => {
+            mockOnSnapshot.mockImplementation(makeOnSnapshotMock([]));
+
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            await expect(async () => {
+                await act(async () => {
+                    await result.current.cancelRequest('non-existent-id');
+                });
+            }).rejects.toThrow('Assignment request non-existent-id not found');
+        });
+    });
+
+    // =========================================================================
+    // cancelRequest functionality
+    // =========================================================================
+
+    describe('cancelRequest', () => {
+        it('cancels request when user is the original requester', async () => {
+            const requestDoc = makeRequestDoc({
+                requestedBy: 'test-user-id',
+            });
+            mockOnSnapshot.mockImplementation(makeOnSnapshotMock([requestDoc]));
+
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            await act(async () => {
+                await result.current.cancelRequest('req-1');
+            });
+
+            expect(mockBatchCommit).toHaveBeenCalled();
+            expect(mockBatchUpdate).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({ status: 'rejected' })
+            );
+        });
+
+        it('throws error when non-requester tries to cancel', async () => {
+            const requestDoc = makeRequestDoc({
+                requestedBy: 'other-user-id',
+            });
+            mockOnSnapshot.mockImplementation(makeOnSnapshotMock([requestDoc]));
+
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            await expect(async () => {
+                await act(async () => {
+                    await result.current.cancelRequest('req-1');
+                });
+            }).rejects.toThrow('Only the requester can cancel');
+        });
+
+        it('resets equipment status to serviceable on cancel', async () => {
+            const requestDoc = makeRequestDoc({
+                requestedBy: 'test-user-id',
+            });
+            mockOnSnapshot.mockImplementation(makeOnSnapshotMock([requestDoc]));
+
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            await act(async () => {
+                await result.current.cancelRequest('req-1');
+            });
+
+            const serviceableCall = mockBatchUpdate.mock.calls.find((call) =>
+                call[1] && call[1].status === 'serviceable'
+            );
+            expect(serviceableCall).toBeDefined();
+        });
+    });
+
+    // =========================================================================
+    // recipientApprove and recipientReject
+    // =========================================================================
+
+    describe('recipientApprove and recipientReject', () => {
+        it('recipientApprove calls approveRequest', async () => {
+            const requestDoc = makeRequestDoc();
+            mockOnSnapshot.mockImplementation(makeOnSnapshotMock([requestDoc]));
+
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            mockGetDocs.mockResolvedValue(emptySnapshot);
+
+            await act(async () => {
+                await result.current.recipientApprove('req-1', 'Looks good');
+            });
+
+            expect(mockBatchCommit).toHaveBeenCalled();
+            expect(mockBatchUpdate).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({ status: 'approved' })
+            );
+        });
+
+        it('recipientReject calls rejectRequest', async () => {
+            const requestDoc = makeRequestDoc();
+            mockOnSnapshot.mockImplementation(makeOnSnapshotMock([requestDoc]));
+
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            await act(async () => {
+                await result.current.recipientReject('req-1', 'Not needed');
+            });
+
+            expect(mockBatchCommit).toHaveBeenCalled();
+            expect(mockBatchUpdate).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({ status: 'rejected' })
+            );
+        });
+    });
+
+    // =========================================================================
+    // Filtering: incoming and outgoing transfers
+    // =========================================================================
+
+    describe('Filtering: incoming and outgoing transfers', () => {
+        it('filters incoming transfers for current user', async () => {
+            const incomingRequest = makeRequestDoc({
+                status: 'pending',
+                toPersonnelId: 'test-user-id',
+                recipientApproved: false,
+            });
+
+            mockOnSnapshot.mockImplementation((ref: unknown, onNext: (snap: unknown) => void) => {
+                const isDocRef = (ref as { _isDocRef?: boolean })._isDocRef;
+                const refPath = (ref as { path?: string }).path;
+
+                if (isDocRef && refPath?.startsWith('users/')) {
+                    onNext({
+                        exists: () => true,
+                        id: 'test-user-id',
+                        data: () => ({ unitId: 'unit-test', roles: ['user'] }),
+                    });
+                } else {
+                    onNext({ docs: [incomingRequest] });
+                }
+                return () => {};
+            });
+
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            expect(result.current.incomingTransfers).toHaveLength(1);
+            expect(result.current.incomingTransfers[0].id).toBe('req-1');
+        });
+
+        it('filters outgoing transfers for current user', async () => {
+            const outgoingRequest = makeRequestDoc({
+                status: 'pending',
+                fromPersonnelId: 'test-user-id',
+            });
+
+            mockOnSnapshot.mockImplementation((ref: unknown, onNext: (snap: unknown) => void) => {
+                const isDocRef = (ref as { _isDocRef?: boolean })._isDocRef;
+                const refPath = (ref as { path?: string }).path;
+
+                if (isDocRef && refPath?.startsWith('users/')) {
+                    onNext({
+                        exists: () => true,
+                        id: 'test-user-id',
+                        data: () => ({ unitId: 'unit-test', roles: ['user'] }),
+                    });
+                } else {
+                    onNext({ docs: [outgoingRequest] });
+                }
+                return () => {};
+            });
+
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            expect(result.current.outgoingTransfers).toHaveLength(1);
+            expect(result.current.outgoingTransfers[0].id).toBe('req-1');
+        });
+
+        it('filters requests for signature-approved users with unit transfers', async () => {
+            const unitIncomingRequest = makeRequestDoc({
+                status: 'pending',
+                toUnitId: 'unit-test',
+                toPersonnelId: null,
+                recipientApproved: false,
+            });
+
+            mockOnSnapshot.mockImplementation((ref: unknown, onNext: (snap: unknown) => void) => {
+                const isDocRef = (ref as { _isDocRef?: boolean })._isDocRef;
+                const refPath = (ref as { path?: string }).path;
+
+                if (isDocRef && refPath?.startsWith('users/')) {
+                    onNext({
+                        exists: () => true,
+                        id: 'test-user-id',
+                        data: () => ({ unitId: 'unit-test', roles: ['approved_user'] }),
+                    });
+                } else {
+                    onNext({ docs: [unitIncomingRequest] });
+                }
+                return () => {};
+            });
+
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            expect(result.current.incomingTransfers).toHaveLength(1);
+            expect(result.current.incomingTransfers[0].to_unit_id).toBe('unit-test');
+        });
+
+        it('excludes unit transfers for non-signature-approved users', async () => {
+            const unitIncomingRequest = makeRequestDoc({
+                status: 'pending',
+                toUnitId: 'unit-test',
+                toPersonnelId: null,
+                recipientApproved: false,
+            });
+
+            mockOnSnapshot.mockImplementation((ref: unknown, onNext: (snap: unknown) => void) => {
+                const isDocRef = (ref as { _isDocRef?: boolean })._isDocRef;
+                const refPath = (ref as { path?: string }).path;
+
+                if (isDocRef && refPath?.startsWith('users/')) {
+                    onNext({
+                        exists: () => true,
+                        id: 'test-user-id',
+                        data: () => ({ unitId: 'unit-test', roles: ['user'] }),
+                    });
+                } else {
+                    onNext({ docs: [unitIncomingRequest] });
+                }
+                return () => {};
+            });
+
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            expect(result.current.incomingTransfers).toHaveLength(0);
+        });
+
+        it('excludes already recipient-approved requests from incoming', async () => {
+            const approvedRequest = makeRequestDoc({
+                status: 'pending',
+                toPersonnelId: 'test-user-id',
+                recipientApproved: true,
+            });
+
+            mockOnSnapshot.mockImplementation((ref: unknown, onNext: (snap: unknown) => void) => {
+                const isDocRef = (ref as { _isDocRef?: boolean })._isDocRef;
+                const refPath = (ref as { path?: string }).path;
+
+                if (isDocRef && refPath?.startsWith('users/')) {
+                    onNext({
+                        exists: () => true,
+                        id: 'test-user-id',
+                        data: () => ({ unitId: 'unit-test', roles: ['user'] }),
+                    });
+                } else {
+                    onNext({ docs: [approvedRequest] });
+                }
+                return () => {};
+            });
+
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            expect(result.current.incomingTransfers).toHaveLength(0);
+        });
+
+        it('handles users with no unit assigned', async () => {
+            const personalRequest = makeRequestDoc({
+                status: 'pending',
+                toPersonnelId: 'test-user-id',
+                recipientApproved: false,
+            });
+
+            mockOnSnapshot.mockImplementation((ref: unknown, onNext: (snap: unknown) => void) => {
+                const isDocRef = (ref as { _isDocRef?: boolean })._isDocRef;
+                const refPath = (ref as { path?: string }).path;
+
+                if (isDocRef && refPath?.startsWith('users/')) {
+                    onNext({
+                        exists: () => true,
+                        id: 'test-user-id',
+                        data: () => ({ unitId: null, roles: ['user'] }),
+                    });
+                } else {
+                    onNext({ docs: [personalRequest] });
+                }
+                return () => {};
+            });
+
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            expect(result.current.incomingTransfers).toHaveLength(1);
+        });
+
+        it('handles user document not existing', async () => {
+            mockOnSnapshot.mockImplementation((ref: unknown, onNext: (snap: unknown) => void) => {
+                const isDocRef = (ref as { _isDocRef?: boolean })._isDocRef;
+                const refPath = (ref as { path?: string }).path;
+
+                if (isDocRef && refPath?.startsWith('users/')) {
+                    onNext({
+                        exists: () => false,
+                    });
+                } else {
+                    onNext({ docs: [] });
+                }
+                return () => {};
+            });
+
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            expect(result.current.requests).toHaveLength(0);
+        });
+    });
+
+    // =========================================================================
+    // createRequest edge cases and enrichment
+    // =========================================================================
+
+    describe('createRequest enrichment', () => {
+        it('fetches and includes equipment battalion ID', async () => {
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            mockGetDoc.mockResolvedValueOnce({
+                exists: () => true,
+                data: () => ({ serialNumber: 'SN-123', battalionId: 'battalion-5' }),
+            });
+            mockGetDocs.mockResolvedValue(emptySnapshot);
+
+            await act(async () => {
+                await result.current.createRequest({
+                    equipmentId: 'equip-9',
+                    toPersonnelId: 'pers-10',
+                });
+            });
+
+            expect(mockAddDoc).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({
+                    battalionId: 'battalion-5',
+                })
+            );
+        });
+
+        it('enriches from/to names when creating request', async () => {
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            // Mock equipment doc
+            mockGetDoc.mockResolvedValueOnce({
+                exists: () => true,
+                data: () => ({ serialNumber: 'SN-456', battalionId: null }),
+            });
+
+            // Mock current assignment query
+            mockGetDocs.mockResolvedValueOnce({
+                docs: [{
+                    data: () => ({ personnelId: 'from-pers-1', unitId: null }),
+                }],
+            });
+
+            // Mock from personnel user doc
+            mockGetDoc.mockResolvedValueOnce({
+                exists: () => true,
+                data: () => ({ firstName: 'John', lastName: 'Doe' }),
+            });
+
+            // Mock to personnel user doc
+            mockGetDoc.mockResolvedValueOnce({
+                exists: () => true,
+                data: () => ({ firstName: 'Jane', lastName: 'Smith' }),
+            });
+
+            await act(async () => {
+                await result.current.createRequest({
+                    equipmentId: 'equip-10',
+                    toPersonnelId: 'to-pers-2',
+                    notes: 'Transfer request',
+                });
+            });
+
+            expect(mockAddDoc).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({
+                    fromName: 'John Doe',
+                    toName: 'Jane Smith',
+                    notes: 'Transfer request',
+                })
+            );
+        });
+
+        it('sets equipment status to pending_transfer on createRequest', async () => {
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            mockGetDoc.mockResolvedValue({ exists: () => false });
+            mockGetDocs.mockResolvedValue(emptySnapshot);
+
+            await act(async () => {
+                await result.current.createRequest({
+                    equipmentId: 'equip-11',
+                    toUnitId: 'unit-5',
+                });
+            });
+
+            expect(mockUpdateDoc).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({
+                    status: 'pending_transfer',
+                })
+            );
+        });
+
+        it('handles unit-to-unit transfers with enrichment', async () => {
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            // Mock equipment doc
+            mockGetDoc.mockResolvedValueOnce({
+                exists: () => true,
+                data: () => ({ serialNumber: 'SN-789' }),
+            });
+
+            // Mock current assignment (from unit)
+            mockGetDocs.mockResolvedValueOnce({
+                docs: [{
+                    data: () => ({ personnelId: null, unitId: 'from-unit-1' }),
+                }],
+            });
+
+            // Mock from unit doc
+            mockGetDoc.mockResolvedValueOnce({
+                exists: () => true,
+                data: () => ({ name: 'Alpha Company', unitType: 'company' }),
+            });
+
+            // Mock to unit doc
+            mockGetDoc.mockResolvedValueOnce({
+                exists: () => true,
+                data: () => ({ name: 'Bravo Company', unitType: 'company' }),
+            });
+
+            await act(async () => {
+                await result.current.createRequest({
+                    equipmentId: 'equip-12',
+                    toUnitId: 'to-unit-2',
+                });
+            });
+
+            expect(mockAddDoc).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({
+                    fromName: 'Alpha Company',
+                    toName: 'Bravo Company',
+                    fromUnitType: 'company',
+                    toUnitType: 'company',
+                })
+            );
+        });
+    });
+
+    // =========================================================================
+    // getApprovalsForRequest
+    // =========================================================================
+
+    describe('getApprovalsForRequest', () => {
+        it('returns empty array (not yet implemented)', async () => {
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            const approvals = result.current.getApprovalsForRequest('req-1');
+            expect(approvals).toEqual([]);
+        });
+    });
+
+    // =========================================================================
+    // refetch
+    // =========================================================================
+
+    describe('refetch', () => {
+        it('refetch is a no-op with onSnapshot', async () => {
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            await act(async () => {
+                await result.current.refetch();
+            });
+
+            // Should complete without errors
+            expect(result.current.error).toBeNull();
+        });
+    });
 });
