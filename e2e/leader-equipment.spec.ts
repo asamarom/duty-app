@@ -16,7 +16,7 @@ test.describe('Leader Equipment Access Rules [LEADER-EQUIP]', () => {
     test.setTimeout(30000);
 
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Should see equipment tab
     const equipmentTab = page.locator('text=/Equipment|ציוד/i').first();
@@ -39,14 +39,14 @@ test.describe('Leader Equipment Access Rules [LEADER-EQUIP]', () => {
     test.setTimeout(20000);
 
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Check for add equipment button
     const addButton = page.locator('button:has-text("Add"), button:has-text("הוסף"), button[data-testid="add-equipment"]').first();
 
     if (await addButton.isVisible({ timeout: 5000 })) {
       await addButton.click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Should see create form
       const form = page.locator('form, [data-testid="equipment-form"]').first();
@@ -73,13 +73,13 @@ test.describe('Leader Equipment Access Rules [LEADER-EQUIP]', () => {
     // This tests line 48 requirement: Fields required: name, quantity > 0, status
 
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const addButton = page.locator('button:has-text("Add"), button:has-text("הוסף"), button[data-testid="add-equipment"]').first();
 
     if (await addButton.isVisible({ timeout: 5000 })) {
       await addButton.click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Check for required fields
       const nameField = page.locator('input[name*="name"], [data-testid="name-input"]').first();
@@ -116,14 +116,14 @@ test.describe('Leader Equipment Access Rules [LEADER-EQUIP]', () => {
     test.setTimeout(20000);
 
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Find first equipment item
     const firstEquipment = page.locator('table tbody tr, [data-testid="equipment-item"]').first();
 
     if (await firstEquipment.isVisible({ timeout: 5000 })) {
       await firstEquipment.click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Should not see Edit or Update buttons for quantity/status/description
       const editButton = page.locator('button:has-text("Edit"), button:has-text("עריכה"), button[data-testid="edit-equipment"]');
@@ -147,7 +147,7 @@ test.describe('Leader Equipment Access Rules [LEADER-EQUIP]', () => {
     test.setTimeout(20000);
 
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Find first equipment item in their unit
     const equipmentItems = page.locator('table tbody tr, [data-testid="equipment-item"]');
@@ -155,7 +155,7 @@ test.describe('Leader Equipment Access Rules [LEADER-EQUIP]', () => {
     if (await equipmentItems.count() > 0) {
       const firstItem = equipmentItems.first();
       await firstItem.click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Check for delete button
       const deleteButton = page.locator('button:has-text("Delete"), button:has-text("מחק"), button[data-testid="delete-equipment"]');
@@ -175,7 +175,7 @@ test.describe('Leader Equipment Access Rules [LEADER-EQUIP]', () => {
     test.setTimeout(20000);
 
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Find equipment in leader's unit
     const equipmentItems = page.locator('table tbody tr, [data-testid="equipment-item"]');
@@ -183,7 +183,7 @@ test.describe('Leader Equipment Access Rules [LEADER-EQUIP]', () => {
     if (await equipmentItems.count() > 0) {
       const firstItem = equipmentItems.first();
       await firstItem.click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Look for Transfer or Request Transfer button
       const transferButton = page.locator(
@@ -214,7 +214,7 @@ test.describe('Leader Equipment Access Rules [LEADER-EQUIP]', () => {
     test.setTimeout(20000);
 
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Navigate to Transfers tab
     const transfersTab = page.locator('text=/Transfers|העברות/i').or(page.locator('[data-testid="transfers-tab"]')).first();
@@ -254,7 +254,7 @@ test.describe('Leader Equipment Access Rules [LEADER-EQUIP]', () => {
     test.setTimeout(20000);
 
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const equipmentItems = page.locator('table tbody tr, [data-testid="equipment-item"]');
     const equipmentCount = await equipmentItems.count();
@@ -293,7 +293,7 @@ test.describe('Leader Equipment Access Rules [LEADER-EQUIP]', () => {
     test.setTimeout(20000);
 
     await page.goto('/equipment');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // This is verified by checking that equipment is filtered client-side
     // We can't easily test "what's NOT there" in e2e, but we can verify the filter exists
