@@ -51,3 +51,7 @@ nul
 *firebase-adminsdk*.json
 firebase-staging-service-account.json
 backups/
+
+# direnv
+.direnv/
+.envrc.cache
