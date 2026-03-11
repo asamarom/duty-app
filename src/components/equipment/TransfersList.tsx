@@ -75,8 +75,9 @@ export function TransfersList() {
       await cancelRequest(cancelRequestDialog.id);
       toast({ title: t('transfers.transferCanceled'), description: t('transfers.transferCanceledDesc') });
       setCancelRequestDialog(null);
-    } catch {
-      toast({ title: t('common.error'), description: t('transfers.failedToProcess'), variant: 'destructive' });
+    } catch (error) {
+      console.error('Cancel transfer error:', error);
+      toast({ title: t('common.error'), description: error instanceof Error ? error.message : t('transfers.failedToProcess'), variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }
