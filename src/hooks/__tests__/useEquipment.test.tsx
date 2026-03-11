@@ -411,4 +411,610 @@ describe('useEquipment Hook', () => {
             expect(mockHttpsCallable).not.toHaveBeenCalled();
         });
     });
+
+    describe('Equipment Filtering and Assignment Logic', () => {
+        it('admin can see all equipment including unassigned', async () => {
+            mockUseUserRole.mockReturnValue({ isAdmin: true, isLeader: false, loading: false, roles: ['admin'] });
+
+            const mockEquipmentDocs = [
+                {
+                    id: 'eq-1',
+                    data: () => ({
+                        name: 'Rifle A',
+                        serialNumber: 'SN001',
+                        quantity: 1,
+                        status: 'serviceable',
+                        battalionId: 'battalion-a',
+                    }),
+                },
+            ];
+
+            mockOnSnapshot
+                .mockImplementationOnce((q, cb) => { cb({ docs: mockEquipmentDocs }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: [] }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: [] }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: mockEquipmentDocs }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: [] }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: [] }); return () => {}; });
+
+            const { result } = renderHook(() => useEquipment());
+
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            // Admin should see unassigned equipment
+            expect(result.current.equipment.length).toBeGreaterThan(0);
+            expect(result.current.equipment[0].assignmentLevel).toBe('unassigned');
+        });
+
+        it('hides unassigned equipment from non-admin users', async () => {
+            mockUseUserRole.mockReturnValue({ isAdmin: false, isLeader: true, loading: false, roles: ['leader'] });
+
+            const mockEquipmentDocs = [
+                {
+                    id: 'eq-1',
+                    data: () => ({
+                        name: 'Unassigned Rifle',
+                        serialNumber: 'SN999',
+                        quantity: 5,
+                        status: 'serviceable',
+                        battalionId: 'battalion-a',
+                    }),
+                },
+            ];
+
+            mockOnSnapshot
+                .mockImplementationOnce((q, cb) => { cb({ docs: mockEquipmentDocs }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: [] }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: [] }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: mockEquipmentDocs }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: [] }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: [] }); return () => {}; });
+
+            const { result } = renderHook(() => useEquipment());
+
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            // Non-admin should not see unassigned equipment
+            expect(result.current.equipment).toHaveLength(0);
+        });
+
+        it('creates rows for each active assignment', async () => {
+            mockUseUserRole.mockReturnValue({ isAdmin: true, isLeader: false, loading: false, roles: ['admin'] });
+
+            const mockEquipmentDocs = [
+                {
+                    id: 'eq-multi',
+                    data: () => ({
+                        name: 'Multi-Assigned Equipment',
+                        serialNumber: null,
+                        quantity: 10,
+                        status: 'serviceable',
+                        battalionId: 'battalion-a',
+                    }),
+                },
+            ];
+
+            const mockAssignmentDocs = [
+                {
+                    id: 'as-1',
+                    data: () => ({
+                        equipmentId: 'eq-multi',
+                        unitId: 'unit-a',
+                        personnelId: null,
+                        quantity: 5,
+                        returnedAt: null,
+                    }),
+                },
+                {
+                    id: 'as-2',
+                    data: () => ({
+                        equipmentId: 'eq-multi',
+                        personnelId: 'pers-1',
+                        unitId: null,
+                        quantity: 3,
+                        returnedAt: null,
+                    }),
+                },
+            ];
+
+            mockOnSnapshot
+                .mockImplementationOnce((q, cb) => { cb({ docs: mockEquipmentDocs }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: mockAssignmentDocs }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: [] }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: mockEquipmentDocs }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: mockAssignmentDocs }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: [] }); return () => {}; });
+
+            mockGetDoc
+                .mockResolvedValueOnce({ exists: () => true, data: () => ({ name: 'Unit A', unitType: 'company' }) })
+                .mockResolvedValueOnce({ exists: () => true, data: () => ({ firstName: 'John', lastName: 'Doe' }) });
+
+            const { result } = renderHook(() => useEquipment());
+
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            // Should have 3 rows: 2 assignments + 1 unassigned pool (10 - 5 - 3 = 2)
+            expect(result.current.equipment.length).toBe(3);
+        });
+    });
+
+    describe('Pending Transfer Handling', () => {
+        it('marks equipment with pending transfer flag', async () => {
+            mockUseUserRole.mockReturnValue({ isAdmin: true, isLeader: false, loading: false, roles: ['admin'] });
+
+            const mockEquipmentDocs = [
+                {
+                    id: 'eq-pending',
+                    data: () => ({
+                        name: 'Pending Equipment',
+                        serialNumber: 'SNPEND',
+                        quantity: 1,
+                        status: 'pending_transfer',
+                        battalionId: 'battalion-a',
+                    }),
+                },
+            ];
+
+            const mockAssignmentDocs = [
+                {
+                    id: 'as-pending',
+                    data: () => ({
+                        equipmentId: 'eq-pending',
+                        unitId: 'unit-a',
+                        personnelId: null,
+                        quantity: 1,
+                        returnedAt: null,
+                    }),
+                },
+            ];
+
+            const mockPendingDocs = [
+                {
+                    id: 'req-pending',
+                    data: () => ({
+                        equipmentId: 'eq-pending',
+                        fromUnitId: 'unit-a',
+                        toUnitId: 'unit-b',
+                        status: 'pending',
+                        quantity: 1,
+                    }),
+                },
+            ];
+
+            mockOnSnapshot
+                .mockImplementationOnce((q, cb) => { cb({ docs: mockEquipmentDocs }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: mockAssignmentDocs }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: mockPendingDocs }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: mockEquipmentDocs }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: mockAssignmentDocs }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: mockPendingDocs }); return () => {}; });
+
+            mockGetDoc.mockResolvedValueOnce({ exists: () => true, data: () => ({ name: 'Unit A', unitType: 'company' }) });
+
+            const { result } = renderHook(() => useEquipment());
+
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            // Equipment should be marked with pending transfer flag
+            const item = result.current.equipment.find(e => e.name === 'Pending Equipment');
+            expect(item?.hasPendingTransfer).toBe(true);
+        });
+
+        it('tracks total quantity of pending transfers OUT', async () => {
+            mockUseUserRole.mockReturnValue({ isAdmin: true, isLeader: false, loading: false, roles: ['admin'] });
+
+            const mockEquipmentDocs = [
+                {
+                    id: 'eq-multi-pending',
+                    data: () => ({
+                        name: 'Multi Pending Equipment',
+                        serialNumber: null,
+                        quantity: 10,
+                        status: 'serviceable',
+                        battalionId: 'battalion-a',
+                    }),
+                },
+            ];
+
+            const mockAssignmentDocs = [
+                {
+                    id: 'as-multi-pending',
+                    data: () => ({
+                        equipmentId: 'eq-multi-pending',
+                        unitId: 'unit-a',
+                        personnelId: null,
+                        quantity: 10,
+                        returnedAt: null,
+                    }),
+                },
+            ];
+
+            const mockPendingDocs = [
+                {
+                    id: 'req-1',
+                    data: () => ({
+                        equipmentId: 'eq-multi-pending',
+                        fromUnitId: 'unit-a',
+                        toUnitId: 'unit-b',
+                        status: 'pending',
+                        quantity: 2,
+                    }),
+                },
+                {
+                    id: 'req-2',
+                    data: () => ({
+                        equipmentId: 'eq-multi-pending',
+                        fromUnitId: 'unit-a',
+                        toUnitId: 'unit-c',
+                        status: 'pending',
+                        quantity: 3,
+                    }),
+                },
+            ];
+
+            mockOnSnapshot
+                .mockImplementationOnce((q, cb) => { cb({ docs: mockEquipmentDocs }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: mockAssignmentDocs }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: mockPendingDocs }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: mockEquipmentDocs }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: mockAssignmentDocs }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: mockPendingDocs }); return () => {}; });
+
+            mockGetDoc.mockResolvedValueOnce({ exists: () => true, data: () => ({ name: 'Unit A', unitType: 'company' }) });
+
+            const { result } = renderHook(() => useEquipment());
+
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            // Should track total pending OUT (2 + 3 = 5)
+            const item = result.current.equipment.find(e => e.name === 'Multi Pending Equipment');
+            expect(item?.pendingTransferOutQuantity).toBe(5);
+        });
+    });
+
+    describe('Equipment CRUD Operations', () => {
+        it('addEquipment creates new equipment for admin', async () => {
+            mockUseUserRole.mockReturnValue({ isAdmin: true, isLeader: false, loading: false, roles: ['admin'] });
+
+            const { result } = renderHook(() => useEquipment());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            const firestoreMock = await import('firebase/firestore');
+            const mockAddDocFn = vi.mocked(firestoreMock.addDoc);
+            mockAddDocFn.mockResolvedValue({ id: 'new-eq-id' } as any);
+
+            await act(async () => {
+                await result.current.addEquipment({
+                    name: 'New Rifle',
+                    serialNumber: 'SN-NEW',
+                    quantity: 1,
+                });
+            });
+
+            expect(mockAddDocFn).toHaveBeenCalled();
+        });
+
+
+        it('addEquipment allows leaders to create equipment in their own unit', async () => {
+            mockUseUserRole.mockReturnValue({ isAdmin: false, isLeader: true, loading: false, roles: ['leader'] });
+
+            const { result } = renderHook(() => useEquipment());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            const firestoreMock = await import('firebase/firestore');
+            const mockAddDocFn = vi.mocked(firestoreMock.addDoc);
+            mockAddDocFn.mockResolvedValue({ id: 'new-eq-id' } as any);
+
+            await act(async () => {
+                await result.current.addEquipment(
+                    { name: 'New Rifle', serialNumber: 'SN-NEW', quantity: 1 },
+                    { unitId: 'unit-a' }
+                );
+            });
+
+            expect(mockAddDocFn).toHaveBeenCalled();
+        });
+
+        it('addEquipment throws error for leaders creating in different unit', async () => {
+            mockUseUserRole.mockReturnValue({ isAdmin: false, isLeader: true, loading: false, roles: ['leader'] });
+
+            const { result } = renderHook(() => useEquipment());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            await expect(act(async () => {
+                await result.current.addEquipment(
+                    { name: 'New Rifle', serialNumber: 'SN-NEW', quantity: 1 },
+                    { unitId: 'other-unit' }
+                );
+            })).rejects.toThrow('You can only create equipment in your own unit');
+        });
+
+        it('updateEquipment updates equipment fields for admin', async () => {
+            mockUseUserRole.mockReturnValue({ isAdmin: true, isLeader: false, loading: false, roles: ['admin'] });
+
+            const { result } = renderHook(() => useEquipment());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            const firestoreMock = await import('firebase/firestore');
+            const mockUpdateDocFn = vi.mocked(firestoreMock.updateDoc);
+            mockUpdateDocFn.mockResolvedValue(undefined);
+
+            await act(async () => {
+                await result.current.updateEquipment('eq-1--as-1', { quantity: 5, status: 'unserviceable' });
+            });
+
+            expect(mockUpdateDocFn).toHaveBeenCalled();
+        });
+
+        it('updateEquipment throws error for non-admin users', async () => {
+            mockUseUserRole.mockReturnValue({ isAdmin: false, isLeader: true, loading: false, roles: ['leader'] });
+
+            const { result } = renderHook(() => useEquipment());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            await expect(act(async () => {
+                await result.current.updateEquipment('eq-1--as-1', { quantity: 5 });
+            })).rejects.toThrow('Only admins can update equipment fields');
+        });
+
+        it('deleteEquipment deletes equipment for admin', async () => {
+            mockUseUserRole.mockReturnValue({ isAdmin: true, isLeader: false, loading: false, roles: ['admin'] });
+
+            const { result } = renderHook(() => useEquipment());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            const firestoreMock = await import('firebase/firestore');
+            const mockDeleteDocFn = vi.mocked(firestoreMock.deleteDoc);
+            mockDeleteDocFn.mockResolvedValue(undefined);
+
+            await act(async () => {
+                await result.current.deleteEquipment('eq-1--as-1');
+            });
+
+            expect(mockDeleteDocFn).toHaveBeenCalled();
+        });
+
+        it('unassignEquipment marks assignments as returned', async () => {
+            const { result } = renderHook(() => useEquipment());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            const firestoreMock = await import('firebase/firestore');
+            const mockUpdateDocFn = vi.mocked(firestoreMock.updateDoc);
+
+            mockGetDocs.mockResolvedValue({
+                docs: [
+                    { id: 'as-1', data: () => ({ equipmentId: 'eq-1', returnedAt: null }) },
+                ],
+            } as any);
+            mockUpdateDocFn.mockResolvedValue(undefined);
+
+            await act(async () => {
+                await result.current.unassignEquipment('eq-1--as-1');
+            });
+
+            expect(mockUpdateDocFn).toHaveBeenCalled();
+        });
+    });
+
+    describe('Permission Checks', () => {
+        it('canDeleteEquipment returns true for admin', () => {
+            mockUseUserRole.mockReturnValue({ isAdmin: true, isLeader: false, loading: false, roles: ['admin'] });
+
+            const { result } = renderHook(() => useEquipment());
+
+            const equipmentItem = {
+                id: 'eq-1--as-1',
+                name: 'Test Item',
+                currentUnitId: 'unit-other',
+                battalionId: 'battalion-other',
+                assignmentLevel: 'individual' as const,
+                quantity: 1,
+            } as any;
+
+            expect(result.current.canDeleteEquipment(equipmentItem)).toBe(true);
+        });
+
+        it('canDeleteEquipment returns true for leader in same unit and battalion', () => {
+            mockUseUserRole.mockReturnValue({ isAdmin: false, isLeader: true, loading: false, roles: ['leader'] });
+
+            const { result } = renderHook(() => useEquipment());
+
+            const equipmentItem = {
+                id: 'eq-1--as-1',
+                name: 'Test Item',
+                currentUnitId: 'unit-a',
+                battalionId: 'battalion-a',
+                assignmentLevel: 'individual' as const,
+                quantity: 1,
+            } as any;
+
+            expect(result.current.canDeleteEquipment(equipmentItem)).toBe(true);
+        });
+
+        it('canDeleteEquipment returns false for leader with different battalion', () => {
+            mockUseUserRole.mockReturnValue({ isAdmin: false, isLeader: true, loading: false, roles: ['leader'] });
+
+            const { result } = renderHook(() => useEquipment());
+
+            const equipmentItem = {
+                id: 'eq-1--as-1',
+                name: 'Test Item',
+                currentUnitId: 'unit-a',
+                battalionId: 'battalion-other',
+                assignmentLevel: 'individual' as const,
+                quantity: 1,
+            } as any;
+
+            expect(result.current.canDeleteEquipment(equipmentItem)).toBe(false);
+        });
+
+        it('requestAssignment allows admin to transfer any equipment', async () => {
+            mockUseUserRole.mockReturnValue({ isAdmin: true, isLeader: false, loading: false, roles: ['admin'] });
+
+            const { result } = renderHook(() => useEquipment());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            const firestoreMock = await import('firebase/firestore');
+            const mockAddDocFn = vi.mocked(firestoreMock.addDoc);
+            const mockUpdateDocFn = vi.mocked(firestoreMock.updateDoc);
+
+            mockAddDocFn.mockResolvedValue({ id: 'new-request-id' } as any);
+            mockUpdateDocFn.mockResolvedValue(undefined);
+            mockGetDocs.mockResolvedValue({ docs: [] } as any);
+            mockGetDoc.mockResolvedValueOnce({ exists: () => true, data: () => ({ battalionId: 'battalion-a' }) });
+
+            await act(async () => {
+                await result.current.requestAssignment('eq-other--as-other', { unitId: 'unit-c' });
+            });
+
+            expect(mockAddDocFn).toHaveBeenCalled();
+        });
+    });
+
+
+    describe('Loading States', () => {
+        it('sets loading to false after successful data fetch', async () => {
+            mockUseUserRole.mockReturnValue({ isAdmin: true, isLeader: false, loading: false, roles: ['admin'] });
+
+            mockOnSnapshot
+                .mockImplementationOnce((q, cb) => { cb({ docs: [] }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: [] }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: [] }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: [] }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: [] }); return () => {}; })
+                .mockImplementationOnce((q, cb) => { cb({ docs: [] }); return () => {}; });
+
+            const { result } = renderHook(() => useEquipment());
+
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            expect(result.current.error).toBeNull();
+        });
+    });
+
+    describe('Transfer Request Creation', () => {
+        it('_initiateTransferLocally resolves fromName and toName for personnel', async () => {
+            const { result } = renderHook(() => useEquipment());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            const firestoreMock = await import('firebase/firestore');
+            const mockAddDocFn = vi.mocked(firestoreMock.addDoc);
+            const mockUpdateDocFn = vi.mocked(firestoreMock.updateDoc);
+
+            mockAddDocFn.mockResolvedValue({ id: 'new-request-id' } as any);
+            mockUpdateDocFn.mockResolvedValue(undefined);
+            mockGetDocs.mockResolvedValue({ docs: [] } as any);
+
+            mockGetDoc
+                .mockResolvedValueOnce({ exists: () => true, data: () => ({ battalionId: 'battalion-a' }) })
+                .mockResolvedValueOnce({ exists: () => true, data: () => ({ firstName: 'John', lastName: 'Doe' }) });
+
+            await act(async () => {
+                await result.current.assignEquipment('eq-1--unassigned', { personnelId: 'pers-123' });
+            });
+
+            expect(mockAddDocFn).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({
+                    toPersonnelId: 'pers-123',
+                    toName: 'John Doe',
+                })
+            );
+        });
+
+        it('_initiateTransferLocally resolves fromName and toName for units', async () => {
+            const { result } = renderHook(() => useEquipment());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            const firestoreMock = await import('firebase/firestore');
+            const mockAddDocFn = vi.mocked(firestoreMock.addDoc);
+            const mockUpdateDocFn = vi.mocked(firestoreMock.updateDoc);
+
+            mockAddDocFn.mockResolvedValue({ id: 'new-request-id' } as any);
+            mockUpdateDocFn.mockResolvedValue(undefined);
+            mockGetDocs.mockResolvedValue({ docs: [] } as any);
+
+            mockGetDoc
+                .mockResolvedValueOnce({ exists: () => true, data: () => ({ battalionId: 'battalion-a' }) })
+                .mockResolvedValueOnce({ exists: () => true, data: () => ({ name: 'Alpha Company', unitType: 'company' }) });
+
+            await act(async () => {
+                await result.current.assignEquipment('eq-1--unassigned', { unitId: 'unit-alpha' });
+            });
+
+            expect(mockAddDocFn).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({
+                    toUnitId: 'unit-alpha',
+                    toName: 'Alpha Company',
+                    toUnitType: 'company',
+                })
+            );
+        });
+
+        it('_initiateTransferLocally includes notes when provided', async () => {
+            const { result } = renderHook(() => useEquipment());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            const firestoreMock = await import('firebase/firestore');
+            const mockAddDocFn = vi.mocked(firestoreMock.addDoc);
+            const mockUpdateDocFn = vi.mocked(firestoreMock.updateDoc);
+
+            mockAddDocFn.mockResolvedValue({ id: 'new-request-id' } as any);
+            mockUpdateDocFn.mockResolvedValue(undefined);
+            mockGetDocs.mockResolvedValue({ docs: [] } as any);
+
+            mockGetDoc.mockResolvedValueOnce({ exists: () => true, data: () => ({ battalionId: 'battalion-a' }) });
+
+            await act(async () => {
+                await result.current.requestAssignment('eq-1--unassigned', { unitId: 'unit-1' }, 'Urgent transfer', 2);
+            });
+
+            expect(mockAddDocFn).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({
+                    notes: 'Urgent transfer',
+                    quantity: 2,
+                })
+            );
+        });
+
+        it('_initiateTransferLocally retrieves current assignment info', async () => {
+            const { result } = renderHook(() => useEquipment());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            const firestoreMock = await import('firebase/firestore');
+            const mockAddDocFn = vi.mocked(firestoreMock.addDoc);
+            const mockUpdateDocFn = vi.mocked(firestoreMock.updateDoc);
+
+            mockAddDocFn.mockResolvedValue({ id: 'new-request-id' } as any);
+            mockUpdateDocFn.mockResolvedValue(undefined);
+            mockGetDocs.mockResolvedValue({
+                docs: [{
+                    id: 'as-1',
+                    data: () => ({
+                        equipmentId: 'eq-1',
+                        personnelId: 'current-owner',
+                        unitId: null,
+                    }),
+                }],
+            } as any);
+
+            mockGetDoc
+                .mockResolvedValueOnce({ exists: () => true, data: () => ({ battalionId: 'battalion-a' }) })
+                .mockResolvedValueOnce({ exists: () => true, data: () => ({ firstName: 'Jane', lastName: 'Smith' }) });
+
+            await act(async () => {
+                await result.current.assignEquipment('eq-1--as-1', { unitId: 'unit-1' });
+            });
+
+            expect(mockAddDocFn).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({
+                    fromPersonnelId: 'current-owner',
+                    fromName: 'Jane Smith',
+                })
+            );
+        });
+    });
 });
