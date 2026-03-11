@@ -209,11 +209,17 @@ service cloud.firestore {
       // Only admins can update equipment (leaders cannot update)
       // NOTE: Validation that quantity >= assigned quantity requires Cloud Functions
       // as it needs to sum equipmentAssignments, which is too expensive for security rules
-      allow update: if isAdmin() &&
+      // EXCEPTION: Users can revert equipment status when canceling their own transfer request
+      allow update: if (isAdmin() &&
         (!request.resource.data.keys().hasAny(['quantity']) ||
           (request.resource.data.quantity is int && request.resource.data.quantity > 0)) &&
         (!request.resource.data.keys().hasAny(['status']) ||
-          request.resource.data.status in ['serviceable', 'unserviceable', 'in_maintenance', 'missing', 'pending_transfer']);
+          request.resource.data.status in ['serviceable', 'unserviceable', 'in_maintenance', 'missing', 'pending_transfer'])) ||
+        // Allow reverting to serviceable when canceling own transfer (status: pending_transfer → serviceable)
+        (isAuthenticated() &&
+        resource.data.status == 'pending_transfer' &&
+        request.resource.data.status == 'serviceable' &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']));
 
       // Only admins can delete equipment
       // Leaders technically CAN delete (per EQUIPMENT_ACCESS_RULES.md) but only:
