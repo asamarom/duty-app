@@ -556,7 +556,7 @@ describe('useAssignmentRequests Hook', () => {
                 await act(async () => {
                     await result.current.cancelRequest('req-1');
                 });
-            }).rejects.toThrow('Only the requester can cancel');
+            }).rejects.toThrow('Only the requester or unit leader can cancel');
         });
 
         it('resets equipment status to serviceable on cancel', async () => {
