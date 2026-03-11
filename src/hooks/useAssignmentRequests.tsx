@@ -505,11 +505,27 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
       throw new Error(`Assignment request ${requestId} not found`);
     }
 
+    // Debug logging
+    console.log('=== Cancel Request Debug ===');
+    console.log('Request ID:', requestId);
+    console.log('Request data:', localReq);
+    console.log('Current user ID:', user?.uid);
+    console.log('isSignatureApproved:', isSignatureApproved);
+    console.log('currentUnitId:', currentUnitId);
+    console.log('currentPersonnelId:', currentPersonnelId);
+    console.log('from_unit_id:', localReq.from_unit_id);
+    console.log('from_personnel_id:', localReq.from_personnel_id);
+    console.log('requested_by:', localReq.requested_by);
+
     // Only the original requester or leaders of the originating unit can cancel the request
     const isOriginalRequester = localReq.requested_by === user?.uid;
     const isLeaderOfOriginatingUnit = isSignatureApproved &&
       ((localReq.from_unit_id && localReq.from_unit_id === currentUnitId) ||
        (localReq.from_personnel_id && localReq.from_personnel_id === currentPersonnelId));
+
+    console.log('isOriginalRequester:', isOriginalRequester);
+    console.log('isLeaderOfOriginatingUnit:', isLeaderOfOriginatingUnit);
+    console.log('=========================');
 
     if (!isOriginalRequester && !isLeaderOfOriginatingUnit) {
       throw new Error('Only the requester or unit leader can cancel');
