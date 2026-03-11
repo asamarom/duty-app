@@ -55,12 +55,41 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Install Nix for reproducible builds
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+        continue-on-error: true
+
+      # Cache Nix store for faster builds
+      - name: Cache Nix store
+        uses: actions/cache@v4
+        with:
+          path: /nix/store
+          key: nix-store-${{ runner.os }}-${{ hashFiles('flake.lock') }}
+          restore-keys: |
+            nix-store-${{ runner.os }}-
+        continue-on-error: true
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+
       - run: npm ci
-      - run: npm run test:run
+
+      # Try to run tests in Nix environment, fallback to regular npm test
+      - name: Run unit tests
+        run: |
+          if command -v nix &> /dev/null && [ -f flake.nix ]; then
+            echo "Running tests in Nix environment..."
+            npm run test:nix || npm run test:run
+          else
+            echo "Nix not available or flake.nix not found, running regular tests..."
+            npm run test:run
+          fi
 
   rules-tests:
     name: Security Rules Tests
