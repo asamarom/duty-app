@@ -1,0 +1,45 @@
+{
+  "totalMocks": 137,
+  "justifiableMocks": [
+    {"what": "Firebase Authentication client", "why": "External service - unit tests should not depend on network calls", "file": "src/test/setup.ts"},
+    {"what": "Firebase Firestore SDK functions", "why": "External database SDK - operations should not execute in unit tests", "file": "src/test/setup.ts"},
+    {"what": "window.matchMedia (browser API)", "why": "Browser API not available in jsdom", "file": "src/components/settings/*.test.tsx"},
+    {"what": "httpsCallable from firebase/functions", "why": "Cloud Functions are external serverless - should not invoke in tests", "file": "src/hooks/__tests__/*.tsx"},
+    {"what": "@/lib/version module", "why": "Build process version - needs deterministic output", "file": "src/components/settings/ProfileTab.test.tsx"}
+  ],
+  "replaceableMocks": [
+    {"what": "useAuth hook", "why": "Custom hook - bypasses auth state logic", "alternative": "Use real useAuth with TestAuthProvider", "file": "src/test/setup.ts"},
+    {"what": "useEffectiveRole hook", "why": "Custom hook - bypasses role computation", "alternative": "Use real hook with mocked Firestore user docs", "file": "src/components/layout/MobileNav.test.tsx"},
+    {"what": "LanguageContext (useLanguage)", "why": "Simple state - should test translation logic", "alternative": "Use real LanguageProvider", "file": "src/test/setup.ts"},
+    {"what": "AdminModeContext", "why": "Simple boolean state - should test", "alternative": "Use real AdminModeProvider", "file": "src/test/setup.ts"},
+    {"what": "usePendingRequestsCount hook", "why": "Business logic - bypasses counting", "alternative": "Mock Firestore data, let hook compute", "file": "src/test/setup.ts"},
+    {"what": "usePendingTransfersCount hook", "why": "Business logic for counting", "alternative": "Mock Firestore data", "file": "src/components/layout/MobileNav.test.tsx"},
+    {"what": "useUserBattalion hook", "why": "Battalion resolution logic", "alternative": "Mock Firestore docs, test hierarchy", "file": "src/hooks/__tests__/useEquipment.test.tsx"},
+    {"what": "useUserRole hook", "why": "Role resolution", "alternative": "Mock Firestore user doc with roles", "file": "src/hooks/__tests__/useEquipment.test.tsx"},
+    {"what": "useUnitsManagement hook", "why": "Unit management logic", "alternative": "Use real hook with mocked Firestore", "file": "src/components/settings/SettingsTabs.test.tsx"},
+    {"what": "useCurrentPersonnel hook", "why": "Data fetch - bypasses lookup", "alternative": "Mock Firestore personnel collection", "file": "src/components/settings/SettingsTabs.test.tsx"},
+    {"what": "useUnits hook", "why": "Unit hierarchy traversal", "alternative": "Mock Firestore units with relationships", "file": "src/components/settings/ProfileTab.test.tsx"},
+    {"what": "use-toast hook", "why": "UI feedback", "alternative": "Use TestToastProvider to verify calls", "file": "src/hooks/__tests__/useUnitsManagement.test.tsx"}
+  ],
+  "unnecessaryMocks": [
+    {"what": "Duplicate Firebase client mocks", "why": "Already mocked in global setup", "file": "src/components/settings/ApprovalsTab.test.tsx"},
+    {"what": "Duplicate Firebase client mocks", "why": "Already mocked globally", "file": "src/components/settings/SettingsTabs.test.tsx"},
+    {"what": "Skipped Radix UI interaction tests", "why": "Dead code, E2E covers this", "file": "src/components/settings/ProfileTab.test.tsx"},
+    {"what": "Skipped version display tests", "why": "Wrong component, should delete", "file": "src/components/settings/ProfileTab.test.tsx"},
+    {"what": "Skipped heading structure test", "why": "Should implement or delete", "file": "src/components/settings/ProfileTab.test.tsx"}
+  ],
+  "mocksByFile": {
+    "src/test/setup.ts": 49,
+    "src/hooks/__tests__/useEquipment.test.tsx": 24,
+    "src/hooks/__tests__/useAssignmentRequests.test.tsx": 32,
+    "src/hooks/__tests__/useCanManageRole.test.tsx": 27,
+    "src/hooks/__tests__/useUserBattalion.test.tsx": 10,
+    "src/hooks/__tests__/useUnitsManagement.test.tsx": 12,
+    "src/components/layout/MobileNav.test.tsx": 18,
+    "src/components/settings/ApprovalsTab.test.tsx": 27,
+    "src/components/settings/SettingsTabs.test.tsx": 22,
+    "src/components/settings/UnitsTab.test.tsx": 20,
+    "src/components/settings/ProfileTab.test.tsx": 18
+  },
+  "reportPath": "ci-test-review-output/mock-analysis.md"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-10T19:28:40.714Z",
+  "data": {
+    "effectId": "01KKCKJ37R6WZJYE2KMYFT7RB2",
+    "invocationKey": "ci-test-coverage-review:S000004:find-analyze-mocks",
+    "invocationHash": "910b7e8b80e401d3308eda638ca480cc721d573d4b4d03bd670f285d769c5256",
+    "stepId": "S000004",
+    "taskId": "find-analyze-mocks",
+    "kind": "agent",
+    "label": "Find and Analyze All Mocks",
+    "taskDefRef": "tasks/01KKCKJ37R6WZJYE2KMYFT7RB2/task.json"
+  },
+  "checksum": "42cc985d551ec5a764a6d808d6314db0d7796ae71bc1e59e4ebf0434d2e02f25"
+}

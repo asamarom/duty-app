@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KKCHZG0T6588B00KX5525GR6",
+  "taskId": "__sdk.breakpoint",
+  "invocationKey": "ci-test-coverage-review:S000002:__sdk.breakpoint",
+  "stepId": "S000002",
+  "kind": "breakpoint",
+  "title": "breakpoint",
+  "metadata": {
+    "label": "breakpoint",
+    "payload": {
+      "id": "review-ci-analysis",
+      "options": [
+        {
+          "label": "Proceed with test mapping",
+          "value": "proceed"
+        },
+        {
+          "label": "Let me review the report first",
+          "value": "review"
+        }
+      ],
+      "question": "CI Pipeline Analysis Complete. Found:\n- 10 CI jobs\n- 5 test stages\n- 8 quality checks\n\nReview the CI analysis report at: ci-test-review-output/ci-pipeline-analysis.md\n\nWould you like to proceed with test mapping?"
+    },
+    "requestedAt": "2026-03-10T19:01:02.618Z"
+  },
+  "inputs": {
+    "label": "breakpoint",
+    "payload": {
+      "id": "review-ci-analysis",
+      "options": [
+        {
+          "label": "Proceed with test mapping",
+          "value": "proceed"
+        },
+        {
+          "label": "Let me review the report first",
+          "value": "review"
+        }
+      ],
+      "question": "CI Pipeline Analysis Complete. Found:\n- 10 CI jobs\n- 5 test stages\n- 8 quality checks\n\nReview the CI analysis report at: ci-test-review-output/ci-pipeline-analysis.md\n\nWould you like to proceed with test mapping?"
+    },
+    "requestedAt": "2026-03-10T19:01:02.618Z"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "currentCoverage": 59.23,
+  "targetCoverage": 85,
+  "gap": 25.77,
+  "coverageData": {
+    "lines": { "pct": 59.23 },
+    "statements": { "pct": 57.5 },
+    "functions": { "pct": 42.9 },
+    "branches": { "pct": 41.6 }
+  },
+  "uncoveredFiles": [
+    "contexts/AdminModeContext.tsx (11.76%)",
+    "components/approvals/ApprovalManagement.tsx (40.42%)",
+    "components/units/UnitsManagement.tsx (26.31%)",
+    "hooks/useEquipment.tsx (47.5%)",
+    "hooks/useUnits.tsx (41.79%)",
+    "hooks/useAssignmentRequests.tsx (63.88%)"
+  ],
+  "reportPath": "ci-test-review-output/coverage-analysis.md"
+}

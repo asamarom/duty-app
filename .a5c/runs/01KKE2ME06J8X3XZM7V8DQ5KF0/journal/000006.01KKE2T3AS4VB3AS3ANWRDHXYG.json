@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-11T09:14:26.009Z",
+  "data": {
+    "effectId": "01KKE2T37Q7C8HG42QV18Z732P",
+    "invocationKey": "fill-test-mocks:S000003:verify-tests",
+    "invocationHash": "f3f4424e61b83e41cd500c45b43a80c1481c638bb7d0630476e74c53c7ebbca3",
+    "stepId": "S000003",
+    "taskId": "verify-tests",
+    "kind": "agent",
+    "label": "Verify all tests pass with filled mocks",
+    "taskDefRef": "tasks/01KKE2T37Q7C8HG42QV18Z732P/task.json"
+  },
+  "checksum": "2c1e778c81658a6408fe78866ebb5d60d7421f30ee810b7b2871ed0f4b14d669"
+}

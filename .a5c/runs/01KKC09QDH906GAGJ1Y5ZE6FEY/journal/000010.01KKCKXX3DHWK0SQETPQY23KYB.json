@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-10T19:35:07.630Z",
+  "data": {
+    "effectId": "01KKCKXX2X68VHBFRXNGZ6F4PZ",
+    "invocationKey": "ci-test-coverage-review:S000005:analyze-coverage",
+    "invocationHash": "137ae68b16e82744dcbdad352f987a81238d7997e100ceda6d3c80ff9d69971f",
+    "stepId": "S000005",
+    "taskId": "analyze-coverage",
+    "kind": "node",
+    "label": "Analyze Test Coverage",
+    "taskDefRef": "tasks/01KKCKXX2X68VHBFRXNGZ6F4PZ/task.json"
+  },
+  "checksum": "d278aea0a780ccd2400160272cec73faf69724488dd20c2a82a9d8d38367556e"
+}

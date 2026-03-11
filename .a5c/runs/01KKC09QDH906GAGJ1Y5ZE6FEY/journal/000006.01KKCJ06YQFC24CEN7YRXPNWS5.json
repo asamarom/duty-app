@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-10T19:01:26.103Z",
+  "data": {
+    "effectId": "01KKCJ06VQ1H00A4AHNTQ2DJNW",
+    "invocationKey": "ci-test-coverage-review:S000003:map-all-tests",
+    "invocationHash": "a089c5439aca2f286bba6af6b67a55ed0d057512e05146c258a4976a605468aa",
+    "stepId": "S000003",
+    "taskId": "map-all-tests",
+    "kind": "agent",
+    "label": "Map All Tests in Project",
+    "taskDefRef": "tasks/01KKCJ06VQ1H00A4AHNTQ2DJNW/task.json"
+  },
+  "checksum": "678f41314de2efe324b5f6861e6d550a8e87063ae3f0048a952138627e51710f"
+}

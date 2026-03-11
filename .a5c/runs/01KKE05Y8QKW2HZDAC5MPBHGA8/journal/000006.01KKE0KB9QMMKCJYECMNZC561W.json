@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-11T08:35:47.640Z",
+  "data": {
+    "effectId": "01KKE0KB98J5R8AGJHPAEZXHD9",
+    "invocationKey": "nix-test-migration:S000003:create-nix-test-scripts",
+    "invocationHash": "9e341499c78b2dd4b8ecd7953be27419fc6a7cb5f9858cc6cc8d2c2c7ede69af",
+    "stepId": "S000003",
+    "taskId": "create-nix-test-scripts",
+    "kind": "agent",
+    "label": "Create scripts to run tests in Nix environment",
+    "taskDefRef": "tasks/01KKE0KB98J5R8AGJHPAEZXHD9/task.json"
+  },
+  "checksum": "c4bf9fd5d3439f62fe13d5188b865af148d7030d91d48a368ae837688e93f8a2"
+}

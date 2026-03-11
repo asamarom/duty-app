@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-11T08:32:09.632Z",
+  "data": {
+    "effectId": "01KKE0CPC27EV1SF6X0NZ3N1X5",
+    "invocationKey": "nix-test-migration:S000002:create-nix-config",
+    "invocationHash": "f10bafe8c3667177838e2fee027bacbaf5128711c1e033cf53a2c9ba5215626e",
+    "stepId": "S000002",
+    "taskId": "create-nix-config",
+    "kind": "agent",
+    "label": "Create Nix flake and development shell",
+    "taskDefRef": "tasks/01KKE0CPC27EV1SF6X0NZ3N1X5/task.json"
+  },
+  "checksum": "41d7b89742210aa2a29d77209afb41e29371d83b3e532e34afa24c3c0d458f60"
+}

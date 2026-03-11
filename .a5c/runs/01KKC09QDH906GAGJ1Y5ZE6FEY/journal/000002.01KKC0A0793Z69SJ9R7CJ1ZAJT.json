@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-10T13:52:12.521Z",
+  "data": {
+    "effectId": "01KKC0A0429B9AFX48JN7E4KHA",
+    "invocationKey": "ci-test-coverage-review:S000001:analyze-ci-pipeline",
+    "invocationHash": "bcf4300ec18ae77a557b898eea5c123ae04cea0256b53aa22f5af812da27a3b1",
+    "stepId": "S000001",
+    "taskId": "analyze-ci-pipeline",
+    "kind": "agent",
+    "label": "Analyze CI Pipeline Configuration",
+    "taskDefRef": "tasks/01KKC0A0429B9AFX48JN7E4KHA/task.json"
+  },
+  "checksum": "0dce8824bf845e01048f722a08e61d40a695593e17b79d4733793ed59b756369"
+}

@@ -505,9 +505,14 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
       throw new Error(`Assignment request ${requestId} not found`);
     }
 
-    // Only the original requester can cancel the request
-    if (localReq.requested_by !== user?.uid) {
-      throw new Error('Only the requester can cancel');
+    // Only the original requester or leaders of the originating unit can cancel the request
+    const isOriginalRequester = localReq.requested_by === user?.uid;
+    const isLeaderOfOriginatingUnit = isSignatureApproved &&
+      ((localReq.from_unit_id && localReq.from_unit_id === currentUnitId) ||
+       (localReq.from_personnel_id && localReq.from_personnel_id === currentPersonnelId));
+
+    if (!isOriginalRequester && !isLeaderOfOriginatingUnit) {
+      throw new Error('Only the requester or unit leader can cancel');
     }
 
     const batch = writeBatch(db);

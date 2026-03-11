@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-11T08:29:02.997Z",
+  "data": {
+    "effectId": "01KKE0701JY5TZ05PPNHKPHQGV",
+    "invocationKey": "nix-test-migration:S000001:analyze-current-setup",
+    "invocationHash": "59f2b953006cfcf00cc3ff2d830921eaccf5ae7f6d4d39654973ecb073ca40f7",
+    "stepId": "S000001",
+    "taskId": "analyze-current-setup",
+    "kind": "agent",
+    "label": "Analyze current test setup and dependencies",
+    "taskDefRef": "tasks/01KKE0701JY5TZ05PPNHKPHQGV/task.json"
+  },
+  "checksum": "1168378af4b3a78348abedc0aaf771a627af2591f655b9171eca8e1107005e1d"
+}

@@ -1,0 +1,465 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KKE2MV5Z867CJJXGP7SS2XZ7",
+  "taskId": "analyze-test-mocks",
+  "invocationKey": "fill-test-mocks:S000001:analyze-test-mocks",
+  "status": "ok",
+  "result": {
+    "incompleteMocks": [
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/useUserBattalion.test.tsx",
+        "line": 9,
+        "mockName": "mockGetDoc",
+        "notes": "Well-structured test with explicit mocking per test case. No fix needed.",
+        "priority": "low",
+        "usage": "Empty vi.fn() without default implementation - relies on test-specific mockResolvedValueOnce"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/useCanManageRole.test.tsx",
+        "line": 6,
+        "mockName": "mockGetDocs",
+        "notes": "Properly handled in beforeEach with mockResolvedValue({ docs: [] }). No fix needed.",
+        "priority": "low",
+        "usage": "Empty vi.fn() without default implementation"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/useCanManageRole.test.tsx",
+        "line": 7,
+        "mockName": "mockGetDoc",
+        "notes": "Properly handled in beforeEach with mockResolvedValue({ exists: () => false }). No fix needed.",
+        "priority": "low",
+        "usage": "Empty vi.fn() without default implementation"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/components/settings/ProfileTab.test.tsx",
+        "line": 56,
+        "mockName": "doc in firebase/firestore",
+        "notes": "Unused mock - component doesn't interact with Firestore directly in these tests.",
+        "priority": "low",
+        "usage": "vi.fn() without implementation"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/components/settings/ProfileTab.test.tsx",
+        "line": 58,
+        "mockName": "onSnapshot in firebase/firestore",
+        "notes": "Unused mock - component doesn't interact with Firestore directly in these tests.",
+        "priority": "low",
+        "usage": "vi.fn() without implementation"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/components/settings/UnitsTab.test.tsx",
+        "line": 40,
+        "mockName": "battalions, companies, platoons in mockUseUnitsManagement",
+        "notes": "Good pattern - each test defines its own data fixtures.",
+        "priority": "low",
+        "usage": "Empty arrays as default - tests override per scenario"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/components/settings/SettingsTabs.test.tsx",
+        "line": 67,
+        "mockName": "Firestore functions (doc, getDoc, getDocs, etc.)",
+        "notes": "Component uses mocked hooks, not direct Firestore. These are safety mocks.",
+        "priority": "low",
+        "usage": "Multiple vi.fn() mocks with minimal implementations"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/components/settings/ApprovalsTab.test.tsx",
+        "line": 54,
+        "mockName": "Firestore mock (collection, doc, getDoc, etc.)",
+        "notes": "Component uses mocked hooks. Firestore mocks are defensive.",
+        "priority": "low",
+        "usage": "Multiple vi.fn() mocks with minimal implementations"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/components/layout/MobileNav.test.tsx",
+        "line": 36,
+        "mockName": "mockUsePendingRequestsCount",
+        "notes": "Appropriate default for most test scenarios.",
+        "priority": "low",
+        "usage": "Returns 0 by default"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/components/layout/MobileNav.test.tsx",
+        "line": 43,
+        "mockName": "mockUsePendingTransfersCount",
+        "notes": "Complete mock with realistic default values.",
+        "priority": "low",
+        "usage": "Returns { incomingCount: 0, outgoingCount: 0, totalCount: 0 }"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/contexts/AdminModeContext.test.tsx",
+        "line": 0,
+        "mockName": "N/A - Real implementation tested",
+        "notes": "Excellent - tests real implementation, not mocks.",
+        "priority": "low",
+        "usage": "Uses vi.unmock to test actual context implementation"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/useUnits.test.tsx",
+        "line": 8,
+        "mockName": "mockOnSnapshot",
+        "notes": "Proper test structure - each test defines its own snapshot data.",
+        "priority": "low",
+        "usage": "Empty vi.fn() - implementation set per test"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/useUnits.test.tsx",
+        "line": 9,
+        "mockName": "mockDocs",
+        "notes": "Good pattern for test data management.",
+        "priority": "low",
+        "usage": "Empty array - tests populate with fixtures"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/contexts/LanguageContext.test.tsx",
+        "line": 0,
+        "mockName": "N/A - Real implementation tested",
+        "notes": "Excellent - tests real implementation with integration scenarios.",
+        "priority": "low",
+        "usage": "Uses vi.unmock to test actual context implementation"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/components/units/UnitsManagement.test.tsx",
+        "line": 11,
+        "mockName": "mockCreateUnit, mockUpdateUnit, mockDeleteUnit, mockGetChildUnits",
+        "notes": "Clean test structure - functions mocked at module level, configured per test.",
+        "priority": "low",
+        "usage": "Empty vi.fn() - behavior defined per test"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/useEquipment.test.tsx",
+        "line": 6,
+        "mockName": "mockGetDocs",
+        "notes": "Properly initialized in beforeEach with mockResolvedValue({ docs: [] }).",
+        "priority": "low",
+        "usage": "Empty vi.fn() - default set in beforeEach"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/useEquipment.test.tsx",
+        "line": 20,
+        "mockName": "mockOnSnapshot",
+        "notes": "Well-designed mock that handles multiple scenarios. Complete implementation.",
+        "priority": "low",
+        "usage": "Complex implementation handling both document and query refs"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/useUnitsManagement.test.tsx",
+        "line": 7,
+        "mockName": "mockSetDoc, mockUpdateDoc, mockDeleteDoc, mockGetDoc",
+        "notes": "Proper pattern - beforeEach initializes with successful responses.",
+        "priority": "low",
+        "usage": "Empty vi.fn() - defaults set in beforeEach"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/use-toast.test.tsx",
+        "line": 0,
+        "mockName": "N/A - Tests reducer and hook logic directly",
+        "notes": "Excellent - pure unit tests of toast logic.",
+        "priority": "low",
+        "usage": "Tests actual implementation without external mocks"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/useAssignmentRequests.test.tsx",
+        "line": 9,
+        "mockName": "mockBatchUpdate, mockBatchSet, mockBatchDelete, mockBatchCommit",
+        "notes": "Complete mock structure for Firebase batch operations.",
+        "priority": "low",
+        "usage": "Batch operation mocks - properly initialized"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/useAssignmentRequests.test.tsx",
+        "line": 22,
+        "mockName": "Multiple Firestore mocks (getDocs, addDoc, updateDoc, etc.)",
+        "notes": "Well-structured with helper functions like makeOnSnapshotMock.",
+        "priority": "low",
+        "usage": "Comprehensive Firestore mock suite with defaults in beforeEach"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/components/approvals/ApprovalsManagement.test.tsx",
+        "line": 73,
+        "mockName": "mockGetDocs, mockUpdateDoc, mockGetDoc",
+        "notes": "Clean test structure with mock functions defined at module level.",
+        "priority": "low",
+        "usage": "Firestore operation mocks - configured per test"
+      }
+    ],
+    "mockPatterns": [
+      "vi.fn() initialized at module level, configured in beforeEach()",
+      "mockResolvedValue() and mockResolvedValueOnce() for async operations",
+      "Helper functions to create test fixtures (makeSnap, makeRequestDoc, createMockRequest)",
+      "Mock implementations defined per test case using mockImplementation()",
+      "Use of vi.clearAllMocks() in beforeEach to reset state",
+      "Mock return values that match production data structures",
+      "Defensive mocking of unused dependencies (Firestore when using mocked hooks)",
+      "Testing real implementations with vi.unmock() for context providers",
+      "Batch operation mocking for complex Firestore transactions",
+      "Smart onSnapshot mocks that handle both document and query references"
+    ],
+    "prioritizedFixes": [],
+    "summary": {
+      "codeQualityNotes": [
+        "Test suite demonstrates excellent mock hygiene",
+        "No leaky test state detected (proper cleanup in beforeEach)",
+        "Tests are well-isolated and independent",
+        "Mock implementations are realistic and maintainable",
+        "Good balance between mocking and testing real code"
+      ],
+      "findings": [
+        "All test files follow consistent mocking patterns",
+        "Mocks are properly initialized in beforeEach hooks",
+        "No incomplete or placeholder mocks that affect test reliability",
+        "Helper functions are used effectively to create realistic test data",
+        "Tests use appropriate mocking strategies (module-level vs per-test)",
+        "Several tests use vi.unmock() to test real implementations (contexts)",
+        "Complex mocks (like onSnapshot) have complete, well-documented implementations",
+        "Firestore batch operations are properly mocked with all required methods",
+        "Tests use mockResolvedValueOnce for sequential async behavior",
+        "Mock data structures match production schemas"
+      ],
+      "highPriorityFixes": 0,
+      "incompleteMocksCount": 0,
+      "lowPriorityFixes": 0,
+      "mediumPriorityFixes": 0,
+      "overallQuality": "EXCELLENT",
+      "recommendations": [
+        "Continue using helper functions for test data creation",
+        "Maintain consistent beforeEach initialization pattern",
+        "Keep testing real implementations where possible (contexts, reducers)",
+        "Document complex mock implementations (like onSnapshot)",
+        "Consider extracting common mock patterns into shared test utilities"
+      ],
+      "totalMocksAnalyzed": 23
+    },
+    "totalTestFiles": 18
+  },
+  "startedAt": "2026-03-11T09:13:43.405Z",
+  "finishedAt": "2026-03-11T09:13:43.405Z",
+  "value": {
+    "incompleteMocks": [
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/useUserBattalion.test.tsx",
+        "line": 9,
+        "mockName": "mockGetDoc",
+        "notes": "Well-structured test with explicit mocking per test case. No fix needed.",
+        "priority": "low",
+        "usage": "Empty vi.fn() without default implementation - relies on test-specific mockResolvedValueOnce"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/useCanManageRole.test.tsx",
+        "line": 6,
+        "mockName": "mockGetDocs",
+        "notes": "Properly handled in beforeEach with mockResolvedValue({ docs: [] }). No fix needed.",
+        "priority": "low",
+        "usage": "Empty vi.fn() without default implementation"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/useCanManageRole.test.tsx",
+        "line": 7,
+        "mockName": "mockGetDoc",
+        "notes": "Properly handled in beforeEach with mockResolvedValue({ exists: () => false }). No fix needed.",
+        "priority": "low",
+        "usage": "Empty vi.fn() without default implementation"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/components/settings/ProfileTab.test.tsx",
+        "line": 56,
+        "mockName": "doc in firebase/firestore",
+        "notes": "Unused mock - component doesn't interact with Firestore directly in these tests.",
+        "priority": "low",
+        "usage": "vi.fn() without implementation"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/components/settings/ProfileTab.test.tsx",
+        "line": 58,
+        "mockName": "onSnapshot in firebase/firestore",
+        "notes": "Unused mock - component doesn't interact with Firestore directly in these tests.",
+        "priority": "low",
+        "usage": "vi.fn() without implementation"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/components/settings/UnitsTab.test.tsx",
+        "line": 40,
+        "mockName": "battalions, companies, platoons in mockUseUnitsManagement",
+        "notes": "Good pattern - each test defines its own data fixtures.",
+        "priority": "low",
+        "usage": "Empty arrays as default - tests override per scenario"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/components/settings/SettingsTabs.test.tsx",
+        "line": 67,
+        "mockName": "Firestore functions (doc, getDoc, getDocs, etc.)",
+        "notes": "Component uses mocked hooks, not direct Firestore. These are safety mocks.",
+        "priority": "low",
+        "usage": "Multiple vi.fn() mocks with minimal implementations"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/components/settings/ApprovalsTab.test.tsx",
+        "line": 54,
+        "mockName": "Firestore mock (collection, doc, getDoc, etc.)",
+        "notes": "Component uses mocked hooks. Firestore mocks are defensive.",
+        "priority": "low",
+        "usage": "Multiple vi.fn() mocks with minimal implementations"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/components/layout/MobileNav.test.tsx",
+        "line": 36,
+        "mockName": "mockUsePendingRequestsCount",
+        "notes": "Appropriate default for most test scenarios.",
+        "priority": "low",
+        "usage": "Returns 0 by default"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/components/layout/MobileNav.test.tsx",
+        "line": 43,
+        "mockName": "mockUsePendingTransfersCount",
+        "notes": "Complete mock with realistic default values.",
+        "priority": "low",
+        "usage": "Returns { incomingCount: 0, outgoingCount: 0, totalCount: 0 }"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/contexts/AdminModeContext.test.tsx",
+        "line": 0,
+        "mockName": "N/A - Real implementation tested",
+        "notes": "Excellent - tests real implementation, not mocks.",
+        "priority": "low",
+        "usage": "Uses vi.unmock to test actual context implementation"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/useUnits.test.tsx",
+        "line": 8,
+        "mockName": "mockOnSnapshot",
+        "notes": "Proper test structure - each test defines its own snapshot data.",
+        "priority": "low",
+        "usage": "Empty vi.fn() - implementation set per test"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/useUnits.test.tsx",
+        "line": 9,
+        "mockName": "mockDocs",
+        "notes": "Good pattern for test data management.",
+        "priority": "low",
+        "usage": "Empty array - tests populate with fixtures"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/contexts/LanguageContext.test.tsx",
+        "line": 0,
+        "mockName": "N/A - Real implementation tested",
+        "notes": "Excellent - tests real implementation with integration scenarios.",
+        "priority": "low",
+        "usage": "Uses vi.unmock to test actual context implementation"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/components/units/UnitsManagement.test.tsx",
+        "line": 11,
+        "mockName": "mockCreateUnit, mockUpdateUnit, mockDeleteUnit, mockGetChildUnits",
+        "notes": "Clean test structure - functions mocked at module level, configured per test.",
+        "priority": "low",
+        "usage": "Empty vi.fn() - behavior defined per test"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/useEquipment.test.tsx",
+        "line": 6,
+        "mockName": "mockGetDocs",
+        "notes": "Properly initialized in beforeEach with mockResolvedValue({ docs: [] }).",
+        "priority": "low",
+        "usage": "Empty vi.fn() - default set in beforeEach"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/useEquipment.test.tsx",
+        "line": 20,
+        "mockName": "mockOnSnapshot",
+        "notes": "Well-designed mock that handles multiple scenarios. Complete implementation.",
+        "priority": "low",
+        "usage": "Complex implementation handling both document and query refs"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/useUnitsManagement.test.tsx",
+        "line": 7,
+        "mockName": "mockSetDoc, mockUpdateDoc, mockDeleteDoc, mockGetDoc",
+        "notes": "Proper pattern - beforeEach initializes with successful responses.",
+        "priority": "low",
+        "usage": "Empty vi.fn() - defaults set in beforeEach"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/use-toast.test.tsx",
+        "line": 0,
+        "mockName": "N/A - Tests reducer and hook logic directly",
+        "notes": "Excellent - pure unit tests of toast logic.",
+        "priority": "low",
+        "usage": "Tests actual implementation without external mocks"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/useAssignmentRequests.test.tsx",
+        "line": 9,
+        "mockName": "mockBatchUpdate, mockBatchSet, mockBatchDelete, mockBatchCommit",
+        "notes": "Complete mock structure for Firebase batch operations.",
+        "priority": "low",
+        "usage": "Batch operation mocks - properly initialized"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/hooks/__tests__/useAssignmentRequests.test.tsx",
+        "line": 22,
+        "mockName": "Multiple Firestore mocks (getDocs, addDoc, updateDoc, etc.)",
+        "notes": "Well-structured with helper functions like makeOnSnapshotMock.",
+        "priority": "low",
+        "usage": "Comprehensive Firestore mock suite with defaults in beforeEach"
+      },
+      {
+        "file": "/home/ubuntu/duty-app/src/components/approvals/ApprovalsManagement.test.tsx",
+        "line": 73,
+        "mockName": "mockGetDocs, mockUpdateDoc, mockGetDoc",
+        "notes": "Clean test structure with mock functions defined at module level.",
+        "priority": "low",
+        "usage": "Firestore operation mocks - configured per test"
+      }
+    ],
+    "mockPatterns": [
+      "vi.fn() initialized at module level, configured in beforeEach()",
+      "mockResolvedValue() and mockResolvedValueOnce() for async operations",
+      "Helper functions to create test fixtures (makeSnap, makeRequestDoc, createMockRequest)",
+      "Mock implementations defined per test case using mockImplementation()",
+      "Use of vi.clearAllMocks() in beforeEach to reset state",
+      "Mock return values that match production data structures",
+      "Defensive mocking of unused dependencies (Firestore when using mocked hooks)",
+      "Testing real implementations with vi.unmock() for context providers",
+      "Batch operation mocking for complex Firestore transactions",
+      "Smart onSnapshot mocks that handle both document and query references"
+    ],
+    "prioritizedFixes": [],
+    "summary": {
+      "codeQualityNotes": [
+        "Test suite demonstrates excellent mock hygiene",
+        "No leaky test state detected (proper cleanup in beforeEach)",
+        "Tests are well-isolated and independent",
+        "Mock implementations are realistic and maintainable",
+        "Good balance between mocking and testing real code"
+      ],
+      "findings": [
+        "All test files follow consistent mocking patterns",
+        "Mocks are properly initialized in beforeEach hooks",
+        "No incomplete or placeholder mocks that affect test reliability",
+        "Helper functions are used effectively to create realistic test data",
+        "Tests use appropriate mocking strategies (module-level vs per-test)",
+        "Several tests use vi.unmock() to test real implementations (contexts)",
+        "Complex mocks (like onSnapshot) have complete, well-documented implementations",
+        "Firestore batch operations are properly mocked with all required methods",
+        "Tests use mockResolvedValueOnce for sequential async behavior",
+        "Mock data structures match production schemas"
+      ],
+      "highPriorityFixes": 0,
+      "incompleteMocksCount": 0,
+      "lowPriorityFixes": 0,
+      "mediumPriorityFixes": 0,
+      "overallQuality": "EXCELLENT",
+      "recommendations": [
+        "Continue using helper functions for test data creation",
+        "Maintain consistent beforeEach initialization pattern",
+        "Keep testing real implementations where possible (contexts, reducers)",
+        "Document complex mock implementations (like onSnapshot)",
+        "Consider extracting common mock patterns into shared test utilities"
+      ],
+      "totalMocksAnalyzed": 23
+    },
+    "totalTestFiles": 18
+  }
+}

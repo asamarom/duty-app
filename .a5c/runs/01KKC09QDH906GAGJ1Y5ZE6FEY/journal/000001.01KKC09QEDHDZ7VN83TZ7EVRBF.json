@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-03-10T13:52:03.533Z",
+  "data": {
+    "runId": "01KKC09QDH906GAGJ1Y5ZE6FEY",
+    "processId": "ci-test-coverage-review",
+    "entrypoint": {
+      "importPath": "../../processes/ci-test-coverage-review.js",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json"
+  },
+  "checksum": "b617433cae5546a4ef46846bb5897ed2142888bc26854520878eab2001e0e3be"
+}

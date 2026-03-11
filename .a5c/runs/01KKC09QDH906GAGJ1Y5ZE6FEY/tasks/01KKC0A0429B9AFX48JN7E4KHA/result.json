@@ -1,0 +1,931 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KKC0A0429B9AFX48JN7E4KHA",
+  "taskId": "analyze-ci-pipeline",
+  "invocationKey": "ci-test-coverage-review:S000001:analyze-ci-pipeline",
+  "status": "ok",
+  "result": {
+    "gaps": [
+      {
+        "category": "Testing",
+        "description": "Unit tests run but coverage metrics are not collected or enforced",
+        "estimatedEffort": "Low",
+        "id": "GAP-001",
+        "impact": "Cannot track test coverage trends or enforce minimum thresholds",
+        "recommendation": "Add coverage collection to unit-tests job and set minimum threshold (e.g., 80%)",
+        "severity": "Medium",
+        "title": "No Code Coverage Enforcement"
+      },
+      {
+        "category": "Production",
+        "description": "Production smoke tests are disabled, no automated production validation",
+        "estimatedEffort": "Medium",
+        "id": "GAP-002",
+        "impact": "Production issues may not be detected immediately after deployment",
+        "recommendation": "Implement basic health check endpoint and validate after production deploy",
+        "severity": "Medium",
+        "title": "No Production Validation"
+      },
+      {
+        "category": "Accessibility",
+        "description": "No automated accessibility (a11y) testing in pipeline",
+        "estimatedEffort": "Medium",
+        "id": "GAP-003",
+        "impact": "Accessibility regressions may be introduced without detection",
+        "recommendation": "Add axe-core or similar a11y testing to E2E suite",
+        "severity": "Medium",
+        "title": "No Accessibility Testing"
+      },
+      {
+        "category": "Testing",
+        "description": "No visual regression/screenshot comparison testing",
+        "estimatedEffort": "Medium",
+        "id": "ENH-001",
+        "impact": "UI changes may introduce unintended visual bugs",
+        "recommendation": "Add Percy, Chromatic, or Playwright screenshot comparison",
+        "severity": "Low",
+        "title": "No Visual Regression Testing"
+      },
+      {
+        "category": "Performance",
+        "description": "Build artifacts are not cached between jobs",
+        "estimatedEffort": "Low",
+        "id": "ENH-002",
+        "impact": "Redundant build time in deploy-staging and deploy-production",
+        "recommendation": "Cache build artifacts and reuse across jobs",
+        "severity": "Low",
+        "title": "No Build Artifact Caching"
+      },
+      {
+        "category": "Testing",
+        "description": "No explicit API contract or integration testing",
+        "estimatedEffort": "High",
+        "id": "ENH-003",
+        "impact": "Backend/Firebase integration changes may break frontend",
+        "recommendation": "Add API contract tests using Pact or similar",
+        "severity": "Low",
+        "title": "No API Contract Testing"
+      },
+      {
+        "category": "Security",
+        "description": "No dependency vulnerability scanning or SAST",
+        "estimatedEffort": "Low",
+        "id": "ENH-004",
+        "impact": "Vulnerable dependencies may be deployed to production",
+        "recommendation": "Add npm audit or Snyk scanning to Phase 1",
+        "severity": "Medium",
+        "title": "No Security Scanning"
+      },
+      {
+        "category": "Performance",
+        "description": "Performance tests run but no clear pass/fail criteria",
+        "estimatedEffort": "Medium",
+        "id": "ENH-005",
+        "impact": "Performance regressions may not block deployment",
+        "recommendation": "Define performance budgets and fail tests if exceeded",
+        "severity": "Low",
+        "title": "No Performance Budgets"
+      },
+      {
+        "category": "Performance",
+        "description": "E2E tests could be further parallelized with sharding",
+        "estimatedEffort": "Low",
+        "id": "ENH-006",
+        "impact": "Test execution time could be reduced",
+        "recommendation": "Use Playwright sharding for faster test execution",
+        "severity": "Low",
+        "title": "Limited Test Parallelization"
+      },
+      {
+        "category": "Documentation",
+        "description": "No inline documentation about what each test suite validates",
+        "estimatedEffort": "Low",
+        "id": "DOC-001",
+        "impact": "Difficult for new developers to understand test coverage",
+        "recommendation": "Add comments or external test plan documentation",
+        "severity": "Low",
+        "title": "Missing Test Documentation"
+      },
+      {
+        "category": "Documentation",
+        "description": "No documented rollback procedure if production deployment fails",
+        "estimatedEffort": "Low",
+        "id": "DOC-002",
+        "impact": "Delayed response to production incidents",
+        "recommendation": "Document Vercel rollback process or implement automated rollback",
+        "severity": "Medium",
+        "title": "No Rollback Procedure"
+      }
+    ],
+    "jobs": [
+      {
+        "dependencies": [],
+        "estimatedDuration": "2-3 min",
+        "name": "typecheck",
+        "phase": 1,
+        "purpose": "Validate TypeScript type safety across codebase",
+        "qualityGate": true,
+        "runner": "ubuntu-latest"
+      },
+      {
+        "dependencies": [],
+        "estimatedDuration": "2-3 min",
+        "name": "lint",
+        "phase": 1,
+        "purpose": "Enforce code quality and style standards via ESLint",
+        "qualityGate": true,
+        "runner": "ubuntu-latest"
+      },
+      {
+        "dependencies": [],
+        "estimatedDuration": "2-3 min",
+        "name": "unit-tests",
+        "phase": 1,
+        "purpose": "Execute unit tests for component and function logic",
+        "qualityGate": true,
+        "runner": "ubuntu-latest"
+      },
+      {
+        "dependencies": [],
+        "estimatedDuration": "2-3 min",
+        "name": "rules-tests",
+        "phase": 1,
+        "purpose": "Validate Firebase security rules using emulators",
+        "qualityGate": true,
+        "runner": "ubuntu-latest",
+        "specialRequirements": [
+          "Java 21",
+          "Firebase CLI",
+          "Firebase Emulator caching"
+        ]
+      },
+      {
+        "dependencies": [
+          "typecheck",
+          "lint",
+          "unit-tests",
+          "rules-tests"
+        ],
+        "estimatedDuration": "1-2 min",
+        "name": "deploy-staging",
+        "outputs": [
+          "preview-url"
+        ],
+        "phase": 2,
+        "purpose": "Deploy application to Vercel preview environment for testing",
+        "qualityGate": false,
+        "runner": "ubuntu-latest"
+      },
+      {
+        "artifacts": [
+          "staging-auth-state"
+        ],
+        "dependencies": [
+          "deploy-staging"
+        ],
+        "estimatedDuration": "~2 min",
+        "name": "setup-staging-auth",
+        "phase": 3,
+        "purpose": "Seed test data and generate authentication tokens for E2E tests",
+        "qualityGate": false,
+        "runner": "ubuntu-latest"
+      },
+      {
+        "artifacts": [
+          "staging-desktop-report"
+        ],
+        "dependencies": [
+          "deploy-staging",
+          "setup-staging-auth"
+        ],
+        "estimatedDuration": "8-12 min",
+        "name": "test-staging-desktop",
+        "phase": 4,
+        "playwrightProjects": [
+          "staging-unauth",
+          "staging",
+          "staging-admin",
+          "staging-leader"
+        ],
+        "purpose": "Execute comprehensive desktop E2E tests across multiple user roles",
+        "qualityGate": true,
+        "runner": "ubuntu-latest"
+      },
+      {
+        "artifacts": [
+          "staging-mobile-report"
+        ],
+        "dependencies": [
+          "deploy-staging",
+          "setup-staging-auth"
+        ],
+        "estimatedDuration": "8-12 min",
+        "name": "test-staging-mobile",
+        "phase": 4,
+        "playwrightProjects": [
+          "staging-mobile"
+        ],
+        "purpose": "Execute mobile viewport E2E tests for responsive design validation",
+        "qualityGate": true,
+        "runner": "ubuntu-latest"
+      },
+      {
+        "artifacts": [
+          "staging-performance-report"
+        ],
+        "dependencies": [
+          "deploy-staging",
+          "setup-staging-auth"
+        ],
+        "estimatedDuration": "8-12 min",
+        "name": "test-staging-performance",
+        "phase": 4,
+        "playwrightProjects": [
+          "staging-admin"
+        ],
+        "purpose": "Execute performance and load tests on staging environment",
+        "qualityGate": true,
+        "runner": "ubuntu-latest",
+        "testFile": "e2e/performance.spec.ts"
+      },
+      {
+        "condition": "github.ref == 'refs/heads/main' && github.event_name == 'push'",
+        "dependencies": [
+          "deploy-staging",
+          "test-staging-desktop",
+          "test-staging-mobile",
+          "test-staging-performance"
+        ],
+        "estimatedDuration": "1-2 min",
+        "name": "deploy-production",
+        "phase": 5,
+        "purpose": "Promote validated build to production environment",
+        "qualityGate": false,
+        "runner": "ubuntu-latest"
+      }
+    ],
+    "qualityChecks": [
+      {
+        "blocking": true,
+        "blocksProduction": true,
+        "blocksStaging": true,
+        "phase": 1,
+        "tool": "TypeScript Compiler",
+        "type": "Type Safety"
+      },
+      {
+        "blocking": true,
+        "blocksProduction": true,
+        "blocksStaging": true,
+        "phase": 1,
+        "tool": "ESLint",
+        "type": "Code Quality"
+      },
+      {
+        "blocking": true,
+        "blocksProduction": true,
+        "blocksStaging": true,
+        "coverageTracking": false,
+        "phase": 1,
+        "tool": "Vitest",
+        "type": "Unit Tests"
+      },
+      {
+        "blocking": true,
+        "blocksProduction": true,
+        "blocksStaging": true,
+        "phase": 1,
+        "tool": "Firebase Test SDK",
+        "type": "Security Rules"
+      },
+      {
+        "blocking": true,
+        "blocksProduction": true,
+        "blocksStaging": false,
+        "phase": 4,
+        "tool": "Playwright",
+        "type": "Desktop E2E",
+        "userRoles": [
+          "unauthenticated",
+          "user",
+          "admin",
+          "leader"
+        ]
+      },
+      {
+        "blocking": true,
+        "blocksProduction": true,
+        "blocksStaging": false,
+        "phase": 4,
+        "tool": "Playwright",
+        "type": "Mobile E2E"
+      },
+      {
+        "blocking": true,
+        "blocksProduction": true,
+        "blocksStaging": false,
+        "budgetEnforcement": false,
+        "phase": 4,
+        "tool": "Playwright",
+        "type": "Performance"
+      },
+      {
+        "blocking": true,
+        "blocksE2E": true,
+        "maxWaitTime": "5 minutes (30 attempts x 10s)",
+        "phase": 3,
+        "tool": "Custom health check",
+        "type": "Deployment Readiness"
+      }
+    ],
+    "reportPath": "ci-test-review-output/ci-pipeline-analysis.md",
+    "testStages": [
+      {
+        "stage": "Static Analysis",
+        "tests": [
+          {
+            "blocksDeployment": true,
+            "coverage": "Type safety validation",
+            "job": "typecheck",
+            "name": "TypeScript Type Checking",
+            "tool": "TypeScript Compiler"
+          },
+          {
+            "blocksDeployment": true,
+            "coverage": "Code style, best practices, potential bugs",
+            "job": "lint",
+            "name": "ESLint Code Quality",
+            "tool": "ESLint"
+          }
+        ]
+      },
+      {
+        "stage": "Unit Testing",
+        "tests": [
+          {
+            "blocksDeployment": true,
+            "coverage": "Component behavior, business logic",
+            "job": "unit-tests",
+            "missingFeatures": [
+              "Code coverage collection",
+              "Coverage thresholds"
+            ],
+            "name": "Component Unit Tests",
+            "tool": "Vitest (inferred from npm run test:run)"
+          },
+          {
+            "blocksDeployment": true,
+            "coverage": "Database access control, authorization",
+            "job": "rules-tests",
+            "name": "Firebase Security Rules Tests",
+            "optimizations": [
+              "Firebase Emulator binary caching"
+            ],
+            "tool": "Firebase Test SDK with Emulators"
+          }
+        ]
+      },
+      {
+        "stage": "Integration Testing",
+        "tests": [
+          {
+            "artifacts": [
+              "staging-admin.json",
+              "staging-leader.json",
+              "staging-user.json"
+            ],
+            "blocksDeployment": false,
+            "coverage": "Test data seeding, token generation",
+            "job": "setup-staging-auth",
+            "name": "Staging Authentication Setup",
+            "tool": "Playwright + Custom Scripts"
+          }
+        ]
+      },
+      {
+        "stage": "E2E Testing",
+        "tests": [
+          {
+            "blocksProduction": true,
+            "browser": "Chromium",
+            "coverage": "Full user flows, multi-role functionality",
+            "job": "test-staging-desktop",
+            "name": "Desktop E2E Tests",
+            "parallelExecution": true,
+            "projects": [
+              "staging-unauth",
+              "staging",
+              "staging-admin",
+              "staging-leader"
+            ],
+            "tool": "Playwright"
+          },
+          {
+            "blocksProduction": true,
+            "browser": "Chromium (mobile viewport)",
+            "coverage": "Responsive design, touch interactions",
+            "job": "test-staging-mobile",
+            "name": "Mobile E2E Tests",
+            "parallelExecution": true,
+            "projects": [
+              "staging-mobile"
+            ],
+            "tool": "Playwright"
+          },
+          {
+            "blocksProduction": true,
+            "browser": "Chromium",
+            "coverage": "Load times, navigation performance, runtime metrics",
+            "job": "test-staging-performance",
+            "missingFeatures": [
+              "Performance budgets",
+              "Pass/fail thresholds"
+            ],
+            "name": "Performance Tests",
+            "parallelExecution": true,
+            "projects": [
+              "staging-admin"
+            ],
+            "testFile": "e2e/performance.spec.ts",
+            "tool": "Playwright"
+          }
+        ]
+      },
+      {
+        "stage": "Production Validation",
+        "tests": [
+          {
+            "alternative": "Manual testing via npm run test:e2e:prod:setup && npm run test:e2e:prod:auth",
+            "impact": "No automated production validation after deployment",
+            "name": "Production Smoke Tests",
+            "reason": "Production uses real Firebase OAuth, no automated test login available",
+            "status": "DISABLED"
+          }
+        ]
+      }
+    ]
+  },
+  "startedAt": "2026-03-10T15:22:50.433Z",
+  "finishedAt": "2026-03-10T15:22:50.433Z",
+  "value": {
+    "gaps": [
+      {
+        "category": "Testing",
+        "description": "Unit tests run but coverage metrics are not collected or enforced",
+        "estimatedEffort": "Low",
+        "id": "GAP-001",
+        "impact": "Cannot track test coverage trends or enforce minimum thresholds",
+        "recommendation": "Add coverage collection to unit-tests job and set minimum threshold (e.g., 80%)",
+        "severity": "Medium",
+        "title": "No Code Coverage Enforcement"
+      },
+      {
+        "category": "Production",
+        "description": "Production smoke tests are disabled, no automated production validation",
+        "estimatedEffort": "Medium",
+        "id": "GAP-002",
+        "impact": "Production issues may not be detected immediately after deployment",
+        "recommendation": "Implement basic health check endpoint and validate after production deploy",
+        "severity": "Medium",
+        "title": "No Production Validation"
+      },
+      {
+        "category": "Accessibility",
+        "description": "No automated accessibility (a11y) testing in pipeline",
+        "estimatedEffort": "Medium",
+        "id": "GAP-003",
+        "impact": "Accessibility regressions may be introduced without detection",
+        "recommendation": "Add axe-core or similar a11y testing to E2E suite",
+        "severity": "Medium",
+        "title": "No Accessibility Testing"
+      },
+      {
+        "category": "Testing",
+        "description": "No visual regression/screenshot comparison testing",
+        "estimatedEffort": "Medium",
+        "id": "ENH-001",
+        "impact": "UI changes may introduce unintended visual bugs",
+        "recommendation": "Add Percy, Chromatic, or Playwright screenshot comparison",
+        "severity": "Low",
+        "title": "No Visual Regression Testing"
+      },
+      {
+        "category": "Performance",
+        "description": "Build artifacts are not cached between jobs",
+        "estimatedEffort": "Low",
+        "id": "ENH-002",
+        "impact": "Redundant build time in deploy-staging and deploy-production",
+        "recommendation": "Cache build artifacts and reuse across jobs",
+        "severity": "Low",
+        "title": "No Build Artifact Caching"
+      },
+      {
+        "category": "Testing",
+        "description": "No explicit API contract or integration testing",
+        "estimatedEffort": "High",
+        "id": "ENH-003",
+        "impact": "Backend/Firebase integration changes may break frontend",
+        "recommendation": "Add API contract tests using Pact or similar",
+        "severity": "Low",
+        "title": "No API Contract Testing"
+      },
+      {
+        "category": "Security",
+        "description": "No dependency vulnerability scanning or SAST",
+        "estimatedEffort": "Low",
+        "id": "ENH-004",
+        "impact": "Vulnerable dependencies may be deployed to production",
+        "recommendation": "Add npm audit or Snyk scanning to Phase 1",
+        "severity": "Medium",
+        "title": "No Security Scanning"
+      },
+      {
+        "category": "Performance",
+        "description": "Performance tests run but no clear pass/fail criteria",
+        "estimatedEffort": "Medium",
+        "id": "ENH-005",
+        "impact": "Performance regressions may not block deployment",
+        "recommendation": "Define performance budgets and fail tests if exceeded",
+        "severity": "Low",
+        "title": "No Performance Budgets"
+      },
+      {
+        "category": "Performance",
+        "description": "E2E tests could be further parallelized with sharding",
+        "estimatedEffort": "Low",
+        "id": "ENH-006",
+        "impact": "Test execution time could be reduced",
+        "recommendation": "Use Playwright sharding for faster test execution",
+        "severity": "Low",
+        "title": "Limited Test Parallelization"
+      },
+      {
+        "category": "Documentation",
+        "description": "No inline documentation about what each test suite validates",
+        "estimatedEffort": "Low",
+        "id": "DOC-001",
+        "impact": "Difficult for new developers to understand test coverage",
+        "recommendation": "Add comments or external test plan documentation",
+        "severity": "Low",
+        "title": "Missing Test Documentation"
+      },
+      {
+        "category": "Documentation",
+        "description": "No documented rollback procedure if production deployment fails",
+        "estimatedEffort": "Low",
+        "id": "DOC-002",
+        "impact": "Delayed response to production incidents",
+        "recommendation": "Document Vercel rollback process or implement automated rollback",
+        "severity": "Medium",
+        "title": "No Rollback Procedure"
+      }
+    ],
+    "jobs": [
+      {
+        "dependencies": [],
+        "estimatedDuration": "2-3 min",
+        "name": "typecheck",
+        "phase": 1,
+        "purpose": "Validate TypeScript type safety across codebase",
+        "qualityGate": true,
+        "runner": "ubuntu-latest"
+      },
+      {
+        "dependencies": [],
+        "estimatedDuration": "2-3 min",
+        "name": "lint",
+        "phase": 1,
+        "purpose": "Enforce code quality and style standards via ESLint",
+        "qualityGate": true,
+        "runner": "ubuntu-latest"
+      },
+      {
+        "dependencies": [],
+        "estimatedDuration": "2-3 min",
+        "name": "unit-tests",
+        "phase": 1,
+        "purpose": "Execute unit tests for component and function logic",
+        "qualityGate": true,
+        "runner": "ubuntu-latest"
+      },
+      {
+        "dependencies": [],
+        "estimatedDuration": "2-3 min",
+        "name": "rules-tests",
+        "phase": 1,
+        "purpose": "Validate Firebase security rules using emulators",
+        "qualityGate": true,
+        "runner": "ubuntu-latest",
+        "specialRequirements": [
+          "Java 21",
+          "Firebase CLI",
+          "Firebase Emulator caching"
+        ]
+      },
+      {
+        "dependencies": [
+          "typecheck",
+          "lint",
+          "unit-tests",
+          "rules-tests"
+        ],
+        "estimatedDuration": "1-2 min",
+        "name": "deploy-staging",
+        "outputs": [
+          "preview-url"
+        ],
+        "phase": 2,
+        "purpose": "Deploy application to Vercel preview environment for testing",
+        "qualityGate": false,
+        "runner": "ubuntu-latest"
+      },
+      {
+        "artifacts": [
+          "staging-auth-state"
+        ],
+        "dependencies": [
+          "deploy-staging"
+        ],
+        "estimatedDuration": "~2 min",
+        "name": "setup-staging-auth",
+        "phase": 3,
+        "purpose": "Seed test data and generate authentication tokens for E2E tests",
+        "qualityGate": false,
+        "runner": "ubuntu-latest"
+      },
+      {
+        "artifacts": [
+          "staging-desktop-report"
+        ],
+        "dependencies": [
+          "deploy-staging",
+          "setup-staging-auth"
+        ],
+        "estimatedDuration": "8-12 min",
+        "name": "test-staging-desktop",
+        "phase": 4,
+        "playwrightProjects": [
+          "staging-unauth",
+          "staging",
+          "staging-admin",
+          "staging-leader"
+        ],
+        "purpose": "Execute comprehensive desktop E2E tests across multiple user roles",
+        "qualityGate": true,
+        "runner": "ubuntu-latest"
+      },
+      {
+        "artifacts": [
+          "staging-mobile-report"
+        ],
+        "dependencies": [
+          "deploy-staging",
+          "setup-staging-auth"
+        ],
+        "estimatedDuration": "8-12 min",
+        "name": "test-staging-mobile",
+        "phase": 4,
+        "playwrightProjects": [
+          "staging-mobile"
+        ],
+        "purpose": "Execute mobile viewport E2E tests for responsive design validation",
+        "qualityGate": true,
+        "runner": "ubuntu-latest"
+      },
+      {
+        "artifacts": [
+          "staging-performance-report"
+        ],
+        "dependencies": [
+          "deploy-staging",
+          "setup-staging-auth"
+        ],
+        "estimatedDuration": "8-12 min",
+        "name": "test-staging-performance",
+        "phase": 4,
+        "playwrightProjects": [
+          "staging-admin"
+        ],
+        "purpose": "Execute performance and load tests on staging environment",
+        "qualityGate": true,
+        "runner": "ubuntu-latest",
+        "testFile": "e2e/performance.spec.ts"
+      },
+      {
+        "condition": "github.ref == 'refs/heads/main' && github.event_name == 'push'",
+        "dependencies": [
+          "deploy-staging",
+          "test-staging-desktop",
+          "test-staging-mobile",
+          "test-staging-performance"
+        ],
+        "estimatedDuration": "1-2 min",
+        "name": "deploy-production",
+        "phase": 5,
+        "purpose": "Promote validated build to production environment",
+        "qualityGate": false,
+        "runner": "ubuntu-latest"
+      }
+    ],
+    "qualityChecks": [
+      {
+        "blocking": true,
+        "blocksProduction": true,
+        "blocksStaging": true,
+        "phase": 1,
+        "tool": "TypeScript Compiler",
+        "type": "Type Safety"
+      },
+      {
+        "blocking": true,
+        "blocksProduction": true,
+        "blocksStaging": true,
+        "phase": 1,
+        "tool": "ESLint",
+        "type": "Code Quality"
+      },
+      {
+        "blocking": true,
+        "blocksProduction": true,
+        "blocksStaging": true,
+        "coverageTracking": false,
+        "phase": 1,
+        "tool": "Vitest",
+        "type": "Unit Tests"
+      },
+      {
+        "blocking": true,
+        "blocksProduction": true,
+        "blocksStaging": true,
+        "phase": 1,
+        "tool": "Firebase Test SDK",
+        "type": "Security Rules"
+      },
+      {
+        "blocking": true,
+        "blocksProduction": true,
+        "blocksStaging": false,
+        "phase": 4,
+        "tool": "Playwright",
+        "type": "Desktop E2E",
+        "userRoles": [
+          "unauthenticated",
+          "user",
+          "admin",
+          "leader"
+        ]
+      },
+      {
+        "blocking": true,
+        "blocksProduction": true,
+        "blocksStaging": false,
+        "phase": 4,
+        "tool": "Playwright",
+        "type": "Mobile E2E"
+      },
+      {
+        "blocking": true,
+        "blocksProduction": true,
+        "blocksStaging": false,
+        "budgetEnforcement": false,
+        "phase": 4,
+        "tool": "Playwright",
+        "type": "Performance"
+      },
+      {
+        "blocking": true,
+        "blocksE2E": true,
+        "maxWaitTime": "5 minutes (30 attempts x 10s)",
+        "phase": 3,
+        "tool": "Custom health check",
+        "type": "Deployment Readiness"
+      }
+    ],
+    "reportPath": "ci-test-review-output/ci-pipeline-analysis.md",
+    "testStages": [
+      {
+        "stage": "Static Analysis",
+        "tests": [
+          {
+            "blocksDeployment": true,
+            "coverage": "Type safety validation",
+            "job": "typecheck",
+            "name": "TypeScript Type Checking",
+            "tool": "TypeScript Compiler"
+          },
+          {
+            "blocksDeployment": true,
+            "coverage": "Code style, best practices, potential bugs",
+            "job": "lint",
+            "name": "ESLint Code Quality",
+            "tool": "ESLint"
+          }
+        ]
+      },
+      {
+        "stage": "Unit Testing",
+        "tests": [
+          {
+            "blocksDeployment": true,
+            "coverage": "Component behavior, business logic",
+            "job": "unit-tests",
+            "missingFeatures": [
+              "Code coverage collection",
+              "Coverage thresholds"
+            ],
+            "name": "Component Unit Tests",
+            "tool": "Vitest (inferred from npm run test:run)"
+          },
+          {
+            "blocksDeployment": true,
+            "coverage": "Database access control, authorization",
+            "job": "rules-tests",
+            "name": "Firebase Security Rules Tests",
+            "optimizations": [
+              "Firebase Emulator binary caching"
+            ],
+            "tool": "Firebase Test SDK with Emulators"
+          }
+        ]
+      },
+      {
+        "stage": "Integration Testing",
+        "tests": [
+          {
+            "artifacts": [
+              "staging-admin.json",
+              "staging-leader.json",
+              "staging-user.json"
+            ],
+            "blocksDeployment": false,
+            "coverage": "Test data seeding, token generation",
+            "job": "setup-staging-auth",
+            "name": "Staging Authentication Setup",
+            "tool": "Playwright + Custom Scripts"
+          }
+        ]
+      },
+      {
+        "stage": "E2E Testing",
+        "tests": [
+          {
+            "blocksProduction": true,
+            "browser": "Chromium",
+            "coverage": "Full user flows, multi-role functionality",
+            "job": "test-staging-desktop",
+            "name": "Desktop E2E Tests",
+            "parallelExecution": true,
+            "projects": [
+              "staging-unauth",
+              "staging",
+              "staging-admin",
+              "staging-leader"
+            ],
+            "tool": "Playwright"
+          },
+          {
+            "blocksProduction": true,
+            "browser": "Chromium (mobile viewport)",
+            "coverage": "Responsive design, touch interactions",
+            "job": "test-staging-mobile",
+            "name": "Mobile E2E Tests",
+            "parallelExecution": true,
+            "projects": [
+              "staging-mobile"
+            ],
+            "tool": "Playwright"
+          },
+          {
+            "blocksProduction": true,
+            "browser": "Chromium",
+            "coverage": "Load times, navigation performance, runtime metrics",
+            "job": "test-staging-performance",
+            "missingFeatures": [
+              "Performance budgets",
+              "Pass/fail thresholds"
+            ],
+            "name": "Performance Tests",
+            "parallelExecution": true,
+            "projects": [
+              "staging-admin"
+            ],
+            "testFile": "e2e/performance.spec.ts",
+            "tool": "Playwright"
+          }
+        ]
+      },
+      {
+        "stage": "Production Validation",
+        "tests": [
+          {
+            "alternative": "Manual testing via npm run test:e2e:prod:setup && npm run test:e2e:prod:auth",
+            "impact": "No automated production validation after deployment",
+            "name": "Production Smoke Tests",
+            "reason": "Production uses real Firebase OAuth, no automated test login available",
+            "status": "DISABLED"
+          }
+        ]
+      }
+    ]
+  }
+}

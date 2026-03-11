@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-11T09:19:33.219Z",
+  "data": {
+    "effectId": "01KKE33FAKYJJ2RF8CC2V346R7",
+    "invocationKey": "fill-test-mocks:S000004:document-mocking-patterns",
+    "invocationHash": "7d1085d83f5511c17d6f66c4abefb3b3217526e33c83e79883b82bfba65e9c01",
+    "stepId": "S000004",
+    "taskId": "document-mocking-patterns",
+    "kind": "agent",
+    "label": "Document mocking patterns and best practices",
+    "taskDefRef": "tasks/01KKE33FAKYJJ2RF8CC2V346R7/task.json"
+  },
+  "checksum": "7897616f46c1e29700bff2fcad3ba6fd1c97baa7f3d52bcce4bc41c7bc660eb0"
+}

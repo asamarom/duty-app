@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-11T09:11:33.922Z",
+  "data": {
+    "effectId": "01KKE2MV5Z867CJJXGP7SS2XZ7",
+    "invocationKey": "fill-test-mocks:S000001:analyze-test-mocks",
+    "invocationHash": "34f64f9d423b18de5d6636875e2cf434023cd7346d1c018bb5c947d43b5705a2",
+    "stepId": "S000001",
+    "taskId": "analyze-test-mocks",
+    "kind": "agent",
+    "label": "Analyze existing test mocks",
+    "taskDefRef": "tasks/01KKE2MV5Z867CJJXGP7SS2XZ7/task.json"
+  },
+  "checksum": "0719600ae2cdbfd156f659a8f6f7b214194c9b5952416bb4e42e44a560178bce"
+}

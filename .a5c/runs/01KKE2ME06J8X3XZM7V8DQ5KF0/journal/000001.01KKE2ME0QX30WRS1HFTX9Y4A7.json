@@ -1,0 +1,15 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-03-11T09:11:20.343Z",
+  "data": {
+    "runId": "01KKE2ME06J8X3XZM7V8DQ5KF0",
+    "processId": "fill-test-mocks",
+    "entrypoint": {
+      "importPath": "../../processes/fill-test-mocks.js",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json",
+    "prompt": "Fill all relevant mocks in test files with realistic implementations. Analyze existing mocks, fill incomplete ones, verify tests pass, and document mocking patterns."
+  },
+  "checksum": "0e12559aa4e146e77a82ac8fdfa9b6f04d37b0c973b6d75af8f697ecd38fd9f6"
+}

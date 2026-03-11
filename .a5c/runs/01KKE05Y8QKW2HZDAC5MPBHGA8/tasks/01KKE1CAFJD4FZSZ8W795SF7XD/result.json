@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KKE1CAFJD4FZSZ8W795SF7XD",
+  "taskId": "documentation",
+  "invocationKey": "nix-test-migration:S000005:documentation",
+  "status": "ok",
+  "result": {
+    "commitSha": "de9881479a0f822b09fe6af734898716defda427",
+    "docsCreated": [
+      "/home/ubuntu/duty-app/CONTRIBUTING.md",
+      "/home/ubuntu/duty-app/README.md"
+    ]
+  },
+  "startedAt": "2026-03-11T08:52:35.222Z",
+  "finishedAt": "2026-03-11T08:52:35.222Z",
+  "value": {
+    "commitSha": "de9881479a0f822b09fe6af734898716defda427",
+    "docsCreated": [
+      "/home/ubuntu/duty-app/CONTRIBUTING.md",
+      "/home/ubuntu/duty-app/README.md"
+    ]
+  }
+}

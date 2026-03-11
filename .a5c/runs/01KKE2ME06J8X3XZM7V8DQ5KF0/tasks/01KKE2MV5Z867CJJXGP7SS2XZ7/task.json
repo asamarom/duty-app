@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KKE2MV5Z867CJJXGP7SS2XZ7",
+  "taskId": "analyze-test-mocks",
+  "invocationKey": "fill-test-mocks:S000001:analyze-test-mocks",
+  "stepId": "S000001",
+  "kind": "agent",
+  "title": "Analyze existing test mocks",
+  "io": {
+    "inputJsonPath": "tasks/01KKE2MV5Z867CJJXGP7SS2XZ7/input.json",
+    "outputJsonPath": "tasks/01KKE2MV5Z867CJJXGP7SS2XZ7/output.json"
+  },
+  "inputs": {
+    "projectRoot": "/home/ubuntu/duty-app"
+  }
+}

@@ -1,0 +1,299 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KKCKJ37R6WZJYE2KMYFT7RB2",
+  "taskId": "find-analyze-mocks",
+  "invocationKey": "ci-test-coverage-review:S000004:find-analyze-mocks",
+  "status": "ok",
+  "result": {
+    "justifiableMocks": [
+      {
+        "file": "src/test/setup.ts",
+        "what": "Firebase Authentication client",
+        "why": "External service - unit tests should not depend on network calls"
+      },
+      {
+        "file": "src/test/setup.ts",
+        "what": "Firebase Firestore SDK functions",
+        "why": "External database SDK - operations should not execute in unit tests"
+      },
+      {
+        "file": "src/components/settings/*.test.tsx",
+        "what": "window.matchMedia (browser API)",
+        "why": "Browser API not available in jsdom"
+      },
+      {
+        "file": "src/hooks/__tests__/*.tsx",
+        "what": "httpsCallable from firebase/functions",
+        "why": "Cloud Functions are external serverless - should not invoke in tests"
+      },
+      {
+        "file": "src/components/settings/ProfileTab.test.tsx",
+        "what": "@/lib/version module",
+        "why": "Build process version - needs deterministic output"
+      }
+    ],
+    "mocksByFile": {
+      "src/components/layout/MobileNav.test.tsx": 18,
+      "src/components/settings/ApprovalsTab.test.tsx": 27,
+      "src/components/settings/ProfileTab.test.tsx": 18,
+      "src/components/settings/SettingsTabs.test.tsx": 22,
+      "src/components/settings/UnitsTab.test.tsx": 20,
+      "src/hooks/__tests__/useAssignmentRequests.test.tsx": 32,
+      "src/hooks/__tests__/useCanManageRole.test.tsx": 27,
+      "src/hooks/__tests__/useEquipment.test.tsx": 24,
+      "src/hooks/__tests__/useUnitsManagement.test.tsx": 12,
+      "src/hooks/__tests__/useUserBattalion.test.tsx": 10,
+      "src/test/setup.ts": 49
+    },
+    "replaceableMocks": [
+      {
+        "alternative": "Use real useAuth with TestAuthProvider",
+        "file": "src/test/setup.ts",
+        "what": "useAuth hook",
+        "why": "Custom hook - bypasses auth state logic"
+      },
+      {
+        "alternative": "Use real hook with mocked Firestore user docs",
+        "file": "src/components/layout/MobileNav.test.tsx",
+        "what": "useEffectiveRole hook",
+        "why": "Custom hook - bypasses role computation"
+      },
+      {
+        "alternative": "Use real LanguageProvider",
+        "file": "src/test/setup.ts",
+        "what": "LanguageContext (useLanguage)",
+        "why": "Simple state - should test translation logic"
+      },
+      {
+        "alternative": "Use real AdminModeProvider",
+        "file": "src/test/setup.ts",
+        "what": "AdminModeContext",
+        "why": "Simple boolean state - should test"
+      },
+      {
+        "alternative": "Mock Firestore data, let hook compute",
+        "file": "src/test/setup.ts",
+        "what": "usePendingRequestsCount hook",
+        "why": "Business logic - bypasses counting"
+      },
+      {
+        "alternative": "Mock Firestore data",
+        "file": "src/components/layout/MobileNav.test.tsx",
+        "what": "usePendingTransfersCount hook",
+        "why": "Business logic for counting"
+      },
+      {
+        "alternative": "Mock Firestore docs, test hierarchy",
+        "file": "src/hooks/__tests__/useEquipment.test.tsx",
+        "what": "useUserBattalion hook",
+        "why": "Battalion resolution logic"
+      },
+      {
+        "alternative": "Mock Firestore user doc with roles",
+        "file": "src/hooks/__tests__/useEquipment.test.tsx",
+        "what": "useUserRole hook",
+        "why": "Role resolution"
+      },
+      {
+        "alternative": "Use real hook with mocked Firestore",
+        "file": "src/components/settings/SettingsTabs.test.tsx",
+        "what": "useUnitsManagement hook",
+        "why": "Unit management logic"
+      },
+      {
+        "alternative": "Mock Firestore personnel collection",
+        "file": "src/components/settings/SettingsTabs.test.tsx",
+        "what": "useCurrentPersonnel hook",
+        "why": "Data fetch - bypasses lookup"
+      },
+      {
+        "alternative": "Mock Firestore units with relationships",
+        "file": "src/components/settings/ProfileTab.test.tsx",
+        "what": "useUnits hook",
+        "why": "Unit hierarchy traversal"
+      },
+      {
+        "alternative": "Use TestToastProvider to verify calls",
+        "file": "src/hooks/__tests__/useUnitsManagement.test.tsx",
+        "what": "use-toast hook",
+        "why": "UI feedback"
+      }
+    ],
+    "reportPath": "ci-test-review-output/mock-analysis.md",
+    "totalMocks": 137,
+    "unnecessaryMocks": [
+      {
+        "file": "src/components/settings/ApprovalsTab.test.tsx",
+        "what": "Duplicate Firebase client mocks",
+        "why": "Already mocked in global setup"
+      },
+      {
+        "file": "src/components/settings/SettingsTabs.test.tsx",
+        "what": "Duplicate Firebase client mocks",
+        "why": "Already mocked globally"
+      },
+      {
+        "file": "src/components/settings/ProfileTab.test.tsx",
+        "what": "Skipped Radix UI interaction tests",
+        "why": "Dead code, E2E covers this"
+      },
+      {
+        "file": "src/components/settings/ProfileTab.test.tsx",
+        "what": "Skipped version display tests",
+        "why": "Wrong component, should delete"
+      },
+      {
+        "file": "src/components/settings/ProfileTab.test.tsx",
+        "what": "Skipped heading structure test",
+        "why": "Should implement or delete"
+      }
+    ]
+  },
+  "startedAt": "2026-03-10T19:32:15.315Z",
+  "finishedAt": "2026-03-10T19:32:15.315Z",
+  "value": {
+    "justifiableMocks": [
+      {
+        "file": "src/test/setup.ts",
+        "what": "Firebase Authentication client",
+        "why": "External service - unit tests should not depend on network calls"
+      },
+      {
+        "file": "src/test/setup.ts",
+        "what": "Firebase Firestore SDK functions",
+        "why": "External database SDK - operations should not execute in unit tests"
+      },
+      {
+        "file": "src/components/settings/*.test.tsx",
+        "what": "window.matchMedia (browser API)",
+        "why": "Browser API not available in jsdom"
+      },
+      {
+        "file": "src/hooks/__tests__/*.tsx",
+        "what": "httpsCallable from firebase/functions",
+        "why": "Cloud Functions are external serverless - should not invoke in tests"
+      },
+      {
+        "file": "src/components/settings/ProfileTab.test.tsx",
+        "what": "@/lib/version module",
+        "why": "Build process version - needs deterministic output"
+      }
+    ],
+    "mocksByFile": {
+      "src/components/layout/MobileNav.test.tsx": 18,
+      "src/components/settings/ApprovalsTab.test.tsx": 27,
+      "src/components/settings/ProfileTab.test.tsx": 18,
+      "src/components/settings/SettingsTabs.test.tsx": 22,
+      "src/components/settings/UnitsTab.test.tsx": 20,
+      "src/hooks/__tests__/useAssignmentRequests.test.tsx": 32,
+      "src/hooks/__tests__/useCanManageRole.test.tsx": 27,
+      "src/hooks/__tests__/useEquipment.test.tsx": 24,
+      "src/hooks/__tests__/useUnitsManagement.test.tsx": 12,
+      "src/hooks/__tests__/useUserBattalion.test.tsx": 10,
+      "src/test/setup.ts": 49
+    },
+    "replaceableMocks": [
+      {
+        "alternative": "Use real useAuth with TestAuthProvider",
+        "file": "src/test/setup.ts",
+        "what": "useAuth hook",
+        "why": "Custom hook - bypasses auth state logic"
+      },
+      {
+        "alternative": "Use real hook with mocked Firestore user docs",
+        "file": "src/components/layout/MobileNav.test.tsx",
+        "what": "useEffectiveRole hook",
+        "why": "Custom hook - bypasses role computation"
+      },
+      {
+        "alternative": "Use real LanguageProvider",
+        "file": "src/test/setup.ts",
+        "what": "LanguageContext (useLanguage)",
+        "why": "Simple state - should test translation logic"
+      },
+      {
+        "alternative": "Use real AdminModeProvider",
+        "file": "src/test/setup.ts",
+        "what": "AdminModeContext",
+        "why": "Simple boolean state - should test"
+      },
+      {
+        "alternative": "Mock Firestore data, let hook compute",
+        "file": "src/test/setup.ts",
+        "what": "usePendingRequestsCount hook",
+        "why": "Business logic - bypasses counting"
+      },
+      {
+        "alternative": "Mock Firestore data",
+        "file": "src/components/layout/MobileNav.test.tsx",
+        "what": "usePendingTransfersCount hook",
+        "why": "Business logic for counting"
+      },
+      {
+        "alternative": "Mock Firestore docs, test hierarchy",
+        "file": "src/hooks/__tests__/useEquipment.test.tsx",
+        "what": "useUserBattalion hook",
+        "why": "Battalion resolution logic"
+      },
+      {
+        "alternative": "Mock Firestore user doc with roles",
+        "file": "src/hooks/__tests__/useEquipment.test.tsx",
+        "what": "useUserRole hook",
+        "why": "Role resolution"
+      },
+      {
+        "alternative": "Use real hook with mocked Firestore",
+        "file": "src/components/settings/SettingsTabs.test.tsx",
+        "what": "useUnitsManagement hook",
+        "why": "Unit management logic"
+      },
+      {
+        "alternative": "Mock Firestore personnel collection",
+        "file": "src/components/settings/SettingsTabs.test.tsx",
+        "what": "useCurrentPersonnel hook",
+        "why": "Data fetch - bypasses lookup"
+      },
+      {
+        "alternative": "Mock Firestore units with relationships",
+        "file": "src/components/settings/ProfileTab.test.tsx",
+        "what": "useUnits hook",
+        "why": "Unit hierarchy traversal"
+      },
+      {
+        "alternative": "Use TestToastProvider to verify calls",
+        "file": "src/hooks/__tests__/useUnitsManagement.test.tsx",
+        "what": "use-toast hook",
+        "why": "UI feedback"
+      }
+    ],
+    "reportPath": "ci-test-review-output/mock-analysis.md",
+    "totalMocks": 137,
+    "unnecessaryMocks": [
+      {
+        "file": "src/components/settings/ApprovalsTab.test.tsx",
+        "what": "Duplicate Firebase client mocks",
+        "why": "Already mocked in global setup"
+      },
+      {
+        "file": "src/components/settings/SettingsTabs.test.tsx",
+        "what": "Duplicate Firebase client mocks",
+        "why": "Already mocked globally"
+      },
+      {
+        "file": "src/components/settings/ProfileTab.test.tsx",
+        "what": "Skipped Radix UI interaction tests",
+        "why": "Dead code, E2E covers this"
+      },
+      {
+        "file": "src/components/settings/ProfileTab.test.tsx",
+        "what": "Skipped version display tests",
+        "why": "Wrong component, should delete"
+      },
+      {
+        "file": "src/components/settings/ProfileTab.test.tsx",
+        "what": "Skipped heading structure test",
+        "why": "Should implement or delete"
+      }
+    ]
+  }
+}

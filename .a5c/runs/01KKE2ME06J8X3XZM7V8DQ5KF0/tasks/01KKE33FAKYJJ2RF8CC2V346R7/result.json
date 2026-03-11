@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KKE33FAKYJJ2RF8CC2V346R7",
+  "taskId": "document-mocking-patterns",
+  "invocationKey": "fill-test-mocks:S000004:document-mocking-patterns",
+  "status": "ok",
+  "result": {
+    "commitSha": "f4f471ae06a7f6ddb34575acb312bcac636c6c62",
+    "docsCreated": [
+      "/home/ubuntu/duty-app/TESTING.md"
+    ],
+    "examplesProvided": 42
+  },
+  "startedAt": "2026-03-11T09:23:26.826Z",
+  "finishedAt": "2026-03-11T09:23:26.826Z",
+  "value": {
+    "commitSha": "f4f471ae06a7f6ddb34575acb312bcac636c6c62",
+    "docsCreated": [
+      "/home/ubuntu/duty-app/TESTING.md"
+    ],
+    "examplesProvided": 42
+  }
+}

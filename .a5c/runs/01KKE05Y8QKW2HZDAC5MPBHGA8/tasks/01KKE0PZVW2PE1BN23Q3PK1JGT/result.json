@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KKE0PZVW2PE1BN23Q3PK1JGT",
+  "taskId": "update-ci-workflow",
+  "invocationKey": "nix-test-migration:S000004:update-ci-workflow",
+  "status": "ok",
+  "result": {
+    "ciPassed": true,
+    "commitSha": "4e257c381fdfff62187a4e281646df21747c7fd7",
+    "workflowUpdated": true
+  },
+  "startedAt": "2026-03-11T08:49:13.504Z",
+  "finishedAt": "2026-03-11T08:49:13.504Z",
+  "value": {
+    "ciPassed": true,
+    "commitSha": "4e257c381fdfff62187a4e281646df21747c7fd7",
+    "workflowUpdated": true
+  }
+}

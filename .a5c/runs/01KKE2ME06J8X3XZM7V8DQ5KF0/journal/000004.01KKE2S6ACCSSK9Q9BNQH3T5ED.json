@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-11T09:13:56.300Z",
+  "data": {
+    "effectId": "01KKE2S67X27NKNNCJGWG206D5",
+    "invocationKey": "fill-test-mocks:S000002:fill-incomplete-mocks",
+    "invocationHash": "f0d59457be07f0971153baa8fc2fc5f5ab767db4253f2d9dfc9f85c9e324756e",
+    "stepId": "S000002",
+    "taskId": "fill-incomplete-mocks",
+    "kind": "agent",
+    "label": "Fill incomplete mocks with realistic implementations",
+    "taskDefRef": "tasks/01KKE2S67X27NKNNCJGWG206D5/task.json"
+  },
+  "checksum": "17b332d2a629ece928af225fbcf7ef10149809576547a9201e4b790353f0ccb3"
+}

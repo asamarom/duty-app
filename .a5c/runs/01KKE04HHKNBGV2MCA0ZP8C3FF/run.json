@@ -1,0 +1,14 @@
+{
+  "runId": "01KKE04HHKNBGV2MCA0ZP8C3FF",
+  "request": "nix-test-migration",
+  "processId": "nix-test-migration",
+  "entrypoint": {
+    "importPath": "../../processes/nix-test-migration.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/nix-test-migration.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-03-11T08:27:42.596Z",
+  "prompt": "Migrate tests to use Nix image for reproducible test environment. Set up Nix flake with all dependencies, create scripts to run tests in Nix shell, update CI to use Nix, and document the setup.",
+  "completionProof": "1a1ea7765f964100cdc54b6dcc6d1174"
+}

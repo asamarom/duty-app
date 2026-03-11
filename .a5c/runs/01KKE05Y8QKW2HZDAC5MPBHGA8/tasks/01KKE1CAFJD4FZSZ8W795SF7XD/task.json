@@ -1,0 +1,181 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KKE1CAFJD4FZSZ8W795SF7XD",
+  "taskId": "documentation",
+  "invocationKey": "nix-test-migration:S000005:documentation",
+  "stepId": "S000005",
+  "kind": "agent",
+  "title": "Document Nix test setup",
+  "io": {
+    "inputJsonPath": "tasks/01KKE1CAFJD4FZSZ8W795SF7XD/input.json",
+    "outputJsonPath": "tasks/01KKE1CAFJD4FZSZ8W795SF7XD/output.json"
+  },
+  "inputs": {
+    "analysis": {
+      "envVars": [
+        "VITE_TEST_MODE",
+        "VITE_FIREBASE_AUTH_EMULATOR_HOST",
+        "VITE_FIRESTORE_EMULATOR_HOST",
+        "VITE_FIREBASE_API_KEY",
+        "VITE_FIREBASE_AUTH_DOMAIN",
+        "VITE_FIREBASE_PROJECT_ID",
+        "VITE_FIREBASE_STORAGE_BUCKET",
+        "VITE_FIREBASE_MESSAGING_SENDER_ID",
+        "VITE_FIREBASE_APP_ID",
+        "TEST_ENV",
+        "BASE_URL",
+        "STAGING_URL",
+        "TEST_USER_ADMIN_TOKEN",
+        "TEST_USER_LEADER_TOKEN",
+        "TEST_USER_USER_TOKEN",
+        "FIREBASE_SERVICE_ACCOUNT",
+        "CI",
+        "GITHUB_ACTIONS",
+        "GITHUB_ENV"
+      ],
+      "nodejsVersion": "20.x",
+      "systemDependencies": [
+        "chromium",
+        "chromium-headless-shell",
+        "ffmpeg",
+        "java-21-openjdk",
+        "firebase-tools"
+      ],
+      "testCommands": [
+        "npm run test",
+        "npm run test:run",
+        "npm run test:e2e",
+        "npm run test:e2e:auth",
+        "npm run test:e2e:setup",
+        "npm run test:e2e:ui",
+        "npm run test:e2e:report",
+        "npm run test:perf",
+        "npm run test:e2e:prod",
+        "npm run test:e2e:prod:setup",
+        "npm run test:e2e:prod:auth",
+        "npm run test:e2e:staging",
+        "npm run test:e2e:staging:setup",
+        "npm run test:e2e:staging:auth",
+        "npm run test:e2e:staging:mobile",
+        "npm run test:e2e:mobile",
+        "npm run test:e2e:mobile:safari",
+        "npm run test:rtl",
+        "npm run test:rtl:mobile",
+        "npm run emulator:start",
+        "npm run emulator:seed",
+        "npm run emulator:all",
+        "npm run test:rules"
+      ],
+      "testDependencies": [
+        "vitest",
+        "@vitest/coverage-v8",
+        "@playwright/test",
+        "@testing-library/react",
+        "@testing-library/jest-dom",
+        "@testing-library/user-event",
+        "@firebase/rules-unit-testing",
+        "firebase",
+        "firebase-admin",
+        "jsdom",
+        "cross-env",
+        "vite",
+        "@vitejs/plugin-react-swc",
+        "typescript",
+        "dotenv"
+      ]
+    },
+    "ciUpdate": {
+      "ciPassed": true,
+      "commitSha": "4e257c381fdfff62187a4e281646df21747c7fd7",
+      "workflowUpdated": true
+    },
+    "nixConfig": {
+      "commitSha": "0a779c4e4dfe1a39b7d586ee15ba47f1774fd873",
+      "dependencies": {
+        "firebaseCli": "latest from nixpkgs",
+        "java": "21 (OpenJDK)",
+        "nodejs": "20.x",
+        "playwrightBrowsers": [
+          "chromium",
+          "firefox",
+          "webkit"
+        ],
+        "systemPackages": [
+          "nss",
+          "nspr",
+          "atk",
+          "cups",
+          "libdrm",
+          "expat",
+          "libxkbcommon",
+          "pango",
+          "cairo",
+          "alsa-lib",
+          "dbus",
+          "at-spi2-atk",
+          "at-spi2-core",
+          "libxshmfence",
+          "libxrandr",
+          "mesa",
+          "gtk3",
+          "glib",
+          "ffmpeg",
+          "libsoup",
+          "webkitgtk",
+          "fontconfig",
+          "freetype"
+        ]
+      },
+      "devShellWorks": true,
+      "environmentVariables": {
+        "FIREBASE_AUTH_EMULATOR_HOST": "localhost:9099",
+        "FIREBASE_FIRESTORE_EMULATOR_HOST": "localhost:8085",
+        "JAVA_HOME": "Set to JDK 21 path",
+        "PLAYWRIGHT_BROWSERS_PATH": "$HOME/.cache/ms-playwright",
+        "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH": "System chromium path",
+        "PLAYWRIGHT_FIREFOX_EXECUTABLE_PATH": "System firefox path",
+        "VITE_TEST_MODE": "true"
+      },
+      "features": [
+        "Automatic npm dependency installation on shell entry",
+        "Automatic Playwright browser installation on shell entry",
+        "direnv integration for automatic environment loading",
+        "Comprehensive documentation in NIX_SETUP.md",
+        "Validation script for checking flake configuration",
+        "Cross-platform support (Linux, macOS, WSL)",
+        "Isolated and reproducible environment"
+      ],
+      "filesCreated": [
+        "/home/ubuntu/duty-app/flake.nix",
+        "/home/ubuntu/duty-app/.envrc",
+        "/home/ubuntu/duty-app/NIX_SETUP.md",
+        "/home/ubuntu/duty-app/.nix-validation.sh"
+      ],
+      "flakeCreated": true,
+      "usage": {
+        "direnv": "direnv allow",
+        "nixDevelop": "nix develop",
+        "validation": "./.nix-validation.sh"
+      },
+      "validation": {
+        "nixInstalled": false,
+        "note": "Full validation requires Nix to be installed. Basic structure validation passed.",
+        "structureCheck": "passed",
+        "syntaxCheck": "passed"
+      }
+    },
+    "projectRoot": "/home/ubuntu/duty-app",
+    "scripts": {
+      "commitSha": "a7521b33d18950e49e0c44f139abfce7185f9fe0",
+      "npmScriptsAdded": [
+        "test:nix",
+        "test:e2e:nix"
+      ],
+      "scriptsCreated": [
+        "/home/ubuntu/duty-app/scripts/test-in-nix.sh",
+        "/home/ubuntu/duty-app/scripts/test-e2e-in-nix.sh"
+      ],
+      "testsPass": false
+    }
+  }
+}

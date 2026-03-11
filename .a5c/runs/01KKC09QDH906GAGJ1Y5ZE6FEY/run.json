@@ -1,0 +1,13 @@
+{
+  "runId": "01KKC09QDH906GAGJ1Y5ZE6FEY",
+  "request": "ci-test-coverage-review",
+  "processId": "ci-test-coverage-review",
+  "entrypoint": {
+    "importPath": "../../processes/ci-test-coverage-review.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/ci-test-coverage-review.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-03-10T13:52:03.513Z",
+  "completionSecret": "6944f84a0e1253758bf1d685ab3e3dc9"
+}

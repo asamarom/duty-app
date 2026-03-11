@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KKE2T37Q7C8HG42QV18Z732P",
+  "taskId": "verify-tests",
+  "invocationKey": "fill-test-mocks:S000003:verify-tests",
+  "status": "ok",
+  "result": {
+    "allTestsPass": true,
+    "ciStatus": "not applicable (no changes to push)",
+    "commitSha": "not applicable (no changes made)",
+    "coverage": "87.09%",
+    "failedTests": 0,
+    "passedTests": 310,
+    "totalTests": 315
+  },
+  "startedAt": "2026-03-11T09:19:20.551Z",
+  "finishedAt": "2026-03-11T09:19:20.551Z",
+  "value": {
+    "allTestsPass": true,
+    "ciStatus": "not applicable (no changes to push)",
+    "commitSha": "not applicable (no changes made)",
+    "coverage": "87.09%",
+    "failedTests": 0,
+    "passedTests": 310,
+    "totalTests": 315
+  }
+}

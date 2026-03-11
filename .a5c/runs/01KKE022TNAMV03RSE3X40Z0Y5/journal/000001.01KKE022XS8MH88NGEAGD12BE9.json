@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-03-11T08:26:22.009Z",
+  "data": {
+    "runId": "01KKE022TNAMV03RSE3X40Z0Y5",
+    "processId": "nix-test-migration",
+    "entrypoint": {
+      "importPath": "../../processes/nix-test-migration.js",
+      "exportName": "process"
+    },
+    "prompt": "Migrate tests to use Nix image for reproducible test environment. Set up Nix flake with all dependencies (Node.js, npm packages, Playwright browsers, Firebase emulators), create scripts to run tests in Nix shell, update CI to use Nix, and document the setup."
+  },
+  "checksum": "c90d3fe82d81a0d34eb49f520ccfdcd9b007415214f77b206daab8ca5e6a0e0f"
+}

@@ -1,0 +1,18 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-10T19:01:02.633Z",
+  "data": {
+    "effectId": "01KKCHZG0T6588B00KX5525GR6",
+    "invocationKey": "ci-test-coverage-review:S000002:__sdk.breakpoint",
+    "invocationHash": "d8d3d7a9a6e2345253f2835559712f66887023d2227bea47bff133fec3804f39",
+    "stepId": "S000002",
+    "taskId": "__sdk.breakpoint",
+    "kind": "breakpoint",
+    "label": "breakpoint",
+    "taskDefRef": "tasks/01KKCHZG0T6588B00KX5525GR6/task.json",
+    "labels": [
+      "breakpoint"
+    ]
+  },
+  "checksum": "68eb3d6b36be1dd1b304a782e74ac1ec6a6565e2f5e4bb47137172b80cf958ee"
+}

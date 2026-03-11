@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-11T08:37:47.200Z",
+  "data": {
+    "effectId": "01KKE0PZVW2PE1BN23Q3PK1JGT",
+    "invocationKey": "nix-test-migration:S000004:update-ci-workflow",
+    "invocationHash": "4fa2bea4796ac2df8a78a4621239ea630ffe9551e49e05c9792eebf74215968a",
+    "stepId": "S000004",
+    "taskId": "update-ci-workflow",
+    "kind": "agent",
+    "label": "Update GitHub Actions to use Nix",
+    "taskDefRef": "tasks/01KKE0PZVW2PE1BN23Q3PK1JGT/task.json"
+  },
+  "checksum": "75c38ff48054c9441d376b7a48cc76f1f4089063c93380b828d3ce064d352622"
+}

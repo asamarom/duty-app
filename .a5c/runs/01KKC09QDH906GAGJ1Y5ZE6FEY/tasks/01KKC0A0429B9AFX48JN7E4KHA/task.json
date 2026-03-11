@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KKC0A0429B9AFX48JN7E4KHA",
+  "taskId": "analyze-ci-pipeline",
+  "invocationKey": "ci-test-coverage-review:S000001:analyze-ci-pipeline",
+  "stepId": "S000001",
+  "kind": "agent",
+  "title": "Analyze CI Pipeline Configuration",
+  "io": {
+    "inputJsonPath": "tasks/01KKC0A0429B9AFX48JN7E4KHA/input.json",
+    "outputJsonPath": "tasks/01KKC0A0429B9AFX48JN7E4KHA/output.json"
+  },
+  "inputs": {
+    "outputDir": "ci-test-review-output",
+    "projectPath": "/home/ubuntu/duty-app"
+  }
+}

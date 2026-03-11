@@ -1,0 +1,12 @@
+{
+  "scriptsCreated": [
+    "/home/ubuntu/duty-app/scripts/test-in-nix.sh",
+    "/home/ubuntu/duty-app/scripts/test-e2e-in-nix.sh"
+  ],
+  "testsPass": false,
+  "npmScriptsAdded": [
+    "test:nix",
+    "test:e2e:nix"
+  ],
+  "commitSha": "a7521b33d18950e49e0c44f139abfce7185f9fe0"
+}

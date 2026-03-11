@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KKCHZG0T6588B00KX5525GR6",
+  "taskId": "__sdk.breakpoint",
+  "invocationKey": "ci-test-coverage-review:S000002:__sdk.breakpoint",
+  "status": "ok",
+  "result": {
+    "approved": true,
+    "selection": "proceed"
+  },
+  "startedAt": "2026-03-10T19:01:18.900Z",
+  "finishedAt": "2026-03-10T19:01:18.900Z",
+  "value": {
+    "approved": true,
+    "selection": "proceed"
+  }
+}

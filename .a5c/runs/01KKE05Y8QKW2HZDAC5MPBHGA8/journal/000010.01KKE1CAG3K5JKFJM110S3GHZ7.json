@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-11T08:49:26.019Z",
+  "data": {
+    "effectId": "01KKE1CAFJD4FZSZ8W795SF7XD",
+    "invocationKey": "nix-test-migration:S000005:documentation",
+    "invocationHash": "a45eda64068e0386651be929fad05e93db598865b72e703ca93e3a7bc5578655",
+    "stepId": "S000005",
+    "taskId": "documentation",
+    "kind": "agent",
+    "label": "Document Nix test setup",
+    "taskDefRef": "tasks/01KKE1CAFJD4FZSZ8W795SF7XD/task.json"
+  },
+  "checksum": "24c1d4786e39b4360399776e336d2392176e4670e1a5b9ee8b93b1642884e7d8"
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KKCJ06VQ1H00A4AHNTQ2DJNW",
+  "taskId": "map-all-tests",
+  "invocationKey": "ci-test-coverage-review:S000003:map-all-tests",
+  "stepId": "S000003",
+  "kind": "agent",
+  "title": "Map All Tests in Project",
+  "io": {
+    "inputJsonPath": "tasks/01KKCJ06VQ1H00A4AHNTQ2DJNW/input.json",
+    "outputJsonPath": "tasks/01KKCJ06VQ1H00A4AHNTQ2DJNW/output.json"
+  },
+  "inputs": {
+    "outputDir": "ci-test-review-output",
+    "projectPath": "/home/ubuntu/duty-app"
+  }
+}

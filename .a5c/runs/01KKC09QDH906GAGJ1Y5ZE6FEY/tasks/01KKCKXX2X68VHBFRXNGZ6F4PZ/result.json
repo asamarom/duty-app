@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KKCKXX2X68VHBFRXNGZ6F4PZ",
+  "taskId": "analyze-coverage",
+  "invocationKey": "ci-test-coverage-review:S000005:analyze-coverage",
+  "status": "ok",
+  "result": {
+    "coverageData": {
+      "branches": {
+        "pct": 41.6
+      },
+      "functions": {
+        "pct": 42.9
+      },
+      "lines": {
+        "pct": 59.23
+      },
+      "statements": {
+        "pct": 57.5
+      }
+    },
+    "currentCoverage": 59.23,
+    "gap": 25.77,
+    "reportPath": "ci-test-review-output/coverage-analysis.md",
+    "targetCoverage": 85,
+    "uncoveredFiles": [
+      "contexts/AdminModeContext.tsx (11.76%)",
+      "components/approvals/ApprovalManagement.tsx (40.42%)",
+      "components/units/UnitsManagement.tsx (26.31%)",
+      "hooks/useEquipment.tsx (47.5%)",
+      "hooks/useUnits.tsx (41.79%)",
+      "hooks/useAssignmentRequests.tsx (63.88%)"
+    ]
+  },
+  "startedAt": "2026-03-10T19:38:45.909Z",
+  "finishedAt": "2026-03-10T19:38:45.909Z",
+  "value": {
+    "coverageData": {
+      "branches": {
+        "pct": 41.6
+      },
+      "functions": {
+        "pct": 42.9
+      },
+      "lines": {
+        "pct": 59.23
+      },
+      "statements": {
+        "pct": 57.5
+      }
+    },
+    "currentCoverage": 59.23,
+    "gap": 25.77,
+    "reportPath": "ci-test-review-output/coverage-analysis.md",
+    "targetCoverage": 85,
+    "uncoveredFiles": [
+      "contexts/AdminModeContext.tsx (11.76%)",
+      "components/approvals/ApprovalManagement.tsx (40.42%)",
+      "components/units/UnitsManagement.tsx (26.31%)",
+      "hooks/useEquipment.tsx (47.5%)",
+      "hooks/useUnits.tsx (41.79%)",
+      "hooks/useAssignmentRequests.tsx (63.88%)"
+    ]
+  }
+}

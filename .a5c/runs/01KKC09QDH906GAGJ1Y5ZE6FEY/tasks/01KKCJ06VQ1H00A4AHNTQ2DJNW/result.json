@@ -1,0 +1,379 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KKCJ06VQ1H00A4AHNTQ2DJNW",
+  "taskId": "map-all-tests",
+  "invocationKey": "ci-test-coverage-review:S000003:map-all-tests",
+  "status": "ok",
+  "result": {
+    "e2eTests": [
+      {
+        "file": "e2e/auth.spec.ts",
+        "testCount": 5
+      },
+      {
+        "file": "e2e/user-lifecycle.spec.ts",
+        "testCount": 24
+      },
+      {
+        "file": "e2e/admin-approvals.spec.ts",
+        "testCount": 5
+      },
+      {
+        "file": "e2e/dashboard.spec.ts",
+        "testCount": 5
+      },
+      {
+        "file": "e2e/performance.spec.ts",
+        "testCount": 3
+      },
+      {
+        "file": "e2e/equipment.spec.ts",
+        "testCount": 23
+      },
+      {
+        "file": "e2e/equipment.mobile.spec.ts",
+        "testCount": 18
+      },
+      {
+        "file": "e2e/leader-equipment.spec.ts",
+        "testCount": 8
+      },
+      {
+        "file": "e2e/user-equipment.spec.ts",
+        "testCount": 7
+      },
+      {
+        "file": "e2e/equipment-missing-battalion.spec.ts",
+        "testCount": 3
+      },
+      {
+        "file": "e2e/battalion-equipment.spec.ts",
+        "testCount": 5
+      },
+      {
+        "file": "e2e/equipment-quantity-with-pending-transfers.spec.ts",
+        "testCount": 2
+      },
+      {
+        "file": "e2e/personnel.spec.ts",
+        "testCount": 7
+      },
+      {
+        "file": "e2e/units.spec.ts",
+        "testCount": 3
+      },
+      {
+        "file": "e2e/transfers.spec.ts",
+        "testCount": 42
+      },
+      {
+        "file": "e2e/transfers-role-split.spec.ts",
+        "testCount": 8
+      },
+      {
+        "file": "e2e/transfers-rtl.spec.ts",
+        "testCount": 6
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "testCount": 20
+      },
+      {
+        "file": "e2e/settings-navigation-admin.spec.ts",
+        "testCount": 10
+      },
+      {
+        "file": "e2e/settings-navigation-leader.spec.ts",
+        "testCount": 4
+      },
+      {
+        "file": "e2e/settings-navigation-user.spec.ts",
+        "testCount": 3
+      },
+      {
+        "file": "e2e/rtl.spec.ts",
+        "testCount": 12
+      },
+      {
+        "file": "e2e/rtl.mobile.spec.ts",
+        "testCount": 13
+      },
+      {
+        "file": "e2e/i18n.spec.ts",
+        "testCount": 2
+      },
+      {
+        "file": "e2e/battalion-scoping.spec.ts",
+        "testCount": 5
+      }
+    ],
+    "integrationTests": [
+      {
+        "file": "src/hooks/__tests__/useUserBattalion.test.tsx",
+        "testCount": 5
+      },
+      {
+        "file": "src/hooks/__tests__/useCanManageRole.test.tsx",
+        "testCount": 8
+      },
+      {
+        "file": "src/hooks/__tests__/useUnitsManagement.test.tsx",
+        "testCount": 4
+      },
+      {
+        "file": "src/components/settings/ProfileTab.test.tsx",
+        "testCount": 11
+      },
+      {
+        "file": "src/components/settings/UnitsTab.test.tsx",
+        "testCount": 11
+      },
+      {
+        "file": "src/components/settings/SettingsTabs.test.tsx",
+        "testCount": 29
+      },
+      {
+        "file": "src/components/settings/ApprovalsTab.test.tsx",
+        "testCount": 9
+      },
+      {
+        "file": "src/components/layout/MobileNav.test.tsx",
+        "testCount": 10
+      },
+      {
+        "file": "src/hooks/__tests__/useAssignmentRequests.test.tsx",
+        "testCount": 14
+      },
+      {
+        "file": "src/hooks/__tests__/useEquipment.test.tsx",
+        "testCount": 13
+      }
+    ],
+    "reportPath": "ci-test-review-output/test-inventory.md",
+    "testsByFeature": {
+      "approvals": 5,
+      "authentication": 34,
+      "battalion": 10,
+      "dashboard": 5,
+      "equipment": 89,
+      "i18n": 2,
+      "mobile-navigation": 10,
+      "onboarding": 3,
+      "performance": 3,
+      "personnel": 7,
+      "role-management": 8,
+      "rtl": 31,
+      "security": 87,
+      "settings": 54,
+      "transfers": 56,
+      "units": 18,
+      "user-lifecycle": 24,
+      "utilities": 19
+    },
+    "testsByRole": {
+      "admin": 95,
+      "cross-role": 241,
+      "leader": 68,
+      "unauth": 11,
+      "user": 42
+    },
+    "totalTests": 457,
+    "unitTests": [
+      {
+        "file": "src/lib/version.test.ts",
+        "testCount": 19
+      },
+      {
+        "file": "src/test/rules/firestore-rules.test.ts",
+        "testCount": 87
+      }
+    ]
+  },
+  "startedAt": "2026-03-10T19:08:50.300Z",
+  "finishedAt": "2026-03-10T19:08:50.300Z",
+  "value": {
+    "e2eTests": [
+      {
+        "file": "e2e/auth.spec.ts",
+        "testCount": 5
+      },
+      {
+        "file": "e2e/user-lifecycle.spec.ts",
+        "testCount": 24
+      },
+      {
+        "file": "e2e/admin-approvals.spec.ts",
+        "testCount": 5
+      },
+      {
+        "file": "e2e/dashboard.spec.ts",
+        "testCount": 5
+      },
+      {
+        "file": "e2e/performance.spec.ts",
+        "testCount": 3
+      },
+      {
+        "file": "e2e/equipment.spec.ts",
+        "testCount": 23
+      },
+      {
+        "file": "e2e/equipment.mobile.spec.ts",
+        "testCount": 18
+      },
+      {
+        "file": "e2e/leader-equipment.spec.ts",
+        "testCount": 8
+      },
+      {
+        "file": "e2e/user-equipment.spec.ts",
+        "testCount": 7
+      },
+      {
+        "file": "e2e/equipment-missing-battalion.spec.ts",
+        "testCount": 3
+      },
+      {
+        "file": "e2e/battalion-equipment.spec.ts",
+        "testCount": 5
+      },
+      {
+        "file": "e2e/equipment-quantity-with-pending-transfers.spec.ts",
+        "testCount": 2
+      },
+      {
+        "file": "e2e/personnel.spec.ts",
+        "testCount": 7
+      },
+      {
+        "file": "e2e/units.spec.ts",
+        "testCount": 3
+      },
+      {
+        "file": "e2e/transfers.spec.ts",
+        "testCount": 42
+      },
+      {
+        "file": "e2e/transfers-role-split.spec.ts",
+        "testCount": 8
+      },
+      {
+        "file": "e2e/transfers-rtl.spec.ts",
+        "testCount": 6
+      },
+      {
+        "file": "e2e/settings-navigation.spec.ts",
+        "testCount": 20
+      },
+      {
+        "file": "e2e/settings-navigation-admin.spec.ts",
+        "testCount": 10
+      },
+      {
+        "file": "e2e/settings-navigation-leader.spec.ts",
+        "testCount": 4
+      },
+      {
+        "file": "e2e/settings-navigation-user.spec.ts",
+        "testCount": 3
+      },
+      {
+        "file": "e2e/rtl.spec.ts",
+        "testCount": 12
+      },
+      {
+        "file": "e2e/rtl.mobile.spec.ts",
+        "testCount": 13
+      },
+      {
+        "file": "e2e/i18n.spec.ts",
+        "testCount": 2
+      },
+      {
+        "file": "e2e/battalion-scoping.spec.ts",
+        "testCount": 5
+      }
+    ],
+    "integrationTests": [
+      {
+        "file": "src/hooks/__tests__/useUserBattalion.test.tsx",
+        "testCount": 5
+      },
+      {
+        "file": "src/hooks/__tests__/useCanManageRole.test.tsx",
+        "testCount": 8
+      },
+      {
+        "file": "src/hooks/__tests__/useUnitsManagement.test.tsx",
+        "testCount": 4
+      },
+      {
+        "file": "src/components/settings/ProfileTab.test.tsx",
+        "testCount": 11
+      },
+      {
+        "file": "src/components/settings/UnitsTab.test.tsx",
+        "testCount": 11
+      },
+      {
+        "file": "src/components/settings/SettingsTabs.test.tsx",
+        "testCount": 29
+      },
+      {
+        "file": "src/components/settings/ApprovalsTab.test.tsx",
+        "testCount": 9
+      },
+      {
+        "file": "src/components/layout/MobileNav.test.tsx",
+        "testCount": 10
+      },
+      {
+        "file": "src/hooks/__tests__/useAssignmentRequests.test.tsx",
+        "testCount": 14
+      },
+      {
+        "file": "src/hooks/__tests__/useEquipment.test.tsx",
+        "testCount": 13
+      }
+    ],
+    "reportPath": "ci-test-review-output/test-inventory.md",
+    "testsByFeature": {
+      "approvals": 5,
+      "authentication": 34,
+      "battalion": 10,
+      "dashboard": 5,
+      "equipment": 89,
+      "i18n": 2,
+      "mobile-navigation": 10,
+      "onboarding": 3,
+      "performance": 3,
+      "personnel": 7,
+      "role-management": 8,
+      "rtl": 31,
+      "security": 87,
+      "settings": 54,
+      "transfers": 56,
+      "units": 18,
+      "user-lifecycle": 24,
+      "utilities": 19
+    },
+    "testsByRole": {
+      "admin": 95,
+      "cross-role": 241,
+      "leader": 68,
+      "unauth": 11,
+      "user": 42
+    },
+    "totalTests": 457,
+    "unitTests": [
+      {
+        "file": "src/lib/version.test.ts",
+        "testCount": 19
+      },
+      {
+        "file": "src/test/rules/firestore-rules.test.ts",
+        "testCount": 87
+      }
+    ]
+  }
+}

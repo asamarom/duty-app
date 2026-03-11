@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KKE0701JY5TZ05PPNHKPHQGV",
+  "taskId": "analyze-current-setup",
+  "invocationKey": "nix-test-migration:S000001:analyze-current-setup",
+  "stepId": "S000001",
+  "kind": "agent",
+  "title": "Analyze current test setup and dependencies",
+  "io": {
+    "inputJsonPath": "tasks/01KKE0701JY5TZ05PPNHKPHQGV/input.json",
+    "outputJsonPath": "tasks/01KKE0701JY5TZ05PPNHKPHQGV/output.json"
+  },
+  "inputs": {
+    "projectRoot": "/home/ubuntu/duty-app"
+  }
+}
