@@ -516,9 +516,11 @@ export function useEquipment(): UseEquipmentReturn {
       notes?: string,
       quantity?: number,
     ) => {
-      // a. Get equipment doc to get battalionId
+      // a. Get equipment doc to get battalionId and original status
       const equipDoc = await getDoc(doc(db, 'equipment', equipmentId));
-      const equipBattalionId = equipDoc?.exists() ? (equipDoc.data() as EquipmentDoc & { battalionId?: string }).battalionId : undefined;
+      const equipData = equipDoc?.exists() ? (equipDoc.data() as EquipmentDoc & { battalionId?: string }) : null;
+      const equipBattalionId = equipData?.battalionId;
+      const originalEquipmentStatus = equipData?.status as EquipmentStatus | undefined;
 
       // b. Get current assignment
       const currentAssignmentSnapshot = await getDocs(
@@ -591,6 +593,7 @@ export function useEquipment(): UseEquipmentReturn {
         toUnitId: toUnitId || null,
         toUnitType,
         toName,
+        originalEquipmentStatus, // Store original status for restoration on cancel
       };
 
       if (notes !== undefined) {

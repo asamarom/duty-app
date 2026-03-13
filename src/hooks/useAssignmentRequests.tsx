@@ -307,14 +307,12 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
   }) => {
     const { equipmentId, toUnitId, toPersonnelId, notes } = data;
 
-    // Get equipment doc to get battalionId
+    // Get equipment doc to get battalionId and original status
     const equipDoc = await getDoc(doc(db, 'equipment', equipmentId));
-    const equipBattalionId = equipDoc?.exists()
-      ? (equipDoc.data() as EquipmentDoc & { battalionId?: string }).battalionId
-      : undefined;
-    const equipSerial = equipDoc?.exists()
-      ? (equipDoc.data() as EquipmentDoc).serialNumber ?? null
-      : null;
+    const equipData = equipDoc?.exists() ? (equipDoc.data() as EquipmentDoc & { battalionId?: string }) : null;
+    const equipBattalionId = equipData?.battalionId;
+    const equipSerial = equipData?.serialNumber ?? null;
+    const originalEquipmentStatus = equipData?.status as EquipmentStatus | undefined;
 
     // Get current assignment for "from" details
     const currentAssignmentSnapshot = await getDocs(
@@ -386,6 +384,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
       toUnitType,
       toName,
       equipmentSerialNumber: equipSerial,
+      originalEquipmentStatus, // Store original status for restoration on cancel
     };
 
     if (notes) {
@@ -521,8 +520,11 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
       processedAt: serverTimestamp(),
     };
 
+    // Restore equipment to its original status (before transfer was initiated)
+    // Default to 'serviceable' for legacy requests without originalEquipmentStatus
+    const restoredStatus = localReq.originalEquipmentStatus || 'serviceable';
     const equipmentUpdate = {
-      status: 'serviceable' as const,
+      status: restoredStatus as const,
       updatedAt: serverTimestamp(),
     };
 

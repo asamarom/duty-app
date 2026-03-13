@@ -95,6 +95,7 @@ export interface AssignmentRequestDoc {
   recipientApprovedBy: string | null;
   quantity?: number;
   battalionId: string;
+  originalEquipmentStatus?: EquipmentStatus; // Status before transfer was initiated (for restoration on cancel)
   // Denormalized display names
   equipmentName?: string;
   equipmentSerialNumber?: string | null;

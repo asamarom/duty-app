@@ -560,9 +560,10 @@ describe('useAssignmentRequests Hook', () => {
             }).rejects.toThrow('Only the requester or unit leader can cancel');
         });
 
-        it('resets equipment status to serviceable on cancel', async () => {
+        it('resets equipment status to serviceable on cancel (legacy request without originalEquipmentStatus)', async () => {
             const requestDoc = makeRequestDoc({
                 requestedBy: 'test-user-id',
+                // No originalEquipmentStatus field (legacy request)
             });
             mockOnSnapshot.mockImplementation(makeOnSnapshotMock([requestDoc]));
 
@@ -573,11 +574,32 @@ describe('useAssignmentRequests Hook', () => {
                 await result.current.cancelRequest('req-1');
             });
 
-            // Should call updateDoc with equipment update (status: serviceable)
+            // Should default to 'serviceable' for legacy requests
             const serviceableCall = mockUpdateDoc.mock.calls.find((call) =>
                 call[1] && call[1].status === 'serviceable'
             );
             expect(serviceableCall).toBeDefined();
+        });
+
+        it('restores equipment to original status on cancel', async () => {
+            const requestDoc = makeRequestDoc({
+                requestedBy: 'test-user-id',
+                originalEquipmentStatus: 'unserviceable',
+            });
+            mockOnSnapshot.mockImplementation(makeOnSnapshotMock([requestDoc]));
+
+            const { result } = renderHook(() => useAssignmentRequests());
+            await waitFor(() => expect(result.current.loading).toBe(false));
+
+            await act(async () => {
+                await result.current.cancelRequest('req-1');
+            });
+
+            // Should restore to original status (unserviceable)
+            const unserviceableCall = mockUpdateDoc.mock.calls.find((call) =>
+                call[1] && call[1].status === 'unserviceable'
+            );
+            expect(unserviceableCall).toBeDefined();
         });
     });
 

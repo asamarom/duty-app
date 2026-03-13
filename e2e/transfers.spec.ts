@@ -1349,6 +1349,13 @@ test.describe('Transfer Create and Cancel Workflow [XFER-CREATE-CANCEL]', () => 
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
+    // Step 2b: Capture the original equipment status before creating transfer
+    const statusBadge = page.locator(
+      'text=/Serviceable|תקין|Unserviceable|לא תקין|In Maintenance|בתחזוקה|Missing|חסר/i'
+    ).first();
+    const originalStatus = await statusBadge.textContent().catch(() => 'Serviceable');
+    console.log('Original equipment status:', originalStatus);
+
     // Step 3: Verify transfer section is visible and button is NOT disabled
     const transferHeading = page.locator(
       'h2:has-text("Transfer Equipment"), h2:has-text("העבר ציוד")'
@@ -1521,6 +1528,26 @@ test.describe('Transfer Create and Cancel Workflow [XFER-CREATE-CANCEL]', () => 
           const isDisabledAfter = await transferButtonAfter.isDisabled();
           expect(isDisabledAfter).toBe(false);
         }
+
+        // Verify equipment status is restored to original
+        const restoredStatusBadge = page.locator(
+          'text=/Serviceable|תקין|Unserviceable|לא תקין|In Maintenance|בתחזוקה|Missing|חסר/i'
+        ).first();
+        const restoredStatus = await restoredStatusBadge.textContent().catch(() => '');
+        console.log('Restored equipment status:', restoredStatus);
+
+        // The status should match the original (accounting for translations)
+        const statusMatches =
+          (originalStatus?.includes('Serviceable') && restoredStatus?.includes('Serviceable')) ||
+          (originalStatus?.includes('תקין') && restoredStatus?.includes('תקין')) ||
+          (originalStatus?.includes('Unserviceable') && restoredStatus?.includes('Unserviceable')) ||
+          (originalStatus?.includes('לא תקין') && restoredStatus?.includes('לא תקין')) ||
+          (originalStatus?.includes('Maintenance') && restoredStatus?.includes('Maintenance')) ||
+          (originalStatus?.includes('תחזוקה') && restoredStatus?.includes('תחזוקה')) ||
+          (originalStatus?.includes('Missing') && restoredStatus?.includes('Missing')) ||
+          (originalStatus?.includes('חסר') && restoredStatus?.includes('חסר'));
+
+        expect(statusMatches).toBe(true);
       }
     }
 
