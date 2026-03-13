@@ -582,7 +582,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
       await updateDoc(doc(db, 'assignmentRequests', requestId), { status: 'pending' });
       throw new Error(`Failed to update equipment: ${err instanceof Error ? err.message : String(err)}`);
     }
-  }, [user]);
+  }, [user, isSignatureApproved, currentUnitId, currentPersonnelId]);
 
   const getApprovalsForRequest = useCallback((_requestId: string): RequestApproval[] => {
     // Approval history is not yet stored per-request in the data model.
