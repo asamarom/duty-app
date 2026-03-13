@@ -558,6 +558,20 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     console.log('Equipment update:', equipmentUpdate);
     console.log('Equipment ID:', localReq.equipment_id);
 
+    // First, fetch the current equipment document to see its status
+    try {
+      const equipDoc = await getDoc(doc(db, 'equipment', localReq.equipment_id));
+      if (equipDoc.exists()) {
+        const equipData = equipDoc.data();
+        console.log('Current equipment data:', equipData);
+        console.log('Current equipment status:', equipData.status);
+      } else {
+        console.error('Equipment document does not exist!');
+      }
+    } catch (err) {
+      console.error('Failed to fetch equipment doc:', err);
+    }
+
     try {
       // Try updating equipment
       await updateDoc(doc(db, 'equipment', localReq.equipment_id), equipmentUpdate);
