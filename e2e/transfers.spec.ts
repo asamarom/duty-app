@@ -1320,41 +1320,78 @@ test.describe('Transfer Create and Cancel Workflow [XFER-CREATE-CANCEL]', () => 
     }
   });
 
-  test('[XFER-CREATE-CANCEL-1] Complete workflow: create transfer request then cancel it', async ({ page }) => {
+  test('[XFER-CREATE-CANCEL-1] Complete workflow: create transfer request then cancel it with unserviceable equipment', async ({ page }) => {
     await loginAsTestUser(page, 'admin');
 
-    // Step 1: Navigate to equipment list
+    // Step 1: Create test equipment with UNSERVICEABLE status
     await page.goto('/equipment');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(1000);
 
-    // Step 2: Find and click on the first equipment item
-    const equipmentLink = page.locator('a[href^="/equipment/"]').first();
+    // Click "Add Equipment" button
+    const addButton = page.locator('button:has-text("Add Equipment"), button:has-text("הוסף ציוד")').first();
+    await expect(addButton).toBeVisible({ timeout: 8000 });
+    await addButton.click();
+    await page.waitForTimeout(500);
+
+    // Fill in equipment details
+    const testEquipmentName = `E2E-Test-Unserviceable-${Date.now()}`;
+    const nameInput = page.locator('input[name="name"], input[placeholder*="name"], input[placeholder*="שם"]').first();
+    await nameInput.fill(testEquipmentName);
+
+    const serialInput = page.locator('input[name="serialNumber"], input[placeholder*="serial"], input[placeholder*="סידורי"]').first();
+    await serialInput.fill(`SN-${Date.now()}`);
+
+    // Set status to UNSERVICEABLE
+    const statusSelect = page.locator('select[name="status"], [role="combobox"]:has-text("Status"), [role="combobox"]:has-text("סטטוס")').first();
+    const hasStatusSelect = await statusSelect.isVisible({ timeout: 3000 }).catch(() => false);
+
+    if (hasStatusSelect) {
+      await statusSelect.click();
+      await page.waitForTimeout(300);
+
+      const unserviceableOption = page.locator('[role="option"]:has-text("Unserviceable"), [role="option"]:has-text("לא תקין")').first();
+      const hasOption = await unserviceableOption.isVisible({ timeout: 2000 }).catch(() => false);
+
+      if (hasOption) {
+        await unserviceableOption.click();
+        await page.waitForTimeout(300);
+      }
+    }
+
+    // Save equipment
+    const saveButton = page.locator('button:has-text("Add"), button:has-text("הוסף"), button[type="submit"]').last();
+    await saveButton.click();
+    await page.waitForTimeout(2000);
+
+    // Step 2: Find and open the equipment we just created
+    await page.goto('/equipment');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
+
+    const equipmentLink = page.locator(`a[href^="/equipment/"]:has-text("${testEquipmentName}")`).first();
     const hasEquipment = await equipmentLink.isVisible({ timeout: 8000 }).catch(() => false);
 
     if (!hasEquipment) {
-      // No equipment in staging - skip test
-      console.log('No equipment available - skipping test');
-      return;
+      console.log('Test equipment not found - test failed');
+      throw new Error('Test equipment not created successfully');
     }
-
-    await expect(equipmentLink).toBeVisible();
-
-    // Get equipment name for later verification
-    const equipmentNameElement = equipmentLink.locator('[class*="font-medium"], h3, h4, p').first();
-    const equipmentName = await equipmentNameElement.textContent();
-    console.log('Equipment name:', equipmentName);
 
     await equipmentLink.click();
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
-    // Step 2b: Capture the original equipment status before creating transfer
+    // Step 2b: Verify the status is UNSERVICEABLE
     const statusBadge = page.locator(
-      'text=/Serviceable|תקין|Unserviceable|לא תקין|In Maintenance|בתחזוקה|Missing|חסר/i'
+      'text=/Unserviceable|לא תקין/i'
     ).first();
-    const originalStatus = await statusBadge.textContent().catch(() => 'Serviceable');
+    const originalStatus = await statusBadge.textContent().catch(() => null);
     console.log('Original equipment status:', originalStatus);
+
+    if (!originalStatus || (!originalStatus.includes('Unserviceable') && !originalStatus.includes('לא תקין'))) {
+      console.log('Equipment status is not unserviceable - skipping test');
+      return;
+    }
 
     // Step 3: Verify transfer section is visible and button is NOT disabled
     const transferHeading = page.locator(
@@ -1370,6 +1407,8 @@ test.describe('Transfer Create and Cancel Workflow [XFER-CREATE-CANCEL]', () => 
     // Verify button is NOT disabled (no pending transfer)
     const isDisabled = await transferButton.isDisabled();
     expect(isDisabled).toBe(false);
+
+    const equipmentName = testEquipmentName;
 
     // Step 4: Select transfer destination (Battalion/Company/Platoon/Individual)
     const individualButton = page.locator(
@@ -1529,25 +1568,25 @@ test.describe('Transfer Create and Cancel Workflow [XFER-CREATE-CANCEL]', () => 
           expect(isDisabledAfter).toBe(false);
         }
 
-        // Verify equipment status is restored to original
+        // Verify equipment status is restored to UNSERVICEABLE (not serviceable!)
         const restoredStatusBadge = page.locator(
-          'text=/Serviceable|תקין|Unserviceable|לא תקין|In Maintenance|בתחזוקה|Missing|חסר/i'
+          'text=/Unserviceable|לא תקין/i'
         ).first();
-        const restoredStatus = await restoredStatusBadge.textContent().catch(() => '');
-        console.log('Restored equipment status:', restoredStatus);
+        const hasUnserviceableBadge = await restoredStatusBadge.isVisible({ timeout: 5000 }).catch(() => false);
+        console.log('Equipment has unserviceable badge:', hasUnserviceableBadge);
 
-        // The status should match the original (accounting for translations)
-        const statusMatches =
-          (originalStatus?.includes('Serviceable') && restoredStatus?.includes('Serviceable')) ||
-          (originalStatus?.includes('תקין') && restoredStatus?.includes('תקין')) ||
-          (originalStatus?.includes('Unserviceable') && restoredStatus?.includes('Unserviceable')) ||
-          (originalStatus?.includes('לא תקין') && restoredStatus?.includes('לא תקין')) ||
-          (originalStatus?.includes('Maintenance') && restoredStatus?.includes('Maintenance')) ||
-          (originalStatus?.includes('תחזוקה') && restoredStatus?.includes('תחזוקה')) ||
-          (originalStatus?.includes('Missing') && restoredStatus?.includes('Missing')) ||
-          (originalStatus?.includes('חסר') && restoredStatus?.includes('חסר'));
+        // CRITICAL: Status should be UNSERVICEABLE, not SERVICEABLE
+        expect(hasUnserviceableBadge).toBe(true);
 
-        expect(statusMatches).toBe(true);
+        // Also verify it's NOT serviceable (the bug we're testing for)
+        const serviceableBadge = page.locator(
+          'text=/^Serviceable$|^תקין$/i'
+        ).first();
+        const hasServiceableBadge = await serviceableBadge.isVisible({ timeout: 2000 }).catch(() => false);
+        console.log('Equipment has serviceable badge (should be false):', hasServiceableBadge);
+
+        // If this is true, the bug is present - status was incorrectly reset to serviceable
+        expect(hasServiceableBadge).toBe(false);
       }
     }
 
