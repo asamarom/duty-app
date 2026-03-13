@@ -17,7 +17,7 @@ import { db } from '@/integrations/firebase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserBattalion } from '@/hooks/useUserBattalion';
 import { useUserRole } from '@/hooks/useUserRole';
-import type { AssignmentRequestDoc, EquipmentDoc, UnitDoc, PersonnelDoc, UserDoc } from '@/integrations/firebase/types';
+import type { AssignmentRequestDoc, EquipmentDoc, EquipmentStatus, UnitDoc, PersonnelDoc, UserDoc } from '@/integrations/firebase/types';
 
 export type AssignmentRequestStatus = 'pending' | 'approved' | 'rejected';
 
@@ -50,6 +50,7 @@ export interface AssignmentRequest {
   recipient_approved: boolean;
   recipient_approved_at?: string;
   recipient_approved_by?: string;
+  originalEquipmentStatus?: EquipmentStatus;
 }
 
 export interface RequestApproval {
@@ -176,6 +177,7 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
           recipient_approved: data.recipientApproved || false,
           recipient_approved_at: data.recipientApprovedAt?.toDate().toISOString(),
           recipient_approved_by: data.recipientApprovedBy || undefined,
+          originalEquipmentStatus: data.originalEquipmentStatus,
         };
       })
     );
