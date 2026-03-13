@@ -215,10 +215,10 @@ service cloud.firestore {
           (request.resource.data.quantity is int && request.resource.data.quantity > 0)) &&
         (!request.resource.data.keys().hasAny(['status']) ||
           request.resource.data.status in ['serviceable', 'unserviceable', 'in_maintenance', 'missing', 'pending_transfer'])) ||
-        // Allow reverting to serviceable when canceling own transfer (status: pending_transfer → serviceable)
+        // Allow reverting to any valid status when canceling transfer (status: pending_transfer → any valid status)
         (isAuthenticated() &&
         resource.data.status == 'pending_transfer' &&
-        request.resource.data.status == 'serviceable' &&
+        request.resource.data.status in ['serviceable', 'unserviceable', 'in_maintenance', 'missing'] &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']));
 
       // Only admins can delete equipment
