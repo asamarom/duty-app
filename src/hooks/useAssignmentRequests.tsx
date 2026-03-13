@@ -531,23 +531,43 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
       throw new Error('Only the requester or unit leader can cancel');
     }
 
-    const batch = writeBatch(db);
-
-    // Update request status to rejected
-    batch.update(doc(db, 'assignmentRequests', requestId), {
-      status: 'rejected',
+    const requestUpdate = {
+      status: 'rejected' as const,
       processedBy: user!.uid,
       processedAt: serverTimestamp(),
-    });
+    };
 
-    // Reset equipment status to serviceable
-    batch.update(doc(db, 'equipment', localReq.equipment_id), {
-      status: 'serviceable',
+    const equipmentUpdate = {
+      status: 'serviceable' as const,
       updatedAt: serverTimestamp(),
-    });
+    };
 
-    // Commit batch
-    await batch.commit();
+    console.log('Updating request...');
+    console.log('Request update:', requestUpdate);
+
+    try {
+      // Try updating request first
+      await updateDoc(doc(db, 'assignmentRequests', requestId), requestUpdate);
+      console.log('Request updated successfully');
+    } catch (err) {
+      console.error('Request update failed:', err);
+      throw new Error(`Failed to update request: ${err instanceof Error ? err.message : String(err)}`);
+    }
+
+    console.log('Updating equipment...');
+    console.log('Equipment update:', equipmentUpdate);
+    console.log('Equipment ID:', localReq.equipment_id);
+
+    try {
+      // Try updating equipment
+      await updateDoc(doc(db, 'equipment', localReq.equipment_id), equipmentUpdate);
+      console.log('Equipment updated successfully');
+    } catch (err) {
+      console.error('Equipment update failed:', err);
+      // Rollback request update
+      await updateDoc(doc(db, 'assignmentRequests', requestId), { status: 'pending' });
+      throw new Error(`Failed to update equipment: ${err instanceof Error ? err.message : String(err)}`);
+    }
   }, [user]);
 
   const getApprovalsForRequest = useCallback((_requestId: string): RequestApproval[] => {
