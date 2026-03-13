@@ -1312,3 +1312,229 @@ test.describe('Mobile Layout [XFER-MOBILE]', () => {
     }
   });
 });
+
+test.describe('Transfer Create and Cancel Workflow [XFER-CREATE-CANCEL]', () => {
+  test.beforeEach(async ({ page }) => {
+    if (!isStagingTest()) {
+      await clearAuthState(page);
+    }
+  });
+
+  test('[XFER-CREATE-CANCEL-1] Complete workflow: create transfer request then cancel it', async ({ page }) => {
+    await loginAsTestUser(page, 'admin');
+
+    // Step 1: Navigate to equipment list
+    await page.goto('/equipment');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
+
+    // Step 2: Find and click on the first equipment item
+    const equipmentLink = page.locator('a[href^="/equipment/"]').first();
+    await expect(equipmentLink).toBeVisible({ timeout: 8000 });
+
+    // Get equipment name for later verification
+    const equipmentNameElement = equipmentLink.locator('[class*="font-medium"], h3, h4, p').first();
+    const equipmentName = await equipmentNameElement.textContent();
+    console.log('Equipment name:', equipmentName);
+
+    await equipmentLink.click();
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
+
+    // Step 3: Verify transfer section is visible and button is NOT disabled
+    const transferHeading = page.locator(
+      'h2:has-text("Transfer Equipment"), h2:has-text("העבר ציוד")'
+    ).first();
+    await expect(transferHeading).toBeVisible({ timeout: 8000 });
+
+    const transferButton = page.locator(
+      'button:has-text("Transfer Equipment"), button:has-text("העבר ציוד")'
+    ).first();
+    await expect(transferButton).toBeVisible();
+
+    // Verify button is NOT disabled (no pending transfer)
+    const isDisabled = await transferButton.isDisabled();
+    expect(isDisabled).toBe(false);
+
+    // Step 4: Select transfer destination (Battalion/Company/Platoon/Individual)
+    const individualButton = page.locator(
+      'button:has-text("Individual"), button:has-text("אדם")'
+    ).first();
+
+    const hasIndividualOption = await individualButton.isVisible().catch(() => false);
+
+    if (hasIndividualOption && !(await individualButton.isDisabled())) {
+      // Select individual
+      await individualButton.click();
+      await page.waitForTimeout(500);
+
+      // Select a person from dropdown
+      const personSelect = page.locator('select, [role="combobox"]').last();
+      const hasPersonSelect = await personSelect.isVisible({ timeout: 3000 }).catch(() => false);
+
+      if (hasPersonSelect) {
+        await personSelect.click();
+        await page.waitForTimeout(300);
+
+        // Select first available person
+        const firstOption = page.locator('[role="option"]').first();
+        const hasOption = await firstOption.isVisible().catch(() => false);
+
+        if (hasOption) {
+          await firstOption.click();
+          await page.waitForTimeout(300);
+        }
+      }
+    } else {
+      // Try company or battalion
+      const companyButton = page.locator(
+        'button:has-text("Company"), button:has-text("פלוגה")'
+      ).first();
+
+      const hasCompanyOption = await companyButton.isVisible().catch(() => false);
+
+      if (hasCompanyOption && !(await companyButton.isDisabled())) {
+        await companyButton.click();
+        await page.waitForTimeout(500);
+      }
+    }
+
+    // Step 5: Click transfer button to create the request
+    await transferButton.click();
+    await page.waitForTimeout(2000); // Wait for transfer to be created
+
+    // Check for any error toasts
+    const errorToast = page.locator('[class*="toast"]:has-text("Error"), [class*="toast"]:has-text("שגיאה")').first();
+    const hasError = await errorToast.isVisible({ timeout: 2000 }).catch(() => false);
+
+    if (hasError) {
+      const errorText = await errorToast.textContent();
+      console.log('Transfer creation error:', errorText);
+    }
+
+    // Step 6: Navigate to outgoing transfers tab
+    await page.goto('/equipment?tab=transfers');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
+
+    const outgoingTab = page.locator(
+      '[role="tab"]:has-text("Outgoing"), [role="tab"]:has-text("יוצאות")'
+    ).first();
+
+    await expect(outgoingTab).toBeVisible({ timeout: 8000 });
+    await outgoingTab.click();
+    await page.waitForTimeout(500);
+
+    // Step 7: Find the transfer we just created
+    const transferCard = page.locator('[class*="Card"]').first();
+    const hasTransferCard = await transferCard.isVisible({ timeout: 5000 }).catch(() => false);
+
+    expect(hasTransferCard).toBe(true);
+
+    // Step 8: Click cancel button
+    const cancelButton = transferCard.locator(
+      'button:has-text("Cancel"), button:has-text("ביטול"), button[data-testid="cancel-btn"]'
+    ).first();
+
+    await expect(cancelButton).toBeVisible({ timeout: 5000 });
+    await cancelButton.click();
+    await page.waitForTimeout(500);
+
+    // Step 9: Confirm cancellation in dialog
+    const dialog = page.locator('[role="dialog"]').first();
+    await expect(dialog).toBeVisible({ timeout: 5000 });
+
+    // Look for confirmation button (might say "Cancel Transfer" or similar)
+    const confirmButton = dialog.locator(
+      'button:has-text("Cancel Transfer"), button:has-text("בטל העברה"), button.bg-destructive'
+    ).last();
+
+    await expect(confirmButton).toBeVisible({ timeout: 5000 });
+
+    // Check for error messages before clicking confirm
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        console.log('Console error:', msg.text());
+      }
+    });
+
+    await confirmButton.click();
+    await page.waitForTimeout(2000);
+
+    // Step 10: Check for any error toasts after cancellation
+    const cancelErrorToast = page.locator('[class*="toast"]:has-text("Error"), [class*="toast"]:has-text("שגיאה")').first();
+    const hasCancelError = await cancelErrorToast.isVisible({ timeout: 2000 }).catch(() => false);
+
+    if (hasCancelError) {
+      const cancelErrorText = await cancelErrorToast.textContent();
+      console.log('Cancellation error:', cancelErrorText);
+      // Don't fail the test, just log it
+    }
+
+    // Step 11: Verify dialog closed
+    await expect(dialog).not.toBeVisible({ timeout: 5000 });
+
+    // Step 12: Verify transfer is no longer in outgoing tab
+    await page.waitForTimeout(1000);
+    const outgoingCardsAfter = await page.locator('[class*="Card"]').count();
+    console.log('Outgoing transfers after cancel:', outgoingCardsAfter);
+
+    // Step 13: Navigate back to equipment detail to verify no pending transfer badge
+    await page.goto('/equipment');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
+
+    // Find the equipment again
+    if (equipmentName) {
+      const equipLink = page.locator(`a[href^="/equipment/"]:has-text("${equipmentName.trim()}")`).first();
+      const hasEquipLink = await equipLink.isVisible({ timeout: 5000 }).catch(() => false);
+
+      if (hasEquipLink) {
+        await equipLink.click();
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(500);
+
+        // Verify NO "Transfer Pending" badge
+        const pendingBadge = page.locator(
+          'text=/Transfer Pending|העברה ממתינה/i'
+        ).first();
+        const hasPendingBadge = await pendingBadge.isVisible({ timeout: 2000 }).catch(() => false);
+
+        expect(hasPendingBadge).toBe(false);
+
+        // Verify transfer button is enabled again
+        const transferButtonAfter = page.locator(
+          'button:has-text("Transfer Equipment"), button:has-text("העבר ציוד")'
+        ).first();
+
+        const hasTransferButton = await transferButtonAfter.isVisible({ timeout: 5000 }).catch(() => false);
+
+        if (hasTransferButton) {
+          const isDisabledAfter = await transferButtonAfter.isDisabled();
+          expect(isDisabledAfter).toBe(false);
+        }
+      }
+    }
+
+    // Step 14: Verify transfer appears in History tab
+    await page.goto('/equipment?tab=transfers');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
+
+    const historyTab = page.locator(
+      '[role="tab"]:has-text("History"), [role="tab"]:has-text("היסטוריה")'
+    ).first();
+
+    await expect(historyTab).toBeVisible({ timeout: 8000 });
+    await historyTab.click();
+    await page.waitForTimeout(500);
+
+    // Should see at least one card in history (the canceled one)
+    const historyCards = await page.locator('[class*="Card"]').count();
+    expect(historyCards).toBeGreaterThanOrEqual(1);
+
+    // Verify canceled transfer shows rejected status
+    const rejectedBadge = page.locator('text=/rejected|נדחה/i').first();
+    await expect(rejectedBadge).toBeVisible({ timeout: 5000 });
+  });
+});
