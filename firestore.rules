@@ -338,22 +338,13 @@ service cloud.firestore {
         request.resource.data.status in ['approved', 'rejected'] &&
         (isAdmin() || !resource.data.keys().hasAll(['battalionId']) || isSameBattalion(resource.data.battalionId))) ||
         // Self-cancellation: users can reject their own pending requests
-        // Leaders can also cancel transfers from their unit
         // Allow updating status, processedBy, and processedAt fields
         (isAuthenticated() &&
         resource.data.status == 'pending' &&
         request.resource.data.status == 'rejected' &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'processedBy', 'processedAt']) &&
         (!request.resource.data.keys().hasAny(['processedBy']) || request.resource.data.processedBy == request.auth.uid) &&
-        (
-          // Original requester can cancel
-          resource.data.requestedBy == request.auth.uid ||
-          // Leader of originating unit can cancel (from_unit_id matches user's unit)
-          (resource.data.keys().hasAny(['from_unit_id']) &&
-           resource.data.from_unit_id != null &&
-           getUserDoc().data.keys().hasAny(['unitId']) &&
-           resource.data.from_unit_id == getUserDoc().data.unitId)
-        ));
+        resource.data.requestedBy == request.auth.uid);
 
       // Only admins can delete requests
       allow delete: if isAdmin();
