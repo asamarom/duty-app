@@ -505,27 +505,11 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
       throw new Error(`Assignment request ${requestId} not found`);
     }
 
-    // Debug logging
-    console.log('=== Cancel Request Debug ===');
-    console.log('Request ID:', requestId);
-    console.log('Request data:', localReq);
-    console.log('Current user ID:', user?.uid);
-    console.log('isSignatureApproved:', isSignatureApproved);
-    console.log('currentUnitId:', currentUnitId);
-    console.log('currentPersonnelId:', currentPersonnelId);
-    console.log('from_unit_id:', localReq.from_unit_id);
-    console.log('from_personnel_id:', localReq.from_personnel_id);
-    console.log('requested_by:', localReq.requested_by);
-
     // Only the original requester or leaders of the originating unit can cancel the request
     const isOriginalRequester = localReq.requested_by === user?.uid;
     const isLeaderOfOriginatingUnit = isSignatureApproved &&
       ((localReq.from_unit_id && localReq.from_unit_id === currentUnitId) ||
        (localReq.from_personnel_id && localReq.from_personnel_id === currentPersonnelId));
-
-    console.log('isOriginalRequester:', isOriginalRequester);
-    console.log('isLeaderOfOriginatingUnit:', isLeaderOfOriginatingUnit);
-    console.log('=========================');
 
     if (!isOriginalRequester && !isLeaderOfOriginatingUnit) {
       throw new Error('Only the requester or unit leader can cancel');
@@ -542,42 +526,17 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
       updatedAt: serverTimestamp(),
     };
 
-    console.log('Updating request...');
-    console.log('Request update:', requestUpdate);
-
     try {
-      // Try updating request first
+      // Update request first
       await updateDoc(doc(db, 'assignmentRequests', requestId), requestUpdate);
-      console.log('Request updated successfully');
     } catch (err) {
-      console.error('Request update failed:', err);
       throw new Error(`Failed to update request: ${err instanceof Error ? err.message : String(err)}`);
     }
 
-    console.log('Updating equipment...');
-    console.log('Equipment update:', equipmentUpdate);
-    console.log('Equipment ID:', localReq.equipment_id);
-
-    // First, fetch the current equipment document to see its status
     try {
-      const equipDoc = await getDoc(doc(db, 'equipment', localReq.equipment_id));
-      if (equipDoc.exists()) {
-        const equipData = equipDoc.data();
-        console.log('Current equipment data:', equipData);
-        console.log('Current equipment status:', equipData.status);
-      } else {
-        console.error('Equipment document does not exist!');
-      }
-    } catch (err) {
-      console.error('Failed to fetch equipment doc:', err);
-    }
-
-    try {
-      // Try updating equipment
+      // Update equipment
       await updateDoc(doc(db, 'equipment', localReq.equipment_id), equipmentUpdate);
-      console.log('Equipment updated successfully');
     } catch (err) {
-      console.error('Equipment update failed:', err);
       // Rollback request update
       await updateDoc(doc(db, 'assignmentRequests', requestId), { status: 'pending' });
       throw new Error(`Failed to update equipment: ${err instanceof Error ? err.message : String(err)}`);
