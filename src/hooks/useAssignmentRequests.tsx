@@ -499,12 +499,23 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
   }, [rejectRequest]);
 
   const cancelRequest = useCallback(async (requestId: string) => {
+    console.log('[cancelRequest] Starting cancellation for request:', requestId);
+
     // Always read from the ref so we get the latest data regardless of whether
     // the React state update from the onSnapshot has flushed yet.
     const localReq = latestRequestsRef.current.find(r => r.id === requestId);
     if (!localReq) {
+      console.error('[cancelRequest] Request not found:', requestId);
       throw new Error(`Assignment request ${requestId} not found`);
     }
+
+    console.log('[cancelRequest] Request data:', {
+      equipment_id: localReq.equipment_id,
+      originalEquipmentStatus: localReq.originalEquipmentStatus,
+      requested_by: localReq.requested_by,
+      from_unit_id: localReq.from_unit_id,
+      from_personnel_id: localReq.from_personnel_id,
+    });
 
     // Only the original requester or leaders of the originating unit can cancel the request
     const isOriginalRequester = localReq.requested_by === user?.uid;
@@ -512,7 +523,17 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
       ((localReq.from_unit_id && localReq.from_unit_id === currentUnitId) ||
        (localReq.from_personnel_id && localReq.from_personnel_id === currentPersonnelId));
 
+    console.log('[cancelRequest] Permission check:', {
+      isOriginalRequester,
+      isLeaderOfOriginatingUnit,
+      userId: user?.uid,
+      isSignatureApproved,
+      currentUnitId,
+      currentPersonnelId,
+    });
+
     if (!isOriginalRequester && !isLeaderOfOriginatingUnit) {
+      console.error('[cancelRequest] Permission denied');
       throw new Error('Only the requester or unit leader can cancel');
     }
 
@@ -525,26 +546,38 @@ export function useAssignmentRequests(): UseAssignmentRequestsReturn {
     // Restore equipment to its original status (before transfer was initiated)
     // Default to 'serviceable' for legacy requests without originalEquipmentStatus
     const restoredStatus = localReq.originalEquipmentStatus || 'serviceable';
+    console.log('[cancelRequest] Restoring equipment status to:', restoredStatus);
+
     const equipmentUpdate = {
       status: restoredStatus as const,
       updatedAt: serverTimestamp(),
     };
 
     try {
-      // Update request first
+      console.log('[cancelRequest] Updating request status to rejected');
       await updateDoc(doc(db, 'assignmentRequests', requestId), requestUpdate);
+      console.log('[cancelRequest] Request updated successfully');
     } catch (err) {
+      console.error('[cancelRequest] Failed to update request:', err);
       throw new Error(`Failed to update request: ${err instanceof Error ? err.message : String(err)}`);
     }
 
     try {
-      // Update equipment
+      console.log('[cancelRequest] Updating equipment status:', {
+        equipmentId: localReq.equipment_id,
+        newStatus: restoredStatus,
+      });
       await updateDoc(doc(db, 'equipment', localReq.equipment_id), equipmentUpdate);
+      console.log('[cancelRequest] Equipment updated successfully');
     } catch (err) {
+      console.error('[cancelRequest] Failed to update equipment:', err);
       // Rollback request update
+      console.log('[cancelRequest] Rolling back request status');
       await updateDoc(doc(db, 'assignmentRequests', requestId), { status: 'pending' });
       throw new Error(`Failed to update equipment: ${err instanceof Error ? err.message : String(err)}`);
     }
+
+    console.log('[cancelRequest] Cancellation completed successfully');
   }, [user, isSignatureApproved, currentUnitId, currentPersonnelId]);
 
   const getApprovalsForRequest = useCallback((_requestId: string): RequestApproval[] => {
