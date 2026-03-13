@@ -536,8 +536,9 @@ describe('useAssignmentRequests Hook', () => {
                 await result.current.cancelRequest('req-1');
             });
 
-            expect(mockBatchCommit).toHaveBeenCalled();
-            expect(mockBatchUpdate).toHaveBeenCalledWith(
+            // Should call updateDoc twice: once for request, once for equipment
+            expect(mockUpdateDoc).toHaveBeenCalledTimes(2);
+            expect(mockUpdateDoc).toHaveBeenCalledWith(
                 expect.anything(),
                 expect.objectContaining({ status: 'rejected' })
             );
@@ -572,7 +573,8 @@ describe('useAssignmentRequests Hook', () => {
                 await result.current.cancelRequest('req-1');
             });
 
-            const serviceableCall = mockBatchUpdate.mock.calls.find((call) =>
+            // Should call updateDoc with equipment update (status: serviceable)
+            const serviceableCall = mockUpdateDoc.mock.calls.find((call) =>
                 call[1] && call[1].status === 'serviceable'
             );
             expect(serviceableCall).toBeDefined();
